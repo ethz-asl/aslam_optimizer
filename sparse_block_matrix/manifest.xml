@@ -1,0 +1,26 @@
+<package>
+  <description brief="sparse_block_matrix">
+
+     sparse_block_matrix
+
+  </description>
+  <author>Paul Furgale</author>
+  <license>BSD</license>
+  <review status="unreviewed" notes=""/>
+  <url>http://ros.org/wiki/sparse_block_matrix</url>
+
+  <depend package="sm_common"/>
+  <depend package="sm_eigen"/>
+  <depend package="numpy_eigen"/>
+  <rosdep name="suitesparse"/>
+  <rosdep name="tbb"/>
+
+
+  <export>
+   <cpp cflags="`pkg-config --cflags eigen3` -I${prefix}/include"
+	lflags="-L${prefix}/lib -lsparse_block_matrix"/>
+   <python path="${prefix}/src"/>
+  </export>
+</package>
+
+

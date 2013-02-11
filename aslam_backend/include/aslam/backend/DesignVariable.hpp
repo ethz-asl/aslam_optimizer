@@ -1,0 +1,121 @@
+#ifndef ASLAM_DESIGN_VARIABLE_HPP
+#define ASLAM_DESIGN_VARIABLE_HPP
+
+#include <aslam/Id.hpp>
+#ifdef _WIN32
+#include <unordered_set>
+#else
+#include <tr1/unordered_set>
+#endif
+#include <set>
+#include <aslam/Exceptions.hpp>
+
+namespace aslam {
+  namespace backend {
+
+    class JacobianContainer;
+
+    class DesignVariable {
+    public:
+      /**
+       * \struct BlockIndexOrdering
+       *
+       * A comparator to allow design variables to be ordered by block index.
+       */
+      struct BlockIndexOrdering {
+        inline bool operator()(const DesignVariable* lhs, const DesignVariable* rhs) const {
+          SM_ASSERT_TRUE_DBG(aslam::Exception, lhs != NULL, "Null value!");
+          SM_ASSERT_TRUE_DBG(aslam::Exception, rhs != NULL, "Null value!");
+          return lhs->blockIndex() < rhs->blockIndex();
+        }
+      };
+
+      /**
+       * \typedef unordered_set_t
+       * \brief A fast unordered set of design variables.
+       */
+      typedef std::tr1::unordered_set< DesignVariable* > set_t;
+
+      /**
+       * \typedef blockordered_set_t
+       * \brief a set of design variables ordered by block index.
+       */
+      //      typedef std::tr1::unordered_set//set<DesignVariable *, BlockIndexOrdering> blockordered_set_t;
+
+      DesignVariable();
+
+      virtual ~DesignVariable();
+
+      /// \brief what is the number of dimensions of the minimal perturbation.
+      virtual int minimalDimensions() const;
+
+      /// \brief update the design variable.
+      void update(const double* update, int size);
+
+      /// \brief Revert the last state update
+      void revertUpdate();
+
+      /// \brief is this design variable active in the optimization.
+      bool isActive() const;
+
+      /// \brief set the active state of this design variable.
+      void setActive(bool active);
+
+      /// \brief should this variable be marginalized in the Schur-complement step?
+      bool isMarginalized() const;
+
+      /// \brief should this variable be marginalized in the Schur-complement step?
+      void setMarginalized(bool marginalized);
+
+      /// \brief get the block index used in the optimization routine. -1 if not being optimized.
+      int blockIndex() const;
+
+      /// \brief set the block index used in the optimization routine.
+      void setBlockIndex(int blockIndex);
+
+      /// \brief set the scaling of this design variable used in the optimization.
+      void setScaling(double scaling);
+
+      /// \brief get the scaling of this design variable used in the optimization.
+      double scaling() const;
+
+      /// \brief The column base of this block in the Jacobian matrix
+      int columnBase() const;
+
+      /// \brief Set the column base of this block in the Jacobian matrix
+      void setColumnBase(int columnBase);
+
+    protected:
+      /// \brief what is the number of dimensions of the perturbation variable.
+      virtual int minimalDimensionsImplementation() const = 0;
+
+      /// \brief Update the design variable.
+      virtual void updateImplementation(const double* dp, int size) = 0;
+
+      /// \brief Revert the last state update.
+      virtual void revertUpdateImplementation() = 0;
+
+
+    private:
+      /// \brief The block index used in the optimization routine.
+      int _blockIndex;
+
+      /// \brief The column base of this block in the Jacobian matrix
+      int _columnBase;
+
+      /// \brief Should this variable be marginalized in the schur-complement step?
+      bool _isMarginalized;
+
+      /// \brief is the design variable active in the optimization?
+      bool _isActive;
+
+      /// \brief The scaling of this design variable within the optimization.
+      double _scaling;
+
+    };
+
+  } // namespace backend
+} // namespace aslam
+
+
+#endif /* ASLAM_DESIGN_VARIABLE_HPP */
