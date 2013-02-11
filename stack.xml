@@ -1,0 +1,10 @@
+<stack>
+  <description brief="aslam">aslam</description>
+  <author>Maintained by Paul Furgale</author>
+  <license>BSD</license>  
+  <review status="unreviewed" notes=""/>
+  <url>http://ros.org/wiki/aslam</url>
+  <depend stack="ros" />
+  <depend stack="vision_opencv" />
+
+</stack>

@@ -1,0 +1,24 @@
+<package>
+  <description brief="aslam_backend_expressions">
+
+     aslam_backend_expressions
+
+  </description>
+  <author>Paul Furgale</author>
+  <license>BSD</license>
+  <review status="unreviewed" notes=""/>
+  <url>http://ros.org/wiki/aslam_backend_expressions</url>
+
+  <depend package="aslam_backend"/>
+  <depend package="sm_boost"/>
+  <depend package="sm_random"/>
+  <depend package="aslam_cameras"/>
+
+  <export>
+    <cpp cflags="-I${prefix}/include"
+	 lflags="-Wl,-rpath,${prefix}/lib -L${prefix}/lib -laslam_backend_expressions" />
+  </export>
+
+</package>
+
+
