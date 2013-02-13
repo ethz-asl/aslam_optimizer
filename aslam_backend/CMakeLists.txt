@@ -17,6 +17,8 @@ set(EXECUTABLE_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/bin)
 #set the default path for built libraries to the "lib" directory
 set(LIBRARY_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/lib)
 
+
+
 #uncomment if you have defined messages
 #rosbuild_genmsg()
 #uncomment if you have defined services
@@ -32,6 +34,9 @@ set(LIBRARY_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/lib)
 
 IF(${CMAKE_SYSTEM} MATCHES "Darwin-*")
   message("You are using OSX")
+  #SET (CMAKE_C_COMPILER         "/usr/bin/gcc")
+  #SET (CMAKE_CXX_COMPILER        "/usr/bin/g++")
+  #SET (CMAKE_CXX_FLAGS ${CMAKE_CXX_FLAGS} -std=c++11)
   add_definitions( -fPIC -msse2 -mssse3 -march=nocona -Wextra -Winit-self -Woverloaded-virtual -Wnon-virtual-dtor -Wsign-promo -Wno-long-long)
 ELSE()
   add_definitions( -fPIC -msse2 -mssse3 -march=nocona -Wextra -Winit-self -Woverloaded-virtual -Wnon-virtual-dtor -Wsign-promo -Wno-long-long -std=c++0x)
@@ -86,7 +91,7 @@ rosbuild_add_library(${PROJECT_NAME}
   )
 
 target_link_libraries(${PROJECT_NAME} ${CHOLMOD_LIBRARIES} ${EXTRA_LIBS}  ${CSPARSE_LIBRARY})
-
+rosbuild_link_boost(${PROJECT_NAME} thread system)
 rosbuild_add_gtest(${PROJECT_NAME}_test
   test/test_main.cpp
   test/JacobianContainer.cpp

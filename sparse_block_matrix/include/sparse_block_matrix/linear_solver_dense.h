@@ -94,11 +94,13 @@ namespace sparse_block_matrix {
         const Eigen::Map<Eigen::VectorXd> bvec(b, n);
 
         // std::cerr << bvec << std::endl;
-        xvec = H.selfadjointView<Eigen::Upper>().ldlt().solve(Eigen::VectorXd(bvec));
 
+        Eigen::VectorXd mm = H.selfadjointView<Eigen::Upper>().ldlt().solve(Eigen::VectorXd(bvec));
+
+        xvec.operator=(Eigen::DenseBase<Eigen::VectorXd>(mm));
 
         // std::cerr << xvec << std::endl;
-
+        
         return true;
       }
 

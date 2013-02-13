@@ -6,11 +6,11 @@ void exportOptimizerOptions();
 void exportOptimizationProblem();
 void exportDesignVariable();
 void exportErrorTerm();
-void exportBSplineMotionError();
+//void exportBSplineMotionError();
 void exportMEstimators();
 void exportJacobianContainer();
 void exportBackendExpressions();
-void exportErrorTermTransformation();
+//void exportErrorTermTransformation();
 
 void exportBackend()
 {
@@ -19,10 +19,10 @@ void exportBackend()
   exportOptimizationProblem();
   exportDesignVariable();
   exportErrorTerm();
-  exportBSplineMotionError();
+  //exportBSplineMotionError();
   exportMEstimators();
   exportJacobianContainer();
   exportBackendExpressions();
-  exportErrorTermTransformation();
+  //exportErrorTermTransformation();
 }
 

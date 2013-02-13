@@ -12,7 +12,7 @@
   <depend package="aslam_backend"/>
 
   <depend package="numpy_eigen"/>
-  <depend package="aslam_python"/>
+  <depend package="aslam_backend_python"/>
 
   <export>
     <cpp cflags="-I${prefix}/include"

@@ -1,7 +1,7 @@
 #ifndef ASLAM_DESIGN_VARIABLE_HPP
 #define ASLAM_DESIGN_VARIABLE_HPP
 
-#include <aslam/Id.hpp>
+#include <sm/Id.hpp>
 #ifdef _WIN32
 #include <unordered_set>
 #else

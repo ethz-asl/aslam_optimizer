@@ -18,7 +18,7 @@
 #include <aslam/backend/Scalar.hpp>
 #include <aslam/backend/EuclideanDirection.hpp>
 #include <aslam/backend/VectorExpression.hpp>
-#include <aslam/python/ExportAPrioriInformationError.hpp>
+//#include <aslam/python/ExportAPrioriInformationError.hpp>
 
 using namespace boost::python;
 using namespace aslam::backend;
@@ -177,8 +177,8 @@ void exportBackendExpressions()
       .def("toScalar", &Scalar::toScalar)
       .def("toValue", &Scalar::toScalar)
       ;
-
-  exportAPrioriInformationError<Scalar>("ScalarAPrioriInformationError");
+  // \todo reenable this
+  // exportAPrioriInformationError<Scalar>("ScalarAPrioriInformationError");
 
 
   class_<EuclideanDirection, boost::shared_ptr<EuclideanDirection>, bases<DesignVariable> >("EuclideanDirection", init< const Eigen::Vector3d & >("EuclideanDirection(Vector3d p)"))

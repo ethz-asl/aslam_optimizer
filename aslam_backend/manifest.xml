@@ -9,7 +9,6 @@
   <review status="unreviewed" notes=""/>
   <url>http://ros.org/wiki/aslam_backend</url>
 
-  <depend package="aslam_frontend_common" />
   <depend package="sparse_block_matrix" />
   <depend package="sm_boost"/>
   <depend package="sm_random"/>
