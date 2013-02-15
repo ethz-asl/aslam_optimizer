@@ -7,7 +7,7 @@ namespace aslam {
       _u(u), _x_k(x_k), _x_kp1(x_kp1)
     {
       // Fill in the inverse covariance. In this scalar case, this is just an inverse variance.
-      _invR(0,0) = 1.0/sigma2_u;
+        setInvR( Eigen::Matrix<double,1,1>(1.0/sigma2_u) );
 
       // Tell the super class about the design variables:
       setDesignVariables(x_k, x_kp1);
@@ -22,8 +22,8 @@ namespace aslam {
     /// \brief evaluate the error term and return the weighted squared error e^T invR e
     double ErrorTermMotion::evaluateErrorImplementation()
     {
-      _error(0) = _x_kp1->value() - _x_k->value() - _u;
-      return _error.dot(_invR * _error);
+        setError( Eigen::Matrix<double,1,1>( _x_kp1->value() - _x_k->value() - _u));
+        return evaluateChiSquaredError();
     }
 
 

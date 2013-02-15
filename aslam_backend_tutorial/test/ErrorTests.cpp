@@ -26,6 +26,9 @@ TEST(AslamTutorialTestSuite, testObservation)
     // Create the test harness of dimension 1.
     ErrorTermTestHarness<1> harness(&obs);
 
+    // Gives you a good error message.
+    SCOPED_TRACE("");
+
     // Run the unit tests.
     harness.testAll();
   }
@@ -51,6 +54,9 @@ TEST(AslamTutorialTestSuite, testMotion)
     // Create the test harness of dimension 1.
     ErrorTermTestHarness<1> harness(&motion);
 
+    // Gives you a good error message.
+    SCOPED_TRACE("");
+
     // Run the unit tests.
     harness.testAll();
   }
@@ -73,6 +79,9 @@ TEST(AslamTutorialTestSuite, testPrior)
 
     // Create the test harness of dimension 1.
     ErrorTermTestHarness<1> harness(&prior);
+
+    // Gives you a good error message.
+    SCOPED_TRACE("");
 
     // Run the unit tests.
     harness.testAll();

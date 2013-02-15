@@ -431,11 +431,6 @@ namespace aslam {
     }
 
 
-
-
-  } // namespace backend
-} // namespace aslam
-
 template<typename I>
 std::ostream& operator<<(std::ostream& os, const aslam::backend::CompressedColumnMatrix<I>& ccm)
 {
@@ -460,3 +455,13 @@ std::ostream& operator<<(std::ostream& os, const aslam::backend::CompressedColum
 }
 
 
+  } // namespace backend
+} // namespace aslam
+
+
+
+template<typename I>
+std::ostream& operator<<(std::ostream& os, const aslam::backend::CompressedColumnMatrix<I>& ccm)
+{
+    return aslam::backend::operator<<(os,ccm);
+}

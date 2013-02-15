@@ -6,7 +6,7 @@ namespace aslam {
       : _x(x), _hat_x(hat_x)
     {
       // Fill in the inverse covariance. In this scalar case, this is just an inverse variance.
-      _invR(0,0) = 1.0/sigma2_x;
+        setInvR( Eigen::Matrix<double,1,1>( 1.0/sigma2_x));
 
       // Tell the super class about the design variables:
       setDesignVariables(_x);
@@ -22,14 +22,17 @@ namespace aslam {
     /// \brief evaluate the error term and return the weighted squared error e^T invR e
     double ErrorTermPrior::evaluateErrorImplementation()
     {
-      _error(0) = _x->value() - _hat_x;
-      return _error.dot(_invR * _error);	    
+        double err = _x->value() - _hat_x;
+        std::cout << "err: " << err << std::endl;
+        setError( Eigen::Matrix<double,1,1>(err));
+        return evaluateChiSquaredError();
     }
 
 
     /// \brief evaluate the jacobian
     void ErrorTermPrior::evaluateJacobiansImplementation()
     {
+
       _jacobians.add(_x, Eigen::MatrixXd::Identity(1,1));
     }
 

@@ -8,7 +8,7 @@ namespace aslam {
       _x_k(x_k), _w(w), _y(y)
     {
       // Fill in the inverse covariance. In this scalar case, this is just an inverse variance.
-      _invR(0,0) = 1.0/sigma2_n;
+        setInvR(Eigen::Matrix<double,1,1>(1.0/sigma2_n));
 
       // Tell the super class about the design variables:
       setDesignVariables(_x_k, w);
@@ -24,8 +24,8 @@ namespace aslam {
     double ErrorTermObservation::evaluateErrorImplementation()
     {
       // Build the error from the measurment _y and the design variables
-      _error(0) = _y - 1.0/(_w->value() - _x_k->value());
-      return _error.dot(_invR * _error);
+        setError( Eigen::Matrix<double,1,1>(_y - 1.0/(_w->value() - _x_k->value())));
+        return evaluateChiSquaredError();
     }
 
 
