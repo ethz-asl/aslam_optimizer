@@ -37,7 +37,7 @@ namespace aslam {
         @{
         */
       /// Default constructor
-      DenseQRLinearSolverOptions() = default;
+      DenseQRLinearSolverOptions();
       /// Copy constructor
       DenseQRLinearSolverOptions(const DenseQRLinearSolverOptions& other);
       /// Assignment operator

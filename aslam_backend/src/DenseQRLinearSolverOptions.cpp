@@ -25,6 +25,9 @@ namespace aslam {
 /* Constructors and Destructor                                                */
 /******************************************************************************/
 
+      DenseQRLinearSolverOptions::DenseQRLinearSolverOptions() {}
+        
+      
     DenseQRLinearSolverOptions::DenseQRLinearSolverOptions(
         const DenseQRLinearSolverOptions& other) {
     }

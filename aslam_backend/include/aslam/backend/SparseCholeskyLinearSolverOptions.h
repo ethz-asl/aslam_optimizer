@@ -37,7 +37,7 @@ namespace aslam {
         @{
         */
       /// Default constructor
-      SparseCholeskyLinearSolverOptions() = default;
+      SparseCholeskyLinearSolverOptions();
       /// Copy constructor
       SparseCholeskyLinearSolverOptions(const SparseCholeskyLinearSolverOptions&
         other);

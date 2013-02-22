@@ -25,6 +25,8 @@ namespace aslam {
 /* Constructors and Destructor                                                */
 /******************************************************************************/
 
+      SparseCholeskyLinearSolverOptions::SparseCholeskyLinearSolverOptions() {}
+      
     SparseCholeskyLinearSolverOptions::SparseCholeskyLinearSolverOptions(
         const SparseCholeskyLinearSolverOptions& other) {
     }
