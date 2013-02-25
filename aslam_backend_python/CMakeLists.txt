@@ -48,7 +48,7 @@ rosbuild_find_ros_package(numpy_eigen)
 include(${numpy_eigen_PACKAGE_PATH}/cmake/add_python_export_library.cmake)
 
 # This functions take TARGET_NAME PYTHON_MODULE_DIRECTORY sourceFile1 [sourceFile2 ...]
-add_python_export_library(${PROJECT_NAME} python/aslam
+add_python_export_library(${PROJECT_NAME} python/aslam_backend
   src/module.cpp
   #src/CameraGeometries.cpp
   #src/CameraGeometry.cpp
