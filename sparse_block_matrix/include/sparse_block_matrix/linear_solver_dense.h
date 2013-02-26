@@ -97,7 +97,7 @@ namespace sparse_block_matrix {
 
         Eigen::VectorXd mm = H.selfadjointView<Eigen::Upper>().ldlt().solve(Eigen::VectorXd(bvec));
 
-        xvec.operator=(Eigen::DenseBase<Eigen::VectorXd>(mm));
+        xvec = mm;
 
         // std::cerr << xvec << std::endl;
         
