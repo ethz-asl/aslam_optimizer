@@ -35,7 +35,7 @@ namespace aslam {
     HomogeneousExpression EuclideanExpression::toHomogeneousExpression()
     {
       // \todo
-        SM_THROW(aslam::NotImplementedException, "Not Implemented");
+        SM_THROW(Exception, "Not Implemented");
       return HomogeneousExpression();
     }
     
@@ -46,7 +46,7 @@ namespace aslam {
 
     void EuclideanExpression::evaluateJacobians(JacobianContainer & outJacobians, const Eigen::MatrixXd & applyChainRule) const
     {
-      _root->evaluateJacobians(outJacobians, applyChainRule);
+        _root->evaluateJacobians(outJacobians, applyChainRule);
     }
 
     EuclideanExpression EuclideanExpression::cross(const EuclideanExpression & p)

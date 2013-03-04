@@ -16,6 +16,8 @@ namespace aslam {
     class EuclideanExpression
     {
     public:
+        SM_DEFINE_EXCEPTION(Exception, std::runtime_error);
+
       EuclideanExpression(EuclideanExpressionNode * designVariable);
       EuclideanExpression(boost::shared_ptr<EuclideanExpressionNode> designVariable);
       virtual ~EuclideanExpression();
@@ -40,6 +42,7 @@ namespace aslam {
       EuclideanExpression();
 
       friend class RotationExpression;
+      friend class MatrixExpression;
       
       boost::shared_ptr<EuclideanExpressionNode> _root;
     };

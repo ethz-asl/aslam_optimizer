@@ -3,6 +3,7 @@
 
 #include <aslam/backend/JacobianContainer.hpp>
 #include "RotationExpressionNode.hpp"
+#include "MatrixExpressionNode.hpp"
 #include <boost/shared_ptr.hpp>
 #include <Eigen/Core>
 
@@ -10,7 +11,6 @@
 namespace aslam {
   namespace backend {
     
-        
     /**
      * \class EuclideanExpressionNode
      * \brief The superclass of all classes representing euclidean points.
@@ -66,7 +66,38 @@ namespace aslam {
       Eigen::Matrix3d _C_lhs;
       boost::shared_ptr<EuclideanExpressionNode> _rhs;
       Eigen::Vector3d _p_rhs;
+
+
     };
+
+    // ## New Class for Multiplication with a MatrixExpression
+    /**
+      * \class EuclideanExpressionNodeMatrixMultiply
+      *
+      * \brief A class representing the multiplication of a Matrix with a euclidean Vector.
+      *
+      */
+     class EuclideanExpressionNodeMatrixMultiply : public EuclideanExpressionNode
+     {
+     public:
+       EIGEN_MAKE_ALIGNED_OPERATOR_NEW
+
+       EuclideanExpressionNodeMatrixMultiply(boost::shared_ptr<MatrixExpressionNode> lhs, boost::shared_ptr<EuclideanExpressionNode> rhs);
+       virtual ~EuclideanExpressionNodeMatrixMultiply();
+
+     private:
+       virtual Eigen::Vector3d toEuclideanImplementation();
+       virtual void evaluateJacobiansImplementation(JacobianContainer & outJacobians) const;
+       virtual void evaluateJacobiansImplementation(JacobianContainer & outJacobians, const Eigen::MatrixXd & applyChainRule) const;
+       virtual void getDesignVariablesImplementation(DesignVariable::set_t & designVariables) const;
+
+       boost::shared_ptr<MatrixExpressionNode> _lhs;
+       Eigen::Matrix3d _A_lhs;
+       boost::shared_ptr<EuclideanExpressionNode> _rhs;
+       Eigen::Vector3d _p_rhs;
+
+     };
+
 
 
     /**

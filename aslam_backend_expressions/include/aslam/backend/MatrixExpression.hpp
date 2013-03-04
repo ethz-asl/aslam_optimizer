@@ -1,5 +1,5 @@
-#ifndef ASLAM_BACKEND_ROTATION_EXPRESSION_HPP
-#define ASLAM_BACKEND_ROTATION_EXPRESSION_HPP
+#ifndef ASLAM_BACKEND_MATRIX_EXPRESSION_HPP
+#define ASLAM_BACKEND_MATRIX_EXPRESSION_HPP
 
 #include <Eigen/Core>
 #include <boost/shared_ptr.hpp>
@@ -12,34 +12,32 @@
 namespace aslam {
   namespace backend {
     
-    class RotationExpressionNode;
+    class MatrixExpressionNode;
     class TransformationExpression;
     class EuclideanExpression;
     class HomogeneousExpression;
 
-    class RotationExpression
+    class MatrixExpression
     {
     public:
-        SM_DEFINE_EXCEPTION(Exception, std::runtime_error);
-
-      /// \breif initialize from an existing node.
-      RotationExpression(boost::shared_ptr<RotationExpressionNode> root);
+      /// \brief initialize from an existing node.
+      MatrixExpression(boost::shared_ptr<MatrixExpressionNode> root);
 
       /// \brief Initialize from an existing node. The node will not be deleted.
-      RotationExpression(RotationExpressionNode * root);
+      MatrixExpression(MatrixExpressionNode * root);
       
-      virtual ~RotationExpression();
+      virtual ~MatrixExpression();
 
-      /// \brief Evaluate the rotation matrix.
-      Eigen::Matrix3d toRotationMatrix();
+      /// \brief Evaluate the full transformation matrix.
+      Eigen::Matrix3d toFullMatrix();
 
-      /// \brief return the expression that inverts the rotation.
-      RotationExpression inverse();
+      /// \brief return the expression that inverts the transformation.
+      MatrixExpression inverse();
       
       /// \brief Evaluate the Jacobians in the form (1 - (S \delta v)^\times) \bar C
       void evaluateJacobians(JacobianContainer & outJacobians) const;
 
-      RotationExpression operator*(const RotationExpression & p);
+      MatrixExpression operator*(const MatrixExpression & p);
       EuclideanExpression operator*(const EuclideanExpression & p);
       HomogeneousExpression operator*(const HomogeneousExpression & p);
 
@@ -47,15 +45,15 @@ namespace aslam {
 
       void getDesignVariables(DesignVariable::set_t & designVariables) const;
 
-      boost::shared_ptr<RotationExpressionNode> root() { return _root; }
+      boost::shared_ptr<MatrixExpressionNode> root() { return _root; }
     private:
 
-      RotationExpression();
-      boost::shared_ptr<RotationExpressionNode> _root;
+      MatrixExpression();
+      boost::shared_ptr<MatrixExpressionNode> _root;
     };
 
   } // namespace backend
 } // namespace aslam
 
 
-#endif /* ASLAM_BACKEND_ROTATION_EXPRESSION_HPP */
+#endif /* ASLAM_BACKEND_MATRIX_EXPRESSION_HPP */

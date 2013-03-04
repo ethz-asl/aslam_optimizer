@@ -36,6 +36,10 @@ rosbuild_add_library(${PROJECT_NAME}
   src/RotationExpressionNode.cpp
   src/RotationQuaternion.cpp
 
+  src/MatrixExpression.cpp 
+  src/MatrixExpressionNode.cpp
+  src/MatrixTransformation.cpp
+
   src/TransformationExpression.cpp 
   src/TransformationExpressionNode.cpp
   src/TransformationBasic.cpp
@@ -59,8 +63,9 @@ rosbuild_add_library(${PROJECT_NAME}
 rosbuild_add_gtest(${PROJECT_NAME}_test
   test/test_main.cpp
   test/RotationExpression.cpp
-  test/EuclideanExpression.cpp
+  #test/EuclideanExpression.cpp
   test/HomogeneousExpression.cpp
+  test/MatrixAndEuclideanExpression.cpp
   #test/CameraDesignVariable.cpp
   test/ScalarExpression.cpp
   )

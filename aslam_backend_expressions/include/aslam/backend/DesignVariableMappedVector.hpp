@@ -1,7 +1,6 @@
 #ifndef ASLAM_BACKEND_DESIGN_VARIABLE_MAPPED_VECTOR_HPP
 #define ASLAM_BACKEND_DESIGN_VARIABLE_MAPPED_VECTOR_HPP
 
-#include <aslam/Exceptions.hpp>
 #include <aslam/backend/JacobianContainer.hpp>
 #include <aslam/backend/DesignVariable.hpp>
 #include "VectorExpressionNode.hpp"
@@ -15,7 +14,7 @@ namespace aslam {
     public:
       EIGEN_MAKE_ALIGNED_OPERATOR_NEW
       typedef Eigen::Matrix<double, D, 1> vector_t;
-
+        SM_DEFINE_EXCEPTION(Exception, std::runtime_error);
       /// \brief initialize with a pointer to the mapped memory. This must be 
       ///        a contiguous block of size D.
       DesignVariableMappedVector(double * mappedMemory);

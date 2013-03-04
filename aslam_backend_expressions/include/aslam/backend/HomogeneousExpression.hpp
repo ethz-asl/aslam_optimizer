@@ -15,6 +15,8 @@ namespace aslam {
     class HomogeneousExpression
     {
     public:
+        SM_DEFINE_EXCEPTION(Exception, std::runtime_error);
+
       HomogeneousExpression();
       HomogeneousExpression(HomogeneousExpressionNode * designVariable);
       HomogeneousExpression(boost::shared_ptr<HomogeneousExpressionNode> designVariable);

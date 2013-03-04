@@ -42,19 +42,17 @@ namespace aslam {
     }
 
 
-
-
-
     EuclideanExpressionNodeMultiply::EuclideanExpressionNodeMultiply(boost::shared_ptr<RotationExpressionNode> lhs, boost::shared_ptr<EuclideanExpressionNode> rhs) :
-      _lhs(lhs), _rhs(rhs)
-    {
-      _C_lhs = _lhs->toRotationMatrix();
-      _p_rhs = _rhs->toEuclidean();
-    }
+         _lhs(lhs), _rhs(rhs)
+       {
+
+    	_C_lhs = _lhs->toRotationMatrix();
+         _p_rhs = _rhs->toEuclidean();
+       }
 
     EuclideanExpressionNodeMultiply::~EuclideanExpressionNodeMultiply()
     {
-      
+
     }
 
 
@@ -64,7 +62,7 @@ namespace aslam {
       _rhs->getDesignVariables(designVariables);
     }
 
-    
+
     Eigen::Vector3d EuclideanExpressionNodeMultiply::toEuclideanImplementation()
     {
       _C_lhs = _lhs->toRotationMatrix();
@@ -82,10 +80,65 @@ namespace aslam {
     void EuclideanExpressionNodeMultiply::evaluateJacobiansImplementation(JacobianContainer & outJacobians, const Eigen::MatrixXd & applyChainRule) const
     {
       _lhs->evaluateJacobians(outJacobians, applyChainRule * sm::kinematics::crossMx(_C_lhs * _p_rhs));
-      _rhs->evaluateJacobians(outJacobians, applyChainRule * _C_lhs);      
+      _rhs->evaluateJacobians(outJacobians, applyChainRule * _C_lhs);
+    }
+    // -------------------------------------------------------
+    // ## New Class for rotations with MatrixExpressions
+    EuclideanExpressionNodeMatrixMultiply::EuclideanExpressionNodeMatrixMultiply(boost::shared_ptr<MatrixExpressionNode> lhs, boost::shared_ptr<EuclideanExpressionNode> rhs) :
+         _lhs(lhs), _rhs(rhs)
+       {
+
+    	 _A_lhs = _lhs->toFullMatrix();
+         _p_rhs = _rhs->toEuclidean();
+       }
+
+    EuclideanExpressionNodeMatrixMultiply::~EuclideanExpressionNodeMatrixMultiply()
+    {
+      
     }
 
 
+    void EuclideanExpressionNodeMatrixMultiply::getDesignVariablesImplementation(DesignVariable::set_t & designVariables) const
+    {
+      _lhs->getDesignVariables(designVariables);
+      _rhs->getDesignVariables(designVariables);
+    }
+
+    
+    Eigen::Vector3d EuclideanExpressionNodeMatrixMultiply::toEuclideanImplementation()
+    {
+      _A_lhs = _lhs->toFullMatrix();
+      _p_rhs = _rhs->toEuclidean();
+
+      return _A_lhs * _p_rhs;
+    }
+
+    void EuclideanExpressionNodeMatrixMultiply::evaluateJacobiansImplementation(JacobianContainer & outJacobians) const
+    {
+    	double p1 = _p_rhs(0), p2 = _p_rhs(1), p3 = _p_rhs(2);
+    	Eigen::Matrix<double, 3,9> J_full;
+    	J_full << 
+            p1, 0,  0, p2,  0,  0, p3,  0,  0,
+            0, p1,  0,  0, p2,  0,  0, p3,  0, 
+            0,  0, p1,  0,  0, p2,  0,  0, p3;
+
+        _lhs->evaluateJacobians(outJacobians, J_full); 				 // ## Set in the full 3x9 jacobian matrix
+        _rhs->evaluateJacobians(outJacobians, _A_lhs);
+        //_rhs->evaluateJacobians(outJacobians, Eigen::Matrix3d::Zero());
+    }
+
+    void EuclideanExpressionNodeMatrixMultiply::evaluateJacobiansImplementation(JacobianContainer & outJacobians, const Eigen::MatrixXd & applyChainRule) const
+    {
+    	double p1 = _p_rhs(0), p2 = _p_rhs(1), p3 = _p_rhs(2);
+    	Eigen::Matrix<double, 3,9> J_full;
+    	J_full << p1, 0, 0, p2, 0, 0, p3, 0, 0, 0, p1, 0, 0, p2, 0, 0, p3, 0, 0, 0, p1, 0, 0, p2, 0, 0, p3;
+
+        _lhs->evaluateJacobians(outJacobians, applyChainRule * J_full);		        // ## Set in the full  3x9 jacobian matrix
+        _rhs->evaluateJacobians(outJacobians, applyChainRule * _A_lhs);
+        // _rhs->evaluateJacobians(outJacobians, applyChainRule * Eigen::Matrix3d::Identity());
+    }
+
+    // ----------------------------
 
     EuclideanExpressionNodeCrossEuclidean::EuclideanExpressionNodeCrossEuclidean(boost::shared_ptr<EuclideanExpressionNode> lhs, boost::shared_ptr<EuclideanExpressionNode> rhs) :
       _lhs(lhs), _rhs(rhs)

@@ -56,7 +56,7 @@ namespace aslam {
     template<int D>
     void DesignVariableMappedVector<D>::updateImplementation(const double * dp, int size)
     {
-      SM_ASSERT_EQ_DBG(aslam::InvalidArgumentException, size, D, "Update dimension doesn't match the state dimension");
+        SM_ASSERT_EQ_DBG(Exception, size, D, "Update dimension doesn't match the state dimension");
       Eigen::Map< const vector_t > dv(dp);
       _p_v = _v;
       _v += dv;
@@ -80,14 +80,14 @@ namespace aslam {
     template<int D>
     void DesignVariableMappedVector<D>::evaluateJacobiansImplementation(JacobianContainer & outJacobians) const
     {
-      SM_ASSERT_EQ_DBG(aslam::InvalidArgumentException, outJacobians.rows(), D, "The Jacobian container dimension doesn't match the state. Are you missing a chain rule?");
+      SM_ASSERT_EQ_DBG(Exception, outJacobians.rows(), D, "The Jacobian container dimension doesn't match the state. Are you missing a chain rule?");
       outJacobians.add(const_cast< DesignVariableMappedVector<D>* >(this), Eigen::Matrix<double,D,D>::Identity());
     }
 
     template<int D>
     void DesignVariableMappedVector<D>::evaluateJacobiansImplementation(JacobianContainer & outJacobians, const Eigen::MatrixXd & applyChainRule) const
     {
-      SM_ASSERT_EQ_DBG(aslam::InvalidArgumentException, applyChainRule.cols(), D, "The chain rule matrix dimension doesn't match the state.");
+      SM_ASSERT_EQ_DBG(Exception, applyChainRule.cols(), D, "The chain rule matrix dimension doesn't match the state.");
       outJacobians.add(const_cast< DesignVariableMappedVector<D>* >(this), applyChainRule);
     }
 
