@@ -188,7 +188,7 @@ namespace aslam {
 
 
 
-    /*
+    
           SolutionReturnValue Optimizer::optimizeDogLeg()
           {
             Timer timeGn("Optimizer: build Hessian", true);
@@ -314,7 +314,7 @@ namespace aslam {
                                   _options.verbose && std::cout << "Optimizer: The linear solution failed. Fallback to QR. (" << linearSolverFailCounter << ")" << std::endl;
                                 }
 
-                                solutionSuccess = _solver->solve(_A, &_dx_gn[0], &_b[0]);
+                                solutionSuccess = _fallbackSolver->solve(_A, &_dx_gn[0], &_b[0]);
                                 if(!solutionSuccess) {
                                   _options.verbose && std::cout << "Optimizer: The linear solution failed. Again... (" << linearSolverFailCounter << ")" << std::endl;
                                   _dx_gn = _dx_sd;
@@ -457,7 +457,7 @@ namespace aslam {
 
 
 
-          }*/
+          }
 
 
 

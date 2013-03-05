@@ -11,6 +11,10 @@
 #include <aslam/backend/HomogeneousPoint.hpp>
 #include <aslam/backend/DesignVariableMappedVector.hpp>
 #include <aslam/backend/DesignVariableVector.hpp>
+
+#include <aslam/backend/VectorExpression.hpp>
+#include <aslam/backend/VectorExpressionNode.hpp>
+
 #include <sstream>
 #include <boost/shared_ptr.hpp>
 #include <aslam/python/ExportBackendExpressions.hpp>
@@ -44,6 +48,28 @@ void exportDesignVariableVector()
     .def("value", &DesignVariableVector<D>::value, return_value_policy<copy_const_reference>())
     .def("toExpression", &DesignVariableVector<D>::toExpression)
     ;
+}
+
+template<int D>
+void exportVectorExpression()
+{
+    std::stringstream str;
+    str << "VectorExpression" << D;
+   // class_< VectorExpression<D>, boost::shared_ptr<VectorExpression<D> >("VectorExpression", init<boost::shared_ptr<VectorExpressionNode<D> > >() )
+   // .def("value", &DesignVariableVector<D>::value, return_value_policy<copy_const_reference>())
+   // .def("toExpression", &DesignVariableVector<D>::toExpression)
+   // ;
+    
+    class_<VectorExpression<D>, boost::shared_ptr<VectorExpression<D> > >("VectorExpression", init<boost::shared_ptr<VectorExpressionNode<D> > >() )
+    .def("toValue", &VectorExpression<D>::toValue)
+    .def("evaluateJacobians", &evaluateJacobians1<VectorExpression<D> >)
+    .def("evaluateJacobians", &evaluateJacobians2<VectorExpression<D> >)
+    .def("getDesignVariables", &getDesignVariables<VectorExpression<D> >)
+    // Decide later if it is useful to export the expression nodes.
+    //.def("root", &EuclideanExpression::root)
+    ;
+    
+    
 }
 
 
@@ -153,6 +179,8 @@ void exportBackendExpressions()
   exportDesignVariableVector<6>();
   exportDesignVariableVector<7>();
   exportDesignVariableVector<8>();
+    
+    exportVectorExpression<1>();
 
 
   class_<ScalarExpression, boost::shared_ptr<ScalarExpression> >("ScalarExpression", init<boost::shared_ptr<ScalarExpressionNode> > () )

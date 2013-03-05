@@ -54,7 +54,7 @@ void exportOptimizer()
 
         /// \brief Run the optimization
         .def("optimize", &Optimizer::optimize)
-        //.def("optimizeDogLeg", &Optimizer::optimizeDogLeg)
+        .def("optimizeDogLeg", &Optimizer::optimizeDogLeg)
 
         /// \brief Get the optimizer options.
         .add_property("options", make_function(&Optimizer::options,return_internal_reference<>()))
