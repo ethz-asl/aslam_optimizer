@@ -1,12 +1,11 @@
 #include <aslam/backend/EuclideanDirection.hpp>
-#include <aslam/Exceptions.hpp>
 
 namespace aslam {
     namespace backend {
         EuclideanDirection::EuclideanDirection(const Eigen::Vector3d & direction)             
         {
             _magnitude = direction.norm();
-            SM_ASSERT_GT(aslam::InvalidArgumentException, _magnitude, 0.0, "The pointing vector must have a magnitude greater than zero");
+            SM_ASSERT_GT(Exception, _magnitude, 0.0, "The pointing vector must have a magnitude greater than zero");
 
             // Decompose the pointing vector into a rotation matrix.
             Eigen::Vector3d unit = direction / _magnitude;

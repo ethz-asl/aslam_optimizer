@@ -66,7 +66,7 @@ namespace aslam {
     HomogeneousExpression RotationExpression::operator*(const HomogeneousExpression & p)
     {
       // \todo
-        SM_THROW(aslam::NotImplementedException, "Not implemented yet")
+        SM_THROW(Exception, "Not implemented yet")
       return HomogeneousExpression();
     }
 
@@ -74,7 +74,7 @@ namespace aslam {
     TransformationExpression RotationExpression::toTransformationExpression()
     {
       // \todo
-        SM_THROW(aslam::NotImplementedException, "Not implemented yet")
+        SM_THROW(Exception, "Not implemented yet")
       return TransformationExpression();
     }
 

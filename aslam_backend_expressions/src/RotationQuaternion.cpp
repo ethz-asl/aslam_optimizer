@@ -2,19 +2,12 @@
 #include <aslam/backend/RotationQuaternion.hpp>
 #include <sm/kinematics/rotations.hpp>
 #include <sm/kinematics/quaternion_algebra.hpp>
-#include <aslam/Exceptions.hpp>
 
 
 namespace aslam {
   namespace backend {
 
     RotationQuaternion::RotationQuaternion(const Eigen::Vector4d & q) : _q(q), _p_q(q), _C(sm::kinematics::quat2r(q)) {}
-
-    RotationQuaternion::RotationQuaternion(const Eigen::Matrix3d& C) :
-        _q(sm::kinematics::r2quat(C)),
-        _p_q(sm::kinematics::r2quat(C)),
-        _C(C) {
-    }
 
     RotationQuaternion::~RotationQuaternion(){}
 
@@ -29,7 +22,7 @@ namespace aslam {
     /// \brief Update the design variable.
     void RotationQuaternion::updateImplementation(const double * dp, int size) 
     {
-      SM_ASSERT_EQ_DBG(aslam::Exception, size, 3, "Incorrect update size");
+      SM_ASSERT_EQ_DBG(Exception, size, 3, "Incorrect update size");
       _p_q = _q;
       Eigen::Map<const Eigen::Vector3d> dpv(dp);
       _q = sm::kinematics::updateQuat(_q, dpv);

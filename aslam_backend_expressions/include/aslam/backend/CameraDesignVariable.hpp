@@ -13,7 +13,7 @@ namespace aslam {
 	class CameraDesignVariable
 	{
 	public:
-
+        SM_DEFINE_EXCEPTION(Exception, std::runtime_error);
 		typedef CAMERA_T camera_t;
 		typedef typename camera_t::keypoint_t keypoint_t;
 		typedef typename camera_t::projection_t projection_t;

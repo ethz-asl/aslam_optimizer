@@ -14,6 +14,8 @@ namespace aslam {
         public:
             EIGEN_MAKE_ALIGNED_OPERATOR_NEW 
 
+        SM_DEFINE_EXCEPTION(Exception, std::runtime_error);
+
             EuclideanDirection(const Eigen::Vector3d & direction);
             virtual ~EuclideanDirection();
 
