@@ -404,8 +404,13 @@ namespace aslam {
           CHOLMOD_REAL, &_cholmod);
         double* values =
           reinterpret_cast<double*>(scaling->x);
-        for (size_t i = 0; i < _qrJ->ncol; ++i)
-          values[i] = 1.0 / colNorm(_qrJ, i);
+        for (size_t i = 0; i < _qrJ->ncol; ++i) {
+          const double normCol = colNorm(_qrJ, i);
+          if (fabs(normCol) < std::numeric_limits<double>::epsilon())
+            values[i] = 0.0;
+          else
+            values[i] = 1.0 / normCol;
+        }
         SM_ASSERT_TRUE(Exception, scale(scaling, CHOLMOD_COL, _qrJ),
           "Scaling failed");
       }
@@ -431,11 +436,10 @@ namespace aslam {
 
 #ifndef QRSOLVER_DISABLED
     template<typename I>
-    void Cholmod<I>::getRE(cholmod_sparse* A, cholmod_sparse** R,
-        SuiteSparse_long** E) {
-      _qrJ = cholmod_l_transpose(A, 1, &_cholmod) ;
-      SuiteSparseQR<double>(SPQR_ORDERING_BEST, SPQR_DEFAULT_TOL, _qrJ->ncol, 0,
-        _qrJ, NULL, NULL, NULL, NULL, R, E, NULL, NULL, NULL, &_cholmod);
+    void Cholmod<I>::getR(cholmod_sparse* A, cholmod_sparse** R) {
+      _qrJ = cholmod_l_transpose(A, 1, &_cholmod);
+      SuiteSparseQR<double>(SPQR_ORDERING_FIXED, SPQR_NO_TOL, _qrJ->ncol, 0,
+        _qrJ, NULL, NULL, NULL, NULL, R, NULL, NULL, NULL, NULL, &_cholmod);
       SM_ASSERT_EQ(Exception, _cholmod.status, CHOLMOD_OK,
         "QR factorization failed");
       CholmodIndexTraits<index_t>::free_sparse(&_qrJ, &_cholmod);

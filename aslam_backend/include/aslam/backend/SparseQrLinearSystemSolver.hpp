@@ -29,6 +29,9 @@ namespace aslam {
       /// Access an element of cholmod_sparse structure
       double getElement(const cholmod_sparse* R, size_t r, size_t c);
 
+      /// Returns the sum of log of the diagonal elements of the R matrix of QR
+      double computeSumLogDiagR(size_t numCols);
+
       /// Returns the options
       const SparseQRLinearSolverOptions& getOptions() const;
       /// Returns the options

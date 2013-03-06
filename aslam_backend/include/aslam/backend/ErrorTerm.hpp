@@ -212,6 +212,12 @@ namespace aslam {
 
       virtual void getWeightedJacobians(JacobianContainer& outJc, bool useMEstimator) const;
       virtual void getWeightedError(Eigen::VectorXd& e, bool useMEstimator) const;
+
+      /// Check if Jacobians are finite
+      void checkJacobiansFinite() const;
+      /// Check if analytical and numerical Jacobians match
+      void checkJacobiansNumerical(double tolerance = 1e-6);
+
     protected:
 
       /// \brief build the hessian.

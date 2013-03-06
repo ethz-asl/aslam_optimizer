@@ -96,8 +96,8 @@ namespace aslam {
       double colNorm(cholmod_sparse* A, size_t n);
 
 #ifndef QRSOLVER_DISABLED
-      /// Get the R and E matrix from the QR decomposition
-      void getRE(cholmod_sparse* A, cholmod_sparse** R, SuiteSparse_long** E);
+      /// Get the R matrix from the QR decomposition
+      void getR(cholmod_sparse* A, cholmod_sparse** R);
 #endif
 
     private:

@@ -116,39 +116,57 @@ namespace aslam {
       CompressedColumnMatrix<SuiteSparse_long>& J_transpose =
         _jacobianBuilder.J_transpose();
       J_transpose.getView(&_cholmodLhs);
-      _cholmod.view(_e, &_cholmodRhs);
+      SM_ASSERT_LE_DBG(Exception, numCols, _cholmodLhs.ncol,
+        "Invalid number of columns");
       cholmod_sparse* R;
-      SuiteSparse_long* E;
-      _cholmod.getRE(&_cholmodLhs, &R, &E);
+      _cholmod.getR(&_cholmodLhs, &R);
       Sigma = Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic>::
         Zero(numCols, numCols);
       const size_t n = R->ncol;
-      for (size_t l = n - 1, Sigma_l = numCols - 1;
-          l >= n - numCols; --l, --Sigma_l) {
+      for (int l = n - 1, Sigma_l = numCols - 1;
+          l >= (int)(n - numCols); --l, --Sigma_l) {
         double temp1 = 0;
-        for (size_t j = l + 1, Sigma_j = Sigma_l + 1; j < n; ++j, ++Sigma_j) {
-          temp1 += getElement(R, E[l], E[j]) * Sigma(Sigma_j, Sigma_l);
+        for (int j = l + 1, Sigma_j = Sigma_l + 1; j < (int)n; ++j, ++Sigma_j) {
+          temp1 += getElement(R, l, j) * Sigma(Sigma_j, Sigma_l);
         }
-        const double R_ll = getElement(R, E[l], E[l]);
+        const double R_ll = getElement(R, l, l);
         Sigma(Sigma_l, Sigma_l) = 1 / R_ll * (1 / R_ll - temp1);
-        for (size_t i = l - 1, Sigma_i = Sigma_l - 1;
-            i >= n - numCols; --i, --Sigma_i) {
+        for (int i = l - 1, Sigma_i = Sigma_l - 1;
+            i >= int(n - numCols); --i, --Sigma_i) {
           temp1 = 0;
-          for (size_t j = i + 1, Sigma_j = Sigma_i + 1;
+          for (int j = i + 1, Sigma_j = Sigma_i + 1;
               j <= l; ++j, ++Sigma_j) {
-            temp1 += getElement(R, E[i], E[j]) * Sigma(Sigma_j, Sigma_l);
+            temp1 += getElement(R, i, j) * Sigma(Sigma_j, Sigma_l);
           }
           double temp2 = 0;
-          for (size_t j = l + 1, Sigma_j = Sigma_l + 1; j < n; ++j, ++Sigma_j) {
-            temp2 += getElement(R, E[i], E[j]) * Sigma(Sigma_l, Sigma_j);
+          for (int j = l + 1, Sigma_j = Sigma_l + 1; j < (int)n; ++j,
+              ++Sigma_j) {
+            temp2 += getElement(R, i, j) * Sigma(Sigma_l, Sigma_j);
           }
-          Sigma(Sigma_i, Sigma_l) = 1 / getElement(R, E[i], E[i]) *
+          Sigma(Sigma_i, Sigma_l) = 1 / getElement(R, i, i) *
             (-temp1 - temp2);
           Sigma(Sigma_l, Sigma_i) = Sigma(Sigma_i, Sigma_l);
         }
       }
       _cholmod.free(R);
-      _cholmod.free(n, sizeof(SuiteSparse_long), E);
+    }
+
+    double SparseQrLinearSystemSolver::computeSumLogDiagR(size_t numCols) {
+      CompressedColumnMatrix<SuiteSparse_long>& J_transpose =
+        _jacobianBuilder.J_transpose();
+      J_transpose.getView(&_cholmodLhs);
+      SM_ASSERT_LE_DBG(Exception, numCols, _cholmodLhs.ncol,
+        "Invalid number of columns");
+      cholmod_sparse* R;
+      _cholmod.getR(&_cholmodLhs, &R);
+      double sumLogDiagR = 0;
+      for (size_t i = R->ncol - numCols; i < R->ncol; ++i) {
+        const double value = getElement(R, i, i);
+        if (fabs(value) > std::numeric_limits<double>::epsilon())
+          sumLogDiagR += log2(fabs(value));
+      }
+      _cholmod.free(R);
+      return sumLogDiagR;
     }
 
     const SparseQRLinearSolverOptions&

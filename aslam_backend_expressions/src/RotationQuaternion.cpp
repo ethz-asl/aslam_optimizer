@@ -9,6 +9,12 @@ namespace aslam {
 
     RotationQuaternion::RotationQuaternion(const Eigen::Vector4d & q) : _q(q), _p_q(q), _C(sm::kinematics::quat2r(q)) {}
 
+    RotationQuaternion::RotationQuaternion(const Eigen::Matrix3d& C) :
+        _q(sm::kinematics::r2quat(C)),
+        _p_q(sm::kinematics::r2quat(C)),
+        _C(C) {
+    }
+
     RotationQuaternion::~RotationQuaternion(){}
 
       
