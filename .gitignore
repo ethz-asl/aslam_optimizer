@@ -1,3 +1,4 @@
+*.so
 aslam_backend/bin/
 aslam_backend/build/
 aslam_backend/lib/
