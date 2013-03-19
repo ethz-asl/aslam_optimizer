@@ -7,7 +7,7 @@ roslib.load_manifest("aslam_backend_tutorial")
 
 # Once the manifest is loaded, the tutorial python package and all dependencies
 # can be seen by python.
-import aslam
+import aslam_backend as aslam
 # sm is the Schweizer Messer library
 import sm
 # This is our tutorial package
