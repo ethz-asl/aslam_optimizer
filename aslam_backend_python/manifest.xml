@@ -12,7 +12,6 @@
   <depend package="sm_common"/>
   <depend package="sm_eigen"/>
   <depend package="sm_kinematics"/>
-  <depend package="aslam_cameras"/>
   <depend package="roscpp"/>
 
   <depend package="aslam_time"/>
@@ -21,7 +20,6 @@
   <depend package="sm_python"/>
   <depend package="aslam_backend_expressions"/>
 
-  <depend package="aslam_backend_design_variables"/>
 
   <export>
     <python path="${prefix}/python"/>
