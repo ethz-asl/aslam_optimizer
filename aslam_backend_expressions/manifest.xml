@@ -12,7 +12,7 @@
   <depend package="aslam_backend"/>
   <depend package="sm_boost"/>
   <depend package="sm_random"/>
-
+  <depend package="sm_kinematics"/>
 
   <export>
     <cpp cflags="-I${prefix}/include"
