@@ -1,3 +1,7 @@
+#ifndef SuiteSparse_long
+#define SuiteSparse_long UF_long
+#endif
+
 namespace aslam {
   namespace backend {
 

@@ -24,7 +24,7 @@
 #include <vector>
 #include <algorithm>
 
-#include <cholmod.h>
+#include <suitesparse/cholmod.h>
 
 using namespace std;
 

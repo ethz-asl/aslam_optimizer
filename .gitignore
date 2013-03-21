@@ -2,6 +2,7 @@
 aslam_backend/bin/
 aslam_backend/build/
 aslam_backend/lib/
+aslam_backend_expressions/bin/
 aslam_backend_expressions/build/
 aslam_backend_expressions/lib/
 aslam_backend_python/build/
@@ -9,6 +10,7 @@ aslam_backend_python/lib/
 aslam_backend_tutorial/bin/
 aslam_backend_tutorial/build/
 aslam_backend_tutorial/lib/
+sparse_block_matrix/bin/
 sparse_block_matrix/build/
 sparse_block_matrix/lib/
 aslam_backend_design_variables/build/

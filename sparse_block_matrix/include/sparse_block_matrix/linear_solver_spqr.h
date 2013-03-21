@@ -18,9 +18,9 @@
 #define SBM_LINEAR_SOLVER_SPQR
 
 #include <sparse_block_matrix/linear_solver.h>
-#include <SuiteSparseQR.hpp>
+#include <suitesparse/SuiteSparseQR.hpp>
 #include <sparse_block_matrix/sparse_helper.h>
-#include <cholmod.h>
+#include <suitesparse/cholmod.h>
 
 namespace sparse_block_matrix {
 

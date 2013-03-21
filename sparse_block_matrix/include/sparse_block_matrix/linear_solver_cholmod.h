@@ -20,7 +20,7 @@
 #include <sparse_block_matrix/linear_solver.h>
 #include <sparse_block_matrix/marginal_covariance_cholesky.h>
 #include <sparse_block_matrix/sparse_helper.h>
-#include <cholmod.h>
+#include <suitesparse/cholmod.h>
 
 namespace sparse_block_matrix {
 
