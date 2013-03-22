@@ -42,6 +42,14 @@ SET(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${PROJECT_SOURCE_DIR}/../cmake)
 FIND_PACKAGE(SuiteSparse REQUIRED)
 include_directories(${CSPARSE_INCLUDE_DIR})
 include_directories(${CHOLMOD_INCLUDE_DIR})
+
+#generate flag export files based on the values found by FIND_PACKAGE.
+#They are incorporated by a backticks expression in the manifest.xml's export/cpp tag.
+file(WRITE build/cflags.export "-I${CSPARSE_INCLUDE_DIR}\n-I${CHOLMOD_INCLUDE_DIR}\n")
+file(WRITE build/lflags.export "")
+foreach(lib ${CSPARSE_LIBRARY} ${CHOLMOD_LIBRARIES})
+	file(APPEND build/lflags.export "-l${lib}\n")
+endforeach()
  
 IF(NOT CSPARSE_FOUND)
    message( FATAL_ERROR "CSparse was not found")

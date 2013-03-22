@@ -42,21 +42,7 @@ ELSE()
   add_definitions( -fPIC -msse2 -mssse3 -march=nocona -Wextra -Winit-self -Woverloaded-virtual -Wnon-virtual-dtor -Wsign-promo -Wno-long-long -std=c++0x)
 ENDIF(${CMAKE_SYSTEM} MATCHES "Darwin-*")
 
-
-# For building the CHOLMOD / CSPARSE solvers 
 SET(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${PROJECT_SOURCE_DIR}/../cmake)
-FIND_PACKAGE(SuiteSparse REQUIRED)
-include_directories(${CSPARSE_INCLUDE_DIR})
-include_directories(${CHOLMOD_INCLUDE_DIR})
- 
-IF(NOT CSPARSE_FOUND)
-   message( FATAL_ERROR "CSparse was not found")
-ENDIF()
-
-IF(NOT CHOLMOD_FOUND)
-   message( FATAL_ERROR "Cholmod was not found")
-ENDIF()
-
 FIND_PACKAGE(TBB)
 SET(EXTRA_LIBS)
 IF(TBB_FOUND)

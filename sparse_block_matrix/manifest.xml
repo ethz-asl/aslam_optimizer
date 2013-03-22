@@ -17,8 +17,8 @@
 
 
   <export>
-   <cpp cflags="`pkg-config --cflags eigen3` -I${prefix}/include"
-	lflags="-L${prefix}/lib -lsparse_block_matrix"/>
+   <cpp cflags="`pkg-config --cflags eigen3` -I${prefix}/include `cat ${prefix}/build/cflags.export`"
+	lflags="-L${prefix}/lib -lsparse_block_matrix `cat ${prefix}/build/lflags.export`"/>
    <python path="${prefix}/src"/>
   </export>
 </package>
