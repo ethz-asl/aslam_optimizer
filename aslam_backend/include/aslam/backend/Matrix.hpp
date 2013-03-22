@@ -49,6 +49,10 @@ namespace aslam {
       virtual void leftMultiply(const Eigen::VectorXd& x, Eigen::VectorXd& outY) const = 0;
 
       /// \todo initialization from a triplet matrix.
+
+      /// Writes to standard output
+      virtual void write(std::ostream& stream) const;
+
     };
 
   } // namespace backend

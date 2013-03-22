@@ -136,6 +136,9 @@ namespace aslam {
       ///        should be considered zeros.
       virtual void fromDenseTolerance(const Eigen::MatrixXd& M, double tolerance);
 
+      /// Writes to standard output
+      virtual void write(std::ostream& stream) const;
+
     private:
       void checkMatrixDbg();
 
@@ -153,9 +156,6 @@ namespace aslam {
 
   } // namespace backend
 } // namespace aslam
-
-template<typename I>
-std::ostream& operator<<(std::ostream& os, const aslam::backend::CompressedColumnMatrix<I>& ccm);
 
 #include "implementation/CompressedColumnMatrix.hpp"
 

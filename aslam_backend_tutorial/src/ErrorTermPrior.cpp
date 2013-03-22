@@ -24,7 +24,9 @@ namespace aslam {
     {
         double err = _x->value() - _hat_x;
         std::cout << "err: " << err << std::endl;
-        setError( Eigen::Matrix<double,1,1>(err));
+        error_t error;
+        error(0) = err;
+        setError(error);
         return evaluateChiSquaredError();
     }
 

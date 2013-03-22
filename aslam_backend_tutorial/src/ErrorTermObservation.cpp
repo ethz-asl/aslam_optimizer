@@ -24,7 +24,9 @@ namespace aslam {
     double ErrorTermObservation::evaluateErrorImplementation()
     {
       // Build the error from the measurment _y and the design variables
-        setError( Eigen::Matrix<double,1,1>(_y - 1.0/(_w->value() - _x_k->value())));
+        error_t error;
+        error(0) = _y - 1.0/(_w->value() - _x_k->value());
+        setError(error);
         return evaluateChiSquaredError();
     }
 

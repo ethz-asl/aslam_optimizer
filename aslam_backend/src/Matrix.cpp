@@ -28,6 +28,17 @@ namespace aslam {
       }
     }
 
+    void Matrix::write(std::ostream& stream) const {
+      for (size_t r = 0; r < rows(); ++r) {
+        for (size_t c = 0; c < cols(); ++c) {
+          stream.width(10);
+          stream.setf(std::ios::fixed, std::ios::floatfield); // floatfield set to fixed
+          stream.precision(5);
+          stream << (*this)(r, c) << " ";
+        }
+        stream << std::endl;
+      }
+    }
 
 
   } // namespace backend
@@ -36,14 +47,6 @@ namespace aslam {
 
 std::ostream& operator<<(std::ostream& os, const aslam::backend::Matrix& ccm)
 {
-  for (size_t r = 0; r < ccm.rows(); ++r) {
-    for (size_t c = 0; c < ccm.cols(); ++c) {
-      os.width(10);
-      os.setf(std::ios::fixed, std::ios::floatfield);  // floatfield set to fixed
-      os.precision(5);
-      os << ccm(r, c) << " ";
-    }
-    os << std::endl;
-  }
+  ccm.write(os);
   return os;
 }

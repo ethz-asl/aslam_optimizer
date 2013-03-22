@@ -430,38 +430,18 @@ namespace aslam {
       checkMatrixDbg();
     }
 
-
-template<typename I>
-std::ostream& operator<<(std::ostream& os, const aslam::backend::CompressedColumnMatrix<I>& ccm)
-{
-  os << "M = " << ccm.rows() << ", N = " << ccm.cols() << std::endl;
-  os << "values(" << ccm.values().size() << "):\n";
-  sm::toStream(os, ccm.values().begin(), ccm.values().end(), ",", "[", "]");
-  os << "\nrow_ind(" << ccm.row_ind().size() << "):\n";
-  sm::toStream(os, ccm.row_ind().begin(), ccm.row_ind().end(), ",", "[", "]");
-  os << "\ncol_ptr(" << ccm.col_ptr().size() << "):\n";
-  sm::toStream(os, ccm.col_ptr().begin(), ccm.col_ptr().end(), ",", "[", "]");
-  os << std::endl;
-  for (size_t r = 0; r < ccm.rows(); ++r) {
-    for (size_t c = 0; c < ccm.cols(); ++c) {
-      os.width(10);
-      os.setf(std::ios::fixed, std::ios::floatfield);  // floatfield set to fixed
-      os.precision(5);
-      os << ccm(r, c) << " ";
+    template<typename I>
+    void CompressedColumnMatrix<I>::write(std::ostream& stream) const {
+      stream << "M = " << rows() << ", N = " << cols() << std::endl;
+      stream << "values(" << values().size() << "):\n";
+      sm::toStream(stream, values().begin(), values().end(), ",", "[", "]");
+      stream << "\nrow_ind(" << row_ind().size() << "):\n";
+      sm::toStream(stream, row_ind().begin(), row_ind().end(), ",", "[", "]");
+      stream << "\ncol_ptr(" << col_ptr().size() << "):\n";
+      sm::toStream(stream, col_ptr().begin(), col_ptr().end(), ",", "[", "]");
+      stream << std::endl;
+      Matrix::write(stream);
     }
-    os << std::endl;
-  }
-  return os;
-}
-
 
   } // namespace backend
 } // namespace aslam
-
-
-
-template<typename I>
-std::ostream& operator<<(std::ostream& os, const aslam::backend::CompressedColumnMatrix<I>& ccm)
-{
-    return aslam::backend::operator<<(os,ccm);
-}

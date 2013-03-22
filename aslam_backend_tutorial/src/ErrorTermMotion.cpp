@@ -22,7 +22,9 @@ namespace aslam {
     /// \brief evaluate the error term and return the weighted squared error e^T invR e
     double ErrorTermMotion::evaluateErrorImplementation()
     {
-        setError( Eigen::Matrix<double,1,1>( _x_kp1->value() - _x_k->value() - _u));
+        error_t error;
+        error(0) = _x_kp1->value() - _x_k->value() - _u;
+        setError(error);
         return evaluateChiSquaredError();
     }
 
