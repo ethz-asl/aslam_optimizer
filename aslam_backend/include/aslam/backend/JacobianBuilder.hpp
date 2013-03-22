@@ -1,7 +1,7 @@
 #ifndef ASLAM_BACKEND_COMPRESSED_ROW_JACOBIAN_BUILDER_HPP
 #define ASLAM_BACKEND_COMPRESSED_ROW_JACOBIAN_BUILDER_HPP
 
-#include <suitesparse/cholmod.h>
+#include <cholmod.h>
 #include "ErrorTerm.hpp"
 
 namespace aslam {

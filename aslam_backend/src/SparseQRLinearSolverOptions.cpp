@@ -18,7 +18,7 @@
 
 #include "aslam/backend/SparseQRLinearSolverOptions.h"
 
-#include <suitesparse/SuiteSparseQR.hpp>
+#include <SuiteSparseQR.hpp>
 
 namespace aslam {
   namespace backend {

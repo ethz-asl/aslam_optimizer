@@ -1,9 +1,9 @@
 #ifndef ASLAM_BACKEND_CHOLMOD_HPP
 #define ASLAM_BACKEND_CHOLMOD_HPP
 
-#include <suitesparse/cholmod.h>
+#include <cholmod.h>
 #ifndef QRSOLVER_DISABLED
-#include <suitesparse/SuiteSparseQR.hpp>
+#include <SuiteSparseQR.hpp>
 #endif
 #include <sm/assert_macros.hpp>
 #include <Eigen/Core>
