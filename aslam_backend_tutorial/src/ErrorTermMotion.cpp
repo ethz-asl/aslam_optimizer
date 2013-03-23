@@ -6,8 +6,11 @@ namespace aslam {
     ErrorTermMotion::ErrorTermMotion(ScalarDesignVariable * x_k, ScalarDesignVariable * x_kp1, double u, double sigma2_u) :
       _u(u), _x_k(x_k), _x_kp1(x_kp1)
     {
+
+        Eigen::Matrix<double,1,1> invR;
+        invR(0,0) = (1.0/sigma2_u);
       // Fill in the inverse covariance. In this scalar case, this is just an inverse variance.
-        setInvR( Eigen::Matrix<double,1,1>(1.0/sigma2_u) );
+        setInvR( invR );
 
       // Tell the super class about the design variables:
       setDesignVariables(x_k, x_kp1);

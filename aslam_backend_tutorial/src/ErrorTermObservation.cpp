@@ -7,8 +7,10 @@ namespace aslam {
     ErrorTermObservation::ErrorTermObservation(ScalarDesignVariable * x_k, ScalarDesignVariable * w, double y, double sigma2_n) :
       _x_k(x_k), _w(w), _y(y)
     {
+        Eigen::Matrix<double,1,1> invR;
+        invR(0,0) = (1.0/sigma2_n);
       // Fill in the inverse covariance. In this scalar case, this is just an inverse variance.
-        setInvR(Eigen::Matrix<double,1,1>(1.0/sigma2_n));
+        setInvR( invR );
 
       // Tell the super class about the design variables:
       setDesignVariables(_x_k, w);
