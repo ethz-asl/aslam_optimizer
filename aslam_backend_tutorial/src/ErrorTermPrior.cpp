@@ -25,7 +25,7 @@ namespace aslam {
     double ErrorTermPrior::evaluateErrorImplementation()
     {
         double err = _x->value() - _hat_x;
-        std::cout << "err: " << err << std::endl;
+        //std::cout << "err: " << err << std::endl;
         error_t error;
         error(0) = err;
         setError(error);
