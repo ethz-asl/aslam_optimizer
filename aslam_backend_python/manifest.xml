@@ -14,7 +14,7 @@
   <depend package="sm_kinematics"/>
   <depend package="roscpp"/>
 
-  <depend package="aslam_time"/>
+
   <depend package="numpy_eigen"/>
   <depend package="aslam_backend"/>
   <depend package="sm_python"/>
