@@ -1,3 +1,6 @@
+.cproject
+.project
+.pydevproject
 *.so
 aslam_backend/bin/
 aslam_backend/build/
