@@ -228,7 +228,11 @@ namespace aslam {
 
     template<int C>
     void ErrorTermFs<C>::checkJacobiansFinite() const {
-      for (auto it = _jacobians.begin(); it != _jacobians.end(); ++it) {
+#ifdef BOOST_NO_AUTO_DECLARATIONS
+        for (JacobianContainer::map_t::iterator it = _jacobians.begin(); it != _jacobians.end(); ++it) {      
+#else
+        for (auto it = _jacobians.begin(); it != _jacobians.end(); ++it) {
+#endif
         SM_ASSERT_MAT_IS_FINITE(Exception, it->second,
           "Jacobian is not finite!");
       }

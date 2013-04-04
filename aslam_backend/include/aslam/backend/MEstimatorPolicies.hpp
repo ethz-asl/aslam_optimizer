@@ -4,7 +4,13 @@
 #include <cmath>
 #include <string>
 #include <sstream>
-#include <array>
+#include <boost/config.hpp>
+
+#ifdef BOOST_NO_0X_HDR_ARRAY
+    #include <tr1/array>
+#else
+    #include<array>
+#endif
 
 #include <aslam/Exceptions.hpp>
 #include <sm/assert_macros.hpp>
@@ -13,7 +19,11 @@ namespace aslam {
   namespace backend {
 
     /// Inverse chi-squared cdf for p = 0.999 and df = 1...20
-    constexpr std::array<double, 20> chi2invTable{{
+#ifdef BOOST_NO_CONSTEXPR
+    static std::tr1::array<double, 20> chi2invTable={{
+#else
+      constexpr std::array<double, 20> chi2invTable{{
+#endif
       10.827566170662738,
       13.815510557964272,
       16.266236196238129,
@@ -35,6 +45,7 @@ namespace aslam {
       43.820195964517531,
       45.314746618125859}};
 
+          
     class MEstimator {
     public:
       virtual ~MEstimator();
