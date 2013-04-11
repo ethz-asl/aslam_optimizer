@@ -1,3 +1,4 @@
+#include <algorithm>
 
 #define checkMatrixDbg() \
   SM_ASSERT_EQ(Exception, (size_t)_col_ptr.back(), _values.size(), "This matrix is screwed up");\
@@ -441,6 +442,37 @@ namespace aslam {
       sm::toStream(stream, col_ptr().begin(), col_ptr().end(), ",", "[", "]");
       stream << std::endl;
       Matrix::write(stream);
+    }
+
+    template<typename I>
+    void CompressedColumnMatrix<I>::writeMATLAB(std::ostream& stream) const {
+      for (size_t j = 0; j < _cols; ++j)
+        for (I p = _col_ptr[j]; p < _col_ptr[j + 1]; ++p)
+          stream << std::fixed << std::setprecision(16) <<
+            _row_ind[p] + 1 << " " << j + 1 << " " << _values[p] << std::endl;
+    }
+
+    template<typename I>
+    void CompressedColumnMatrix<I>::
+        fromCholmodSparse(const cholmod_sparse* cs) {
+      if (cs == NULL)
+        return;
+      _rows = cs->nrow;
+      _cols = cs->ncol;
+      const SuiteSparse_long* row_ind = reinterpret_cast<const I*>(cs->i);
+      const SuiteSparse_long* col_ptr = reinterpret_cast<const I*>(cs->p);
+      const double* values = reinterpret_cast<const double*>(cs->x);
+      const size_t nzmax = cs->nzmax;
+      _col_ptr.reserve(_cols + 1);
+      _col_ptr.resize(_cols + 1);
+      std::copy(col_ptr, col_ptr + _cols + 1, _col_ptr.begin());
+      _row_ind.reserve(nzmax);
+      _row_ind.resize(nzmax);
+      std::copy(row_ind, row_ind + nzmax, _row_ind.begin());
+      _values.reserve(nzmax);
+      _values.resize(nzmax);
+      std::copy(values, values + nzmax, _values.begin());
+      checkMatrixDbg();
     }
 
   } // namespace backend

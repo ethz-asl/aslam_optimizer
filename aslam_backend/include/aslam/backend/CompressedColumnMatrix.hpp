@@ -139,6 +139,12 @@ namespace aslam {
       /// Writes to standard output
       virtual void write(std::ostream& stream) const;
 
+      /// Writes to standard stream in MATLAB format
+      void writeMATLAB(std::ostream& stream) const;
+
+      /// Initializes the matrix from a cholmod_sparse matrix
+      void fromCholmodSparse(const cholmod_sparse* cs);
+
     private:
       void checkMatrixDbg();
 

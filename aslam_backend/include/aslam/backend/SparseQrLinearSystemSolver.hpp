@@ -32,6 +32,9 @@ namespace aslam {
       /// Returns the sum of log of the diagonal elements of the R matrix of QR
       double computeSumLogDiagR(size_t numCols);
 
+      /// Returns the current Jacobian transpose (note: const should be added)
+      const CompressedColumnMatrix<index_t>& getJacobianTranspose();
+
       /// Returns the options
       const SparseQRLinearSolverOptions& getOptions() const;
       /// Returns the options

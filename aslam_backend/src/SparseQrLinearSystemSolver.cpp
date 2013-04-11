@@ -184,5 +184,10 @@ namespace aslam {
       _options = options;
     }
 
+    const CompressedColumnMatrix<SuiteSparse_long>&
+        SparseQrLinearSystemSolver::getJacobianTranspose() {
+      return _jacobianBuilder.J_transpose();
+    }
+
   } // namespace backend
 } // namespace aslam
