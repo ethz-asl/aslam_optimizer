@@ -165,7 +165,7 @@ namespace aslam {
 
 
     template<typename I>
-    Cholmod<I>::Cholmod(): _qrJ(NULL), _qrY(NULL)
+    Cholmod<I>::Cholmod()
     {
       CholmodIndexTraits<index_t>::start(&_cholmod);
     }
@@ -173,10 +173,6 @@ namespace aslam {
     template<typename I>
     Cholmod<I>::~Cholmod()
     {
-      if (_qrJ)
-        CholmodIndexTraits<index_t>::free_sparse(&_qrJ, &_cholmod);
-      if (_qrY)
-        CholmodIndexTraits<index_t>::free_dense(&_qrY, &_cholmod);
       CholmodIndexTraits<index_t>::finish(&_cholmod);
     }
 
@@ -239,9 +235,9 @@ namespace aslam {
       _cholmod.SPQR_nthreads = -1;  // let tbb choose whats best
       _cholmod.SPQR_grain = 12;   // +/-2* number of cores
       spqr_factor* factor = NULL;
-      _qrJ = cholmod_l_transpose(J, 1, &_cholmod) ;
-      factor = SuiteSparseQR_symbolic <double>(SPQR_ORDERING_BEST, SPQR_DEFAULT_TOL, _qrJ, &_cholmod) ;
-      CholmodIndexTraits<index_t>::free_sparse(&_qrJ, &_cholmod);
+      cholmod_sparse* qrJ = cholmod_l_transpose(J, 1, &_cholmod) ;
+      factor = SuiteSparseQR_symbolic <double>(SPQR_ORDERING_BEST, SPQR_DEFAULT_TOL, qrJ, &_cholmod) ;
+      CholmodIndexTraits<index_t>::free_sparse(&qrJ, &_cholmod);
       SM_ASSERT_EQ(Exception, _cholmod.status, CHOLMOD_OK, "The symbolic qr factorization failed.");
       SM_ASSERT_FALSE(Exception, factor == NULL, "SuiteSparseQR_symbolic returned a null factor");
       return factor;
@@ -400,40 +396,40 @@ namespace aslam {
     template<typename I>
     cholmod_dense* Cholmod<I>::solve(cholmod_sparse* A, spqr_factor* L,
         cholmod_dense* b, double tol, bool norm) {
-      _qrJ = cholmod_l_transpose(A, 1, &_cholmod);
+      cholmod_sparse* qrJ = cholmod_l_transpose(A, 1, &_cholmod);
       cholmod_dense* scaling = NULL;
       if (norm) {
         scaling =
-          CholmodIndexTraits<index_t>::allocate_dense(_qrJ->ncol, 1, _qrJ->ncol,
+          CholmodIndexTraits<index_t>::allocate_dense(qrJ->ncol, 1, qrJ->ncol,
           CHOLMOD_REAL, &_cholmod);
         double* values =
           reinterpret_cast<double*>(scaling->x);
-        for (size_t i = 0; i < _qrJ->ncol; ++i) {
-          const double normCol = colNorm(_qrJ, i);
+        for (size_t i = 0; i < qrJ->ncol; ++i) {
+          const double normCol = colNorm(qrJ, i);
           if (fabs(normCol) < std::numeric_limits<double>::epsilon())
             values[i] = 0.0;
           else
             values[i] = 1.0 / normCol;
         }
-        SM_ASSERT_TRUE(Exception, scale(scaling, CHOLMOD_COL, _qrJ),
+        SM_ASSERT_TRUE(Exception, scale(scaling, CHOLMOD_COL, qrJ),
           "Scaling failed");
       }
       cholmod_dense* res = NULL;
-      if (factorize(_qrJ, L, tol)) {
-        _qrY = SuiteSparseQR_qmult(SPQR_QTX, L, b, &_cholmod);
-        res = SuiteSparseQR_solve(SPQR_RETX_EQUALS_B, L, _qrY, &_cholmod);
-        CholmodIndexTraits<index_t>::free_dense(&_qrY, &_cholmod);
+      if (factorize(qrJ, L, tol)) {
+        cholmod_dense* qrY = SuiteSparseQR_qmult(SPQR_QTX, L, b, &_cholmod);
+        res = SuiteSparseQR_solve(SPQR_RETX_EQUALS_B, L, qrY, &_cholmod);
+        CholmodIndexTraits<index_t>::free_dense(&qrY, &_cholmod);
       }
       if (norm) {
         const double* svalues =
           reinterpret_cast<const double*>(scaling->x);
         double* rvalues =
           reinterpret_cast<double*>(res->x);
-        for (size_t i = 0; i < _qrJ->ncol; ++i)
+        for (size_t i = 0; i < qrJ->ncol; ++i)
           rvalues[i] = svalues[i] * rvalues[i];
         CholmodIndexTraits<index_t>::free_dense(&scaling, &_cholmod);
       }
-      CholmodIndexTraits<index_t>::free_sparse(&_qrJ, &_cholmod);
+      CholmodIndexTraits<index_t>::free_sparse(&qrJ, &_cholmod);
       return res;
     }
 #endif
@@ -441,12 +437,12 @@ namespace aslam {
 #ifndef QRSOLVER_DISABLED
     template<typename I>
     void Cholmod<I>::getR(cholmod_sparse* A, cholmod_sparse** R) {
-      _qrJ = cholmod_l_transpose(A, 1, &_cholmod);
-      SuiteSparseQR<double>(SPQR_ORDERING_FIXED, SPQR_NO_TOL, _qrJ->ncol, 0,
-        _qrJ, NULL, NULL, NULL, NULL, R, NULL, NULL, NULL, NULL, &_cholmod);
+      cholmod_sparse* qrJ = cholmod_l_transpose(A, 1, &_cholmod);
+      SuiteSparseQR<double>(SPQR_ORDERING_FIXED, SPQR_NO_TOL, qrJ->ncol, 0,
+        qrJ, NULL, NULL, NULL, NULL, R, NULL, NULL, NULL, NULL, &_cholmod);
       SM_ASSERT_EQ(Exception, _cholmod.status, CHOLMOD_OK,
         "QR factorization failed");
-      CholmodIndexTraits<index_t>::free_sparse(&_qrJ, &_cholmod);
+      CholmodIndexTraits<index_t>::free_sparse(&qrJ, &_cholmod);
     }
 #endif
 

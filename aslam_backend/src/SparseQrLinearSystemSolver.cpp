@@ -45,6 +45,7 @@ namespace aslam {
       CompressedColumnMatrix<SuiteSparse_long>& J_transpose = _jacobianBuilder.J_transpose();
       J_transpose.rightMultiply(_e, _rhs);
       //std::cout << "build system complete\n";
+      _R.clear();
     }
 
     bool SparseQrLinearSystemSolver::solveSystem(Eigen::VectorXd& outDx)
@@ -187,6 +188,41 @@ namespace aslam {
     const CompressedColumnMatrix<SuiteSparse_long>&
         SparseQrLinearSystemSolver::getJacobianTranspose() {
       return _jacobianBuilder.J_transpose();
+    }
+
+
+    SuiteSparse_long SparseQrLinearSystemSolver::getRank() const {
+      SM_ASSERT_FALSE(Exception, _factor == NULL,
+        "QR decomposition has not run yet");
+      return _factor->rank;
+    }
+
+    double SparseQrLinearSystemSolver::getTol() const {
+      SM_ASSERT_FALSE(Exception, _factor == NULL,
+        "QR decomposition has not run yet");
+      return _factor->tol;
+    }
+
+    std::vector<SuiteSparse_long>
+        SparseQrLinearSystemSolver::getPermutationVector() const {
+      SM_ASSERT_FALSE(Exception, _factor == NULL,
+        "QR decomposition has not run yet");
+      return std::vector<SuiteSparse_long>(_factor->Q1fill,
+        _factor->Q1fill + _cholmodLhs.nrow);
+    }
+
+    const CompressedColumnMatrix<SuiteSparse_long>&
+        SparseQrLinearSystemSolver::getR() {
+      if (_R.nnz() == 0) {
+        CompressedColumnMatrix<SuiteSparse_long>& J_transpose =
+          _jacobianBuilder.J_transpose();
+        J_transpose.getView(&_cholmodLhs);
+        cholmod_sparse* R;
+        _cholmod.getR(&_cholmodLhs, &R);
+        _R.fromCholmodSparse(R);
+        _cholmod.free(R);
+      }
+      return _R;
     }
 
   } // namespace backend

@@ -104,8 +104,8 @@ namespace aslam {
 
       cholmod_common _cholmod;
 
-      cholmod_sparse* _qrJ;
-      cholmod_dense* _qrY;
+//      cholmod_sparse* _qrJ;
+//      cholmod_dense* _qrY;
     };
 
   } // namespace backend
