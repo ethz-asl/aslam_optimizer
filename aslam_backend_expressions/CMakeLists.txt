@@ -80,6 +80,8 @@ rosbuild_add_gtest(${PROJECT_NAME}_test
   #test/EuclideanExpression.cpp
   test/HomogeneousExpression.cpp
   test/MatrixAndEuclideanExpression.cpp
+  test/GenericMatrixExpression.cpp
+  test/QuaternionExpression.cpp
   #test/CameraDesignVariable.cpp
   test/ScalarExpression.cpp
   test/ErrorTest_Transformation.cpp
