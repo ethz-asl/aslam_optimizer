@@ -68,6 +68,7 @@ add_python_export_library(${PROJECT_NAME} python/aslam_backend
   src/MEstimators.cpp
   src/JacobianContainer.cpp
   src/BackendExpressions.cpp
+  src/CompressedColumnMatrix.cpp
   #src/Frontend.cpp
   #src/Frame.cpp
   #src/Descriptors.cpp

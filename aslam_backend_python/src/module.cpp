@@ -4,11 +4,12 @@
 
 void exportBackend();
 void exportBackendDesignVariables();
+void exportCompressedColumnMatrix() ;
 // The title of this library must match exactly
 BOOST_PYTHON_MODULE(libaslam_backend_python)
 {
   // fill this in with boost::python export code
   exportBackend();
-
+  exportCompressedColumnMatrix();
 
 }

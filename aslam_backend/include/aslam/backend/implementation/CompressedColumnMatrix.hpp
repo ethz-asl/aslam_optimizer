@@ -157,8 +157,8 @@ namespace aslam {
     template<typename I>
     double CompressedColumnMatrix<I>::value(size_t r, size_t c) const
     {
-      SM_ASSERT_GE_LT(Exception, r, 0u, (int)_rows, "Index out of bounds");
-      SM_ASSERT_GE_LT(Exception, c, 0u, (int)_cols, "Index out of bounds");
+      SM_ASSERT_LT(Exception, r, _rows, "Index out of bounds");
+      SM_ASSERT_LT(Exception, c, _cols, "Index out of bounds");
       return (*this)(r, c);
     }
 
