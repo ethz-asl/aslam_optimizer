@@ -16,6 +16,11 @@ void exportErrorTerm()
     ///        After this is called, the _squaredError is filled in with \f$ \mathbf e^T \mathbf R^{-1} \mathbf e \f$
     .def("evaluateError", &ErrorTerm::evaluateError)
 
+      .def("invR", &ErrorTerm::vsInvR)
+
+      .def("setInvR", &ErrorTerm::vsSetInvR)
+
+
     /// \brief evaluate the Jacobians.
     .def("evaluateJacobians", &ErrorTerm::evaluateJacobians)
 

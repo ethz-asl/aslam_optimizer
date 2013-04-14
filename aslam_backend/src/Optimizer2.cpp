@@ -599,7 +599,7 @@ namespace aslam {
       }
       // Track the maximum delta
       // \todo: should this be some other metric?
-      double deltaX = _dx.maxCoeff();
+      double deltaX = _dx.array().abs().maxCoeff();
       return deltaX;
     }
 
