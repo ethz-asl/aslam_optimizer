@@ -106,6 +106,7 @@ namespace aslam {
         dim += e->dimension();
       }
       initEt.stop();
+      SM_ASSERT_FALSE(Exception, _errorTerms.empty(), "It is illegal to run the optimizer with no error terms.");
       Timer initMx("Optimizer2: Initialize---Matrices");
       // Set up the block matrix structure.
       // std::cout << "init structure\n";
