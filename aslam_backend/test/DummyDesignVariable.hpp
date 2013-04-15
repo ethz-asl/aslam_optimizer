@@ -18,6 +18,14 @@ protected:
     return MD;
   }
 
+  /// Returns the content of the design variable
+  virtual void getParametersImplementation(Eigen::MatrixXd& value) const {
+  }
+
+  /// Sets the content of the design variable
+  virtual void setParametersImplementation(const Eigen::MatrixXd& value) {
+  }
+
 };
 
 

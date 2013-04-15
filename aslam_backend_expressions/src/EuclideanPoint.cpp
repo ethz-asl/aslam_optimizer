@@ -60,7 +60,17 @@ namespace aslam {
     {
       return EuclideanExpression(this);
     }
-      
+
+    void EuclideanPoint::getParametersImplementation(
+        Eigen::MatrixXd& value) const {
+      value = _p;
+    }
+
+    void EuclideanPoint::setParametersImplementation(
+        const Eigen::MatrixXd& value) {
+      _p_p = _p;
+      _p = value;
+    }
 
   } // namespace backend
 } // namespace aslam

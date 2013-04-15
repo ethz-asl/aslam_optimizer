@@ -38,6 +38,12 @@ namespace aslam {
 
             virtual void getDesignVariablesImplementation(DesignVariable::set_t & designVariables) const;
 
+      /// Returns the content of the design variable
+      virtual void getParametersImplementation(Eigen::MatrixXd& value) const;
+
+      /// Sets the content of the design variable
+      virtual void setParametersImplementation(const Eigen::MatrixXd& value);
+
             Eigen::Matrix3d _C;
             Eigen::Matrix3d _p_C;
 

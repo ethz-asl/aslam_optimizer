@@ -43,6 +43,12 @@ namespace aslam {
       /// \brief Revert the last state update.
       virtual void revertUpdateImplementation();
 
+      /// Returns the content of the design variable
+      virtual void getParametersImplementation(Eigen::MatrixXd& value) const;
+
+      /// Sets the content of the design variable
+      virtual void setParametersImplementation(const Eigen::MatrixXd& value);
+
       /// \brief the design variable being wrapped.
       boost::shared_ptr<T> _dv;
 

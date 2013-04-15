@@ -78,7 +78,18 @@ namespace aslam {
       designVariables.insert(const_cast<DesignVariableVector<D>*>(this));
     }
 
+    template<int D>
+    void DesignVariableVector<D>::getParametersImplementation(
+        Eigen::MatrixXd& value) const {
+      value = _v;
+    }
 
+    template<int D>
+    void DesignVariableVector<D>::setParametersImplementation(
+        const Eigen::MatrixXd& value) {
+      _p_v = _v;
+      _v = value;
+    }
 
   } // namespace backend
 } // namespace aslam

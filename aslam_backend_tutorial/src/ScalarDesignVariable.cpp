@@ -49,6 +49,19 @@ namespace aslam {
       _value = _p_value;
     }
 
+    void ScalarDesignVariable::getParametersImplementation(
+        Eigen::MatrixXd& value) const {
+      Eigen::Matrix<double, 1, 1> valueMat;
+      valueMat << _value;
+      value = valueMat;
+    }
+
+
+    void ScalarDesignVariable::setParametersImplementation(
+        const Eigen::MatrixXd& value) {
+      _p_value = _value;
+      _value = value(0, 0);
+    }
 
 
   } // namespace backend

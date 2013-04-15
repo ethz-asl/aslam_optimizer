@@ -14,25 +14,37 @@ public:
   Eigen::Vector2d _p_v;
 
   Point2d(const Eigen::Vector2d& v) : _v(v), _p_v(v) {}
-  ~Point2d() {}
+  virtual ~Point2d() {}
 
 protected:
   /// \brief Revert the last state update.
-  void revertUpdateImplementation() {
+  virtual void revertUpdateImplementation() {
     _v = _p_v;
   }
 
   /// \brief Update the design variable.
-  void updateImplementation(const double* dp, int size) {
+  virtual void updateImplementation(const double* dp, int size) {
     _p_v = _v;
     _v[0] += dp[0];
     _v[1] += dp[1];
   }
 
   /// \brief what is the number of dimensions of the perturbation variable.
-  int minimalDimensionsImplementation() const {
+  virtual int minimalDimensionsImplementation() const {
     return 2;
   }
+
+  /// Returns the content of the design variable
+  virtual void getParametersImplementation(Eigen::MatrixXd& value) const {
+    value = _v;
+  }
+
+  /// Sets the content of the design variable
+  virtual void setParametersImplementation(const Eigen::MatrixXd& value) {
+    _p_v = _v;
+    _v = value;
+  }
+
 };
 
 class LinearErr : public aslam::backend::ErrorTermFs<2> {

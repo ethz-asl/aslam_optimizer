@@ -76,6 +76,18 @@ namespace aslam {
       return _dv;
     }
 
+    template<typename T>
+    void DesignVariableAdapter<T>::getParametersImplementation(
+        Eigen::MatrixXd& value) const {
+      _dv->getParameters(value);
+    }
+
+    template<typename T>
+    void DesignVariableAdapter<T>::setParametersImplementation(
+        const Eigen::MatrixXd& value) {
+      _dv->getParameters(_backup);
+      _dv->setParameters(value);
+    }
 
   } // namespace backend
 } // namespace aslam

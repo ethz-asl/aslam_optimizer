@@ -42,6 +42,12 @@ namespace aslam {
       virtual void evaluateJacobiansImplementation(JacobianContainer & outJacobians, const Eigen::MatrixXd & applyChainRule) const;
       virtual void getDesignVariablesImplementation(DesignVariable::set_t & designVariables) const;
 
+      /// Returns the content of the design variable
+      virtual void getParametersImplementation(Eigen::MatrixXd& value) const;
+
+      /// Sets the content of the design variable
+      virtual void setParametersImplementation(const Eigen::MatrixXd& value);
+
     private:
       Eigen::Map< vector_t > _v;
       vector_t _p_v;

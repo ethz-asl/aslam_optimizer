@@ -82,6 +82,16 @@ namespace aslam {
             designVariables.insert(const_cast<EuclideanDirection*>(this));
         }
 
+      void EuclideanDirection::getParametersImplementation(
+          Eigen::MatrixXd& value) const {
+        value = _C;
+      }
+
+      void EuclideanDirection::setParametersImplementation(
+          const Eigen::MatrixXd& value) {
+        _p_C = _C;
+        _C = value;
+      }
 
     } // namespace backend
 } // namespace aslam

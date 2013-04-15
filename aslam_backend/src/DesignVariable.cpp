@@ -102,5 +102,13 @@ namespace aslam {
     }
 
 
+    void DesignVariable::getParameters(Eigen::MatrixXd& value) const {
+      getParametersImplementation(value);
+    }
+
+    void DesignVariable::setParameters(const Eigen::MatrixXd& value) {
+      setParametersImplementation(value);
+    }
+
   } // namespace backend
 } // namespace aslam

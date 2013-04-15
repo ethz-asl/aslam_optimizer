@@ -67,7 +67,17 @@ namespace aslam {
         	M << toScalar();
         	return M;
         }
-      
+
+      void Scalar::getParametersImplementation(Eigen::MatrixXd& value) const {
+        Eigen::Matrix<double, 1, 1> valueMat;
+        valueMat << _p;
+        value = valueMat;
+      }
+
+      void Scalar::setParametersImplementation(const Eigen::MatrixXd& value) {
+        _p_p = _p;
+        _p = value(0, 0);
+      }
 
     } // namespace backend
 } // namespace aslam

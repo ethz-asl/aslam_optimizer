@@ -62,5 +62,16 @@ namespace aslam {
       return HomogeneousExpression(this);
     }
 
+    void HomogeneousPoint::getParametersImplementation(Eigen::MatrixXd& value)
+        const {
+      value = _p;
+    }
+
+    void HomogeneousPoint::setParametersImplementation(const Eigen::MatrixXd&
+        value) {
+      _p_p = _p;
+      _p = value;
+    }
+
   } // namespace backend
 } // namespace aslam

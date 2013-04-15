@@ -89,6 +89,17 @@ namespace aslam {
       designVariables.insert(const_cast<MatrixTransformation*>(this));
     }
 
+    void MatrixTransformation::getParametersImplementation(
+        Eigen::MatrixXd& value) const {
+      value = _A;
+    }
+
+    void MatrixTransformation::setParametersImplementation(
+        const Eigen::MatrixXd& value) {
+      _A_a = _A;
+      _A = value;
+    }
+
   } // namespace backend
 } // namespace aslam
 

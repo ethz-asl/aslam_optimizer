@@ -65,6 +65,18 @@ namespace aslam {
       designVariables.insert(const_cast<RotationQuaternion*>(this));
     }
 
+    void RotationQuaternion::getParametersImplementation(
+        Eigen::MatrixXd& value) const {
+      value = _q;
+    }
+
+    void RotationQuaternion::setParametersImplementation(
+        const Eigen::MatrixXd& value) {
+      _p_q = _q;
+      _q = value;
+      _C = sm::kinematics::quat2r(_q);
+    }
+
   } // namespace backend
 } // namespace aslam
 

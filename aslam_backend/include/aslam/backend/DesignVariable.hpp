@@ -8,6 +8,9 @@
 #include <tr1/unordered_set>
 #endif
 #include <set>
+
+#include <Eigen/Core>
+
 #include <aslam/Exceptions.hpp>
 
 namespace aslam {
@@ -85,6 +88,12 @@ namespace aslam {
       /// \brief Set the column base of this block in the Jacobian matrix
       void setColumnBase(int columnBase);
 
+      /// Returns the content of the design variable
+      void getParameters(Eigen::MatrixXd& value) const;
+
+      /// Sets the content of the design variable
+      void setParameters(const Eigen::MatrixXd& value);
+
     protected:
       /// \brief what is the number of dimensions of the perturbation variable.
       virtual int minimalDimensionsImplementation() const = 0;
@@ -95,6 +104,13 @@ namespace aslam {
       /// \brief Revert the last state update.
       virtual void revertUpdateImplementation() = 0;
 
+      /// Returns the content of the design variable
+      virtual void getParametersImplementation(Eigen::MatrixXd& value)
+        const = 0;
+
+      /// Sets the content of the design variable
+      virtual void setParametersImplementation(const Eigen::MatrixXd& value)
+        = 0;
 
     private:
       /// \brief The block index used in the optimization routine.
