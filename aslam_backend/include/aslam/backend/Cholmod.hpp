@@ -51,7 +51,7 @@ namespace aslam {
 
 #ifndef QRSOLVER_DISABLED
       bool factorize(cholmod_sparse* A, spqr_factor* L,
-        double tol = SPQR_DEFAULT_TOL);
+        double tol = SPQR_DEFAULT_TOL, bool transpose = false);
 #endif
 
       /// \brief free a cholmod_factor

@@ -22,16 +22,6 @@ namespace aslam {
       // virtual void solveConstantAugmentedSystem(double diagonalConditioner, Eigen::VectorXd & outDx);
       // virtual void solveAugmentedSystem(const Eigen::VectorXd & diagonalConditioner, Eigen::VectorXd & outDx);
 
-      /// Compute covariance block from the R matrix of QR (TO BE REMOVED)
-      void computeSigma(Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic>&
-        Sigma, size_t numCols);
-
-      /// Access an element of cholmod_sparse structure (TO BE REMOVED)
-      double getElement(const cholmod_sparse* R, size_t r, size_t c);
-
-      /// Returns the sum of log of the diagonal elements of the R matrix of QR (TO BE REMOVED)
-      double computeSumLogDiagR(size_t numCols);
-
       /// Returns the current Jacobian transpose (note: const should be added)
       const CompressedColumnMatrix<index_t>& getJacobianTranspose();
       /// Returns the current estimated numerical rank
@@ -44,6 +34,8 @@ namespace aslam {
       const CompressedColumnMatrix<index_t>& getR();
       /// Returns the current memory usage in bytes
       size_t getMemoryUsage() const;
+      /// Performs symbolic and numeric analysis
+      void analyzeSystem();
 
       /// Returns the options
       const SparseQRLinearSolverOptions& getOptions() const;

@@ -327,51 +327,58 @@ namespace aslam {
       return false;
     }
 
-
 #ifndef QRSOLVER_DISABLED
     template<typename I>
-    bool Cholmod<I>::factorize(cholmod_sparse* A, spqr_factor* L, double tol)
-    {
-      SM_ASSERT_TRUE(Exception, A != NULL, "Null input");
+    bool Cholmod<I>::factorize(cholmod_sparse* A, spqr_factor* L, double tol,
+        bool transpose) {
+      cholmod_sparse* At = A;
+      if (transpose)
+        At = cholmod_l_transpose(A, 1, &_cholmod) ;
+      SM_ASSERT_TRUE(Exception, At != NULL, "Null input");
       SM_ASSERT_TRUE(Exception, L != NULL, "Null input");
       _cholmod.quick_return_if_not_posdef = 1;
-      int status = SuiteSparseQR_numeric(tol, A, L, &_cholmod);
+      int status = SuiteSparseQR_numeric(tol, At, L, &_cholmod);
       // TODO: check if those ones are the same for cholmod and spqr
       switch (_cholmod.status) {
         case CHOLMOD_NOT_INSTALLED:
           std::cerr << "Cholmod failure: method not installed.";
-          return false;
+          break;
         case CHOLMOD_OUT_OF_MEMORY:
           std::cerr << "Cholmod failure: out of memory.";
-          return false;
+          break;
         case CHOLMOD_TOO_LARGE:
           std::cerr << "Cholmod failure: integer overflow occured.";
-          return false;
+          break;
         case CHOLMOD_INVALID:
           std::cerr << "Cholmod failure: invalid input.";
-          return false;
+          break;
         case CHOLMOD_NOT_POSDEF:
           // TODO(sameeragarwal): These two warnings require more
           // sophisticated handling going forward. For now we will be
           // strict and treat them as failures.
           std::cerr << "Cholmod warning: matrix not positive definite.";
-          return false;
+          break;
         case CHOLMOD_DSMALL:
           std::cerr << "Cholmod warning: D for LDL' or diag(L) or "
                     << "LL' has tiny absolute value.";
-          return false;
+          break;
         case CHOLMOD_OK:
           if (status != 0) {
-            return true;
+            break;
           }
           std::cerr << "Cholmod failure: cholmod_factorize returned zero "
                     << "but cholmod_common::status is CHOLMOD_OK.";
-          return false;
+          break;
         default:
           std::cerr << "Unknown cholmod return code. ";
-          return false;
+          break;
       }
-      return false;
+      if (transpose)
+        CholmodIndexTraits<index_t>::free_sparse(&At, &_cholmod);
+      if (_cholmod.status == CHOLMOD_OK && status == 1)
+        return true;
+      else
+        return false;
     }
 #endif
 

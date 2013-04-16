@@ -92,84 +92,6 @@ namespace aslam {
       return true;
     }
 
-    double SparseQrLinearSystemSolver::getElement(const cholmod_sparse* R,
-        size_t r, size_t c) {
-      SM_ASSERT_LT_DBG(Exception, r, R->nrow, "Index out of bounds");
-      SM_ASSERT_LT_DBG(Exception, c, R->ncol, "Index out of bounds");
-      const SuiteSparse_long* row_ind =
-        reinterpret_cast<const SuiteSparse_long*>(R->i);
-      const SuiteSparse_long* col_ptr =
-        reinterpret_cast<const SuiteSparse_long*>(R->p);
-      const double* values =
-        reinterpret_cast<const double*>(R->x);
-      const SuiteSparse_long* colBegin = &row_ind[col_ptr[c]];
-      const SuiteSparse_long* colEnd = &row_ind[col_ptr[c + 1]];
-      const SuiteSparse_long* result = std::lower_bound(colBegin, colEnd, r);
-      if (result != colEnd && *result == static_cast<SuiteSparse_long>(r))
-        return values[result - &row_ind[0]];
-      else
-        return 0.0;
-    }
-
-    void SparseQrLinearSystemSolver::computeSigma(
-        Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic>& Sigma,
-        size_t numCols) {
-      CompressedColumnMatrix<SuiteSparse_long>& J_transpose =
-        _jacobianBuilder.J_transpose();
-      J_transpose.getView(&_cholmodLhs);
-      SM_ASSERT_LE_DBG(Exception, numCols, _cholmodLhs.ncol,
-        "Invalid number of columns");
-      cholmod_sparse* R;
-      _cholmod.getR(&_cholmodLhs, &R);
-      Sigma = Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic>::
-        Zero(numCols, numCols);
-      const size_t n = R->ncol;
-      for (int l = n - 1, Sigma_l = numCols - 1;
-          l >= (int)(n - numCols); --l, --Sigma_l) {
-        double temp1 = 0;
-        for (int j = l + 1, Sigma_j = Sigma_l + 1; j < (int)n; ++j, ++Sigma_j) {
-          temp1 += getElement(R, l, j) * Sigma(Sigma_j, Sigma_l);
-        }
-        const double R_ll = getElement(R, l, l);
-        Sigma(Sigma_l, Sigma_l) = 1 / R_ll * (1 / R_ll - temp1);
-        for (int i = l - 1, Sigma_i = Sigma_l - 1;
-            i >= int(n - numCols); --i, --Sigma_i) {
-          temp1 = 0;
-          for (int j = i + 1, Sigma_j = Sigma_i + 1;
-              j <= l; ++j, ++Sigma_j) {
-            temp1 += getElement(R, i, j) * Sigma(Sigma_j, Sigma_l);
-          }
-          double temp2 = 0;
-          for (int j = l + 1, Sigma_j = Sigma_l + 1; j < (int)n; ++j,
-              ++Sigma_j) {
-            temp2 += getElement(R, i, j) * Sigma(Sigma_l, Sigma_j);
-          }
-          Sigma(Sigma_i, Sigma_l) = 1 / getElement(R, i, i) *
-            (-temp1 - temp2);
-          Sigma(Sigma_l, Sigma_i) = Sigma(Sigma_i, Sigma_l);
-        }
-      }
-      _cholmod.free(R);
-    }
-
-    double SparseQrLinearSystemSolver::computeSumLogDiagR(size_t numCols) {
-      CompressedColumnMatrix<SuiteSparse_long>& J_transpose =
-        _jacobianBuilder.J_transpose();
-      J_transpose.getView(&_cholmodLhs);
-      SM_ASSERT_LE_DBG(Exception, numCols, _cholmodLhs.ncol,
-        "Invalid number of columns");
-      cholmod_sparse* R;
-      _cholmod.getR(&_cholmodLhs, &R);
-      double sumLogDiagR = 0;
-      for (size_t i = R->ncol - numCols; i < R->ncol; ++i) {
-        const double value = getElement(R, i, i);
-        if (fabs(value) > std::numeric_limits<double>::epsilon())
-          sumLogDiagR += log2(fabs(value));
-      }
-      _cholmod.free(R);
-      return sumLogDiagR;
-    }
-
     const SparseQRLinearSolverOptions&
     SparseQrLinearSystemSolver::getOptions() const {
       return _options;
@@ -189,7 +111,6 @@ namespace aslam {
         SparseQrLinearSystemSolver::getJacobianTranspose() {
       return _jacobianBuilder.J_transpose();
     }
-
 
     SuiteSparse_long SparseQrLinearSystemSolver::getRank() const {
       SM_ASSERT_FALSE(Exception, _factor == NULL,
@@ -227,6 +148,16 @@ namespace aslam {
 
     size_t SparseQrLinearSystemSolver::getMemoryUsage() const {
       return _cholmod.getMemoryUsage();
+    }
+
+    void SparseQrLinearSystemSolver::analyzeSystem() {
+      CompressedColumnMatrix<SuiteSparse_long>& J_transpose =
+        _jacobianBuilder.J_transpose();
+      J_transpose.getView(&_cholmodLhs);
+      if (_factor == NULL)
+        _factor = _cholmod.analyzeQR(&_cholmodLhs);
+      SM_ASSERT_TRUE(Exception, _cholmod.factorize(&_cholmodLhs, _factor,
+        _options.qrTol, true), "QR decomposition failed");
     }
 
   } // namespace backend
