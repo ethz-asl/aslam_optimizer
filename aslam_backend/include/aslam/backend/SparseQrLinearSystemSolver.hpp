@@ -42,6 +42,8 @@ namespace aslam {
       std::vector<index_t> getPermutationVector() const;
       /// Performs QR decomposition and returns the R matrix
       const CompressedColumnMatrix<index_t>& getR();
+      /// Returns the current memory usage in bytes
+      size_t getMemoryUsage() const;
 
       /// Returns the options
       const SparseQRLinearSolverOptions& getOptions() const;

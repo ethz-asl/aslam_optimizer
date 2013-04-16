@@ -499,5 +499,10 @@ namespace aslam {
       return sqrt(norm);
     }
 
+    template<typename I>
+    size_t Cholmod<I>::getMemoryUsage() const {
+      return _cholmod.memory_inuse;
+    }
+
   } // namespace backend
 } // namespace aslam

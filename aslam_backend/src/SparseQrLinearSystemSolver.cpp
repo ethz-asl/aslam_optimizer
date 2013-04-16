@@ -225,5 +225,9 @@ namespace aslam {
       return _R;
     }
 
+    size_t SparseQrLinearSystemSolver::getMemoryUsage() const {
+      return _cholmod.getMemoryUsage();
+    }
+
   } // namespace backend
 } // namespace aslam

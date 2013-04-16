@@ -100,6 +100,9 @@ namespace aslam {
       void getR(cholmod_sparse* A, cholmod_sparse** R);
 #endif
 
+      /// Returns the current memory usage in bytes
+      size_t getMemoryUsage() const;
+
     private:
 
       cholmod_common _cholmod;
