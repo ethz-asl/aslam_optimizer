@@ -18,402 +18,377 @@
 
 
 namespace aslam {
-  namespace backend {
+    namespace backend {
 
 
-    Optimizer2::Optimizer2(const Optimizer2Options& options) :
-      _options(options)
-    {
-      initializeLinearSolver();
-    }
-
-
-    Optimizer2::~Optimizer2()
-    {
-    }
-
-
-    /// \brief Set up to work on the optimization problem.
-    void Optimizer2::setProblem(boost::shared_ptr<OptimizationProblemBase> problem)
-    {
-      _problem = problem;
-    }
-
-
-    void Optimizer2::initializeLinearSolver()
-    {
-      // \todo Add the remaining sparse_block_matrix solvers here.
-      if (_options.linearSolver == "block_cholesky") {
-        _options.verbose && std::cout << "Using the block cholesky linear solver.\n";
-        _solver.reset(new BlockCholeskyLinearSystemSolver());
-      } else if (_options.linearSolver == "sparse_cholesky") {
-        _options.verbose && std::cout << "Using the sparse cholesky linear solver.\n";
-        _solver.reset(new SparseCholeskyLinearSystemSolver());
-      }
-#ifndef QRSOLVER_DISABLED
-      else if (_options.linearSolver == "sparse_qr") {
-        _options.verbose && std::cout << "Using the sparse qr linear solver.\n";
-        _solver.reset(new SparseQrLinearSystemSolver());
-      }
-#endif
-      else if (_options.linearSolver == "dense_qr") {
-        _options.verbose && std::cout << "Using the dense qr linear solver.\n";
-        _solver.reset(new DenseQrLinearSystemSolver());
-      } else {
-        _options.verbose && std::cout << "Unknown linear solver specified: " << _options.linearSolver << ". Using the block cholesky linear solver.\n";
-        _solver.reset(new BlockCholeskyLinearSystemSolver());
-      }
-    }
-
-    /// \brief initialize the optimizer to run on an optimization problem.
-    ///        This should be called before calling optimize()
-    void Optimizer2::initialize()
-    {
-      SM_ASSERT_FALSE(Exception, _problem.get() == NULL, "No optimization problem has been set");
-      _options.verbose && std::cout << "Initializing\n";
-      Timer init("Optimizer2: Initialize Total");
-      _designVariables.clear();
-      _designVariables.reserve(_problem->numDesignVariables());
-      _errorTerms.clear();
-      _errorTerms.reserve(_problem->numErrorTerms());
-      Timer initDv("Optimizer2: Initialize---Design Variables");
-      // Run through all design variables adding active ones to an active list.
-      // std::cout << "dvloop 1\n";
-      for (size_t i = 0; i < _problem->numDesignVariables(); ++i) {
-        DesignVariable* dv = _problem->designVariable(i);
-        if (dv->isActive())
-          _designVariables.push_back(dv);
-      }
-      SM_ASSERT_FALSE(Exception, _designVariables.empty(), "It is illegal to run the optimizer with all marginalized design variables.");
-      // Assign block indices to the design variables.
-      // "blocks" will hold the structure of the left-hand-side of Gauss-Newton
-      int columnBase = 0;
-      // std::cout << "dvloop 2\n";
-      for (size_t i = 0; i < _designVariables.size(); ++i) {
-        _designVariables[i]->setBlockIndex(i);
-        _designVariables[i]->setColumnBase(columnBase);
-        columnBase += _designVariables[i]->minimalDimensions();
-      }
-      initDv.stop();
-      Timer initEt("Optimizer2: Initialize---Error Terms");
-      // Get all of the error terms that work on these design variables.
-      int dim = 0;
-      // std::cout << "eloop 1\n";
-      for (unsigned i = 0; i < _problem->numErrorTerms(); ++i) {
-        ErrorTerm* e = _problem->errorTerm(i);
-        _errorTerms.push_back(e);
-        e->setRowBase(dim);
-        dim += e->dimension();
-      }
-      initEt.stop();
-      SM_ASSERT_FALSE(Exception, _errorTerms.empty(), "It is illegal to run the optimizer with no error terms.");
-      Timer initMx("Optimizer2: Initialize---Matrices");
-      // Set up the block matrix structure.
-      // std::cout << "init structure\n";
-      //      initializeLinearSolver();
-      _solver->initMatrixStructure(_designVariables, _errorTerms, _options.doLevenbergMarquardt);
-      initMx.stop();
-      _options.verbose && std::cout << "Optimization problem initialized with " << _designVariables.size() << " design variables and " << _errorTerms.size() << " error terms\n";
-      // \todo Say how big the problem is.
-      _options.verbose && std::cout << "The Jacobian matrix is " << dim << " x " << columnBase << std::endl;
-
-
-      // \todo initialize the trust region stuff.
-      
-    }
-
-
-    /*
-    // returns true of stop!
-    bool Optimizer2::evaluateStoppingCriterion(int iterations)
-    {
-
-    // as we have analytic Jacobians we can assume the precision to be:
-    double epsilon = std::numeric_limits<double>::epsilon();
-
-    double x_norm = ...;
-
-    // the gradient: is simply the right hand side of GN:
-    double grad_norm = _rhs.norm();
-    double abs_J = fabs(_J);
-
-    // the first condition:
-    bool crit1 = grad_norm < sqrt(epsilon) * (1 + abs_J);
-
-    bool crit2 = _dx.norm() < sqrt(epsilon) * (1 + x_norm);
-
-    bool crit3 = fabs(_J - _p_J) < epsilon * (1 + abs_J);
-
-    bool crit4 = iterations < _options.maxIterations;
-
-    return (crit1 && crit2 && crit3) || crit4;
-
-    }*/
-
-
-
-    SolutionReturnValue Optimizer2::optimize()
-    {
-      Timer timeGn("Optimizer2: build Hessian", true);
-      Timer timeErr("Optimizer2: evaluate error", true);
-      Timer timeSchur("Optimizer2: Schur complement", true);
-      Timer timeBackSub("Optimizer2: Back substitution", true);
-      Timer timeSolve("Optimizer2: Solve linear system", true);
-      // Select the design variables and (eventually) the error terms involved in the optimization.
-      initialize();
-      SolutionReturnValue srv;
-      _p_J = 0.0;
-      _lambda = 0;
-      double gamma = _options.levenbergMarquardtLambdaGamma;
-      double beta = _options.levenbergMarquardtLambdaBeta;
-      int p = _options.levenbergMarquardtLambdaP;
-      double mu = _options.levenbergMarquardtLambdaMuInit;
-      //std::cout << "Evaluate error for the first time\n";
-      // This sets _J
-      timeErr.start();
-      evaluateError(true);
-      timeErr.stop();
-      _p_J = _J;
-      srv.JStart = _p_J;
-      // *** while not done
-      _options.verbose && std::cout << "[" << srv.iterations << ".0]: J: " << _J << std::endl;
-      // Set up the estimation problem.
-      double deltaX = _options.convergenceDeltaX + 1.0;
-      double deltaJ = _options.convergenceDeltaJ + 1.0;
-      bool isLmRegression = false;
-
-      // Loop until convergence
-      while (srv.iterations <  _options.maxIterations &&
-             deltaX > _options.convergenceDeltaX &&
-             fabs(deltaJ) > _options.convergenceDeltaJ) {
-        // *** build: J, U, Vi, Wi, ea, ebi
-        if (! isLmRegression) {
-          timeGn.start();
-          buildGnMatrices(true);
-          timeGn.stop();
+        Optimizer2::Optimizer2(const Optimizer2Options& options) :
+            _options(options)
+        {
+            initializeLinearSolver();
         }
-        timeSolve.start();
-        bool solutionSuccess = false;
-        if (_options.doLevenbergMarquardt) {
-          _solver->setConstantConditioner(_lambda);
-          solutionSuccess = _solver->solveSystem(_dx);
-        } else {
-          solutionSuccess = _solver->solveSystem(_dx);
+
+
+        Optimizer2::~Optimizer2()
+        {
         }
-        timeSolve.stop();
-        if (!solutionSuccess) {
-          _options.verbose && std::cout << "[WARNING] System solution failed\n";
-          isLmRegression = true;
-          // **** if J is a regression
-          revertLastStateUpdate();
-          _lambda *= mu;
-          mu *= 2;
-          srv.failedIterations++;
-        } else {
-          /// Apply the state update. _A, _b, _dx, and _H are passed in implicitly.
-          timeBackSub.start();
-          deltaX = applyStateUpdate();
-          timeBackSub.stop();
-          // This sets _J
-          timeErr.start();
-          evaluateError(true);
-          timeErr.stop();
-          deltaJ = _p_J - _J;
-          if (_options.doLevenbergMarquardt) {
-              // update rho:
-            double rho = getLmRho();
-            // if(_J > _p_J)
-            if (rho <= 0) {
-              isLmRegression = true;
-              // **** if J is a regression
-              revertLastStateUpdate();
-              // ***** Update lambda
-              // _lambda *= 1000;
-              _lambda *= mu;
-              mu *= 2;
-              srv.failedIterations++;
-            } else {
-              isLmRegression = false;
-              // **** otherwise
-              // ***** Update lambda
-              if (_lambda > 1e-16) {
-                // _lambda *= 0.1;
-                double u1 = 1 / gamma;
-                double u2 = 1 - (beta - 1) * pow((2 * rho - 1), p);
-                if (u1 > u2)
-                  _lambda *= u1;
-                else
-                  _lambda *= u2;
-                mu = _options.levenbergMarquardtLambdaBeta;
-              } else
-                _lambda = 1e-15;
+
+
+        /// \brief Set up to work on the optimization problem.
+        void Optimizer2::setProblem(boost::shared_ptr<OptimizationProblemBase> problem)
+        {
+            _problem = problem;
+        }
+
+
+        void Optimizer2::initializeLinearSolver()
+        {
+            // \todo Add the remaining sparse_block_matrix solvers here.
+            if (_options.linearSolver == "block_cholesky") {
+                _options.verbose && std::cout << "Using the block cholesky linear solver.\n";
+                _solver.reset(new BlockCholeskyLinearSystemSolver());
+            } else if (_options.linearSolver == "sparse_cholesky") {
+                _options.verbose && std::cout << "Using the sparse cholesky linear solver.\n";
+                _solver.reset(new SparseCholeskyLinearSystemSolver());
             }
-          }
+#ifndef QRSOLVER_DISABLED
+            else if (_options.linearSolver == "sparse_qr") {
+                _options.verbose && std::cout << "Using the sparse qr linear solver.\n";
+                _solver.reset(new SparseQrLinearSystemSolver());
+            }
+#endif
+            else if (_options.linearSolver == "dense_qr") {
+                _options.verbose && std::cout << "Using the dense qr linear solver.\n";
+                _solver.reset(new DenseQrLinearSystemSolver());
+            } else {
+                _options.verbose && std::cout << "Unknown linear solver specified: " << _options.linearSolver << ". Using the block cholesky linear solver.\n";
+                _solver.reset(new BlockCholeskyLinearSystemSolver());
+            }
         }
-        srv.iterations++;
-        if (_J < _p_J)
-          _p_J = _J;
-        _options.verbose && std::cout << "[" << srv.iterations << "]: J: " << _J << ", dJ: " << deltaJ << ", deltaX: " << deltaX << ", lambda: " << _lambda << std::endl;
-        if (isLmRegression)
-          _options.verbose && std::cout << "Regression in J. Reverting the last update\n";
-      }
-      srv.JFinal = _p_J;
-      srv.lmLambdaFinal = _lambda;
-      srv.dXFinal = deltaX;
-      srv.dJFinal = deltaJ;
-      return srv;
-    }
+
+        /// \brief initialize the optimizer to run on an optimization problem.
+        ///        This should be called before calling optimize()
+        void Optimizer2::initialize()
+        {
+            SM_ASSERT_FALSE(Exception, _problem.get() == NULL, "No optimization problem has been set");
+            _options.verbose && std::cout << "Initializing\n";
+            Timer init("Optimizer2: Initialize Total");
+            _designVariables.clear();
+            _designVariables.reserve(_problem->numDesignVariables());
+            _errorTerms.clear();
+            _errorTerms.reserve(_problem->numErrorTerms());
+            Timer initDv("Optimizer2: Initialize---Design Variables");
+            // Run through all design variables adding active ones to an active list.
+            // std::cout << "dvloop 1\n";
+            for (size_t i = 0; i < _problem->numDesignVariables(); ++i) {
+                DesignVariable* dv = _problem->designVariable(i);
+                if (dv->isActive())
+                    _designVariables.push_back(dv);
+            }
+            SM_ASSERT_FALSE(Exception, _designVariables.empty(), "It is illegal to run the optimizer with all marginalized design variables.");
+            // Assign block indices to the design variables.
+            // "blocks" will hold the structure of the left-hand-side of Gauss-Newton
+            int columnBase = 0;
+            // std::cout << "dvloop 2\n";
+            for (size_t i = 0; i < _designVariables.size(); ++i) {
+                _designVariables[i]->setBlockIndex(i);
+                _designVariables[i]->setColumnBase(columnBase);
+                columnBase += _designVariables[i]->minimalDimensions();
+            }
+            initDv.stop();
+            Timer initEt("Optimizer2: Initialize---Error Terms");
+            // Get all of the error terms that work on these design variables.
+            int dim = 0;
+            // std::cout << "eloop 1\n";
+            for (unsigned i = 0; i < _problem->numErrorTerms(); ++i) {
+                ErrorTerm* e = _problem->errorTerm(i);
+                _errorTerms.push_back(e);
+                e->setRowBase(dim);
+                dim += e->dimension();
+            }
+            initEt.stop();
+            SM_ASSERT_FALSE(Exception, _errorTerms.empty(), "It is illegal to run the optimizer with no error terms.");
+            Timer initMx("Optimizer2: Initialize---Matrices");
+            // Set up the block matrix structure.
+            // std::cout << "init structure\n";
+            //      initializeLinearSolver();
+            _solver->initMatrixStructure(_designVariables, _errorTerms, _options.doLevenbergMarquardt);
+            initMx.stop();
+            _options.verbose && std::cout << "Optimization problem initialized with " << _designVariables.size() << " design variables and " << _errorTerms.size() << " error terms\n";
+            // \todo Say how big the problem is.
+            _options.verbose && std::cout << "The Jacobian matrix is " << dim << " x " << columnBase << std::endl;
 
 
-    DesignVariable* Optimizer2::designVariable(size_t i)
-    {
-      SM_ASSERT_LT_DBG(Exception, i, _designVariables.size(), "index out of bounds");
-      return _designVariables[i];
-    }
-
-
-
-    size_t Optimizer2::numDesignVariables() const
-    {
-      return _designVariables.size();
-    }
-
-
-    double Optimizer2::applyStateUpdate()
-    {
-      // Apply the update to the dense state.
-      int startIdx = 0;
-      for (size_t i = 0; i < numDesignVariables(); i++) {
-        DesignVariable* d = _designVariables[i];
-        const int dbd = d->minimalDimensions();
-        Eigen::VectorXd dxS = _dx.segment(startIdx, dbd);
-        dxS *= d->scaling();
-        d->update(&dxS[0], dbd);
-        startIdx += dbd;
-      }
-      // Track the maximum delta
-      // \todo: should this be some other metric?
-      double deltaX = _dx.array().abs().maxCoeff();
-      return deltaX;
-    }
-
-
-
-
-
-    void Optimizer2::revertLastStateUpdate()
-    {
-      for (size_t i = 0; i < _designVariables.size(); i++) {
-        _designVariables[i]->revertUpdate();
-      }
-    }
-
-
-    Optimizer2Options& Optimizer2::options()
-    {
-      return _options;
-    }
-
-
-    double Optimizer2::evaluateError(bool useMEstimator)
-    {
-      SM_ASSERT_TRUE(Exception, _solver.get() != NULL, "The solver is null");
-      _J = _solver->evaluateError(_options.nThreads, useMEstimator);
-      return _J;
-    }
-
-    void Optimizer2::buildGnMatrices(bool useMEstimator)
-    {
-      SM_ASSERT_TRUE(Exception, _solver.get() != NULL, "The solver is null");
-      _solver->buildSystem(_options.nThreads, useMEstimator);
-    }
-
-
-
-    /// \brief return the reduced system dx
-    const Eigen::VectorXd& Optimizer2::dx() const
-    {
-      return _dx;
-    }
-
-    /// The value of the objective function.
-    double Optimizer2::J() const
-    {
-      return _J;
-    }
-
-    void Optimizer2::printTiming() const
-    {
-      sm::timing::Timing::print(std::cout);
-    }
-
-
-
-
-
-
-
-    void Optimizer2::checkProblemSetup()
-    {
-      // Check that all error terms are hooked up to design variables.
-    }
-
-
-
-    void Optimizer2::computeDiagonalCovariances(SparseBlockMatrix& outP, double lambda)
-    {
-      std::vector<std::pair<int, int> > blockIndices;
-      for (size_t i = 0; i < _designVariables.size(); ++i) {
-        blockIndices.push_back(std::make_pair(i, i));
-      }
-      computeCovarianceBlocks(blockIndices, outP, lambda);
-    }
-
-    void Optimizer2::computeCovarianceBlocks(const std::vector<std::pair<int, int> > & blockIndices, SparseBlockMatrix& outP, double lambda)
-    {
-      BlockCholeskyLinearSystemSolver* solver = dynamic_cast<BlockCholeskyLinearSystemSolver*>(_solver.get());
-      boost::shared_ptr<BlockCholeskyLinearSystemSolver> solver_sp;
-      if (! solver || !_options.doLevenbergMarquardt) {
-        _options.verbose && std::cout << "Creating a new block Cholesky solver to retrieve the covariance.\n";
-        /// \todo Figure out properly why I have to create a new linear solver here.
-        solver_sp.reset(new BlockCholeskyLinearSystemSolver());
-        // True here for creating the diagonal conditioning.
-        solver->initMatrixStructure(_designVariables, _errorTerms, true);
-      }
-      _options.verbose && std::cout << "Setting the diagonal conditioner to: " << lambda << ".\n";
-      solver->setConstantConditioner(lambda);
-      solver->buildSystem(_options.nThreads, false);
-      solver->computeCovarianceBlocks(blockIndices, outP);
-    }
-
-
-    void Optimizer2::computeCovariances(SparseBlockMatrix& outP, double lambda)
-    {
-      std::vector<std::pair<int, int> > blockIndices;
-      for (size_t i = 0; i < _designVariables.size(); ++i) {
-        for (size_t j = i; j < _designVariables.size(); ++j) {
-          blockIndices.push_back(std::make_pair(i, j));
+            // \todo initialize the trust region stuff.
+      
         }
-      }
-      computeCovarianceBlocks(blockIndices, outP, lambda);
-    }
 
-    void Optimizer2::computeHessian(SparseBlockMatrix& outH, double lambda)
-    {
-      BlockCholeskyLinearSystemSolver* solver = dynamic_cast<BlockCholeskyLinearSystemSolver*>(_solver.get());
-      boost::shared_ptr<BlockCholeskyLinearSystemSolver> solver_sp;
-      if (! solver || !_options.doLevenbergMarquardt) {
-        _options.verbose && std::cout << "Creating a new block Cholesky solver to retrieve the covariance.\n";
-        /// \todo Figure out properly why I have to create a new linear solver here.
-        solver_sp.reset(new BlockCholeskyLinearSystemSolver());
-        // True here for creating the diagonal conditioning.
-        solver->initMatrixStructure(_designVariables, _errorTerms, true);
-      }
-      _options.verbose && std::cout << "Setting the diagonal conditioner to: " << lambda << ".\n";
-      solver->setConstantConditioner(lambda);
-      solver->buildSystem(_options.nThreads, false);
-      solver->copyHessian(outH);
-    }
 
-  } // namespace backend
-} // namespace aslam
+        /*
+        // returns true of stop!
+        bool Optimizer2::evaluateStoppingCriterion(int iterations)
+        {
+
+        // as we have analytic Jacobians we can assume the precision to be:
+        double epsilon = std::numeric_limits<double>::epsilon();
+
+        double x_norm = ...;
+
+        // the gradient: is simply the right hand side of GN:
+        double grad_norm = _rhs.norm();
+        double abs_J = fabs(_J);
+
+        // the first condition:
+        bool crit1 = grad_norm < sqrt(epsilon) * (1 + abs_J);
+
+        bool crit2 = _dx.norm() < sqrt(epsilon) * (1 + x_norm);
+
+        bool crit3 = fabs(_J - _p_J) < epsilon * (1 + abs_J);
+
+        bool crit4 = iterations < _options.maxIterations;
+
+        return (crit1 && crit2 && crit3) || crit4;
+
+        }*/
+
+
+
+        SolutionReturnValue Optimizer2::optimize()
+        {
+            Timer timeGn("Optimizer2: build Hessian", true);
+            Timer timeErr("Optimizer2: evaluate error", true);
+            Timer timeSchur("Optimizer2: Schur complement", true);
+            Timer timeBackSub("Optimizer2: Back substitution", true);
+            Timer timeSolve("Optimizer2: Solve linear system", true);
+            // Select the design variables and (eventually) the error terms involved in the optimization.
+            initialize();
+            SolutionReturnValue srv;
+            _p_J = 0.0;
+            
+            //std::cout << "Evaluate error for the first time\n";
+            // This sets _J
+            timeErr.start();
+            evaluateError(true);
+            timeErr.stop();
+            _p_J = _J;
+            srv.JStart = _p_J;
+            // *** while not done
+            _options.verbose && std::cout << "[" << srv.iterations << ".0]: J: " << _J << std::endl;
+            // Set up the estimation problem.
+            double deltaX = _options.convergenceDeltaX + 1.0;
+            double deltaJ = _options.convergenceDeltaJ + 1.0;
+            bool previousIterationFailed = false;
+            bool linearSolverFailure = false;
+
+            _trustRegionPolicy->setSolver(_solver);
+            _trustRegionPolicy->optimizationStarting();
+
+            // Loop until convergence
+            while (srv.iterations <  _options.maxIterations &&
+                   deltaX > _options.convergenceDeltaX &&
+                   fabs(deltaJ) > _options.convergenceDeltaJ &&
+                   !linearSolverFailure) {
+        
+                timeSolve.start();
+                bool solutionSuccess = _trustRegionPolicy->solveSystem(_dx, previousIterationFailed);
+                timeSolve.stop();
+
+        
+                if (!solutionSuccess) {
+                    _options.verbose && std::cout << "[WARNING] System solution failed\n";
+                    previousIterationFailed = true;
+                    linearSolverFailure = true;
+                    srv.failedIterations++;
+                } else {
+                    /// Apply the state update. _A, _b, _dx, and _H are passed in implicitly.
+                    timeBackSub.start();
+                    deltaX = applyStateUpdate();
+                    timeBackSub.stop();
+                    // This sets _J
+                    timeErr.start();
+                    evaluateError(true);
+                    timeErr.stop();
+                    deltaJ = _p_J - _J;
+                    // This was a regression.
+                    if( _trustRegionPolicy->revertOnFailure() )
+                    {
+                        if(deltaJ < 0.0)
+                        {
+                            revertLastStateUpdate();
+                            srv.failedIterations++;
+                        }
+                        else
+                        {
+                            _p_J = _J;
+                        }
+
+                    }
+                    else
+                    {
+                        _p_J = _J;
+                    }
+                    srv.iterations++;
+
+                    _options.verbose && std::cout << "[" << srv.iterations << "]: J: " << _J << ", dJ: " << deltaJ << ", deltaX: " << deltaX << ", ";
+                    _options.verbose && _trustRegionPolicy->printState(std::cout);
+                    _options.verbose && std::cout << std::endl;
+                }
+            } // if the linear solver failed / else
+            srv.JFinal = _p_J;
+            srv.dXFinal = deltaX;
+            srv.dJFinal = deltaJ;
+            return srv;
+        }
+
+
+            DesignVariable* Optimizer2::designVariable(size_t i)
+            {
+                SM_ASSERT_LT_DBG(Exception, i, _designVariables.size(), "index out of bounds");
+                return _designVariables[i];
+            }
+
+
+
+            size_t Optimizer2::numDesignVariables() const
+            {
+                return _designVariables.size();
+            }
+
+
+            double Optimizer2::applyStateUpdate()
+            {
+                // Apply the update to the dense state.
+                int startIdx = 0;
+                for (size_t i = 0; i < numDesignVariables(); i++) {
+                    DesignVariable* d = _designVariables[i];
+                    const int dbd = d->minimalDimensions();
+                    Eigen::VectorXd dxS = _dx.segment(startIdx, dbd);
+                    dxS *= d->scaling();
+                    d->update(&dxS[0], dbd);
+                    startIdx += dbd;
+                }
+                // Track the maximum delta
+                // \todo: should this be some other metric?
+                double deltaX = _dx.array().abs().maxCoeff();
+                return deltaX;
+            }
+
+
+
+
+
+            void Optimizer2::revertLastStateUpdate()
+            {
+                for (size_t i = 0; i < _designVariables.size(); i++) {
+                    _designVariables[i]->revertUpdate();
+                }
+            }
+
+
+            Optimizer2Options& Optimizer2::options()
+            {
+                return _options;
+            }
+
+
+            double Optimizer2::evaluateError(bool useMEstimator)
+            {
+                SM_ASSERT_TRUE(Exception, _solver.get() != NULL, "The solver is null");
+                _J = _solver->evaluateError(_options.nThreads, useMEstimator);
+                return _J;
+            }
+
+            void Optimizer2::buildGnMatrices(bool useMEstimator)
+            {
+                SM_ASSERT_TRUE(Exception, _solver.get() != NULL, "The solver is null");
+                _solver->buildSystem(_options.nThreads, useMEstimator);
+            }
+
+
+
+            /// \brief return the reduced system dx
+            const Eigen::VectorXd& Optimizer2::dx() const
+            {
+                return _dx;
+            }
+
+            /// The value of the objective function.
+            double Optimizer2::J() const
+            {
+                return _J;
+            }
+
+            void Optimizer2::printTiming() const
+            {
+                sm::timing::Timing::print(std::cout);
+            }
+
+
+
+
+
+
+
+            void Optimizer2::checkProblemSetup()
+            {
+                // Check that all error terms are hooked up to design variables.
+            }
+
+
+
+            void Optimizer2::computeDiagonalCovariances(SparseBlockMatrix& outP, double lambda)
+            {
+                std::vector<std::pair<int, int> > blockIndices;
+                for (size_t i = 0; i < _designVariables.size(); ++i) {
+                    blockIndices.push_back(std::make_pair(i, i));
+                }
+                computeCovarianceBlocks(blockIndices, outP, lambda);
+            }
+
+            void Optimizer2::computeCovarianceBlocks(const std::vector<std::pair<int, int> > & blockIndices, SparseBlockMatrix& outP, double lambda)
+            {
+                BlockCholeskyLinearSystemSolver* solver = dynamic_cast<BlockCholeskyLinearSystemSolver*>(_solver.get());
+                boost::shared_ptr<BlockCholeskyLinearSystemSolver> solver_sp;
+                if (! solver || !_options.doLevenbergMarquardt) {
+                    _options.verbose && std::cout << "Creating a new block Cholesky solver to retrieve the covariance.\n";
+                    /// \todo Figure out properly why I have to create a new linear solver here.
+                    solver_sp.reset(new BlockCholeskyLinearSystemSolver());
+                    // True here for creating the diagonal conditioning.
+                    solver->initMatrixStructure(_designVariables, _errorTerms, true);
+                }
+                _options.verbose && std::cout << "Setting the diagonal conditioner to: " << lambda << ".\n";
+                solver->setConstantConditioner(lambda);
+                solver->buildSystem(_options.nThreads, false);
+                solver->computeCovarianceBlocks(blockIndices, outP);
+            }
+
+
+            void Optimizer2::computeCovariances(SparseBlockMatrix& outP, double lambda)
+            {
+                std::vector<std::pair<int, int> > blockIndices;
+                for (size_t i = 0; i < _designVariables.size(); ++i) {
+                    for (size_t j = i; j < _designVariables.size(); ++j) {
+                        blockIndices.push_back(std::make_pair(i, j));
+                    }
+                }
+                computeCovarianceBlocks(blockIndices, outP, lambda);
+            }
+
+            void Optimizer2::computeHessian(SparseBlockMatrix& outH, double lambda)
+            {
+                BlockCholeskyLinearSystemSolver* solver = dynamic_cast<BlockCholeskyLinearSystemSolver*>(_solver.get());
+                boost::shared_ptr<BlockCholeskyLinearSystemSolver> solver_sp;
+                if (! solver || !_options.doLevenbergMarquardt) {
+                    _options.verbose && std::cout << "Creating a new block Cholesky solver to retrieve the covariance.\n";
+                    /// \todo Figure out properly why I have to create a new linear solver here.
+                    solver_sp.reset(new BlockCholeskyLinearSystemSolver());
+                    // True here for creating the diagonal conditioning.
+                    solver->initMatrixStructure(_designVariables, _errorTerms, true);
+                }
+                _options.verbose && std::cout << "Setting the diagonal conditioner to: " << lambda << ".\n";
+                solver->setConstantConditioner(lambda);
+                solver->buildSystem(_options.nThreads, false);
+                solver->copyHessian(outH);
+            }
+
+        } // namespace backend
+    } // namespace aslam
