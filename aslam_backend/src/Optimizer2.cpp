@@ -17,6 +17,7 @@
 #include <aslam/backend/DenseQrLinearSystemSolver.hpp>
 
 
+
 namespace aslam {
     namespace backend {
 
@@ -25,6 +26,7 @@ namespace aslam {
             _options(options)
         {
             initializeLinearSolver();
+            initializeTrustRegionPolicy();
         }
 
 
@@ -37,6 +39,17 @@ namespace aslam {
         void Optimizer2::setProblem(boost::shared_ptr<OptimizationProblemBase> problem)
         {
             _problem = problem;
+        }
+        
+        void Optimizer2::initializeTrustRegionPolicy()
+        {
+            if(_options.trustRegionPolicy == "LevenbergMarquardt") {
+                _trustRegionPolicy.reset(new LevenbergMarquardtTrustRegionPolicy());
+            } else if(_options.trustRegionPolicy == "DogLeg") {
+                _trustRegionPolicy.reset(new DogLegTrustRegionPolicy());
+            } else {
+                _trustRegionPolicy.reset(new GaussNewtonTrustRegionPolicy());
+            }
         }
 
 
@@ -179,7 +192,8 @@ namespace aslam {
             bool previousIterationFailed = false;
             bool linearSolverFailure = false;
 
-            _trustRegionPolicy->setSolver(_solver);
+            SM_ASSERT_TRUE(Exception, _solver.get() != NULL, "The solver is null");
+            _trustRegionPolicy->setSolver(_solver, _options);
             _trustRegionPolicy->optimizationStarting();
 
             // Loop until convergence
@@ -189,7 +203,7 @@ namespace aslam {
                    !linearSolverFailure) {
         
                 timeSolve.start();
-                bool solutionSuccess = _trustRegionPolicy->solveSystem(_dx, previousIterationFailed);
+                bool solutionSuccess = _trustRegionPolicy->solveSystem(_J, previousIterationFailed, _dx);
                 timeSolve.stop();
 
         
@@ -297,13 +311,6 @@ namespace aslam {
                 _J = _solver->evaluateError(_options.nThreads, useMEstimator);
                 return _J;
             }
-
-            void Optimizer2::buildGnMatrices(bool useMEstimator)
-            {
-                SM_ASSERT_TRUE(Exception, _solver.get() != NULL, "The solver is null");
-                _solver->buildSystem(_options.nThreads, useMEstimator);
-            }
-
 
 
             /// \brief return the reduced system dx

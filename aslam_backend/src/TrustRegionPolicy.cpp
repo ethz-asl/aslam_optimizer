@@ -14,9 +14,10 @@ namespace aslam {
         }
 
         /// \brief set the linear system solver
-        void TrustRegionPolicy::setSolver(boost::shared_ptr<LinearSystemSolver> solver)
+        void TrustRegionPolicy::setSolver(boost::shared_ptr<LinearSystemSolver> solver, Optimizer2Options options)
         {
             _solver = solver;
+            _options = options;
         }
             
         bool TrustRegionPolicy::revertOnFailure()

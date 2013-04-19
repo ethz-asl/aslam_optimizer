@@ -1,5 +1,5 @@
-#ifndef ASLAM_BACKEND_GAUSS_NEWTON_TRUST_REGION_POLICY_HPP
-#define ASLAM_BACKEND_GAUSS_NEWTON_TRUST_REGION_POLICY_HPP
+#ifndef ASLAM_BACKEND_LEVENBERG_MARQUARDT_TRUST_REGION_POLICY_HPP
+#define ASLAM_BACKEND_LEVENBERG_MARQUARDT_TRUST_REGION_POLICY_HPP
 
 #include <aslam/backend/TrustRegionPolicy.hpp>
 #include <aslam/backend/LinearSystemSolver.hpp>
@@ -8,11 +8,11 @@
 namespace aslam {
     namespace backend {
         
-        class GaussNewtonTrustRegionPolicy : public TrustRegionPolicy
+        class LevenbergMarquardtTrustRegionPolicy : public TrustRegionPolicy
         {
         public:
-            GaussNewtonTrustRegionPolicy();
-            virtual ~GaussNewtonTrustRegionPolicy();
+            LevenbergMarquardtTrustRegionPolicy();
+            virtual ~LevenbergMarquardtTrustRegionPolicy();
             
             /// \brief called by the optimizer when an optimization is starting
             virtual void optimizationStarting();
@@ -25,7 +25,20 @@ namespace aslam {
             
             /// \brief print the current state to a stream (no newlines).
             virtual std::ostream & printState(std::ostream & out);
+            
+        private:
+            double _lambda;
         
+            double getLmRho();
+            
+            double _J;
+            double _p_J;
+            double _gamma;
+            double _beta;
+            int _p;
+            double _mu;
+            
+            Eigen::VectorXd _dx;
             
         };
         
@@ -33,4 +46,4 @@ namespace aslam {
 } // namespace aslam
 
 
-#endif /* ASLAM_BACKEND_GAUSS_NEWTON_TRUST_REGION_POLICY_HPP */
+#endif /* ASLAM_BACKEND_LEVENBERG_MARQUARDT_TRUST_REGION_POLICY_HPP */

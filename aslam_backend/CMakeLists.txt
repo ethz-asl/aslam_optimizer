@@ -76,6 +76,8 @@ rosbuild_add_library(${PROJECT_NAME}
   src/DenseQRLinearSolverOptions.cpp
   src/TrustRegionPolicy.cpp
   src/GaussNewtonTrustRegionPolicy.cpp
+  src/LevenbergMarquardtTrustRegionPolicy.cpp
+  src/DogLegTrustRegionPolicy.cpp
   )
 
 target_link_libraries(${PROJECT_NAME} ${CHOLMOD_LIBRARIES} ${EXTRA_LIBS}  ${CSPARSE_LIBRARY})

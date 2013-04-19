@@ -14,6 +14,9 @@
 #include <boost/thread.hpp>
 #include <sparse_block_matrix/linear_solver.h>
 #include <aslam/backend/TrustRegionPolicy.hpp>
+#include <aslam/backend/LevenbergMarquardtTrustRegionPolicy.hpp>
+#include <aslam/backend/GaussNewtonTrustRegionPolicy.hpp>
+#include <aslam/backend/DogLegTrustRegionPolicy.hpp>
 
 namespace aslam {
   namespace backend {
@@ -61,6 +64,8 @@ namespace aslam {
 
       /// \brief initialize the linear solver specified in the optimizer options.
       void initializeLinearSolver();
+      
+      void initializeTrustRegionPolicy();
 
       /// \brief Run the optimization
       SolutionReturnValue optimize();

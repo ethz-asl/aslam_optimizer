@@ -64,7 +64,7 @@ namespace aslam {
       size_t JCols() const;
       
       // helper function for dog leg implementation / steepest descent solution
-      virtual double rhsJtJrhs();
+      virtual double rhsJtJrhs() = 0;
 
     protected:
       /// \brief initialized the matrix structure for the problem with these error terms and errors.

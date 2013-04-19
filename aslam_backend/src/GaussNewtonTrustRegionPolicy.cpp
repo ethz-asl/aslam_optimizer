@@ -4,6 +4,10 @@ namespace aslam {
     namespace backend {
         
         
+        GaussNewtonTrustRegionPolicy::GaussNewtonTrustRegionPolicy()  {}
+        GaussNewtonTrustRegionPolicy::~GaussNewtonTrustRegionPolicy() {}
+        
+        
         /// \brief called by the optimizer when an optimization is starting
         void GaussNewtonTrustRegionPolicy::optimizationStarting()
         {
@@ -11,13 +15,13 @@ namespace aslam {
         }
         
         // Returns true if the solution was successful
-        bool GaussNewtonTrustRegionPolicy::solveSystem(Eigen::VectorXd& outDx, bool previousIterationFailed)
+        bool GaussNewtonTrustRegionPolicy::solveSystem(double J, bool previousIterationFailed, Eigen::VectorXd& outDx)
         {
             return _solver->solveSystem(outDx);
         }
         
         /// \brief print the current state to a stream (no newlines).
-        std::ostream & printState(std::ostream & out)
+        std::ostream & GaussNewtonTrustRegionPolicy::printState(std::ostream & out)
         {
             
         }

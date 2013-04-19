@@ -3,6 +3,9 @@
 
 #include <aslam/backend/LinearSystemSolver.hpp>
 #include <boost/shared_ptr.hpp>
+#include "Optimizer2Options.hpp"
+#include <sm/eigen/assert_macros.hpp>
+#include <aslam/Exceptions.hpp>
 
 namespace aslam {
     namespace backend {
@@ -17,13 +20,13 @@ namespace aslam {
             virtual void optimizationStarting() = 0;
             
             // Returns true if the solution was successful
-            virtual bool solveSystem(Eigen::VectorXd& outDx, bool previousIterationFailed) = 0;
+            virtual bool solveSystem(double J, bool previousIterationFailed, Eigen::VectorXd& outDx) = 0;
 
             /// \brief get the linear system solver
             boost::shared_ptr<LinearSystemSolver> getSolver();
 
             /// \brief set the linear system solver
-            virtual void setSolver(boost::shared_ptr<LinearSystemSolver> solver) = 0;
+            virtual void setSolver(boost::shared_ptr<LinearSystemSolver> solver, Optimizer2Options options);
             
             /// \brief should the optimizer revert on failure? You should probably return true
             virtual bool revertOnFailure();
@@ -33,6 +36,8 @@ namespace aslam {
         protected:
             /// \brief the linear system solver.
             boost::shared_ptr<LinearSystemSolver> _solver;
+            
+            Optimizer2Options _options;
                 
         };
 

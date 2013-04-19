@@ -20,8 +20,9 @@ namespace aslam {
         verbose(false),
         linearSolverMaximumFails(0),
         linearSolver("block_cholesky"),
+        trustRegionPolicy("LevenbergMarquardt"),
         nThreads(4)
-
+        // LevenbergMarquardt, DogLeg, GaussNewton
 
       {};
 
@@ -60,6 +61,8 @@ namespace aslam {
 
       /// \brief which linear solver should we use. Options are currently "block_cholesky", "sparse_cholesky", "sparse_qr".
       std::string linearSolver;
+        
+      std::string trustRegionPolicy;
 
       /// \brief The number of threads to use
       int nThreads;
