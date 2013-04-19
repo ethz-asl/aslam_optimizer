@@ -30,7 +30,9 @@ namespace aslam {
 
             /// \brief should the optimizer revert on failure?
             virtual bool revertOnFailure() = 0;
-            
+
+            /// \brief print the current state to a stream (no newlines).
+            virtual std::ostream & printState(std::ostream & out) = 0;
         protected:
             /// \brief the linear system solver.
             boost::shared_ptr<LinearSystemSolver> _solver;
