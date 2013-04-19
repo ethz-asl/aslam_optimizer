@@ -215,12 +215,13 @@ namespace aslam {
                         {
                             revertLastStateUpdate();
                             srv.failedIterations++;
+                            previousIterationFailed = true;
                         }
                         else
                         {
                             _p_J = _J;
+                            previousIterationFailed = false;
                         }
-
                     }
                     else
                     {
