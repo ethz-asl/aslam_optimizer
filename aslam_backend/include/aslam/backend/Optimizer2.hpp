@@ -13,6 +13,7 @@
 #include <sm/timing/Timer.hpp>
 #include <boost/thread.hpp>
 #include <sparse_block_matrix/linear_solver.h>
+#include <aslam/backend/TrustRegionPolicy.hpp>
 
 namespace aslam {
   namespace backend {
@@ -119,15 +120,6 @@ namespace aslam {
       /// \brief Apply a state update.
       double applyStateUpdate();
 
-      /// \brief Returns Rho for the LM lambda update
-      double getLmRho();
-
-      /// \brief Set the initial lambda by looking at the entries of the Hessian matrix.
-      void setInitialLambda();
-
-      /// \brief The current value of LM lambda.
-      double _lambda;
-
       /// \brief The dense update vector.
       Eigen::VectorXd _dx;
 
@@ -138,6 +130,8 @@ namespace aslam {
       double _p_J;
 
       boost::shared_ptr<LinearSystemSolver> _solver;
+
+      boost::shared_ptr<TrustRegionPolicy> _trustRegionPolicy;
 
       /// \brief The current optimization problem.
       boost::shared_ptr<OptimizationProblemBase> _problem;
