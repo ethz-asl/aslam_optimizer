@@ -160,5 +160,14 @@ namespace aslam {
         _options.qrTol, true), "QR decomposition failed");
     }
 
+    double SparseQrLinearSystemSolver::rhsJtJrhs() {
+        CompressedColumnMatrix<SuiteSparse_long>& J_transpose = _jacobianBuilder.J_transpose();
+        Eigen::VectorXd Jrhs;
+        J_transpose.leftMultiply(_rhs, Jrhs);
+        return Jrhs.squaredNorm();
+    }
+      
+      
+      
   } // namespace backend
 } // namespace aslam

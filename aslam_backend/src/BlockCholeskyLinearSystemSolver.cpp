@@ -124,6 +124,15 @@ namespace aslam {
         const BlockCholeskyLinearSolverOptions& options) {
       _options = options;
     }
+      
+      
+      
+    double BlockCholeskyLinearSystemSolver::rhsJtJrhs() {
+        Eigen::VectorXd JtJrhs;
+        _H.rightMultiply(_rhs, JtJrhs);
+        return _rhs.dot(JtJrhs);
+    }
+      
 
   } // namespace backend
 } // namespace aslam

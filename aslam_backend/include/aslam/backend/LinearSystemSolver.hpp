@@ -62,6 +62,9 @@ namespace aslam {
 
       /// \brief the number of columns in the Jacobian matrix
       size_t JCols() const;
+      
+      // helper function for dog leg implementation / steepest descent solution
+      virtual double rhsJtJrhs();
 
     protected:
       /// \brief initialized the matrix structure for the problem with these error terms and errors.

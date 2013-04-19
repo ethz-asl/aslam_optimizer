@@ -43,6 +43,9 @@ namespace aslam {
       /// Sets the options
       void setOptions(const BlockCholeskyLinearSolverOptions& options);
 
+      /// Helper Function for DogLeg implementation; returns parts required for the steepest descent solution
+      double rhsJtJrhs();
+        
     private:
 
       /// \brief initialized the matrix structure for the problem with these error terms and errors.

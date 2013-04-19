@@ -30,6 +30,9 @@ namespace aslam {
       /// Sets the options
       void setOptions(const DenseQRLinearSolverOptions& options);
 
+      /// Helper Function for DogLeg implementation; returns parts required for the steepest descent solution
+      double rhsJtJrhs();
+    
     private:
       /// \brief a method for a thread to evaluate Jacobians
       void evaluateJacobians(size_t threadId, size_t startIdx, size_t endIdx, bool useMEstimator);

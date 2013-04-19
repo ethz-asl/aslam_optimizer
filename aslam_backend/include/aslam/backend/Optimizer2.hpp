@@ -63,6 +63,7 @@ namespace aslam {
 
       /// \brief Run the optimization
       SolutionReturnValue optimize();
+      SolutionReturnValue optimizeDogLeg();
 
       /// \brief Get the optimizer options.
       Optimizer2Options& options();
