@@ -143,6 +143,14 @@ namespace aslam {
       return _J_transpose;
     }
 
+    /// \brief Get a const version of the compressed column matrix.
+    template<typename I>
+    const CompressedColumnMatrix<I> & CompressedColumnJacobianTransposeBuilder<I>::J_transpose() const
+    {
+      return _J_transpose;
+    }
+
+
     // const Eigen::VectorXd & CompressedColumnJacobianTransposeBuilder::e() const
     // {
     //     return _e;

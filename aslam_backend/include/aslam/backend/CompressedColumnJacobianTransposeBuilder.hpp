@@ -36,7 +36,10 @@ namespace aslam {
       virtual cholmod_sparse getJacobianTransposeView();
 
       /// \brief Get a const version of the compressed column matrix.
-      CompressedColumnMatrix<index_t>& J_transpose();
+      CompressedColumnMatrix<index_t> & J_transpose();
+
+      /// \brief Get a const version of the compressed column matrix.
+        const CompressedColumnMatrix<index_t> & J_transpose() const;
 
     private:
       /// \brief a function to be run by a single thread.
