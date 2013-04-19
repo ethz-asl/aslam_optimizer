@@ -19,7 +19,10 @@ namespace aslam {
             _solver = solver;
         }
             
-
+        bool TrustRegionPolicy::revertOnFailure()
+        {
+            return true;
+        }
 
     } // namespace backend
 } // namespace aslam

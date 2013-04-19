@@ -13,8 +13,11 @@ namespace aslam {
             TrustRegionPolicy();
             virtual ~TrustRegionPolicy();
             
+            /// \brief called by the optimizer when an optimization is starting
+            virtual void optimizationStarting() = 0;
+            
             // Returns true if the solution was successful
-            virtual bool solveSystem(Eigen::VectorXd& outDx) = 0;
+            virtual bool solveSystem(Eigen::VectorXd& outDx, bool previousIterationFailed) = 0;
 
             /// \brief get the linear system solver
             boost::shared_ptr<LinearSystemSolver> getSolver();
@@ -22,14 +25,8 @@ namespace aslam {
             /// \brief set the linear system solver
             virtual void setSolver(boost::shared_ptr<LinearSystemSolver> solver) = 0;
             
-            /// \brief called by the optimizer if the solution was successful
-            virtual void solutionWasSuccessful() = 0;
-
-            /// \brief called by the optimizer if the solution failed.
-            virtual void solutionFailed() = 0;
-
-            /// \brief should the optimizer revert on failure?
-            virtual bool revertOnFailure() = 0;
+            /// \brief should the optimizer revert on failure? You should probably return true
+            virtual bool revertOnFailure();
 
             /// \brief print the current state to a stream (no newlines).
             virtual std::ostream & printState(std::ostream & out) = 0;

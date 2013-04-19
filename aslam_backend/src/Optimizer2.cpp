@@ -116,45 +116,12 @@ namespace aslam {
       _options.verbose && std::cout << "Optimization problem initialized with " << _designVariables.size() << " design variables and " << _errorTerms.size() << " error terms\n";
       // \todo Say how big the problem is.
       _options.verbose && std::cout << "The Jacobian matrix is " << dim << " x " << columnBase << std::endl;
-    }
-
-    double Optimizer2::getLmRho()
-    {
-      double d1 = _p_J - _J;    // update cost delta
-      // L(0) - L(h):
-      double d2 = _dx.transpose() * (_lambda * _dx + _solver->rhs());
-      return d1 / d2;
-    }
 
 
-    void Optimizer2::setInitialLambda()
-    {
-      // check if _lambda already set:
-      if (_lambda != 0) // if set return
-        return;
-      // \todo Reenable this.
-      //if(_options.levenbergMarquardtEstimateLambdaScale <= 0 )
-      {
-        _lambda = _options.levenbergMarquardtLambdaInit;
-      }
-      // else
-      // {
-      //     double maximum = 0;
-      //     // find the maximum diagonal element in H ans scale by LambdaScale:
-      //     // loop the diagonal blocks:
-      //     for(int i = 0; i < _H.bRows(); i++) {
-      //         const Eigen::MatrixXd* H = _H.block(i,i,false); // do no allocate if missing!
-      //         if (H) {
-      //             for( int j = 0; j < H->rows(); j++) {
-      //                 if (fabs((*H)(j,j)) > maximum)
-      //                     maximum = fabs((*H)(i,j));
-      //             }
-      //         }
-      //     }
-      //     _lambda = maximum * _options.levenbergMarquardtEstimateLambdaScale;
-      //     _options.verbose && std::cout << "Initialised Lambda: " << _lambda << std::endl;
-      // }
+      // \todo initialize the trust region stuff.
+      
     }
+
 
     /*
     // returns true of stop!
@@ -214,7 +181,7 @@ namespace aslam {
       double deltaX = _options.convergenceDeltaX + 1.0;
       double deltaJ = _options.convergenceDeltaJ + 1.0;
       bool isLmRegression = false;
-      setInitialLambda();
+
       // Loop until convergence
       while (srv.iterations <  _options.maxIterations &&
              deltaX > _options.convergenceDeltaX &&
