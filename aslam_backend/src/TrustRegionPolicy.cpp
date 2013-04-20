@@ -3,7 +3,7 @@
 namespace aslam {
     namespace backend {
         
-        TrustRegionPolicy::TrustRegionPolicy(){}
+        TrustRegionPolicy::TrustRegionPolicy(Optimizer2Options & options) : _options(options){}
         TrustRegionPolicy::~TrustRegionPolicy(){}
             
 

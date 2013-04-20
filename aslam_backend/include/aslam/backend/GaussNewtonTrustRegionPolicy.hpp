@@ -11,7 +11,7 @@ namespace aslam {
         class GaussNewtonTrustRegionPolicy : public TrustRegionPolicy
         {
         public:
-            GaussNewtonTrustRegionPolicy();
+            GaussNewtonTrustRegionPolicy(Optimizer2Options & options);
             virtual ~GaussNewtonTrustRegionPolicy();
             
             /// \brief called by the optimizer when an optimization is starting

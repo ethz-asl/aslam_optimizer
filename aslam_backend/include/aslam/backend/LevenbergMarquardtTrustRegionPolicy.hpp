@@ -11,7 +11,7 @@ namespace aslam {
         class LevenbergMarquardtTrustRegionPolicy : public TrustRegionPolicy
         {
         public:
-            LevenbergMarquardtTrustRegionPolicy();
+            LevenbergMarquardtTrustRegionPolicy(Optimizer2Options & options);
             virtual ~LevenbergMarquardtTrustRegionPolicy();
             
             /// \brief called by the optimizer when an optimization is starting
@@ -21,7 +21,7 @@ namespace aslam {
             virtual bool solveSystem(double J, bool previousIterationFailed, Eigen::VectorXd& outDx);
             
             /// \brief should the optimizer revert on failure? You should probably return true
-            bool revertOnFailure();
+            virtual bool revertOnFailure();
             
             /// \brief print the current state to a stream (no newlines).
             virtual std::ostream & printState(std::ostream & out);

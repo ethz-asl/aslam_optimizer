@@ -16,7 +16,7 @@
 #include <aslam/backend/TrustRegionPolicy.hpp>
 #include <aslam/backend/LevenbergMarquardtTrustRegionPolicy.hpp>
 #include <aslam/backend/GaussNewtonTrustRegionPolicy.hpp>
-#include <aslam/backend/DogLegTrustRegionPolicy.hpp>
+//#include <aslam/backend/DogLegTrustRegionPolicy.hpp>
 
 namespace aslam {
   namespace backend {
@@ -50,7 +50,6 @@ namespace aslam {
       // typedef sm::timing::DummyTimer Timer;
       typedef sparse_block_matrix::SparseBlockMatrix<Eigen::MatrixXd> SparseBlockMatrix;
 
-
       SM_DEFINE_EXCEPTION(Exception, aslam::Exception);
 
       Optimizer2(const Optimizer2Options& options = Optimizer2Options());
@@ -69,7 +68,6 @@ namespace aslam {
 
       /// \brief Run the optimization
       SolutionReturnValue optimize();
-      SolutionReturnValue optimizeDogLeg();
 
       /// \brief Get the optimizer options.
       Optimizer2Options& options();

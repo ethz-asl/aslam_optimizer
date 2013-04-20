@@ -13,7 +13,7 @@ namespace aslam {
         class TrustRegionPolicy
         {
         public:
-            TrustRegionPolicy();
+            TrustRegionPolicy(Optimizer2Options & options);
             virtual ~TrustRegionPolicy();
             
             /// \brief called by the optimizer when an optimization is starting
@@ -37,7 +37,7 @@ namespace aslam {
             /// \brief the linear system solver.
             boost::shared_ptr<LinearSystemSolver> _solver;
             
-            Optimizer2Options _options;
+            Optimizer2Options & _options;
                 
         };
 
