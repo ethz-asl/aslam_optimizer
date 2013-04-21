@@ -22,8 +22,8 @@ namespace aslam {
       // virtual void solveConstantAugmentedSystem(double diagonalConditioner, Eigen::VectorXd & outDx);
       // virtual void solveAugmentedSystem(const Eigen::VectorXd & diagonalConditioner, Eigen::VectorXd & outDx);
 
-      /// Returns the current Jacobian transpose (note: const should be added)
-      const CompressedColumnMatrix<index_t>& getJacobianTranspose();
+      /// Returns the current Jacobian transpose
+      const CompressedColumnMatrix<index_t>& getJacobianTranspose() const;
       /// Returns the current estimated numerical rank
       index_t getRank() const;
       /// Returns the current tolerance

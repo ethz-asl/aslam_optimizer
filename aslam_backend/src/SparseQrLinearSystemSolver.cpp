@@ -108,7 +108,7 @@ namespace aslam {
     }
 
     const CompressedColumnMatrix<SuiteSparse_long>&
-        SparseQrLinearSystemSolver::getJacobianTranspose() {
+        SparseQrLinearSystemSolver::getJacobianTranspose() const {
       return _jacobianBuilder.J_transpose();
     }
 
