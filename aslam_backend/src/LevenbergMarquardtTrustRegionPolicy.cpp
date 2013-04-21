@@ -70,7 +70,7 @@ namespace aslam {
         /// \brief print the current state to a stream (no newlines).
         std::ostream & LevenbergMarquardtTrustRegionPolicy::printState(std::ostream & out)
         {
-            out << "lambda:" << _lambda << " mu:" << _mu;
+            out << "LM - lambda:" << _lambda << " mu:" << _mu;
             return out;
         }
 
