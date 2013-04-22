@@ -132,6 +132,14 @@ namespace aslam {
         _factor->Q1fill + _cholmodLhs.nrow);
     }
 
+      Eigen::Matrix<SparseQrLinearSystemSolver::index_t, Eigen::Dynamic, 1> SparseQrLinearSystemSolver::getPermutationVectorEigen() const
+      {
+          SM_ASSERT_FALSE(Exception, _factor == NULL,
+                          "QR decomposition has not run yet");
+          Eigen::Map< Eigen::Matrix<SparseQrLinearSystemSolver::index_t, Eigen::Dynamic, 1> > pv( _factor->Q1fill, _cholmodLhs.nrow );
+          return pv;
+      }
+
     const CompressedColumnMatrix<SuiteSparse_long>&
         SparseQrLinearSystemSolver::getR() {
       if (_R.nnz() == 0) {

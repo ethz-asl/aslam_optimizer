@@ -30,6 +30,8 @@ namespace aslam {
       double getTol() const;
       /// Returns the current permutation vector
       std::vector<index_t> getPermutationVector() const;
+      /// Returns the current permutation vector
+      Eigen::Matrix<index_t, Eigen::Dynamic, 1> getPermutationVectorEigen() const;
       /// Performs QR decomposition and returns the R matrix
       const CompressedColumnMatrix<index_t>& getR();
       /// Returns the current memory usage in bytes
