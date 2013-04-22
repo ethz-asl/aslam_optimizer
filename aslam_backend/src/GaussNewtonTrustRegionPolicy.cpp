@@ -24,6 +24,7 @@ namespace aslam {
         /// \brief print the current state to a stream (no newlines).
         std::ostream & GaussNewtonTrustRegionPolicy::printState(std::ostream & out)
         {
+            out << "GN" << std::endl;
             return out;
         }
 

@@ -16,7 +16,7 @@
 #include <aslam/backend/TrustRegionPolicy.hpp>
 #include <aslam/backend/LevenbergMarquardtTrustRegionPolicy.hpp>
 #include <aslam/backend/GaussNewtonTrustRegionPolicy.hpp>
-//#include <aslam/backend/DogLegTrustRegionPolicy.hpp>
+#include <aslam/backend/DogLegTrustRegionPolicy.hpp>
 
 namespace aslam {
   namespace backend {

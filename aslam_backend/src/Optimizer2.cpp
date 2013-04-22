@@ -46,9 +46,9 @@ namespace aslam {
             // \todo remove this check when the sparse qr solver supports an augmented diagonal
             if(_options.linearSolver != "sparse_qr" && _options.trustRegionPolicy == "LevenbergMarquardt") {
                 _trustRegionPolicy.reset(new LevenbergMarquardtTrustRegionPolicy(_options));
-            } /*else if(_options.trustRegionPolicy == "DogLeg") {
-                _trustRegionPolicy.reset(new DogLegTrustRegionPolicy());
-                }*/ else {
+            } else if(_options.trustRegionPolicy == "DogLeg") {
+                _trustRegionPolicy.reset(new DogLegTrustRegionPolicy(_options));
+                } else {
                 _trustRegionPolicy.reset(new GaussNewtonTrustRegionPolicy(_options));
             }
         }
