@@ -77,7 +77,6 @@ namespace aslam {
       std::cout << "J:\n" << J << "\n";
     }
 
-    aslam::backend::JacobianContainer outJacobian(6);
     _T.evaluateJacobians(_jacobians, J);
   }
 
