@@ -105,7 +105,7 @@ void testJacobian(HomogeneousExpression dv)
   sm::eigen::NumericalDiff<HomogeneousExpressionNodeFunctor> numdiff(functor,1e-7);
   
   /// Discern the size of the jacobian container
-  Eigen::Vector4d p = dv.toHomogeneous();
+//  Eigen::Vector4d p = dv.toHomogeneous();
   JacobianContainer Jc(4);
   dv.evaluateJacobians(Jc);
    
