@@ -65,7 +65,7 @@ void testJacobian(EuclideanExpression dv)
   sm::eigen::NumericalDiff<EuclideanExpressionNodeFunctor> numdiff(functor);
   
   /// Discern the size of the jacobian container
-  Eigen::Vector3d p = dv.toEuclidean();
+//  Eigen::Vector3d p = dv.toEuclidean();
   JacobianContainer Jc(3);
   JacobianContainer Jccr(3);
 

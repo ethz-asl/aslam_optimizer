@@ -20,7 +20,6 @@ namespace aslam {
       HomogeneousExpression();
       HomogeneousExpression(HomogeneousExpressionNode * designVariable);
       HomogeneousExpression(boost::shared_ptr<HomogeneousExpressionNode> designVariable);
-
         // Create a constant expression
         HomogeneousExpression(const Eigen::Vector4d & p);
 

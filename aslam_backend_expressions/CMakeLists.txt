@@ -59,6 +59,8 @@ rosbuild_add_library(${PROJECT_NAME}
   src/Scalar.cpp
 
   src/EuclideanDirection.cpp
+
+  src/ErrorTermTransformation.cpp
   )
 
 
@@ -70,6 +72,7 @@ rosbuild_add_gtest(${PROJECT_NAME}_test
   test/MatrixAndEuclideanExpression.cpp
   #test/CameraDesignVariable.cpp
   test/ScalarExpression.cpp
+  test/ErrorTest_Transformation.cpp
   )
 
 target_link_libraries(${PROJECT_NAME}_test ${PROJECT_NAME})

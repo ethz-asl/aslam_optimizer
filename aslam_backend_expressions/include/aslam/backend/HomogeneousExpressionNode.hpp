@@ -79,6 +79,7 @@ namespace aslam {
       HomogeneousExpressionNodeConstant(const Eigen::Vector4d & p);
       virtual ~HomogeneousExpressionNodeConstant();
 
+        void set(const Eigen::Vector4d & p){ _p = p; }
     private:
       virtual Eigen::Vector4d toHomogeneousImplementation();
       virtual void evaluateJacobiansImplementation(JacobianContainer & outJacobians) const;
