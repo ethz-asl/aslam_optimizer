@@ -15,7 +15,6 @@ namespace aslam {
         levenbergMarquardtLambdaP(3),
         levenbergMarquardtLambdaMuInit(2),
         levenbergMarquardtEstimateLambdaScale(-1),
-        doLevenbergMarquardt(true),
         doSchurComplement(false),
         verbose(false),
         linearSolverMaximumFails(0),
@@ -46,9 +45,6 @@ namespace aslam {
 
       /// \brief negative values indicate that the LamdaInit inital value should be used
       double levenbergMarquardtEstimateLambdaScale;
-
-      /// \brief should we use Levenberg-Marquardt? Otherwise use plain Gauss-Newton.
-      bool doLevenbergMarquardt;
 
       /// \brief should we use the Schur complement trick? Currently not supported.
       bool doSchurComplement;
@@ -88,8 +84,6 @@ namespace aslam {
       out << "\tlevenbergMarquardtLambdaMuInit: " << options.levenbergMarquardtLambdaMuInit << std::endl;
       /// \brief negative values indicate that the LamdaInit inital value should be used
       out << "\tlevenbergMarquardtEstimateLambdaScale: " << options.levenbergMarquardtEstimateLambdaScale << std::endl;
-      /// \brief should we use Levenberg-Marquardt? Otherwise use plain Gauss-Newton.
-      out << "\tdoLevenbergMarquardt: " <<  options.doLevenbergMarquardt << std::endl;
       /// \brief should we use the Schur complement trick? Currently not supported.
       out << "\tdoSchurComplement: " << options.doSchurComplement << std::endl;
       /// \brief should we print out some information each iteration?

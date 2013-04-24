@@ -8,7 +8,7 @@ namespace aslam {
         
         
         /// \brief called by the optimizer when an optimization is starting
-        void DogLegTrustRegionPolicy::optimizationStarting()
+        void DogLegTrustRegionPolicy::optimizationStartingImplementation(double J)
         {
             // initialise lambda:
             //_lambda = _options.levenbergMarquardtLambdaInit;
@@ -24,48 +24,48 @@ namespace aslam {
         }
         
         // Returns true if the solution was successful
-        bool DogLegTrustRegionPolicy::solveSystem(double J, bool previousIterationFailed, Eigen::VectorXd& outDx)
+        bool DogLegTrustRegionPolicy::solveSystemImplementation(double J, bool previousIterationFailed, Eigen::VectorXd& outDx)
         {
             SM_ASSERT_TRUE(Exception, _solver.get() != NULL, "The solver is null");
             bool solutionSuccess = true;
-            // update J:
-            _p_J = _J;
-            _J = J;
             
             ///////////////
             ///Update Delta
             // same check as in GN lambda update:
-            double rho = (_p_J - _J) / _L0;
+            double rho = get_dJ() / _L0;
             
-            
-            // update trust region
-            _p_delta = _delta;
-            if( rho > 0.75 ) // step succeeded
+          
+            if( ! isFirstIteration() )
             {
-                double dx_norm3 = 3 * _dx.norm();
-                if ( _delta > dx_norm3 )
-                    _delta = _delta;
-                else
-                    _delta = dx_norm3;
-            }
-            else if (rho > 0 && rho < 0.25) // step almost failed
-            {
-                _delta /= 2.0;
-            }
-            else if (rho <= 0)  // step failed
-            {
-                // if we took a GN step set the trust region to the GN Step / 2
-                if(_stepType == "GN")
-                    _delta = _dx_gn_norm / 2.0;
-                else
+                // update trust region
+                _p_delta = _delta;
+                if( rho > 0.75 ) // step succeeded
+                {
+                    double dx_norm3 = 3 * _dx.norm();
+                    if ( _delta > dx_norm3 )
+                        _delta = _delta;
+                    else
+                        _delta = dx_norm3;
+                }
+                else if (rho > 0 && rho < 0.25) // step almost failed
+                {
                     _delta /= 2.0;
-            }
-            
+                }
+                else if (rho <= 0)  // step failed
+                {
+                    // if we took a GN step set the trust region to the GN Step / 2
+                    if(_stepType == "GN")
+                        _delta = _dx_gn_norm / 2.0;
+                    else
+                        _delta /= 2.0;
+                }
+            }            
             bool gnComputed = true;
             // successful step:
             // rebuild system and recalculate sd-solution
             if(!previousIterationFailed) {
                 // update GN matrices:
+                std::cout << "Building system\n";
                 _solver->buildSystem(_options.nThreads, true);
                 
                 // calculate steepest descent step:
@@ -113,7 +113,7 @@ namespace aslam {
                 if(_dx_gn_norm <= _delta)
                 {
                     _dx = _dx_gn; // trust region larger than GN step. take it!
-                    _L0 = _J;
+                    _L0 = J;
                     _stepType = "GN";
                 }
                 else  // otherwise interpolate on the line between the cauchy point and gn step
@@ -135,7 +135,7 @@ namespace aslam {
                     }
                     
                     _dx = _dx_sd + _beta * ( dgnsd );
-                    _L0 = 1/2 * _sd_scale * (1-_beta)*(1-_beta)* _solver->rhs().squaredNorm() + _beta*(2-_beta)*_J;
+                    _L0 = 1/2 * _sd_scale * (1-_beta)*(1-_beta)* _solver->rhs().squaredNorm() + _beta*(2-_beta)*J;
                     _stepType = "DL";
                 }
             }

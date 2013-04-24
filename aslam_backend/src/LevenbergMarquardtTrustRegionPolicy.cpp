@@ -8,7 +8,7 @@ namespace aslam {
         
         
         /// \brief called by the optimizer when an optimization is starting
-        void LevenbergMarquardtTrustRegionPolicy::optimizationStarting()
+        void LevenbergMarquardtTrustRegionPolicy::optimizationStartingImplementation(double J)
         {
             // initialise lambda:
             _lambda = _options.levenbergMarquardtLambdaInit;
@@ -16,25 +16,18 @@ namespace aslam {
             _beta = _options.levenbergMarquardtLambdaBeta;
             _p = _options.levenbergMarquardtLambdaP;
             _mu = _options.levenbergMarquardtLambdaMuInit;
-            _J = -1.0;
-            _p_J = -1.0;
             
         }
         
         // Returns true if the solution was successful
-        bool LevenbergMarquardtTrustRegionPolicy::solveSystem(double J, bool previousIterationFailed, Eigen::VectorXd& outDx)
+        bool LevenbergMarquardtTrustRegionPolicy::solveSystemImplementation(double J, bool previousIterationFailed, Eigen::VectorXd& outDx)
         {
             SM_ASSERT_TRUE(Exception, _solver.get() != NULL, "The solver is null");
             
-            
-            if (_p_J == -1.0 && _J == -1.0) {
+            if (isFirstIteration()) {
                 // This is the first step.
-                _J = J;
                 _solver->buildSystem(_options.nThreads, true);
             } else {
-                // update J:
-                _p_J = _J;
-                _J = J;
                 ///get Rho and update Lambda:
                 double rho = getLmRho();
               
@@ -83,7 +76,7 @@ namespace aslam {
         
         double LevenbergMarquardtTrustRegionPolicy::getLmRho()
         {
-            double d1 = _p_J - _J;    // update cost delta
+            double d1 = get_dJ();    // update cost delta
             // L(0) - L(h):
             double d2 = _dx.transpose() * (_lambda * _dx + _solver->rhs());
             return d1 / d2;

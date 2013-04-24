@@ -125,7 +125,7 @@ namespace aslam {
             // Set up the block matrix structure.
             // std::cout << "init structure\n";
             //      initializeLinearSolver();
-            _solver->initMatrixStructure(_designVariables, _errorTerms, _options.doLevenbergMarquardt);
+            _solver->initMatrixStructure(_designVariables, _errorTerms, _options.trustRegionPolicy == "LevenbergMarquardt");
             initMx.stop();
             _options.verbose && std::cout << "Optimization problem initialized with " << _designVariables.size() << " design variables and " << _errorTerms.size() << " error terms\n";
             // \todo Say how big the problem is.
@@ -195,7 +195,7 @@ namespace aslam {
 
             SM_ASSERT_TRUE(Exception, _solver.get() != NULL, "The solver is null");
             _trustRegionPolicy->setSolver(_solver, _options);
-            _trustRegionPolicy->optimizationStarting();
+            _trustRegionPolicy->optimizationStarting(_J);
 
             // Loop until convergence
             while (srv.iterations <  _options.maxIterations &&
@@ -358,7 +358,7 @@ namespace aslam {
             {
                 BlockCholeskyLinearSystemSolver* solver = dynamic_cast<BlockCholeskyLinearSystemSolver*>(_solver.get());
                 boost::shared_ptr<BlockCholeskyLinearSystemSolver> solver_sp;
-                if (! solver || !_options.doLevenbergMarquardt) {
+                if (! solver || _options.trustRegionPolicy != "LevenbergMarquardt") {
                     _options.verbose && std::cout << "Creating a new block Cholesky solver to retrieve the covariance.\n";
                     /// \todo Figure out properly why I have to create a new linear solver here.
                     solver_sp.reset(new BlockCholeskyLinearSystemSolver());
@@ -387,7 +387,7 @@ namespace aslam {
             {
                 BlockCholeskyLinearSystemSolver* solver = dynamic_cast<BlockCholeskyLinearSystemSolver*>(_solver.get());
                 boost::shared_ptr<BlockCholeskyLinearSystemSolver> solver_sp;
-                if (! solver || !_options.doLevenbergMarquardt) {
+                if (! solver || _options.trustRegionPolicy != "LevenbergMarquardt") {
                     _options.verbose && std::cout << "Creating a new block Cholesky solver to retrieve the covariance.\n";
                     /// \todo Figure out properly why I have to create a new linear solver here.
                     solver_sp.reset(new BlockCholeskyLinearSystemSolver());

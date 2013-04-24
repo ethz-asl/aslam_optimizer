@@ -15,10 +15,10 @@ namespace aslam {
             virtual ~LevenbergMarquardtTrustRegionPolicy();
             
             /// \brief called by the optimizer when an optimization is starting
-            virtual void optimizationStarting();
+            virtual void optimizationStartingImplementation(double J);
             
             // Returns true if the solution was successful
-            virtual bool solveSystem(double J, bool previousIterationFailed, Eigen::VectorXd& outDx);
+            virtual bool solveSystemImplementation(double J, bool previousIterationFailed, Eigen::VectorXd& outDx);
             
             /// \brief should the optimizer revert on failure? You should probably return true
             virtual bool revertOnFailure();
@@ -30,9 +30,6 @@ namespace aslam {
             double _lambda;
         
             double getLmRho();
-            
-            double _J;
-            double _p_J;
             double _gamma;
             double _beta;
             int _p;

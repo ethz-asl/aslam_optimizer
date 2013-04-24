@@ -17,10 +17,10 @@ namespace aslam {
             virtual ~TrustRegionPolicy();
             
             /// \brief called by the optimizer when an optimization is starting
-            virtual void optimizationStarting() = 0;
+            virtual void optimizationStarting(double J);
             
             // Returns true if the solution was successful
-            virtual bool solveSystem(double J, bool previousIterationFailed, Eigen::VectorXd& outDx) = 0;
+            virtual bool solveSystem(double J, bool previousIterationFailed, Eigen::VectorXd& outDx);
 
             /// \brief get the linear system solver
             boost::shared_ptr<LinearSystemSolver> getSolver();
@@ -34,11 +34,23 @@ namespace aslam {
             /// \brief print the current state to a stream (no newlines).
             virtual std::ostream & printState(std::ostream & out) = 0;
         protected:
-            /// \brief the linear system solver.
-            boost::shared_ptr<LinearSystemSolver> _solver;
+            double get_dJ();
+            bool isFirstIteration(){ return _isFirstIteration; }
+
+            /// \brief called by the optimizer when an optimization is starting
+            virtual void optimizationStartingImplementation(double J) = 0;
             
+            // Returns true if the solution was successful
+            virtual bool solveSystemImplementation(double J, bool previousIterationFailed, Eigen::VectorXd& outDx) = 0;
+
+            boost::shared_ptr<LinearSystemSolver> _solver;
             Optimizer2Options & _options;
-                
+            
+        private:
+            /// \brief the linear system solver.
+            double _J;
+            double _p_J;
+            bool _isFirstIteration;
         };
 
     } // namespace backend

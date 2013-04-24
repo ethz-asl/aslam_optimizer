@@ -15,10 +15,10 @@ namespace aslam {
             virtual ~DogLegTrustRegionPolicy();
             
             /// \brief called by the optimizer when an optimization is starting
-            virtual void optimizationStarting();
+            virtual void optimizationStartingImplementation(double J);
             
             // Returns true if the solution was successful
-            virtual bool solveSystem(double J, bool previousIterationFailed, Eigen::VectorXd& outDx);
+            virtual bool solveSystemImplementation(double J, bool previousIterationFailed, Eigen::VectorXd& outDx);
             
             /// \brief should the optimizer revert on failure? You should probably return true
             bool revertOnFailure();
@@ -37,8 +37,6 @@ namespace aslam {
             double _L0;
             double _sd_scale;
             double _beta;
-            double _p_J;
-            double _J;
             double _delta;
             double _p_delta;
             std::string _stepType;

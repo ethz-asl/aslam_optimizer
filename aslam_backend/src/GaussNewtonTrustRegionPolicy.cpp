@@ -9,13 +9,13 @@ namespace aslam {
         
         
         /// \brief called by the optimizer when an optimization is starting
-        void GaussNewtonTrustRegionPolicy::optimizationStarting()
+        void GaussNewtonTrustRegionPolicy::optimizationStartingImplementation(double J)
         {
             
         }
         
         // Returns true if the solution was successful
-        bool GaussNewtonTrustRegionPolicy::solveSystem(double J, bool previousIterationFailed, Eigen::VectorXd& outDx)
+        bool GaussNewtonTrustRegionPolicy::solveSystemImplementation(double J, bool previousIterationFailed, Eigen::VectorXd& outDx)
         {
             _solver->buildSystem(_options.nThreads, true);
             return _solver->solveSystem(outDx);
