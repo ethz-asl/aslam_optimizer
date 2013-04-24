@@ -31,6 +31,8 @@ namespace aslam {
       virtual int minimalDimensionsImplementation() const;
 
       RotationExpression toExpression();
+
+        void set( const Eigen::Vector4d & q){ _q = q; _p_q = q; }
     private:
       virtual Eigen::Matrix3d toRotationMatrixImplementation();
       virtual void evaluateJacobiansImplementation(JacobianContainer & outJacobians) const;

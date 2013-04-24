@@ -26,6 +26,8 @@ namespace aslam {
       virtual int minimalDimensionsImplementation() const;
 
       EuclideanExpression toExpression();
+
+        void set(const Eigen::Vector3d & p){ _p = p; _p_p = _p; }
     private:
       virtual Eigen::Vector3d toEuclideanImplementation();
 
