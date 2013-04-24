@@ -39,9 +39,9 @@ namespace aslam {
      */
     class Optimizer {
     public:
-      typedef sm::timing::Timer Timer;
+        //typedef sm::timing::Timer Timer;
       /// Swapping this to the dummy timer will disable timing
-      // typedef sm::timing::DummyTimer Timer;
+      typedef sm::timing::DummyTimer Timer;
 
       SM_DEFINE_EXCEPTION(Exception, aslam::Exception);
 

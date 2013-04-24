@@ -52,6 +52,19 @@ namespace aslam {
         @{
         */
       /// Constructor
+
+        /** 
+         * The constructor solves for the free parameter in the M-Estimator
+         * based on your desired behavior (statistically speaking)
+         * 
+         * @param df    The dimension of your error term
+         * @param pCut  The probability of error that you want to down-weight. 0.99 means 
+         *              that the 99% most likely squared errors will not be much down-weighted
+         *              and the remaining 1% will be smoothly cut to zero weight.
+         * @param wCut  The weight (between 0 and 1 not inclusive) that you want the above probability to have.
+         * 
+         * @return 
+         */
       BlakeZissermanMEstimator(size_t df, double pCut = 0.999,
           double wCut = 0.1);
       /// Copy constructor

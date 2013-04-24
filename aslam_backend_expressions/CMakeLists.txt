@@ -12,6 +12,8 @@ set(ROS_BUILD_TYPE Release)
 
 rosbuild_init()
 
+add_definitions (-Wall -std=c++0x -O3 -march=native)
+
 #set(CMAKE_CXX_FLAGS "-std=c++0x")
 
 #set the default path for built executables to the "bin" directory
