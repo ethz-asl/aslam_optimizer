@@ -56,14 +56,14 @@ namespace sparse_block_matrix {
     csn *N ;
     int n, ok ;
     if (!CS_CSC (A) || !b || ! S || !x) {
-      fprintf(stderr, "%s: No valid input!\n", __PRETTY_FUNCTION__);
+      fprintf(stderr, "%s: No valid input!\n", __func__);
       assert(0); // get a backtrace in debug mode
       return (0) ;     /* check inputs */
     }
     n = A->n ;
     N = cs_chol_workspace (A, S, work, x) ;                    /* numeric Cholesky factorization */
     if (!N) {
-      fprintf(stderr, "%s: cholesky failed!\n", __PRETTY_FUNCTION__);
+      fprintf(stderr, "%s: cholesky failed!\n", __func__);
       /*assert(0);*/
     }
     ok = (N != NULL) ;
