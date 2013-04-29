@@ -41,9 +41,9 @@ namespace aslam {
      */
     class Optimizer2 {
     public:
-      typedef sm::timing::Timer Timer;
+        //  typedef sm::timing::Timer Timer;
       /// Swapping this to the dummy timer will disable timing
-      // typedef sm::timing::DummyTimer Timer;
+       typedef sm::timing::DummyTimer Timer;
       typedef sparse_block_matrix::SparseBlockMatrix<Eigen::MatrixXd> SparseBlockMatrix;
 
 

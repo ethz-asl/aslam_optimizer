@@ -29,6 +29,8 @@ namespace aslam {
       VectorExpression<D> toExpression();
 
       void updateMap(double * p);
+
+        double * data() { return &_v[0]; }
     protected:
       /// \brief Revert the last state update.
       virtual void revertUpdateImplementation();
