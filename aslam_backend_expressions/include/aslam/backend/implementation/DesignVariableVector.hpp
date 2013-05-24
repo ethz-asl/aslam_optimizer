@@ -91,6 +91,21 @@ namespace aslam {
       _v = value;
     }
 
+    template<int D>
+    void DesignVariableVector<D>::minimalDifferenceImplementation(const Eigen::MatrixXd& xHat, Eigen::VectorXd& outDifference) const
+    {
+    	// Todo: assert dimensions
+    	outDifference = _v - xHat;
+    }
+
+    template<int D>
+    void DesignVariableVector<D>::minimalDifferenceAndJacobianImplementation(const Eigen::MatrixXd& xHat, Eigen::VectorXd& outDifference, Eigen::MatrixXd& outJacobian) const
+    {
+    	minimalDifferenceImplementation(xHat, outDifference);
+    	outJacobian = Eigen::MatrixXd::Identity(D,D);
+
+    }
+
   } // namespace backend
 } // namespace aslam
 

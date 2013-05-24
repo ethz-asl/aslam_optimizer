@@ -7,14 +7,14 @@ include($ENV{ROS_ROOT}/core/rosbuild/rosbuild.cmake)
 #  Release        : w/o debug symbols, w/ optimization
 #  RelWithDebInfo : w/ debug symbols, w/ optimization
 #  MinSizeRel     : w/o debug symbols, w/ optimization, stripped binaries
-#set(ROS_BUILD_TYPE Debug)
-set(ROS_BUILD_TYPE Release)
+set(ROS_BUILD_TYPE Debug)
+#set(ROS_BUILD_TYPE Release)
 
 rosbuild_init()
 
-add_definitions (-Wall -std=c++0x -O3 -march=native)
+#add_definitions (-Wall -std=c++0x -O3 -march=native)
 
-#set(CMAKE_CXX_FLAGS "-std=c++0x")
+set(CMAKE_CXX_FLAGS "-std=c++0x")
 
 #set the default path for built executables to the "bin" directory
 set(EXECUTABLE_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/bin)

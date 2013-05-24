@@ -79,5 +79,18 @@ namespace aslam {
         _p = value(0, 0);
       }
 
+      void Scalar::minimalDifferenceImplementation(const Eigen::MatrixXd& xHat, Eigen::VectorXd& outDifference) const
+      {
+    	  SM_ASSERT_TRUE(aslam::InvalidArgumentException, (xHat.rows() == 1)&(xHat.cols() == 1), "xHat has incompatible dimensions");
+    	  outDifference = Eigen::VectorXd(1);
+    	  outDifference(0) = _p - xHat(0,0);
+      }
+
+      void Scalar::minimalDifferenceAndJacobianImplementation(const Eigen::MatrixXd& xHat, Eigen::VectorXd& outDifference, Eigen::MatrixXd& outJacobian) const
+      {
+    	  minimalDifferenceImplementation(xHat, outDifference);
+    	  outJacobian = Eigen::MatrixXd::Identity(1,1);
+      }
+
     } // namespace backend
 } // namespace aslam

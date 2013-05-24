@@ -7,8 +7,8 @@ include($ENV{ROS_ROOT}/core/rosbuild/rosbuild.cmake)
 #  Release        : w/o debug symbols, w/ optimization
 #  RelWithDebInfo : w/ debug symbols, w/ optimization
 #  MinSizeRel     : w/o debug symbols, w/ optimization, stripped binaries
-#set(ROS_BUILD_TYPE Debug)
-set(ROS_BUILD_TYPE Release)
+set(ROS_BUILD_TYPE Debug)
+#set(ROS_BUILD_TYPE Release)
 
 rosbuild_init()
 
@@ -74,6 +74,8 @@ rosbuild_add_library(${PROJECT_NAME}
   src/SparseCholeskyLinearSolverOptions.cpp
   src/SparseQRLinearSolverOptions.cpp
   src/DenseQRLinearSolverOptions.cpp
+  src/ErrorTermDs.cpp
+  src/MarginalizationPriorErrorTerm.cpp
   )
 
 target_link_libraries(${PROJECT_NAME} ${CHOLMOD_LIBRARIES} ${EXTRA_LIBS}  ${CSPARSE_LIBRARY})

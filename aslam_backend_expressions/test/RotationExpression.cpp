@@ -77,10 +77,6 @@ void testJacobian(RotationExpression dv)
   sm::eigen::assertNear(Jc.asSparseMatrix(), Jest, 1e-6, SM_SOURCE_FILE_POS, "Testing the quat Jacobian");
 }
 
-
-
-
-
 // Test that the quaternion jacobian matches the finite difference jacobian
 TEST(RotationExpressionNodeTestSuites, testQuat)
 {
@@ -405,4 +401,82 @@ TEST(RotationExpressionNodeTestSuites, testQuatInverseTemplate1)
     {
       FAIL() << e.what();
     }
+}
+
+TEST(RotationExpressionNodeTestSuites, testMinimalDifference)
+{
+  try {
+    using namespace sm::kinematics;
+    Eigen::Vector4d initialValue = quatRandom();
+    RotationQuaternion quat(initialValue);
+    quat.setActive(true);
+    quat.setBlockIndex(0);
+
+    Eigen::Vector4d epsQ = quatRandom();
+    Eigen::Vector3d eps = sm::kinematics::qlog(epsQ);
+    double updateValues[3] = {eps(0), eps(1), eps(2)};
+    quat.update(updateValues, 3);
+
+    Eigen::VectorXd diff;
+    quat.minimalDifference(initialValue, diff);
+
+    EXPECT_TRUE(eps.isApprox(diff));
+
+  }
+  catch(const std::exception & e)
+    {
+      FAIL() << e.what();
+    }
+}
+
+TEST(RotationExpressionNodeTestSuites,testMinimalDifferenceJacobian)
+{
+	try {
+
+	    using namespace sm::kinematics;
+	    Eigen::Vector4d initialValue = quatRandom();
+	    RotationQuaternion quat(initialValue);
+	    quat.setActive(true);
+	    quat.setBlockIndex(0);
+
+
+	    Eigen::Vector4d uQ = quatRandom();
+	    Eigen::Vector3d u = sm::kinematics::qlog(uQ);
+	    double updateValues[3] = {u(0), u(1), u(2)};
+	    quat.update(updateValues, 3);
+
+	    Eigen::VectorXd diff_e1;
+	    quat.minimalDifference(initialValue, diff_e1);
+
+	    Eigen::Vector4d epsQ = quatRandom();
+	    Eigen::Vector3d eps = sm::kinematics::qlog(epsQ);
+	    double updateValues2[3] = {eps(0), eps(1), eps(2)};
+	    quat.update(updateValues2, 3);
+
+	    Eigen::VectorXd diff_e2;
+	    Eigen::MatrixXd J;
+	    quat.minimalDifferenceAndJacobian(initialValue, diff_e2, J);
+
+	    // delta e is the difference between the two differences diff_e1 and diff_e2
+	    Eigen::VectorXd delta_e = diff_e2 - diff_e1;
+
+	    // compute the lhs (i.e. J*eps ~= delta_e)
+	    Eigen::VectorXd lhs = sm::kinematics::qlog(J*eps);
+
+	    std::cout << "initialValue is: " << std::endl << initialValue << std::endl;
+	    std::cout << "diff_e1 is: " << std::endl  << diff_e1 << std::endl;
+	    std::cout << "diff_e2 is: " << std::endl  << diff_e2 << std::endl;
+	    std::cout << "J is: " << std::endl  << J << std::endl;
+	    std::cout << "u is: " << std::endl  << u << std::endl;
+	    std::cout << "eps is: " << std::endl  << eps << std::endl;
+	    std::cout << "delta_e is: " << std::endl  << delta_e << std::endl;
+	    std::cout << "lhs is: " << std::endl  << lhs << std::endl;
+
+	    sm::eigen::assertNear(lhs, delta_e, 1e-6, SM_SOURCE_FILE_POS, "Testing the minimal difference jacobian");
+	}
+	catch(std::exception const & e)
+    {
+        FAIL() << e.what();
+    }
+
 }
