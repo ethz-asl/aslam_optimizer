@@ -76,6 +76,7 @@ rosbuild_add_library(${PROJECT_NAME}
   src/DenseQRLinearSolverOptions.cpp
   src/ErrorTermDs.cpp
   src/MarginalizationPriorErrorTerm.cpp
+  src/Marginalizer.cpp
   )
 
 target_link_libraries(${PROJECT_NAME} ${CHOLMOD_LIBRARIES} ${EXTRA_LIBS}  ${CSPARSE_LIBRARY})

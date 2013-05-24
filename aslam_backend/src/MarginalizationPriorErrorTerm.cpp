@@ -40,11 +40,11 @@ double MarginalizationPriorErrorTerm::evaluateErrorImplementation()
 {
   Eigen::VectorXd diff = getDifferenceSinceMarginalization();
   // ASSERT DIMENSIONS MATCH
-//  std::cout << "Diff looks like this: " << std::endl << diff << std::endl;
-//  std::cout << "R looks like this: " << std::endl << _R << std::endl;
-//  std::cout << "d looks like this: " << std::endl << _d << std::endl;
+  std::cout << "Diff looks like this: " << std::endl << diff << std::endl;
+  std::cout << "R looks like this: " << std::endl << _R << std::endl;
+  std::cout << "d looks like this: " << std::endl << _d << std::endl;
   Eigen::VectorXd currentError = -(_d - _R*diff);
-  //std::cout << "current error looks like this: " << std::endl << currentError << std::endl;
+  std::cout << "current error looks like this: " << std::endl << currentError << std::endl;
   setError(currentError);
   return evaluateChiSquaredError();
 
