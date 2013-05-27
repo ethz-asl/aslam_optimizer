@@ -28,19 +28,19 @@ struct RotationExpressionNodeFunctor
   Eigen::VectorXd operator()(const Eigen::VectorXd & dr)
   {
     
-    Eigen::Matrix3d C = _dv.toRotationMatrix();
+    //Eigen::Matrix3d C = _dv.toRotationMatrix();
     JacobianContainer J(3);
     _dv.evaluateJacobians(J);
 
     int offset = 0;
     for(size_t i = 0; i < J.numDesignVariables(); i++)
       {
-	DesignVariable * d = J.designVariable(i);
-	d->update(&dr[offset],d->minimalDimensions());
-	offset += d->minimalDimensions();
+		DesignVariable * d = J.designVariable(i);
+		d->update(&dr[offset],d->minimalDimensions());
+		offset += d->minimalDimensions();
       }
 
-    C = _dv.toRotationMatrix();
+    Eigen::Matrix3d C = _dv.toRotationMatrix();
     
  
     for(size_t i = 0; i < J.numDesignVariables(); i++)
@@ -53,6 +53,124 @@ struct RotationExpressionNodeFunctor
    
   }
 };
+//
+//struct RotationExpressionLogNodeFunctor
+//{
+//  typedef Eigen::Vector3d value_t;
+//  typedef value_t::Scalar scalar_t;
+//  typedef Eigen::VectorXd input_t;
+//  typedef Eigen::MatrixXd jacobian_t;
+//
+//
+//  RotationExpressionLogNodeFunctor(RotationQuaternion dv) : //, Eigen::Vector4d xHat) :
+//   _dv(dv) {}
+//
+//  input_t update(const input_t & x, int c, scalar_t delta) { input_t xnew = x; xnew[c] += delta; return xnew; }
+//
+//  RotationQuaternion _dv;
+//  Eigen::Vector4d _xHat;
+//
+//  Eigen::Vector3d operator()(const Eigen::VectorXd & dr)
+//  {
+//	    std::setprecision(15);
+//	  std::cout << "perturbing by: " << std::endl << dr << std::endl;
+//
+//    //Eigen::Matrix3d C = _dv.toRotationMatrix();
+//    JacobianContainer J(3);
+//    _dv.evaluateJacobians(J);
+//
+//    Eigen::MatrixXd params1;
+//    _dv.getParameters(params1);
+//    Eigen::Vector4d quatParams1;
+//    quatParams1(0) = params1(0,0); quatParams1(1) = params1(1,0); quatParams1(2) = params1(2,0); quatParams1(3) = params1(3,0);
+//
+//    Eigen::Vector3d out1  = sm::kinematics::qlog(quatParams1);
+//
+//    std::cout << "axis angle before the update: " << std::endl << out1 << std::endl;
+//
+//    int offset = 0;
+//    for(size_t i = 0; i < J.numDesignVariables(); i++)
+//      {
+//		DesignVariable * d = J.designVariable(i);
+//		d->update(&dr[offset],d->minimalDimensions());
+//		offset += d->minimalDimensions();
+//      }
+//
+//    Eigen::MatrixXd params;
+//    _dv.getParameters(params);
+//    Eigen::Vector4d quatParams;
+//    quatParams(0) = params(0,0); quatParams(1) = params(1,0); quatParams(2) = params(2,0); quatParams(3) = params(3,0);
+//    Eigen::Vector3d out  = sm::kinematics::qlog(quatParams);
+//    std::cout << "axis angle after the update: " << std::endl << out << std::endl;
+//    std::setprecision(5);
+//    for(size_t i = 0; i < J.numDesignVariables(); i++)
+//      {
+//		DesignVariable * d = J.designVariable(i);
+//		d->revertUpdate();
+//      }
+//
+//    return out;
+//
+//  }
+//};
+
+TEST(RotationExpressionNodeTestSuites,testQuatLogJacobian)
+{
+	try {
+
+	    using namespace sm::kinematics;
+	    Eigen::Vector4d initialValue = quatRandom();
+	    //RotationQuaternion quat(initialValue);
+	    //quat.setActive(true);
+	    //quat.setBlockIndex(0);
+
+//	    RotationExpressionLogNodeFunctor functor(quat);
+//	    sm::eigen::NumericalDiff<RotationExpressionLogNodeFunctor> numdiff(functor);
+
+	    double eps = 1e-7;
+
+	    Eigen::Vector3d AAInitial = sm::kinematics::qlog(initialValue);
+
+	    std::cout << std::setprecision(15) << "Initial Value: " << std::endl << initialValue << std::endl;
+	    std::cout << std::setprecision(15) << "Initial AA: " << std::endl << AAInitial << std::endl;
+
+	    Eigen::MatrixXd Jest = Eigen::MatrixXd(3,4);
+
+    	double dx = 2*eps;
+
+	    for(int c = 0; c < 4; c++)
+	    {
+	    	Eigen::Vector4d updatedQuat;
+	    	updatedQuat = initialValue;
+	    	updatedQuat(c) += eps;
+	    	//std::cout << "Updated quat: " << std::endl << updatedQuat << std::endl;
+	    	Eigen::Vector3d AAUpdatedPlus = sm::kinematics::qlog(updatedQuat);
+	    	//std::cout << "AAUpdatedPlus: " << std::endl << AAUpdatedPlus << std::endl;
+	    	updatedQuat = initialValue;
+	    	updatedQuat(c) -= eps;
+	    	Eigen::Vector3d AAUpdatedMinus = sm::kinematics::qlog(updatedQuat);
+
+	    	Eigen::Vector3d diffAA =  AAUpdatedPlus - AAUpdatedMinus;
+	    	//std::cout << "Diff AA: " << std::endl << diffAA << std::endl;
+	    	Jest(0,c) = diffAA(0) / dx;
+	    	Jest(1,c) = diffAA(1) / dx;
+	    	Jest(2,c) = diffAA(2) / dx;
+	    }
+
+	    Eigen::MatrixXd J = sm::kinematics::quatLogJacobian(initialValue);
+
+		std::cout << "Jest" << std::endl << Jest << std::endl;
+		std::cout << "J" << std::endl << J << std::endl;
+
+		sm::eigen::assertNear(J, Jest, 1e-6, SM_SOURCE_FILE_POS, "Testing the quat log Jacobian");
+
+	}
+	catch(std::exception const & e)
+    {
+        FAIL() << e.what();
+    }
+
+}
 
 
 void testJacobian(RotationExpression dv)
@@ -67,12 +185,17 @@ void testJacobian(RotationExpression dv)
   Eigen::Matrix3d C = dv.toRotationMatrix();
   JacobianContainer Jc(3);
   dv.evaluateJacobians(Jc);
+  std::cout << "Jc:" << std::endl << Jc.asDenseMatrix() << std::endl;
+  std::cout << "C*p:" << std::endl << C*p << std::endl;
   Eigen::Matrix3d Cp_cross = sm::kinematics::crossMx(C*p);
+  std::cout << "Cp_cross" << std::endl << Cp_cross << std::endl;
   Jc.applyChainRule(Cp_cross);
+  std::cout << "Jc" << std::endl << Jc.asDenseMatrix() << std::endl;
  
   Eigen::VectorXd dp(Jc.cols());
   dp.setZero();
   Eigen::MatrixXd Jest = numdiff.estimateJacobian(dp);
+  std::cout << "Jest" << std::endl << Jest << std::endl;
  
   sm::eigen::assertNear(Jc.asSparseMatrix(), Jest, 1e-6, SM_SOURCE_FILE_POS, "Testing the quat Jacobian");
 }
@@ -429,54 +552,3 @@ TEST(RotationExpressionNodeTestSuites, testMinimalDifference)
     }
 }
 
-TEST(RotationExpressionNodeTestSuites,testMinimalDifferenceJacobian)
-{
-	try {
-
-	    using namespace sm::kinematics;
-	    Eigen::Vector4d initialValue = quatRandom();
-	    RotationQuaternion quat(initialValue);
-	    quat.setActive(true);
-	    quat.setBlockIndex(0);
-
-
-	    Eigen::Vector4d uQ = quatRandom();
-	    Eigen::Vector3d u = sm::kinematics::qlog(uQ);
-	    double updateValues[3] = {u(0), u(1), u(2)};
-	    quat.update(updateValues, 3);
-
-	    Eigen::VectorXd diff_e1;
-	    quat.minimalDifference(initialValue, diff_e1);
-
-	    Eigen::Vector4d epsQ = quatRandom();
-	    Eigen::Vector3d eps = sm::kinematics::qlog(epsQ);
-	    double updateValues2[3] = {eps(0), eps(1), eps(2)};
-	    quat.update(updateValues2, 3);
-
-	    Eigen::VectorXd diff_e2;
-	    Eigen::MatrixXd J;
-	    quat.minimalDifferenceAndJacobian(initialValue, diff_e2, J);
-
-	    // delta e is the difference between the two differences diff_e1 and diff_e2
-	    Eigen::VectorXd delta_e = diff_e2 - diff_e1;
-
-	    // compute the lhs (i.e. J*eps ~= delta_e)
-	    Eigen::VectorXd lhs = sm::kinematics::qlog(J*eps);
-
-	    std::cout << "initialValue is: " << std::endl << initialValue << std::endl;
-	    std::cout << "diff_e1 is: " << std::endl  << diff_e1 << std::endl;
-	    std::cout << "diff_e2 is: " << std::endl  << diff_e2 << std::endl;
-	    std::cout << "J is: " << std::endl  << J << std::endl;
-	    std::cout << "u is: " << std::endl  << u << std::endl;
-	    std::cout << "eps is: " << std::endl  << eps << std::endl;
-	    std::cout << "delta_e is: " << std::endl  << delta_e << std::endl;
-	    std::cout << "lhs is: " << std::endl  << lhs << std::endl;
-
-	    sm::eigen::assertNear(lhs, delta_e, 1e-6, SM_SOURCE_FILE_POS, "Testing the minimal difference jacobian");
-	}
-	catch(std::exception const & e)
-    {
-        FAIL() << e.what();
-    }
-
-}

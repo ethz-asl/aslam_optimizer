@@ -86,7 +86,7 @@ namespace aslam {
     void RotationQuaternion::minimalDifferenceAndJacobianImplementation(const Eigen::MatrixXd& xHat, Eigen::VectorXd& outDifference, Eigen::MatrixXd& outJacobian) const
     {
     	minimalDifferenceImplementation(xHat, outDifference);
-    	outJacobian = sm::kinematics::quatJacobian(_q); //???
+    	outJacobian = sm::kinematics::quatLogJacobian(_q)*sm::kinematics::quatJacobian(_q); //???
     }
 
   } // namespace backend
