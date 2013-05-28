@@ -552,3 +552,61 @@ TEST(RotationExpressionNodeTestSuites, testMinimalDifference)
     }
 }
 
+TEST(RotationExpressionNodeTestSuites, testMinimalDifferenceAndJacobian)
+{
+  try {
+    using namespace sm::kinematics;
+    Eigen::Vector4d quatInitial = quatRandom();
+    RotationQuaternion quat(quatInitial);
+    quat.setActive(true);
+    quat.setBlockIndex(0);
+
+    Eigen::Vector4d updatedQuat = quatRandom();
+    Eigen::Vector3d updateAA = sm::kinematics::qlog(updatedQuat);
+    double updateValues[3] = {updateAA(0), updateAA(1), updateAA(2)};
+    quat.update(updateValues, 3);
+
+    Eigen::MatrixXd params;
+    quat.getParameters(params);
+    Eigen::Vector4d quatBar;
+    quatBar(0) = params(0,0); quatBar(1) = params(1,0); quatBar(2) = params(2,0); quatBar(3) = params(3,0);
+
+
+    Eigen::Vector4d evalPoint = sm::kinematics::qplus(quatInitial,sm::kinematics::quatInv(quatBar));
+
+    // choose small
+    Eigen::Vector3d epsV; epsV(0) = 0.001; epsV(1) = 0.001; epsV(2) = 0.001;
+    double eps[3] = {0.001, 0.001, 0.001};
+    quat.update(eps, 3);
+
+    Eigen::MatrixXd params2;
+    quat.getParameters(params2);
+    Eigen::Vector4d quatFinal;
+    quatFinal(0) = params2(0,0); quatFinal(1) = params2(1,0); quatFinal(2) = params2(2,0); quatFinal(3) = params2(3,0);
+
+    Eigen::Vector3d distReal = sm::kinematics::qlog(quatFinal);
+
+    Eigen::VectorXd minDistEst;
+    Eigen::MatrixXd M;
+    quat.minimalDifferenceAndJacobian(quatInitial, minDistEst, M);
+
+    Eigen::MatrixXd A = sm::kinematics::quatJacobian(evalPoint);
+    Eigen::MatrixXd B = sm::kinematics::quatLogJacobian(evalPoint);
+    std::cout << "A: " << std::endl << A << std::endl;
+    std::cout << "B: " << std::endl << B << std::endl;
+    M = B*A;
+
+
+    Eigen::Vector3d distEst = minDistEst + M*epsV;
+
+    std::cout << "distReal: " << std::endl << distReal << std::endl;
+    std::cout << "distEst: " << std::endl << distEst << std::endl;
+    //EXPECT_TRUE(eps.isApprox(diff));
+
+  }
+  catch(const std::exception & e)
+    {
+      FAIL() << e.what();
+    }
+}
+

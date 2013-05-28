@@ -97,6 +97,51 @@ struct HomogeneousExpressionNodeFunctor
   }
 };
 
+//struct HomogeneousExpressionLogNodeFunctor
+//{
+//  typedef Eigen::Vector3d value_t;
+//  typedef value_t::Scalar scalar_t;
+//  typedef Eigen::Vector4d input_t;
+//  typedef Eigen::MatrixXd jacobian_t;
+//
+//
+//  HomogeneousExpressionLogNodeFunctor(HomogeneousExpression dv) :
+//    _dv(dv) {}
+//
+//  input_t update(const input_t & x, int c, scalar_t delta) { input_t xnew = x; xnew[c] += delta; return xnew; }
+//
+//  HomogeneousExpression _dv;
+//
+//  Eigen::Vector3d operator()(const Eigen::Vector4d& dr)
+//  {
+//
+//    Eigen::Vector3d p = sm::kinematics::qlog(_dv.toHomogeneous());
+//    JacobianContainer J(4);
+//    _dv.evaluateJacobians(J);
+//
+//    int offset = 0;
+//    for(size_t i = 0; i < J.numDesignVariables(); i++)
+//      {
+//	DesignVariable * d = J.designVariable(i);
+//	d->update(&dr[offset],d->minimalDimensions());
+//	offset += d->minimalDimensions();
+//      }
+//
+//    p = sm::kinematics::qlog(_dv.toHomogeneous());
+//
+//
+//    for(size_t i = 0; i < J.numDesignVariables(); i++)
+//      {
+//	DesignVariable * d = J.designVariable(i);
+//	d->revertUpdate();
+//      }
+//
+//    return p;
+//
+//  }
+//};
+
+
 
 void testJacobian(HomogeneousExpression dv)
 {
@@ -116,6 +161,29 @@ void testJacobian(HomogeneousExpression dv)
   SCOPED_TRACE("");
   sm::eigen::assertNear(Jc.asSparseMatrix(), Jest, 1e-6, SM_SOURCE_FILE_POS, "Testing the quat Jacobian");
 }
+
+//void testLogJacobian(HomogeneousExpression dv)
+//{
+//  HomogeneousExpressionLogNodeFunctor functor(dv);
+//
+//  sm::eigen::NumericalDiff<HomogeneousExpressionNodeFunctor> numdiff(functor,1e-7);
+//
+//  /// Discern the size of the jacobian container
+////  Eigen::Vector4d p = dv.toHomogeneous();
+//  JacobianContainer Jc(3);
+//  dv.evaluateJacobians(Jc);
+//
+//  Eigen::Vector3d dp(Jc.cols());
+//  dp.setZero();
+//  Eigen::MatrixXd Jest = numdiff.estimateJacobian(dp);
+//
+//  std::cout << "Jest is:" << std::endl << Jest << std::endl;
+//  std::cout << "J real is:" << std::endl << Jest << std::endl;
+//
+//
+//  SCOPED_TRACE("");
+//  sm::eigen::assertNear(Jc.asSparseMatrix(), Jest, 1e-6, SM_SOURCE_FILE_POS, "Testing the quat Jacobian");
+//}
 
 
 //*

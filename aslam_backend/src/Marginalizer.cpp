@@ -25,7 +25,7 @@ Marginalizer::~Marginalizer() {
 	// TODO Auto-generated destructor stub
 }
 
-void Marginalizer::marginalize(
+void Marginalizer::operator () (
 		std::vector<aslam::backend::DesignVariable*>& inDesignVariables,
 		std::vector<aslam::backend::ErrorTerm*>& inErrorTerms,
 		int numberOfInputDesignVariablesToRemove,

@@ -20,7 +20,7 @@ class Marginalizer {
 public:
 	Marginalizer();
 	virtual ~Marginalizer();
-	void marginalize(
+	void operator () (
 			std::vector<aslam::backend::DesignVariable*>& inDesignVariables,
 			std::vector<aslam::backend::ErrorTerm*>& inErrorTerms,
 			int numberOfInputDesignVariablesToRemove,
