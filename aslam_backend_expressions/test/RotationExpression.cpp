@@ -53,66 +53,7 @@ struct RotationExpressionNodeFunctor
    
   }
 };
-//
-//struct RotationExpressionLogNodeFunctor
-//{
-//  typedef Eigen::Vector3d value_t;
-//  typedef value_t::Scalar scalar_t;
-//  typedef Eigen::VectorXd input_t;
-//  typedef Eigen::MatrixXd jacobian_t;
-//
-//
-//  RotationExpressionLogNodeFunctor(RotationQuaternion dv) : //, Eigen::Vector4d xHat) :
-//   _dv(dv) {}
-//
-//  input_t update(const input_t & x, int c, scalar_t delta) { input_t xnew = x; xnew[c] += delta; return xnew; }
-//
-//  RotationQuaternion _dv;
-//  Eigen::Vector4d _xHat;
-//
-//  Eigen::Vector3d operator()(const Eigen::VectorXd & dr)
-//  {
-//	    std::setprecision(15);
-//	  std::cout << "perturbing by: " << std::endl << dr << std::endl;
-//
-//    //Eigen::Matrix3d C = _dv.toRotationMatrix();
-//    JacobianContainer J(3);
-//    _dv.evaluateJacobians(J);
-//
-//    Eigen::MatrixXd params1;
-//    _dv.getParameters(params1);
-//    Eigen::Vector4d quatParams1;
-//    quatParams1(0) = params1(0,0); quatParams1(1) = params1(1,0); quatParams1(2) = params1(2,0); quatParams1(3) = params1(3,0);
-//
-//    Eigen::Vector3d out1  = sm::kinematics::qlog(quatParams1);
-//
-//    std::cout << "axis angle before the update: " << std::endl << out1 << std::endl;
-//
-//    int offset = 0;
-//    for(size_t i = 0; i < J.numDesignVariables(); i++)
-//      {
-//		DesignVariable * d = J.designVariable(i);
-//		d->update(&dr[offset],d->minimalDimensions());
-//		offset += d->minimalDimensions();
-//      }
-//
-//    Eigen::MatrixXd params;
-//    _dv.getParameters(params);
-//    Eigen::Vector4d quatParams;
-//    quatParams(0) = params(0,0); quatParams(1) = params(1,0); quatParams(2) = params(2,0); quatParams(3) = params(3,0);
-//    Eigen::Vector3d out  = sm::kinematics::qlog(quatParams);
-//    std::cout << "axis angle after the update: " << std::endl << out << std::endl;
-//    std::setprecision(5);
-//    for(size_t i = 0; i < J.numDesignVariables(); i++)
-//      {
-//		DesignVariable * d = J.designVariable(i);
-//		d->revertUpdate();
-//      }
-//
-//    return out;
-//
-//  }
-//};
+
 
 TEST(RotationExpressionNodeTestSuites,testQuatLogJacobian)
 {
