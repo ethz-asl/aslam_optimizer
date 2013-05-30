@@ -1,0 +1,20 @@
+<package>
+  <description brief="aslam_backend_bsplines_tutorial">
+
+     aslam_backend_bsplines_tutorial
+
+  </description>
+  <author>Mathias Buerki</author>
+  <license>BSD</license>
+  <review status="unreviewed" notes=""/>
+  <url>http://ros.org/wiki/aslam_backend_bsplines_tutorial</url>
+  <depend package="aslam_backend" />
+  <depend package="aslam_backend_expressions" />
+  <depend package="aslam_backend_tutorial" />
+  <depend package="aslam_splines" />
+  <depend package="bsplines" />
+  <depend package="sm_kinematics" />
+
+</package>
+
+
