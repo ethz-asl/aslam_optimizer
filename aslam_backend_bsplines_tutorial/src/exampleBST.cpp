@@ -101,7 +101,7 @@ int main(int argc, char ** argv)
 //		Eigen::Matrix4d initPose = Eigen::Matrix4d::Identity();
 //		pose.initPoseSpline(0, K, initPose, initPose);
 
-		aslam::splines::OPTBSpline<bsplines::EuclideanBSpline<4, Eigen::Dynamic>::CONF>::BSpline robotPosSpline(createConf<bsplines::EuclideanBSpline<4, Eigen::Dynamic>::CONF, 4, 1>());
+		aslam::splines::OPTBSpline<bsplines::EuclideanBSpline<4, 1>::CONF>::BSpline robotPosSpline(createConf<bsplines::EuclideanBSpline<4, 1>::CONF, 4, 1>());
 		//const int pointSize = robotPosSpline.getPointSize();
 
 		//aslam::splines::BSplinePoseDesignVariable bSplinePoseDV(pose);
@@ -127,12 +127,8 @@ int main(int argc, char ** argv)
 
       // Now create a prior for this initial state.
 
-      aslam::splines::OPTBSpline<bsplines::EuclideanBSpline<4, Eigen::Dynamic>::CONF>::BSpline::ExpressionFactory<1> fact = robotPosSpline.getExpressionFactoryAt<1>(0);
-      aslam::splines::OPTBSpline<bsplines::EuclideanBSpline<4, Eigen::Dynamic>::CONF>::BSpline::expression_t expr = robotPosSpline.getExpressionFactoryAt<1>(0).getValueExpression(0);
-
-      BOOST_AUTO(expression, fact.getValueExpression(1));
-
-      boost::shared_ptr<aslam::backend::ErrorTermPriorBST> prior(new aslam::backend::ErrorTermPriorBST(expression, true_x_k[0], sigma_x * sigma_x));
+      aslam::splines::OPTBSpline<bsplines::EuclideanBSpline<4, 1>::CONF>::BSpline::expression_t vecPosExpr = robotPosSpline.getExpressionFactoryAt<1>(0).getValueExpression(0);
+      boost::shared_ptr<aslam::backend::ErrorTermPriorBST> prior(new aslam::backend::ErrorTermPriorBST(vecPosExpr, true_x_k[0], sigma_x * sigma_x));
 //      // and add it to the problem.
 //      problem->addErrorTerm(prior);
 //
@@ -140,15 +136,15 @@ int main(int argc, char ** argv)
       // odometry error terms and measurement error terms.
       for(int k = 1; k < K; ++k)
 		{
-//		  // Create odometry error
-//    	  aslam::backend::VectorExpression<1> vecVelocityExpr = robotPosSpline.getExpressionFactoryAt<1>(k).getValueExpression(1);
-//		  boost::shared_ptr<aslam::backend::ErrorTermMotionBST> em(new aslam::backend::ErrorTermMotionBST(vecVelocityExpr, u_k[k], sigma_u * sigma_u));
-//		  problem->addErrorTerm(em);
-//
-//		  // Create observation error
-//		  aslam::backend::VectorExpression<1> vecPositionExpr = robotPosSpline.getExpressionFactoryAt<1>(k).getValueExpression(0);
-//		  boost::shared_ptr<aslam::backend::ErrorTermObservationBST> eo(new aslam::backend::ErrorTermObservationBST(vecPositionExpr, dv_w->toExpression(),  y_k[k], sigma_n * sigma_n));
-//		  problem->addErrorTerm(eo);
+		  // Create odometry error
+          aslam::splines::OPTBSpline<bsplines::EuclideanBSpline<4, 1>::CONF>::BSpline::expression_t vecVelExpr = robotPosSpline.getExpressionFactoryAt<1>(k).getValueExpression(1);
+		  boost::shared_ptr<aslam::backend::ErrorTermMotionBST> em(new aslam::backend::ErrorTermMotionBST(vecVelExpr, u_k[k], sigma_u * sigma_u));
+		  problem->addErrorTerm(em);
+
+		  // Create observation error
+	      aslam::splines::OPTBSpline<bsplines::EuclideanBSpline<4, 1>::CONF>::BSpline::expression_t vecPosExpr = robotPosSpline.getExpressionFactoryAt<1>(k).getValueExpression(0);
+		  boost::shared_ptr<aslam::backend::ErrorTermObservationBST> eo(new aslam::backend::ErrorTermObservationBST(vecPosExpr, dv_w->toExpression(),  y_k[k], sigma_n * sigma_n));
+		  problem->addErrorTerm(eo);
 		}
 
       // Now we have a valid optimization problem full of design variables and error terms.
