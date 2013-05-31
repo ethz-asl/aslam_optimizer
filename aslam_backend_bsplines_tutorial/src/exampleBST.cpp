@@ -2,7 +2,8 @@
 #include <aslam/backend/ErrorTermMotionBST.hpp>
 #include <aslam/backend/ErrorTermPriorBST.hpp>
 #include <aslam/backend/OptimizationProblem.hpp>
-#include <aslam/backend/Optimizer.hpp>
+#include <aslam/backend/Optimizer2.hpp>
+#include <aslam/backend/Optimizer2Options.hpp>
 #include <iostream>
 // Bring in some random number generation from Schweizer Messer.
 #include <sm/random.hpp>
@@ -17,6 +18,7 @@
 #include <aslam/splines/OPTBSpline.hpp>
 #include <aslam/splines/implementation/OPTBSplineImpl.hpp>
 #include <bsplines/EuclideanBSpline.hpp>
+#include <aslam/backend/Scalar.hpp>
 
 template <typename TConf, int ISplineOrder, int IDim, bool BDimRequired> struct ConfCreator {
 	static inline TConf create(){
@@ -50,7 +52,7 @@ int main(int argc, char ** argv)
   try 
     {
       // The true wall position
-      const double true_w = -5.0;
+      const double true_w = 5.0;
       
       // The noise properties.
       const double sigma_n = 0.01;
@@ -87,12 +89,14 @@ int main(int argc, char ** argv)
       std::vector<double> y_k(K);
       for(int k = 0; k < K; ++k)
 	{
-	  y_k[k] = (1.0 / (true_w - true_x_k[k])) + sigma_n * sm::random::normal();
+	  //y_k[k] = (1.0 / (true_w - true_x_k[k])) + sigma_n * sm::random::normal();
+	  y_k[k] = (true_w + true_x_k[k]) + sigma_n * sm::random::normal();
+	  std::cout << "y_" << k << " is: " << y_k[k] << std::endl;
 	}
       
       // Now we can build an optimization problem.
       boost::shared_ptr<aslam::backend::OptimizationProblem> problem( new aslam::backend::OptimizationProblem);
-      
+
 
 		// init BSPline
 //		int splineOder = 4;
@@ -102,35 +106,51 @@ int main(int argc, char ** argv)
 //		pose.initPoseSpline(0, K, initPose, initPose);
 
 		aslam::splines::OPTBSpline<bsplines::EuclideanBSpline<4, 1>::CONF>::BSpline robotPosSpline(createConf<bsplines::EuclideanBSpline<4, 1>::CONF, 4, 1>());
+		const int pointSize = robotPosSpline.getPointSize();
+
+		typename aslam::splines::OPTBSpline<bsplines::EuclideanBSpline<4, 1>::CONF>::BSpline::point_t initPoint(pointSize);
+
+		std::cout << "Init point is: " << std::endl << initPoint << std::endl;
+
+
+		//robotPosSpline.getManifold().randomizePoint(initPoint);
+
+		initPoint(0,0) = x_k[0];
+
+		std::cout << "Init point is: " << std::endl << initPoint << std::endl;
+		robotPosSpline.initConstantUniformSpline(0, K, 10*K, initPoint);
+
+//		aslam::splines::OPTBSpline<bsplines::EuclideanBSpline<4, 1>::CONF>::BSpline::expression_t vecPosExpr0 = robotPosSpline.getExpressionFactoryAt<1>(50).getValueExpression(0);
+//		double v = vecPosExpr0.evaluate()(0);
+
+		std::cout << "Init point is: " << std::endl << initPoint << std::endl;
+		//std::cout << "v is: " << std::endl << v << std::endl;
+		// add the robot pose spline to the problem
+		for(int i = 0; i < robotPosSpline.numDesignVariables(); i++)
+		{
+			robotPosSpline.designVariable(i)->setActive(true);
+			problem->addDesignVariable(robotPosSpline.designVariable(i), false);
+		}
+
 		//const int pointSize = robotPosSpline.getPointSize();
 
 		//aslam::splines::BSplinePoseDesignVariable bSplinePoseDV(pose);
 
 		// set up wall position
-		Eigen::Vector3d wallPosition;
-		wallPosition.setZero();
-		wallPosition(0) = true_w + sm::random::normal();
+		double wallPosition = true_w + sm::random::normal();
 
       // First, create a design variable for the wall position.
-      boost::shared_ptr<aslam::backend::EuclideanPoint> dv_w(new aslam::backend::EuclideanPoint(wallPosition));
+      boost::shared_ptr<aslam::backend::Scalar> dv_w(new aslam::backend::Scalar(wallPosition));
       // Setting this active means we estimate it.
       dv_w->setActive(true);
       // Add it to the optimization problem.
       problem->addDesignVariable(dv_w);
 
-//      // Now we add the initial state.
-//      boost::shared_ptr<aslam::backend::ScalarDesignVariable> dv_x_km1(new aslam::backend::ScalarDesignVariable(x_k[0]));
-//      // Setting this active means we estimate it.
-//      dv_x_km1->setActive(true);
-//      // Add it to the optimization problem.
-//      problem->addDesignVariable(dv_x_km1);
-
       // Now create a prior for this initial state.
-
       aslam::splines::OPTBSpline<bsplines::EuclideanBSpline<4, 1>::CONF>::BSpline::expression_t vecPosExpr = robotPosSpline.getExpressionFactoryAt<1>(0).getValueExpression(0);
       boost::shared_ptr<aslam::backend::ErrorTermPriorBST> prior(new aslam::backend::ErrorTermPriorBST(vecPosExpr, true_x_k[0], sigma_x * sigma_x));
 //      // and add it to the problem.
-//      problem->addErrorTerm(prior);
+      problem->addErrorTerm(prior);
 //
       // Now march through the states creating design variables,
       // odometry error terms and measurement error terms.
@@ -143,15 +163,15 @@ int main(int argc, char ** argv)
 
 		  // Create observation error
 	      aslam::splines::OPTBSpline<bsplines::EuclideanBSpline<4, 1>::CONF>::BSpline::expression_t vecPosExpr = robotPosSpline.getExpressionFactoryAt<1>(k).getValueExpression(0);
-		  boost::shared_ptr<aslam::backend::ErrorTermObservationBST> eo(new aslam::backend::ErrorTermObservationBST(vecPosExpr, dv_w->toExpression(),  y_k[k], sigma_n * sigma_n));
+		  boost::shared_ptr<aslam::backend::ErrorTermObservationBST> eo(new aslam::backend::ErrorTermObservationBST(vecPosExpr, dv_w,  y_k[k], sigma_n * sigma_n));
 		  problem->addErrorTerm(eo);
 		}
 
       // Now we have a valid optimization problem full of design variables and error terms.
       // Create some optimization options.
-      aslam::backend::OptimizerOptions options;
+      aslam::backend::Optimizer2Options options;
       options.verbose = true;
-      options.linearSolver = "cholmod";
+      options.linearSolver = "dense_qr";
       options.levenbergMarquardtLambdaInit = 10;
       options.doSchurComplement = false;
       options.doLevenbergMarquardt = true;
@@ -159,9 +179,22 @@ int main(int argc, char ** argv)
       options.convergenceDeltaX = 1e-12;
       options.convergenceDeltaJ = 1e-12;
       // Then create the optimizer and go!
-      aslam::backend::Optimizer optimizer(options);
+      aslam::backend::Optimizer2 optimizer(options);
       optimizer.setProblem( problem );
+
+      // the wall is at
+      std::cout << "Before optimization, the wall is at: " << std::endl << dv_w->toExpression().toScalar() << std::endl;
+
       optimizer.optimize();
+
+      // the wall is at
+      std::cout << "After optimization, the wall is at: " << std::endl << dv_w->toExpression().toScalar() << std::endl;
+
+      for(int i = 0; i < K; i += 10)
+      {
+    	  aslam::splines::OPTBSpline<bsplines::EuclideanBSpline<4, 1>::CONF>::BSpline::expression_t vecPosExpr = robotPosSpline.getExpressionFactoryAt<1>(i).getValueExpression(0);
+          std::cout << "Robot at " << i << " is: " << std::endl << vecPosExpr.evaluate()(0) << std::endl;
+      }
 
       
     }

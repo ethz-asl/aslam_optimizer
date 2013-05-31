@@ -5,6 +5,7 @@
 #include "RotationExpressionNode.hpp"
 #include <boost/shared_ptr.hpp>
 #include <Eigen/Core>
+#include <aslam/backend/VectorExpressionNode.hpp>
 
 
 namespace aslam {
@@ -61,6 +62,26 @@ namespace aslam {
           
     };
 
+      class ScalarExpressionNodeDivide : public ScalarExpressionNode
+      {
+      public:
+          EIGEN_MAKE_ALIGNED_OPERATOR_NEW
+
+          ScalarExpressionNodeDivide(boost::shared_ptr<ScalarExpressionNode> lhs,
+                                       boost::shared_ptr<ScalarExpressionNode> rhs);
+          virtual ~ScalarExpressionNodeDivide();
+      protected:
+          // These functions must be implemented by child classes.
+          virtual double toScalarImplementation() const;
+          virtual void evaluateJacobiansImplementation(JacobianContainer & outJacobians) const;
+          virtual void evaluateJacobiansImplementation(JacobianContainer & outJacobians, const Eigen::MatrixXd & applyChainRule) const;
+          virtual void getDesignVariablesImplementation(DesignVariable::set_t & designVariables) const;
+
+          boost::shared_ptr<ScalarExpressionNode> _lhs;
+          boost::shared_ptr<ScalarExpressionNode> _rhs;
+
+    };
+
       class ScalarExpressionNodeAdd : public ScalarExpressionNode
       {
       public:
@@ -102,7 +123,23 @@ namespace aslam {
           double _s;
       };
           
+      class ScalarExpressionNodeFromVectorExpression : public ScalarExpressionNode
+      {
+      public:
+          EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
+          ScalarExpressionNodeFromVectorExpression(boost::shared_ptr<VectorExpressionNode<1> > lhs);
+          virtual ~ScalarExpressionNodeFromVectorExpression();
+
+       protected:
+          // These functions must be implemented by child classes.
+          virtual double toScalarImplementation() const;
+          virtual void evaluateJacobiansImplementation(JacobianContainer & outJacobians) const;
+          virtual void evaluateJacobiansImplementation(JacobianContainer & outJacobians, const Eigen::MatrixXd & applyChainRule) const;
+          virtual void getDesignVariablesImplementation(DesignVariable::set_t & designVariables) const;
+
+          boost::shared_ptr<VectorExpressionNode<1> > _lhs;
+    };
 
 
   } // namespace backend

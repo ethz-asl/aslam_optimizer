@@ -29,6 +29,7 @@ namespace aslam {
       
         double ScalarExpression::toScalar() const
         {
+        	std::cout << "root address: " << _root.get() << std::endl;
             return _root->toScalar();
         }
     
@@ -65,6 +66,19 @@ namespace aslam {
             boost::shared_ptr<ScalarExpressionNode> newRoot( new ScalarExpressionNodeAdd(_root, constant));
             return ScalarExpression(newRoot);
 
+        }
+
+        ScalarExpression ScalarExpression::operator/(const ScalarExpression & s)
+        {
+            boost::shared_ptr<ScalarExpressionNode> newRoot( new ScalarExpressionNodeDivide(_root, s._root));
+            return ScalarExpression(newRoot);
+        }
+
+        ScalarExpression ScalarExpression::operator/(double s)
+        {
+        	boost::shared_ptr<ScalarExpressionNode> constant( new ScalarExpressionNodeConstant(s));
+            boost::shared_ptr<ScalarExpressionNode> newRoot( new ScalarExpressionNodeDivide(_root, constant));
+            return ScalarExpression(newRoot);
         }
 
         ScalarExpression ScalarExpression::operator+(double s)

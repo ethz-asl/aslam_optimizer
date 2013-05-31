@@ -2,8 +2,10 @@
 #define ASLAM_BACKEND_TUTORIAL_OBSERVATION_HPP
 
 #include <aslam/backend/ErrorTerm.hpp>
-#include <aslam/backend/EuclideanExpression.hpp>
+#include <aslam/backend/Scalar.hpp>
+#include <aslam/backend/ScalarExpression.hpp>
 #include <aslam/backend/VectorExpression.hpp>
+#include <boost/shared_ptr.hpp>
 
 namespace aslam {
   namespace backend {
@@ -19,7 +21,7 @@ namespace aslam {
       // http://eigen.tuxfamily.org/dox-devel/TopicStructHavingEigenMembers.html
       EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
-      ErrorTermObservationBST(aslam::backend::VectorExpression<1> robotPos, aslam::backend::EuclideanExpression wallPoint, double y, double sigma2_n);
+      ErrorTermObservationBST(aslam::backend::VectorExpression<1> robotPos, boost::shared_ptr<aslam::backend::Scalar> wallPoint, double y, double sigma2_n);
       virtual ~ErrorTermObservationBST();
 
     protected:
@@ -32,11 +34,7 @@ namespace aslam {
       virtual void evaluateJacobiansImplementation();
 
     private:
-      aslam::backend::VectorExpression<1> _robotPos;
-      aslam::backend::EuclideanExpression _wallPoint;
-
-      double _y;
-      
+      aslam::backend::ScalarExpression _observationErrorTerm;
     };
 
   } // namespace backend

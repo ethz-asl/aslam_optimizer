@@ -29,6 +29,7 @@ namespace aslam {
     {
         error_t error;
         error(0) = _robotVelocity.evaluate()(0) - _u;
+        //std::cout << "The motion error is: " << error(0) << std::endl;
         setError(error);
         return evaluateChiSquaredError();
     }
