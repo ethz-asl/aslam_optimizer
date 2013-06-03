@@ -11,7 +11,7 @@
 #include <aslam/backend/DesignVariable.hpp>
 #include <aslam/backend/MarginalizationPriorErrorTerm.hpp>
 #include <aslam/backend/ErrorTerm.hpp>
-//#include <boost/shared_ptr.hpp>
+#include <boost/shared_ptr.hpp>
 
 namespace aslam {
 namespace backend {
@@ -24,7 +24,7 @@ public:
 			std::vector<aslam::backend::DesignVariable*>& inDesignVariables,
 			std::vector<aslam::backend::ErrorTerm*>& inErrorTerms,
 			int numberOfInputDesignVariablesToRemove,
-			aslam::backend::MarginalizationPriorErrorTerm** outPriorErrorTerm) const;
+			boost::shared_ptr<aslam::backend::MarginalizationPriorErrorTerm>& outPriorErrorTermPtr) const;
 
 	int bla() {return 1;}
 };

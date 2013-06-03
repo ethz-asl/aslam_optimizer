@@ -102,7 +102,7 @@ namespace aslam {
         void ScalarExpressionNodeDivide::evaluateJacobiansImplementation(JacobianContainer & outJacobians) const
         {
             Eigen::MatrixXd L(1,1), R(1,1);
-            L(0,0) = 1/_rhs->toScalar();
+            L(0,0) = 1 / _rhs->toScalar();
             R(0,0) = -_lhs->toScalar() / (_rhs->toScalar()*_rhs->toScalar());
             _lhs->evaluateJacobians(outJacobians, L);
             _rhs->evaluateJacobians(outJacobians, R);
@@ -111,7 +111,7 @@ namespace aslam {
         void ScalarExpressionNodeDivide::evaluateJacobiansImplementation(JacobianContainer & outJacobians, const Eigen::MatrixXd & applyChainRule) const
         {
             Eigen::MatrixXd L(1,1), R(1,1);
-            L(0,0) = 1/_rhs->toScalar();
+            L(0,0) = 1 /_rhs->toScalar();
             R(0,0) = -_lhs->toScalar() / (_rhs->toScalar()*_rhs->toScalar());
             _lhs->evaluateJacobians(outJacobians, applyChainRule * L);
             _rhs->evaluateJacobians(outJacobians, applyChainRule * R);

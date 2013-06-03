@@ -7,7 +7,7 @@ namespace aslam {
     
     ErrorTermObservationBST::ErrorTermObservationBST(aslam::backend::VectorExpression<1> robotPos, boost::shared_ptr<aslam::backend::Scalar> wallPoint, double y, double sigma2_n) :
     		//_observationErrorTerm(aslam::backend::Scalar(y).toExpression() - (aslam::backend::Scalar(1.0).toExpression() / (wallPoint->toExpression() - robotPos.toScalarExpression())))
-    		_observationErrorTerm(ScalarExpression(boost::shared_ptr<ScalarExpressionNode>(new ScalarExpressionNodeConstant(y))) - wallPoint->toExpression() - robotPos.toScalarExpression())
+    		_observationErrorTerm(ScalarExpression(boost::shared_ptr<ScalarExpressionNode>(new ScalarExpressionNodeConstant(y))) - (wallPoint->toExpression() / robotPos.toScalarExpression()))
     {
         Eigen::Matrix<double,1,1> invR;
         invR(0,0) = (1.0/sigma2_n);

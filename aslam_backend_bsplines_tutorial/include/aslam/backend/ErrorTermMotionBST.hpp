@@ -30,8 +30,7 @@ namespace aslam {
       /// \brief evaluate the jacobian
       virtual void evaluateJacobiansImplementation();
 
-      double _u;
-      aslam::backend::VectorExpression<1> _robotVelocity;
+      aslam::backend::ScalarExpression _motionErrorTerm;
     };
 
   } // namespace backend

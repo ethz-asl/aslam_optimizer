@@ -13,6 +13,8 @@
 
 #include <aslam/Exceptions.hpp>
 
+#include <boost/shared_ptr.hpp>
+
 namespace aslam {
   namespace backend {
 
@@ -20,6 +22,7 @@ namespace aslam {
 
     class DesignVariable {
     public:
+    	typedef boost::shared_ptr<aslam::backend::DesignVariable> Ptr;
       /**
        * \struct BlockIndexOrdering
        *

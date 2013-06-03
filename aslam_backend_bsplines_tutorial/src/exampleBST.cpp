@@ -63,7 +63,7 @@ int main(int argc, char ** argv)
       std::vector<double> true_u_k(K);
       BOOST_FOREACH(double & u, true_u_k)
 	{
-	  u = sm::random::uniform();
+	  u = 1;//sm::random::uniform();
 	}
       
       // Create the noisy odometry
@@ -76,8 +76,8 @@ int main(int argc, char ** argv)
       // Create the states from noisy odometry.
       std::vector<double> x_k(K);
       std::vector<double> true_x_k(K);
-      x_k[0] = 0.0;
-      true_x_k[0] = 0.0;
+      x_k[0] = 10.0;
+      true_x_k[0] = 10.0;
       for(int k = 1; k < K; ++k)
 	{
 	  true_x_k[k] = true_x_k[k-1] + true_u_k[k];
@@ -90,8 +90,8 @@ int main(int argc, char ** argv)
       for(int k = 0; k < K; ++k)
 	{
 	  //y_k[k] = (1.0 / (true_w - true_x_k[k])) + sigma_n * sm::random::normal();
-	  y_k[k] = (true_w + true_x_k[k]) + sigma_n * sm::random::normal();
-	  std::cout << "y_" << k << " is: " << y_k[k] << std::endl;
+	  y_k[k] = (true_w / true_x_k[k]) + sigma_n * sm::random::normal();
+	  //std::cout << "y_" << k << " is: " << y_k[k] << std::endl;
 	}
       
       // Now we can build an optimization problem.
@@ -109,6 +109,7 @@ int main(int argc, char ** argv)
 		const int pointSize = robotPosSpline.getPointSize();
 
 		typename aslam::splines::OPTBSpline<bsplines::EuclideanBSpline<4, 1>::CONF>::BSpline::point_t initPoint(pointSize);
+		typename aslam::splines::OPTBSpline<bsplines::EuclideanBSpline<4, 1>::CONF>::BSpline::point_t p1(pointSize);
 
 		std::cout << "Init point is: " << std::endl << initPoint << std::endl;
 
@@ -116,9 +117,12 @@ int main(int argc, char ** argv)
 		//robotPosSpline.getManifold().randomizePoint(initPoint);
 
 		initPoint(0,0) = x_k[0];
+		p1(0,0) = 50;
 
 		std::cout << "Init point is: " << std::endl << initPoint << std::endl;
 		robotPosSpline.initConstantUniformSpline(0, K, 10*K, initPoint);
+
+		robotPosSpline.addControlVertex(50, p1);
 
 //		aslam::splines::OPTBSpline<bsplines::EuclideanBSpline<4, 1>::CONF>::BSpline::expression_t vecPosExpr0 = robotPosSpline.getExpressionFactoryAt<1>(50).getValueExpression(0);
 //		double v = vecPosExpr0.evaluate()(0);
@@ -144,27 +148,28 @@ int main(int argc, char ** argv)
       // Setting this active means we estimate it.
       dv_w->setActive(true);
       // Add it to the optimization problem.
-      problem->addDesignVariable(dv_w);
+      //problem->addDesignVariable(dv_w);
 
       // Now create a prior for this initial state.
-      aslam::splines::OPTBSpline<bsplines::EuclideanBSpline<4, 1>::CONF>::BSpline::expression_t vecPosExpr = robotPosSpline.getExpressionFactoryAt<1>(0).getValueExpression(0);
+      aslam::splines::OPTBSpline<bsplines::EuclideanBSpline<4, 1>::CONF>::BSpline::expression_t vecPosExpr = robotPosSpline.getExpressionFactoryAt<1>(0).getValueExpression(1);
       boost::shared_ptr<aslam::backend::ErrorTermPriorBST> prior(new aslam::backend::ErrorTermPriorBST(vecPosExpr, true_x_k[0], sigma_x * sigma_x));
 //      // and add it to the problem.
       problem->addErrorTerm(prior);
-//
+
       // Now march through the states creating design variables,
       // odometry error terms and measurement error terms.
       for(int k = 1; k < K; ++k)
 		{
 		  // Create odometry error
-          aslam::splines::OPTBSpline<bsplines::EuclideanBSpline<4, 1>::CONF>::BSpline::expression_t vecVelExpr = robotPosSpline.getExpressionFactoryAt<1>(k).getValueExpression(1);
+          aslam::splines::OPTBSpline<bsplines::EuclideanBSpline<4, 1>::CONF>::BSpline::expression_t vecVelExpr = robotPosSpline.getExpressionFactoryAt<1>(k).getValueExpression(0);
+          std::cout << "vel input is: " << u_k[k] << std::endl;
 		  boost::shared_ptr<aslam::backend::ErrorTermMotionBST> em(new aslam::backend::ErrorTermMotionBST(vecVelExpr, u_k[k], sigma_u * sigma_u));
 		  problem->addErrorTerm(em);
 
 		  // Create observation error
-	      aslam::splines::OPTBSpline<bsplines::EuclideanBSpline<4, 1>::CONF>::BSpline::expression_t vecPosExpr = robotPosSpline.getExpressionFactoryAt<1>(k).getValueExpression(0);
-		  boost::shared_ptr<aslam::backend::ErrorTermObservationBST> eo(new aslam::backend::ErrorTermObservationBST(vecPosExpr, dv_w,  y_k[k], sigma_n * sigma_n));
-		  problem->addErrorTerm(eo);
+//	      aslam::splines::OPTBSpline<bsplines::EuclideanBSpline<4, 1>::CONF>::BSpline::expression_t vecPosExpr = robotPosSpline.getExpressionFactoryAt<1>(k).getValueExpression(0);
+//		  boost::shared_ptr<aslam::backend::ErrorTermObservationBST> eo(new aslam::backend::ErrorTermObservationBST(vecPosExpr, dv_w,  y_k[k], sigma_n * sigma_n));
+//		  problem->addErrorTerm(eo);
 		}
 
       // Now we have a valid optimization problem full of design variables and error terms.
@@ -195,8 +200,6 @@ int main(int argc, char ** argv)
     	  aslam::splines::OPTBSpline<bsplines::EuclideanBSpline<4, 1>::CONF>::BSpline::expression_t vecPosExpr = robotPosSpline.getExpressionFactoryAt<1>(i).getValueExpression(0);
           std::cout << "Robot at " << i << " is: " << std::endl << vecPosExpr.evaluate()(0) << std::endl;
       }
-
-      
     }
   catch(const std::exception & e)
     {

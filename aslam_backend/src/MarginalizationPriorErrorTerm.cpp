@@ -63,10 +63,14 @@ Eigen::VectorXd MarginalizationPriorErrorTerm::getDifferenceSinceMarginalization
 	  // retrieve current value (xar) and value at marginalization(xHat)
       Eigen::MatrixXd xHat = *it_marg;
 
+      std::cout << "xhat:" << std::endl << xHat << std::endl;
+
       //get minimal difference in tangent space
       Eigen::VectorXd diffVector;
       Eigen::MatrixXd Mblock;
       (*it_current)->minimalDifferenceAndJacobian(xHat, diffVector, Mblock);
+      std::cout << "diffVector:" << std::endl << diffVector << std::endl;
+      std::cout << "Mblock:" << std::endl << Mblock << std::endl;
       int base = index;
       int dim = diffVector.rows();
       // TODO: do this as block copy

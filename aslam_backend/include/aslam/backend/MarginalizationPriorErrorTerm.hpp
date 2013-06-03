@@ -22,6 +22,8 @@ class MarginalizationPriorErrorTerm : public aslam::backend::ErrorTermDs {
 public:
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
+	typedef boost::shared_ptr<aslam::backend::MarginalizationPriorErrorTerm> Ptr;
+
   MarginalizationPriorErrorTerm(const std::vector<aslam::backend::DesignVariable*>& designVariables,
      const Eigen::VectorXd& d, const Eigen::MatrixXd& R, int dimensionErrorTerm, int dimensionDesignVariables);
   virtual ~MarginalizationPriorErrorTerm();

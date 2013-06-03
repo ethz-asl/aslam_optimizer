@@ -29,7 +29,6 @@ namespace aslam {
       
         double ScalarExpression::toScalar() const
         {
-        	std::cout << "root address: " << _root.get() << std::endl;
             return _root->toScalar();
         }
     
