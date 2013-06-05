@@ -24,12 +24,19 @@ public:
 
 	typedef boost::shared_ptr<aslam::backend::MarginalizationPriorErrorTerm> Ptr;
 
+    // PTF: This needs comments
+    //      Also, isn't the dimension implicit in R? (also d, also from the design variables)
+    //      Also, doesn't dimensionErrorTerm == dimensionDesignVariables == R.cols() == R.rows() == d.size()?
+    //      Note again that documentation is important because the order of the DVs in the
+    //      vector is important. Also, the comments should point toward the factory function
   MarginalizationPriorErrorTerm(const std::vector<aslam::backend::DesignVariable*>& designVariables,
      const Eigen::VectorXd& d, const Eigen::MatrixXd& R, int dimensionErrorTerm, int dimensionDesignVariables);
   virtual ~MarginalizationPriorErrorTerm();
 
+    // PTF: comments
   void removeTopDesignVariable();
 
+    // PTF: comments
   bool isValid() { return _valid; }
   int numDesignVariables() { return _designVariables.size(); }
   aslam::backend::DesignVariable* getDesignVariable(int i);
@@ -40,6 +47,7 @@ private:
   virtual double evaluateErrorImplementation();
   virtual void evaluateJacobiansImplementation();
 
+    // PTF: comments
   Eigen::VectorXd getDifferenceSinceMarginalization();
 
   bool _valid;

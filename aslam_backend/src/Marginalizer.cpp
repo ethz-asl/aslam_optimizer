@@ -125,8 +125,10 @@ void Marginalizer::operator () (
 
               // PTF: Are you sure this cuts out the correct block?
               //      How is it possible to start at row 0?
+
               // cut off the zero rows at the bottom
               R_reduced = R.block(0, dimOfDesignVariablesToRemove, dimOfRemainingDesignVariables, dimOfRemainingDesignVariables);
+
               // PTF: This one starts at a different row. Doesn't that mean they don't match?
               //      Also, for vectors, you can use segment() instead of block()
               //      http://eigen.tuxfamily.org/dox-devel/group__TutorialBlockOperations.html
@@ -141,21 +143,23 @@ void Marginalizer::operator () (
 		  // now create the new error term
 		  boost::shared_ptr<aslam::backend::MarginalizationPriorErrorTerm> err(new aslam::backend::MarginalizationPriorErrorTerm(remainingDesignVariables, d_reduced, R_reduced, dimOfPriorErrorTerm, dimOfRemainingDesignVariables));
 		  std::cout << "address of new prior error term: " << err.get() << std::endl;
+          // PTF: Nice use of swap!
 		  outPriorErrorTermPtr.swap(err);
 		  std::cout << "address of new prior error term: " << outPriorErrorTermPtr.get() << std::endl;
 
+          // PTF: What is this n for?
 		  int n = outPriorErrorTermPtr->numDesignVariables();
 
 		  // restore initial block indices to prevent side effects
-		for (size_t i = 0; i < inDesignVariables.size(); ++i) {
-			inDesignVariables[i]->setBlockIndex(originalBlockIndices[i]);
-			inDesignVariables[i]->setColumnBase(originalColumnBase[i]);
-		}
-		int index = 0;
-		for(std::vector<aslam::backend::ErrorTerm*>::iterator it = inErrorTerms.begin(); it != inErrorTerms.end(); ++it)
-		{
-			(*it)->setRowBase(originalRowBase[index++]);
-		}
+          for (size_t i = 0; i < inDesignVariables.size(); ++i) {
+              inDesignVariables[i]->setBlockIndex(originalBlockIndices[i]);
+              inDesignVariables[i]->setColumnBase(originalColumnBase[i]);
+          }
+          int index = 0;
+          for(std::vector<aslam::backend::ErrorTerm*>::iterator it = inErrorTerms.begin(); it != inErrorTerms.end(); ++it)
+          {
+              (*it)->setRowBase(originalRowBase[index++]);
+          }
 }
 
 

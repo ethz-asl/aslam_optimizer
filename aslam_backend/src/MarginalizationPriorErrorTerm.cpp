@@ -17,6 +17,9 @@ MarginalizationPriorErrorTerm::MarginalizationPriorErrorTerm(const std::vector<a
 {
 
   _valid = true;
+  // PTF: Hrm...here is a big weakness of the current optimizer code. We should have
+  //      different base classes for different uncertainty types (scalar, diagonal, matrix, none)
+  //      to avoid big matrix multiplications during optimization.
   setInvR(Eigen::MatrixXd::Identity(dimensionErrorTerm, dimensionErrorTerm));
 
   _M = Eigen::MatrixXd::Identity(dimensionDesignVariables, dimensionDesignVariables);
@@ -26,6 +29,7 @@ MarginalizationPriorErrorTerm::MarginalizationPriorErrorTerm(const std::vector<a
   {
     Eigen::MatrixXd values;
     (*it)->getParameters(values);
+    // PTF: Nice variable name.
     _designVariableValuesAtMarginalization.push_back(values);
   }
   setDesignVariables(designVariables);
@@ -43,6 +47,7 @@ double MarginalizationPriorErrorTerm::evaluateErrorImplementation()
   std::cout << "Diff looks like this: " << std::endl << diff << std::endl;
   std::cout << "R looks like this: " << std::endl << _R << std::endl;
   std::cout << "d looks like this: " << std::endl << _d << std::endl;
+  // PTF: Why a negative here?
   Eigen::VectorXd currentError = -(_d - _R*diff);
   std::cout << "current error looks like this: " << std::endl << currentError << std::endl;
   setError(currentError);
@@ -50,6 +55,9 @@ double MarginalizationPriorErrorTerm::evaluateErrorImplementation()
 
 }
 
+// PTF: Actually, evaluateError() should be as inexpensive as possible and 
+//      evaluateJacobians() can be more expensive. I would implement the Jacobians
+//      only when needed.
 Eigen::VectorXd MarginalizationPriorErrorTerm::getDifferenceSinceMarginalization()
 {
   Eigen::VectorXd diff = Eigen::VectorXd(_dimensionDesignVariables);
@@ -57,14 +65,16 @@ Eigen::VectorXd MarginalizationPriorErrorTerm::getDifferenceSinceMarginalization
   int index = 0;
   std::vector<Eigen::MatrixXd>::iterator it_marg = _designVariableValuesAtMarginalization.begin();
   std::vector<aslam::backend::DesignVariable*>::iterator it_current = _designVariables.begin();
+  // PTF: For stuff like this, please use the SM_ASSERT_EQ( ... ) macros. You can even have
+  //      debug versions that compile out in release mode.
   std::cout << "number of design variables: " << _designVariables.size() << " and number of design variable values at marginalization: " << _designVariableValuesAtMarginalization.size() << std::endl;
   for(;it_current != _designVariables.end(); ++it_current, ++it_marg)
   {
 	  // retrieve current value (xar) and value at marginalization(xHat)
       Eigen::MatrixXd xHat = *it_marg;
-
+      
       std::cout << "xhat:" << std::endl << xHat << std::endl;
-
+      
       //get minimal difference in tangent space
       Eigen::VectorXd diffVector;
       Eigen::MatrixXd Mblock;
@@ -74,6 +84,9 @@ Eigen::VectorXd MarginalizationPriorErrorTerm::getDifferenceSinceMarginalization
       int base = index;
       int dim = diffVector.rows();
       // TODO: do this as block copy
+      // PTF: Should be easy:
+      // diff.segment(index,dim) = diffVector;
+      // index += dim;
       for(int i = 0; i < diffVector.rows(); i++)
       {
         diff(index++) = diffVector(i);
@@ -87,15 +100,18 @@ Eigen::VectorXd MarginalizationPriorErrorTerm::getDifferenceSinceMarginalization
 void MarginalizationPriorErrorTerm::evaluateJacobiansImplementation()
 {
   int index = 0;
+  // PTF: What is only valid for vector spaces?
   // only valid for vector spaces!
   for(vector<aslam::backend::DesignVariable*>::iterator it = _designVariables.begin(); it != _designVariables.end(); ++it)
   {
+      // PTF: Ah, you are missing the M contribution. (also, please make that more efficient).
     int dim = (*it)->minimalDimensions();
     // MAKE THIS MORE EFFICIENT!!!
     Eigen::MatrixXd bl = _R;
     //std::cout << "block looks like this:" << std::endl << bl << std::endl;
     Eigen::MatrixXd E = bl.block(0, index++, _dimensionErrorTerm, dim);
     //std::cout << "block looks like this:" << std::endl << E << std::endl;
+    // PTF: This, in the end, shoud be something like E*M
     _jacobians.add(*it, E);
   }
 
