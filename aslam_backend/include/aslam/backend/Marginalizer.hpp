@@ -16,10 +16,16 @@
 namespace aslam {
 namespace backend {
 
+// PTF: As we talked about, this should be a function (unless it needs to hold state in order to be efficient)
 class Marginalizer {
 public:
 	Marginalizer();
 	virtual ~Marginalizer();
+
+    // PTF: The function should have some comments about usage (doxygen style)
+    //      This is especially important here because, as I read your code,
+    //      the ordering of the design variables really matters. it is important
+    //      to document stuff like this.
 	void operator () (
 			std::vector<aslam::backend::DesignVariable*>& inDesignVariables,
 			std::vector<aslam::backend::ErrorTerm*>& inErrorTerms,
