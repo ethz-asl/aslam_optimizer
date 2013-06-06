@@ -33,12 +33,13 @@ void exportOptimizerOptions()
     .def_readwrite("levenbergMarquardtLambdaP", &Optimizer2Options::levenbergMarquardtLambdaP)
     .def_readwrite("levenbergMarquardtLambdaMuInit",&Optimizer2Options::levenbergMarquardtLambdaMuInit)
     .def_readwrite("levenbergMarquardtEstimateLambdaScale",&Optimizer2Options::levenbergMarquardtEstimateLambdaScale)
-    .def_readwrite("doLevenbergMarquardt",&Optimizer2Options::doLevenbergMarquardt) 
+      //.def_readwrite("doLevenbergMarquardt",&Optimizer2Options::doLevenbergMarquardt) 
     .def_readwrite("doSchurComplement",&Optimizer2Options::doSchurComplement)
     .def_readwrite("maxIterations",&Optimizer2Options::maxIterations)
     .def_readwrite("verbose",&Optimizer2Options::verbose)
     .def_readwrite("linearSolver",&Optimizer2Options::linearSolver)
     .def_readwrite("nThreads", &Optimizer2Options::nThreads)
+      .def_readwrite("trustRegionPolicy", &Optimizer2Options::trustRegionPolicy)
     ;
 
 

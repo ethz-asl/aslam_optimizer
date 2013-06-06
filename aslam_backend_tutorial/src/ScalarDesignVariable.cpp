@@ -63,6 +63,18 @@ namespace aslam {
       _value = value(0, 0);
     }
 
+    void ScalarDesignVariable::minimalDifferenceImplementation(const Eigen::MatrixXd& xHat, Eigen::VectorXd& outDifference) const
+    {
+    	outDifference = Eigen::VectorXd(1);
+    	outDifference(0) = _value - xHat(0,0);
+    }
+
+    void ScalarDesignVariable::minimalDifferenceAndJacobianImplementation(const Eigen::MatrixXd& xHat, Eigen::VectorXd& outDifference, Eigen::MatrixXd& outJacobian) const
+    {
+    	minimalDifferenceImplementation(xHat, outDifference);
+    	outJacobian = Eigen::MatrixXd::Identity(1,1);
+    }
+
 
   } // namespace backend
 } // namespace aslam

@@ -83,8 +83,45 @@ namespace aslam {
             _rhs->getDesignVariables(designVariables);
         }
 
-          
-          
+        ScalarExpressionNodeDivide::ScalarExpressionNodeDivide(boost::shared_ptr<ScalarExpressionNode> lhs,
+                                                                   boost::shared_ptr<ScalarExpressionNode> rhs) :
+            _lhs(lhs), _rhs(rhs)
+        {
+
+        }
+
+        ScalarExpressionNodeDivide::~ScalarExpressionNodeDivide()
+        {
+
+        }
+        double ScalarExpressionNodeDivide::toScalarImplementation() const
+        {
+            return _lhs->toScalar() / _rhs->toScalar();
+        }
+
+        void ScalarExpressionNodeDivide::evaluateJacobiansImplementation(JacobianContainer & outJacobians) const
+        {
+            Eigen::MatrixXd L(1,1), R(1,1);
+            L(0,0) = 1 / _rhs->toScalar();
+            R(0,0) = -_lhs->toScalar() / (_rhs->toScalar()*_rhs->toScalar());
+            _lhs->evaluateJacobians(outJacobians, L);
+            _rhs->evaluateJacobians(outJacobians, R);
+        }
+
+        void ScalarExpressionNodeDivide::evaluateJacobiansImplementation(JacobianContainer & outJacobians, const Eigen::MatrixXd & applyChainRule) const
+        {
+            Eigen::MatrixXd L(1,1), R(1,1);
+            L(0,0) = 1 /_rhs->toScalar();
+            R(0,0) = -_lhs->toScalar() / (_rhs->toScalar()*_rhs->toScalar());
+            _lhs->evaluateJacobians(outJacobians, applyChainRule * L);
+            _rhs->evaluateJacobians(outJacobians, applyChainRule * R);
+        }
+
+        void ScalarExpressionNodeDivide::getDesignVariablesImplementation(DesignVariable::set_t & designVariables) const
+        {
+            _lhs->getDesignVariables(designVariables);
+            _rhs->getDesignVariables(designVariables);
+        }
 
 
         ScalarExpressionNodeAdd::ScalarExpressionNodeAdd(boost::shared_ptr<ScalarExpressionNode> lhs,
@@ -134,6 +171,37 @@ namespace aslam {
         ScalarExpressionNodeConstant::~ScalarExpressionNodeConstant()
         {
 
+        }
+
+        ScalarExpressionNodeFromVectorExpression::ScalarExpressionNodeFromVectorExpression(boost::shared_ptr<VectorExpressionNode<1> > lhs) :
+            _lhs(lhs)
+        {
+
+        }
+
+        ScalarExpressionNodeFromVectorExpression::~ScalarExpressionNodeFromVectorExpression()
+        {
+
+        }
+
+        double ScalarExpressionNodeFromVectorExpression::toScalarImplementation() const
+        {
+            return _lhs->evaluate()(0);
+        }
+
+        void ScalarExpressionNodeFromVectorExpression::evaluateJacobiansImplementation(JacobianContainer & outJacobians) const
+        {
+            _lhs->evaluateJacobians(outJacobians);
+        }
+
+        void ScalarExpressionNodeFromVectorExpression::evaluateJacobiansImplementation(JacobianContainer & outJacobians, const Eigen::MatrixXd & applyChainRule) const
+        {
+            _lhs->evaluateJacobians(outJacobians, applyChainRule);
+        }
+
+        void ScalarExpressionNodeFromVectorExpression::getDesignVariablesImplementation(DesignVariable::set_t & designVariables) const
+        {
+            _lhs->getDesignVariables(designVariables);
         }
 
           

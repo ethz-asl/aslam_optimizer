@@ -54,6 +54,14 @@ namespace aslam {
       return _root->getDesignVariables(designVariables);
     }
 
+    template<int D>
+    ScalarExpression VectorExpression<D>::toScalarExpression() const
+    {
+    	//static_assert(D == 1, "Incompatible vector size");
+        boost::shared_ptr<ScalarExpressionNode> newRoot( new ScalarExpressionNodeFromVectorExpression(_root));
+        return ScalarExpression(newRoot);
+    }
+
 
   } // namespace backend
 } // namespace aslam

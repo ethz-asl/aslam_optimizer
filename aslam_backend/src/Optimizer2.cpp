@@ -45,10 +45,13 @@ namespace aslam {
         {
             // \todo remove this check when the sparse qr solver supports an augmented diagonal
             if(_options.linearSolver != "sparse_qr" && _options.trustRegionPolicy == "LevenbergMarquardt") {
+                _options.verbose && std::cout << "Using the LM trust region policy\n";
                 _trustRegionPolicy.reset(new LevenbergMarquardtTrustRegionPolicy(_options));
             } else if(_options.trustRegionPolicy == "DogLeg") {
+                _options.verbose && std::cout << "Using the Dog Leg trust region policy\n";
                 _trustRegionPolicy.reset(new DogLegTrustRegionPolicy(_options));
                 } else {
+                _options.verbose && std::cout << "Using the GN trust region policy\n";
                 _trustRegionPolicy.reset(new GaussNewtonTrustRegionPolicy(_options));
             }
         }

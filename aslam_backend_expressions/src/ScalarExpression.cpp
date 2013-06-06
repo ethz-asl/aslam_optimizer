@@ -67,6 +67,19 @@ namespace aslam {
 
         }
 
+        ScalarExpression ScalarExpression::operator/(const ScalarExpression & s)
+        {
+            boost::shared_ptr<ScalarExpressionNode> newRoot( new ScalarExpressionNodeDivide(_root, s._root));
+            return ScalarExpression(newRoot);
+        }
+
+        ScalarExpression ScalarExpression::operator/(double s)
+        {
+        	boost::shared_ptr<ScalarExpressionNode> constant( new ScalarExpressionNodeConstant(s));
+            boost::shared_ptr<ScalarExpressionNode> newRoot( new ScalarExpressionNodeDivide(_root, constant));
+            return ScalarExpression(newRoot);
+        }
+
         ScalarExpression ScalarExpression::operator+(double s)
         {
             boost::shared_ptr<ScalarExpressionNode> constant( new ScalarExpressionNodeConstant(s));

@@ -31,9 +31,11 @@ namespace aslam {
       ScalarExpression operator+(const ScalarExpression & s);
       ScalarExpression operator-(const ScalarExpression & s);
       ScalarExpression operator*(const ScalarExpression & s);
+      ScalarExpression operator/(const ScalarExpression & s);
       ScalarExpression operator+(double s);
       ScalarExpression operator-(double s);
       ScalarExpression operator*(double s);
+      ScalarExpression operator/(double s);
 
 
     private:

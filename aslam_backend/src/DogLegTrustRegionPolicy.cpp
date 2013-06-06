@@ -65,7 +65,7 @@ namespace aslam {
             // rebuild system and recalculate sd-solution
             if(!previousIterationFailed) {
                 // update GN matrices:
-                std::cout << "Building system\n";
+                //std::cout << "Building system\n";
                 _solver->buildSystem(_options.nThreads, true);
                 
                 // calculate steepest descent step:

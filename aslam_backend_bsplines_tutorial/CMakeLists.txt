@@ -8,13 +8,8 @@ include($ENV{ROS_ROOT}/core/rosbuild/rosbuild.cmake)
 #  RelWithDebInfo : w/ debug symbols, w/ optimization
 #  MinSizeRel     : w/o debug symbols, w/ optimization, stripped binaries
 set(ROS_BUILD_TYPE Debug)
-#set(ROS_BUILD_TYPE Release)
 
 rosbuild_init()
-
-#add_definitions (-Wall -std=c++0x -O3 -march=native)
-
-set(CMAKE_CXX_FLAGS "-std=c++0x")
 
 #set the default path for built executables to the "bin" directory
 set(EXECUTABLE_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/bin)
@@ -34,47 +29,9 @@ set(LIBRARY_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/lib)
 #rosbuild_add_executable(example examples/example.cpp)
 #target_link_libraries(example ${PROJECT_NAME})
 
-
-rosbuild_add_library(${PROJECT_NAME}
-  src/RotationExpression.cpp 
-  src/RotationExpressionNode.cpp
-  src/RotationQuaternion.cpp
-
-  src/MatrixExpression.cpp 
-  src/MatrixExpressionNode.cpp
-  src/MatrixTransformation.cpp
-
-  src/TransformationExpression.cpp 
-  src/TransformationExpressionNode.cpp
-  src/TransformationBasic.cpp
-
-  src/EuclideanExpression.cpp 
-  src/EuclideanExpressionNode.cpp
-  src/EuclideanPoint.cpp
-
-  src/HomogeneousExpression.cpp 
-  src/HomogeneousExpressionNode.cpp
-  src/HomogeneousPoint.cpp
-
-  src/ScalarExpression.cpp
-  src/ScalarExpressionNode.cpp
-  src/Scalar.cpp
-
-  src/EuclideanDirection.cpp
-
-  src/ErrorTermTransformation.cpp
-  )
-
-
-rosbuild_add_gtest(${PROJECT_NAME}_test
-  test/test_main.cpp
-  test/RotationExpression.cpp
-  #test/EuclideanExpression.cpp
-  test/HomogeneousExpression.cpp
-  test/MatrixAndEuclideanExpression.cpp
-  #test/CameraDesignVariable.cpp
-  test/ScalarExpression.cpp
-  test/ErrorTest_Transformation.cpp
-  )
-
-target_link_libraries(${PROJECT_NAME}_test ${PROJECT_NAME})
+rosbuild_add_executable(${PROJECT_NAME}
+  src/ErrorTermObservationBST.cpp
+  src/ErrorTermMotionBST.cpp
+  src/ErrorTermPriorBST.cpp
+  src/exampleBST.cpp
+)

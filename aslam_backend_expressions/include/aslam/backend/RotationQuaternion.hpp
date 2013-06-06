@@ -30,6 +30,10 @@ namespace aslam {
       /// \brief the size of an update step
       virtual int minimalDimensionsImplementation() const;
 
+      virtual void minimalDifferenceImplementation(const Eigen::MatrixXd& xHat, Eigen::VectorXd& outDifference) const;
+
+      virtual void minimalDifferenceAndJacobianImplementation(const Eigen::MatrixXd& xHat, Eigen::VectorXd& outDifference, Eigen::MatrixXd& outJacobian) const;
+
       RotationExpression toExpression();
 
         void set( const Eigen::Vector4d & q){ _q = q; _p_q = q; }

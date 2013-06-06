@@ -17,7 +17,7 @@ namespace aslam {
     	_UpdatePattern << UpdatePattern;              // Pattern of the Matrix;  1: design variables; 0: constants
     	_UpdateDimension = 0;
     	for (int i=0; i<9; i++){
-    		if (_UpdatePattern(i%3,floor(i/3))==1){
+    		if (_UpdatePattern(i%3,floor(static_cast<double>(i/3)))==1){
     			_UpdateDimension ++;					// Count, how many design variables are in the matrix
     		}
     	}
@@ -40,8 +40,8 @@ namespace aslam {
       Eigen::Matrix3d dA;
       int j=0;
       for (int i=0; i<9; i++){
-    	  _A(i%3,floor(i/3)) += _UpdatePattern(i%3,floor(i/3))*dp[j];
-    	  if (_UpdatePattern(i%3,floor(i/3))==1){j++; }
+    	  _A(i%3,floor(static_cast<double>(i/3))) += _UpdatePattern(i%3,floor(static_cast<double>(i/3)))*dp[j];
+    	  if (_UpdatePattern(i%3,floor(static_cast<double>(i/3)))==1){j++; }
       }
     }
     
@@ -70,7 +70,7 @@ namespace aslam {
     	Eigen::MatrixXd finalJacobian(3,_UpdateDimension);
 		int j=0;
 		for (int i=0; i<9; i++){
-			if (_UpdatePattern(i%3,floor(i/3))==1){
+			if (_UpdatePattern(i%3,floor(static_cast<double>(i/3)))==1){
 				SM_ASSERT_GT_DBG(aslam::Exception, _UpdateDimension, j , "Incorrect update dimension! It doesn't match the pattern");
 				finalJacobian.col(j) = applyChainRule.col(i);		// took out only the rows for the values, which are design variables
 				j++;
@@ -98,6 +98,18 @@ namespace aslam {
         const Eigen::MatrixXd& value) {
       _A_a = _A;
       _A = value;
+    }
+
+    void MatrixTransformation::minimalDifferenceImplementation(const Eigen::MatrixXd& xHat, Eigen::VectorXd& outDifference) const
+    {
+    	SM_ASSERT_TRUE(aslam::InvalidArgumentException, (xHat.rows() == 3)&&(xHat.cols() == 3), "xHat has incompatible dimensions");
+    		outDifference = sm::kinematics::R2AxisAngle(_A*xHat.transpose());
+    }
+
+    void MatrixTransformation::minimalDifferenceAndJacobianImplementation(const Eigen::MatrixXd& xHat, Eigen::VectorXd& outDifference, Eigen::MatrixXd& outJacobian) const
+    {
+    	minimalDifferenceImplementation(xHat, outDifference);
+    	// outJacobian = ???
     }
 
   } // namespace backend
