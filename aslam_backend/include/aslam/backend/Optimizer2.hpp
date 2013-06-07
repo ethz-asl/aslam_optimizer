@@ -107,6 +107,9 @@ namespace aslam {
       template <class L>
       L* getSolver();
 
+      
+        const LinearSystemSolver * getBaseSolver() const;
+
     private:
 
       /// \brief Zero the Gauss-Newton matrices.
