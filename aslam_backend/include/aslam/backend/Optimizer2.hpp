@@ -112,6 +112,9 @@ namespace aslam {
       template <class L>
       L* getSolver();
 
+
+        const Matrix * getJacobian() const;
+
     private:
 
       /// \brief Zero the Gauss-Newton matrices.

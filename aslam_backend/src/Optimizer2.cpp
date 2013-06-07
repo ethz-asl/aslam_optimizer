@@ -350,6 +350,8 @@ namespace aslam {
 
             void Optimizer2::computeDiagonalCovariances(SparseBlockMatrix& outP, double lambda)
             {
+                SM_THROW(Exception, "Broken");
+
                 std::vector<std::pair<int, int> > blockIndices;
                 for (size_t i = 0; i < _designVariables.size(); ++i) {
                     blockIndices.push_back(std::make_pair(i, i));
@@ -359,6 +361,8 @@ namespace aslam {
 
             void Optimizer2::computeCovarianceBlocks(const std::vector<std::pair<int, int> > & blockIndices, SparseBlockMatrix& outP, double lambda)
             {
+                SM_THROW(Exception, "Broken");
+
                 BlockCholeskyLinearSystemSolver* solver = dynamic_cast<BlockCholeskyLinearSystemSolver*>(_solver.get());
                 boost::shared_ptr<BlockCholeskyLinearSystemSolver> solver_sp;
                 if (! solver || _options.trustRegionPolicy != "LevenbergMarquardt") {
@@ -377,6 +381,8 @@ namespace aslam {
 
             void Optimizer2::computeCovariances(SparseBlockMatrix& outP, double lambda)
             {
+                SM_THROW(Exception, "Broken");
+
                 std::vector<std::pair<int, int> > blockIndices;
                 for (size_t i = 0; i < _designVariables.size(); ++i) {
                     for (size_t j = i; j < _designVariables.size(); ++j) {
@@ -386,7 +392,7 @@ namespace aslam {
                 computeCovarianceBlocks(blockIndices, outP, lambda);
             }
 
-            void Optimizer2::computeHessian(SparseBlockMatrix& outH, double lambda)
+        void Optimizer2::computeHessian(SparseBlockMatrix& outH, double lambda)
             {
                 BlockCholeskyLinearSystemSolver* solver = dynamic_cast<BlockCholeskyLinearSystemSolver*>(_solver.get());
                 boost::shared_ptr<BlockCholeskyLinearSystemSolver> solver_sp;
@@ -402,6 +408,12 @@ namespace aslam {
                 solver->buildSystem(_options.nThreads, false);
                 solver->copyHessian(outH);
             }
+
+
+        const Matrix * Optimizer2::getJacobian() const {
+            return _solver->Jacobian();
+        }
+
 
         } // namespace backend
     } // namespace aslam
