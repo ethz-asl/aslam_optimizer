@@ -678,6 +678,7 @@ namespace aslam {
 
     void Optimizer2::computeCovarianceBlocks(const std::vector<std::pair<int, int> > & blockIndices, SparseBlockMatrix& outP, double lambda)
     {
+        SM_THROW(Exception, "Broken");
       BlockCholeskyLinearSystemSolver* solver = dynamic_cast<BlockCholeskyLinearSystemSolver*>(_solver.get());
       boost::shared_ptr<BlockCholeskyLinearSystemSolver> solver_sp;
       if (! solver || !_options.doLevenbergMarquardt) {
@@ -696,6 +697,8 @@ namespace aslam {
 
     void Optimizer2::computeCovariances(SparseBlockMatrix& outP, double lambda)
     {
+        SM_THROW(Exception, "Broken");
+
       std::vector<std::pair<int, int> > blockIndices;
       for (size_t i = 0; i < _designVariables.size(); ++i) {
         for (size_t j = i; j < _designVariables.size(); ++j) {
@@ -707,6 +710,7 @@ namespace aslam {
 
     void Optimizer2::computeHessian(SparseBlockMatrix& outH, double lambda)
     {
+ 
       BlockCholeskyLinearSystemSolver* solver = dynamic_cast<BlockCholeskyLinearSystemSolver*>(_solver.get());
       boost::shared_ptr<BlockCholeskyLinearSystemSolver> solver_sp;
       if (! solver || !_options.doLevenbergMarquardt) {
@@ -721,6 +725,11 @@ namespace aslam {
       solver->buildSystem(_options.nThreads, false);
       solver->copyHessian(outH);
     }
+
+      const LinearSystemSolver * Optimizer2::getBaseSolver() const {
+          return _solver.get();
+      }
+
 
   } // namespace backend
 } // namespace aslam

@@ -39,6 +39,7 @@ rosbuild_add_library(${PROJECT_NAME}
   src/RotationExpression.cpp 
   src/RotationExpressionNode.cpp
   src/RotationQuaternion.cpp
+  src/MappedRotationQuaternion.cpp
 
   src/MatrixExpression.cpp 
   src/MatrixExpressionNode.cpp
@@ -51,10 +52,12 @@ rosbuild_add_library(${PROJECT_NAME}
   src/EuclideanExpression.cpp 
   src/EuclideanExpressionNode.cpp
   src/EuclideanPoint.cpp
+  src/MappedEuclideanPoint.cpp
 
   src/HomogeneousExpression.cpp 
   src/HomogeneousExpressionNode.cpp
   src/HomogeneousPoint.cpp
+  src/MappedHomogeneousPoint.cpp
 
   src/ScalarExpression.cpp
   src/ScalarExpressionNode.cpp
@@ -63,6 +66,8 @@ rosbuild_add_library(${PROJECT_NAME}
   src/EuclideanDirection.cpp
 
   src/ErrorTermTransformation.cpp
+
+  src/MapTransformation.cpp
   )
 
 

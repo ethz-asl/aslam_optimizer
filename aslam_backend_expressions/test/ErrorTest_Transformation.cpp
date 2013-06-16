@@ -47,7 +47,7 @@ TEST(AslamVChargeBackendTestSuite, testTransformation)
     aslam::backend::ErrorTermTestHarness<6> harness(&ett);
 
     // Run the unit tests.
-    harness.testAll();
+    harness.testAll(1e-5);
   }
   catch(const std::exception & e)
     {
