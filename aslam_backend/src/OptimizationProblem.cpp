@@ -82,6 +82,7 @@ namespace aslam {
     {
       _errorTerms.clear();
       _designVariables.clear();
+      _errorTermMap.clear();
     }
 
 

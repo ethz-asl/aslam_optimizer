@@ -19,3 +19,5 @@ sparse_block_matrix/bin/
 sparse_block_matrix/build/
 sparse_block_matrix/lib/
 aslam_backend_design_variables/build/
+cmake_install.cmake
+LocalBuildType.cmake

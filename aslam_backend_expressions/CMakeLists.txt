@@ -9,6 +9,9 @@ include($ENV{ROS_ROOT}/core/rosbuild/rosbuild.cmake)
 #  MinSizeRel     : w/o debug symbols, w/ optimization, stripped binaries
 #set(ROS_BUILD_TYPE Debug)
 set(ROS_BUILD_TYPE Release)
+# just write the upper line into LocalBuildType.cmake to have a ROS_BUILD_TYPE not under version control.
+include(LocalBuildType.cmake OPTIONAL)
+message("ROS_BUILD_TYPE=" ${ROS_BUILD_TYPE})
 
 rosbuild_init()
 
@@ -77,6 +80,8 @@ rosbuild_add_gtest(${PROJECT_NAME}_test
   #test/EuclideanExpression.cpp
   test/HomogeneousExpression.cpp
   test/MatrixAndEuclideanExpression.cpp
+  test/GenericMatrixExpression.cpp
+  test/QuaternionExpression.cpp
   #test/CameraDesignVariable.cpp
   test/ScalarExpression.cpp
   test/ErrorTest_Transformation.cpp

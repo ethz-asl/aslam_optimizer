@@ -1,6 +1,7 @@
 #ifndef ASLAM_BACKEND_VECTOR_EXPRESSION_NODE_HPP
 #define ASLAM_BACKEND_VECTOR_EXPRESSION_NODE_HPP
 #include <aslam/backend/JacobianContainer.hpp>
+#include <aslam/backend/Differential.hpp>
 
 namespace aslam {
   namespace backend {
@@ -11,6 +12,7 @@ namespace aslam {
     public:
         EIGEN_MAKE_ALIGNED_OPERATOR_NEW
       typedef Eigen::Matrix<double,D,1> vector_t;
+      typedef Differential<vector_t, double> differential_t;
 
       VectorExpressionNode();
       virtual ~VectorExpressionNode();
@@ -20,12 +22,14 @@ namespace aslam {
       
       void evaluateJacobians(JacobianContainer & outJacobians) const;
       void evaluateJacobians(JacobianContainer & outJacobians, const Eigen::MatrixXd & applyChainRule) const;
+      void evaluateJacobians(JacobianContainer & outJacobians, const differential_t & diff) const;
       void getDesignVariables(DesignVariable::set_t & designVariables) const;
 
     private:
       virtual vector_t evaluateImplementation() const = 0;
       virtual void evaluateJacobiansImplementation(JacobianContainer & outJacobians) const = 0;
       virtual void evaluateJacobiansImplementation(JacobianContainer & outJacobians, const Eigen::MatrixXd & applyChainRule) const = 0;
+      virtual void evaluateJacobiansImplementation(JacobianContainer & outJacobians, const differential_t & diff) const;
       virtual void getDesignVariablesImplementation(DesignVariable::set_t & designVariables) const = 0;
 
     };

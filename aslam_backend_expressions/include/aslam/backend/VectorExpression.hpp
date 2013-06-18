@@ -5,6 +5,7 @@
 #include <boost/shared_ptr.hpp>
 #include <sm/boost/null_deleter.hpp>
 #include "VectorExpressionNode.hpp"
+#include "ScalarExpression.hpp"
 
 namespace aslam {
   namespace backend {
@@ -25,6 +26,7 @@ namespace aslam {
       
       void evaluateJacobians(JacobianContainer & outJacobians) const;
       void evaluateJacobians(JacobianContainer & outJacobians, const Eigen::MatrixXd & applyChainRule) const;
+
       void getDesignVariables(DesignVariable::set_t & designVariables) const;
 
       boost::shared_ptr< VectorExpressionNode<D> > root() { return _root; }
