@@ -39,6 +39,8 @@ namespace aslam {
        */
       typedef std::tr1::unordered_set< DesignVariable* > set_t;
 
+        typedef boost::shared_ptr< DesignVariable > Ptr;
+
       /**
        * \typedef blockordered_set_t
        * \brief a set of design variables ordered by block index.
