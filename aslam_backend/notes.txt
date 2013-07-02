@@ -1,8 +1,9 @@
 Refactoring:
  * Make an ErrorTermBase that does not return Jacobians
  * Move from  size_t numDesignVariables() const, DesignVariable * designVariable(size_t i) to something smarter. Perhaps void getDesignVariables(dv_set_t & outDvSet)
-
-
+ * Make error terms with configurable noise policies (none, scalar, diagonal, matrix)
+ * Make the error terms not store JacobianContainers (wasted memory)
+ * Don't make the evaluateError() function return a scalar (compute that underneath)
 
 Todo:
  * Remove the default constructor from "ErrorTerm" and add a constructor that takes a list of design variables used by the error term.

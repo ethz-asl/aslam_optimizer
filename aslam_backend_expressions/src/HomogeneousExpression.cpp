@@ -29,6 +29,13 @@ namespace aslam {
           _root.reset(new HomogeneousExpressionNodeConstant(p));
       }
 
+      HomogeneousExpression::HomogeneousExpression(const Eigen::Vector3d & p)
+      {
+          Eigen::Vector4d ph(p[0],p[1],p[2],1.0);
+          _root.reset(new HomogeneousExpressionNodeConstant(ph));
+      }
+
+
     Eigen::Vector4d HomogeneousExpression::toHomogeneous()
     {
       return _root->toHomogeneous();

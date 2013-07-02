@@ -87,6 +87,7 @@ void exportBackendExpressions()
     ;
 
   class_<HomogeneousExpression, boost::shared_ptr<HomogeneousExpression> >("HomogeneousExpression", init<boost::shared_ptr<HomogeneousExpressionNode> >() )
+      .def(init<Eigen::Vector4d>())
     .def("toHomogeneous", &HomogeneousExpression::toHomogeneous)
     //.def("toEuclideanExpression", &HomogeneousExpression::toEuclideanExpression)
     .def("evaluateJacobians", &evaluateJacobians1<HomogeneousExpression>)

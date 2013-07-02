@@ -74,6 +74,6 @@ add_python_export_library(${PROJECT_NAME} python/aslam_backend
   #src/Descriptors.cpp
   #src/CameraProjections.cpp
   #src/CameraShutters.cpp
-  #src/ErrorTermTransformation.cpp
+  src/ErrorTermTransformation.cpp
 )
 

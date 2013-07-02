@@ -1,7 +1,7 @@
 #include <numpy_eigen/boost_python_headers.hpp>
 #include <aslam/backend/ErrorTermTransformation.hpp>
 
-// \todo reenable this
+
 void exportErrorTermTransformation()
 {
     using namespace boost::python;

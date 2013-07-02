@@ -23,6 +23,8 @@ class TransformationDv(object):
         return self.expression
     def numDesignVariables(self):
         return 2
+    def designVariable(self, i):
+        return self.getDesignVariable(i)
     def getDesignVariable(self, i):
         if i == 0:
             return self.q
