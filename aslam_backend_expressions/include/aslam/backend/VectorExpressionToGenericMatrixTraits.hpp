@@ -36,8 +36,9 @@ struct GenericMatrixNodeTraits<VectorExpressionNode<D> > {
     typedef typename VectorExpressionNode<D>::vector_t vector_t;
 
     Constant(int rows = D, int cols = 1) {
-      if (D != Eigen::Dynamic)
+      if (D != Eigen::Dynamic){
         SM_ASSERT_EQ_DBG(std::runtime_error, rows, D, "dynamic size has to equal static size");
+      }
       SM_ASSERT_EQ_DBG(std::runtime_error, cols, 1, "there is only one column supported as vector expression.");
     }
    protected:

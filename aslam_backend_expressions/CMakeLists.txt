@@ -43,6 +43,7 @@ rosbuild_add_library(${PROJECT_NAME}
   src/RotationExpressionNode.cpp
   src/RotationQuaternion.cpp
   src/MappedRotationQuaternion.cpp
+  src/Vector2RotationQuaternionExpressionAdapter.cpp
 
   src/MatrixExpression.cpp 
   src/MatrixExpressionNode.cpp
