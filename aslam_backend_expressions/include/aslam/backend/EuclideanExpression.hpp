@@ -5,6 +5,7 @@
 #include <boost/shared_ptr.hpp>
 #include <aslam/backend/JacobianContainer.hpp>
 #include "HomogeneousExpression.hpp"
+#include "VectorExpression.hpp"
 #include <set>
 
 
@@ -20,6 +21,7 @@ namespace aslam {
 
       EuclideanExpression(EuclideanExpressionNode * designVariable);
       EuclideanExpression(boost::shared_ptr<EuclideanExpressionNode> designVariable);
+      EuclideanExpression(const VectorExpression<3> & vectorExpression);
       virtual ~EuclideanExpression();
       
       Eigen::Vector3d toEuclidean();

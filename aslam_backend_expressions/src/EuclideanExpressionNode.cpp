@@ -295,5 +295,35 @@ namespace aslam {
 
 
 
+    VectorExpression2EuclideanExpressionAdapter::VectorExpression2EuclideanExpressionAdapter(boost::shared_ptr<VectorExpressionNode<3> > vectorExpressionNode) :
+      _vectorExpressionNode(vectorExpressionNode)
+    {
+
+    }
+
+    VectorExpression2EuclideanExpressionAdapter::~VectorExpression2EuclideanExpressionAdapter()
+    {
+    }
+
+    void VectorExpression2EuclideanExpressionAdapter::getDesignVariablesImplementation(DesignVariable::set_t & designVariables) const
+    {
+      _vectorExpressionNode->getDesignVariables(designVariables);
+    }
+
+    Eigen::Vector3d VectorExpression2EuclideanExpressionAdapter::toEuclideanImplementation()
+    {
+      return _vectorExpressionNode->toVector();
+    }
+
+    void VectorExpression2EuclideanExpressionAdapter::evaluateJacobiansImplementation(JacobianContainer & outJacobians) const
+    {
+      _vectorExpressionNode->evaluateJacobians(outJacobians, Eigen::Matrix3d::Identity());
+    }
+
+    void VectorExpression2EuclideanExpressionAdapter::evaluateJacobiansImplementation(JacobianContainer & outJacobians, const Eigen::MatrixXd & applyChainRule) const
+    {
+      _vectorExpressionNode->evaluateJacobians(outJacobians, applyChainRule * Eigen::Matrix3d::Identity());
+    }
+
   } // namespace backend
 } // namespace aslam

@@ -21,6 +21,12 @@ namespace aslam {
 
     }
 
+    EuclideanExpression::EuclideanExpression(const VectorExpression<3> & vectorExpression) :
+      _root(new VectorExpression2EuclideanExpressionAdapter(vectorExpression.root()))
+    {
+
+    }
+
     EuclideanExpression::~EuclideanExpression()
     {
       

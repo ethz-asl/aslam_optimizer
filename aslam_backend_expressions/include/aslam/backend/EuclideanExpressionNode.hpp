@@ -4,6 +4,7 @@
 #include <aslam/backend/JacobianContainer.hpp>
 #include "RotationExpressionNode.hpp"
 #include "MatrixExpressionNode.hpp"
+#include "VectorExpression.hpp"
 #include <boost/shared_ptr.hpp>
 #include <Eigen/Core>
 
@@ -202,6 +203,28 @@ namespace aslam {
        boost::shared_ptr<EuclideanExpressionNode> _lhs;
        Eigen::Vector3d _rhs;
      };
+
+
+     /**
+       * \class VectorExpression2EuclideanExpressionAdapter
+       *
+       * \brief A class representing an adapted VectorExpression<3>.
+       *
+       */
+      class VectorExpression2EuclideanExpressionAdapter : public EuclideanExpressionNode
+      {
+      public:
+        VectorExpression2EuclideanExpressionAdapter(boost::shared_ptr<VectorExpressionNode<3> > vectorExpressionNode);
+        virtual ~VectorExpression2EuclideanExpressionAdapter();
+
+      private:
+        virtual Eigen::Vector3d toEuclideanImplementation();
+        virtual void evaluateJacobiansImplementation(JacobianContainer & outJacobians) const;
+        virtual void evaluateJacobiansImplementation(JacobianContainer & outJacobians, const Eigen::MatrixXd & applyChainRule) const;
+        virtual void getDesignVariablesImplementation(DesignVariable::set_t & designVariables) const;
+
+        boost::shared_ptr<VectorExpressionNode<3> > _vectorExpressionNode;
+      };
 
   } // namespace backend
 } // namespace aslam

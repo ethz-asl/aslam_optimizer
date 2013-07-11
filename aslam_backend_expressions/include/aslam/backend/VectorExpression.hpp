@@ -29,7 +29,7 @@ namespace aslam {
 
       void getDesignVariables(DesignVariable::set_t & designVariables) const;
 
-      boost::shared_ptr< VectorExpressionNode<D> > root() { return _root; }
+      boost::shared_ptr< VectorExpressionNode<D> > root() const { return _root; }
 
     private:
       boost::shared_ptr< VectorExpressionNode<D> > _root;

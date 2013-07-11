@@ -9,6 +9,7 @@
 #include <aslam/backend/EuclideanDirection.hpp>
 #include <aslam/backend/MatrixExpression.hpp>
 #include <aslam/backend/MatrixTransformation.hpp>
+#include <aslam/backend/DesignVariableVector.hpp>
 
 using namespace aslam::backend;
 using namespace sm::kinematics;
@@ -57,7 +58,6 @@ struct EuclideanExpressionNodeFunctor
   }
 };
 
-
 void testJacobian(EuclideanExpression dv)
 {
   EuclideanExpressionNodeFunctor functor(dv);
@@ -87,7 +87,6 @@ void testJacobian(EuclideanExpression dv)
   sm::eigen::assertNear(Jccr.asSparseMatrix(), Jest, 1e-6, SM_SOURCE_FILE_POS, "Testing the quat Jacobian");
 
 }
-
 
 
 
@@ -381,6 +380,33 @@ TEST(EuclideanExpressionNodeTestSuites, testEuclideanDrection)
       SCOPED_TRACE("");
       testJacobian(p1);
 
+    }
+  catch(std::exception const & e)
+    {
+      FAIL() << e.what();
+    }
+}
+
+// Test that the jacobian matches the finite difference jacobian
+TEST(EuclideanExpressionNodeTestSuites, testAdaptedVectorExpression)
+{
+  try
+    {
+      using namespace sm::kinematics;
+      EuclideanPoint point1(Eigen::Vector3d::Random());
+      point1.setActive(true);
+      point1.setBlockIndex(1);
+      EuclideanExpression p1(&point1);
+
+      DesignVariableVector<3> point2(Eigen::Vector3d::Random());
+      point2.setActive(true);
+      point2.setBlockIndex(2);
+      EuclideanExpression p2(&point2);
+
+      EuclideanExpression p_add = p1 + p2;
+
+      SCOPED_TRACE("");
+      testJacobian(p1);
     }
   catch(std::exception const & e)
     {
