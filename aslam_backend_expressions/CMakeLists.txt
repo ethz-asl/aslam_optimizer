@@ -77,7 +77,6 @@ rosbuild_add_library(${PROJECT_NAME}
 rosbuild_add_gtest(${PROJECT_NAME}_test
   test/test_main.cpp
   test/RotationExpression.cpp
-  #test/EuclideanExpression.cpp
   test/HomogeneousExpression.cpp
   test/MatrixAndEuclideanExpression.cpp
   test/GenericMatrixExpression.cpp
