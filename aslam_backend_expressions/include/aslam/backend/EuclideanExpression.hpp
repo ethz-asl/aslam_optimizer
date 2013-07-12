@@ -4,8 +4,6 @@
 #include <Eigen/Core>
 #include <boost/shared_ptr.hpp>
 #include <aslam/backend/JacobianContainer.hpp>
-#include "HomogeneousExpression.hpp"
-#include "VectorExpression.hpp"
 #include <set>
 
 
@@ -13,6 +11,7 @@ namespace aslam {
   namespace backend {
     class HomogeneousExpression;
     class EuclideanExpressionNode;
+    template <int D> class VectorExpression;
     
     class EuclideanExpression
     {

@@ -1,4 +1,5 @@
 #include <aslam/backend/EuclideanExpressionNode.hpp>
+#include <aslam/backend/VectorExpressionNode.hpp>
 #include <sm/kinematics/rotations.hpp>
 
 namespace aslam {

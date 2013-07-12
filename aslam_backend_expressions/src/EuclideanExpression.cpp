@@ -1,6 +1,9 @@
 #include <aslam/backend/EuclideanExpression.hpp>
 #include <aslam/backend/EuclideanExpressionNode.hpp>
 #include <sm/boost/null_deleter.hpp>
+#include <aslam/backend/HomogeneousExpression.hpp>
+#include <aslam/backend/VectorExpression.hpp>
+#include <aslam/backend/VectorExpressionNode.hpp>
 
 namespace aslam {
   namespace backend {
