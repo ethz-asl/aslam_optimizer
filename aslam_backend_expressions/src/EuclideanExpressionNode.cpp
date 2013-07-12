@@ -206,14 +206,14 @@ namespace aslam {
 
     void EuclideanExpressionNodeAddEuclidean::evaluateJacobiansImplementation(JacobianContainer & outJacobians) const
     {
-      _lhs->evaluateJacobians(outJacobians, Eigen::Matrix3d::Identity());
-      _rhs->evaluateJacobians(outJacobians, Eigen::Matrix3d::Identity());
+      _lhs->evaluateJacobians(outJacobians);
+      _rhs->evaluateJacobians(outJacobians);
     }
 
     void EuclideanExpressionNodeAddEuclidean::evaluateJacobiansImplementation(JacobianContainer & outJacobians, const Eigen::MatrixXd & applyChainRule) const
     {
-      _lhs->evaluateJacobians(outJacobians, applyChainRule * Eigen::Matrix3d::Identity());
-      _rhs->evaluateJacobians(outJacobians, applyChainRule * Eigen::Matrix3d::Identity());
+      _lhs->evaluateJacobians(outJacobians, applyChainRule);
+      _rhs->evaluateJacobians(outJacobians, applyChainRule);
     }
 
 
@@ -246,16 +246,15 @@ namespace aslam {
 
     void EuclideanExpressionNodeSubtractEuclidean::evaluateJacobiansImplementation(JacobianContainer & outJacobians) const
     {
-      _lhs->evaluateJacobians(outJacobians, Eigen::Matrix3d::Identity());
+      _lhs->evaluateJacobians(outJacobians);
       _rhs->evaluateJacobians(outJacobians, -Eigen::Matrix3d::Identity());
     }
 
     void EuclideanExpressionNodeSubtractEuclidean::evaluateJacobiansImplementation(JacobianContainer & outJacobians, const Eigen::MatrixXd & applyChainRule) const
     {
-      _lhs->evaluateJacobians(outJacobians, applyChainRule * Eigen::Matrix3d::Identity());
-      _rhs->evaluateJacobians(outJacobians, - applyChainRule * Eigen::Matrix3d::Identity());
+      _lhs->evaluateJacobians(outJacobians, applyChainRule);
+      _rhs->evaluateJacobians(outJacobians, - applyChainRule);
     }
-
 
 
 
@@ -271,12 +270,10 @@ namespace aslam {
 
     }
 
-
     void EuclideanExpressionNodeSubtractVector::getDesignVariablesImplementation(DesignVariable::set_t & designVariables) const
     {
       _lhs->getDesignVariables(designVariables);
     }
-
 
     Eigen::Vector3d EuclideanExpressionNodeSubtractVector::toEuclideanImplementation()
     {
@@ -285,12 +282,44 @@ namespace aslam {
 
     void EuclideanExpressionNodeSubtractVector::evaluateJacobiansImplementation(JacobianContainer & outJacobians) const
     {
-      _lhs->evaluateJacobians(outJacobians, Eigen::Matrix3d::Identity());
+      _lhs->evaluateJacobians(outJacobians);
     }
 
     void EuclideanExpressionNodeSubtractVector::evaluateJacobiansImplementation(JacobianContainer & outJacobians, const Eigen::MatrixXd & applyChainRule) const
     {
-      _lhs->evaluateJacobians(outJacobians, applyChainRule * Eigen::Matrix3d::Identity());
+      _lhs->evaluateJacobians(outJacobians, applyChainRule);
+    }
+
+
+
+    EuclideanExpressionNodeNegated::EuclideanExpressionNodeNegated(boost::shared_ptr<EuclideanExpressionNode> operand) :
+      _operand(operand)
+    {
+
+    }
+
+    EuclideanExpressionNodeNegated::~EuclideanExpressionNodeNegated()
+    {
+    }
+
+    void EuclideanExpressionNodeNegated::getDesignVariablesImplementation(DesignVariable::set_t & designVariables) const
+    {
+      _operand->getDesignVariables(designVariables);
+    }
+
+    Eigen::Vector3d EuclideanExpressionNodeNegated::toEuclideanImplementation()
+    {
+      return - _operand->toEuclidean();
+    }
+
+    void EuclideanExpressionNodeNegated::evaluateJacobiansImplementation(JacobianContainer & outJacobians) const
+    {
+      _operand->evaluateJacobians(outJacobians, -Eigen::Matrix3d::Identity());
+    }
+
+    void EuclideanExpressionNodeNegated::evaluateJacobiansImplementation(JacobianContainer & outJacobians, const Eigen::MatrixXd & applyChainRule) const
+    {
+      _operand->evaluateJacobians(outJacobians, -applyChainRule);
     }
 
 

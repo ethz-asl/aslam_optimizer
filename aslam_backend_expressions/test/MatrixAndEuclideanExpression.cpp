@@ -360,6 +360,31 @@ TEST(EuclideanExpressionNodeTestSuites, testVectorSubtraction)
 }
 
 // Test that the jacobian matches the finite difference jacobian
+TEST(EuclideanExpressionNodeTestSuites, testNegation)
+{
+  try
+    {
+      using namespace sm::kinematics;
+      EuclideanPoint point1(Eigen::Vector3d::Random());
+      point1.setActive(true);
+      point1.setBlockIndex(1);
+      EuclideanExpression p1(&point1);
+
+      EuclideanExpression pNegated = -p1;
+
+      sm::eigen::assertNear(-point1.toEuclidean(), pNegated.toEuclidean(), 1e-14, SM_SOURCE_FILE_POS, "Testing the result is unchanged");
+
+      SCOPED_TRACE("");
+      testJacobian(pNegated);
+
+    }
+  catch(std::exception const & e)
+    {
+      FAIL() << e.what();
+    }
+}
+
+// Test that the jacobian matches the finite difference jacobian
 TEST(EuclideanExpressionNodeTestSuites, testEuclideanDrection)
 {
   try

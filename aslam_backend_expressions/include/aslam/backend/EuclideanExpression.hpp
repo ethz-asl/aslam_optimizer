@@ -31,10 +31,11 @@ namespace aslam {
       void evaluateJacobians(JacobianContainer & outJacobians) const;
       void evaluateJacobians(JacobianContainer & outJacobians, const Eigen::MatrixXd & applyChainRule) const;
 
-      EuclideanExpression cross(const EuclideanExpression & p);
-      EuclideanExpression operator+(const EuclideanExpression & p);
-      EuclideanExpression operator-(const EuclideanExpression & p);
-      EuclideanExpression operator-(const Eigen::Vector3d & p);
+      EuclideanExpression cross(const EuclideanExpression & p) const;
+      EuclideanExpression operator+(const EuclideanExpression & p) const;
+      EuclideanExpression operator-(const EuclideanExpression & p) const;
+      EuclideanExpression operator-(const Eigen::Vector3d & p) const;
+      EuclideanExpression operator-() const;
 
       void getDesignVariables(DesignVariable::set_t & designVariables) const;
 
