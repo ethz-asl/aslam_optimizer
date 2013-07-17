@@ -30,6 +30,12 @@ namespace aslam {
 
     }
 
+    EuclideanExpression::EuclideanExpression(const Eigen::Vector3d & p) :
+      _root(new EuclideanExpressionNodeConstant(p))
+    {
+    }
+
+
     EuclideanExpression::~EuclideanExpression()
     {
       

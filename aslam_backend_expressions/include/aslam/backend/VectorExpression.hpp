@@ -16,6 +16,7 @@ namespace aslam {
     {
     public:
       typedef Eigen::Matrix<double,D,1> vector_t;
+      typedef Eigen::Matrix<double,D,1> value_t;
 
       VectorExpression(boost::shared_ptr< VectorExpressionNode<D> > root);
       VectorExpression(VectorExpressionNode<D> * root);

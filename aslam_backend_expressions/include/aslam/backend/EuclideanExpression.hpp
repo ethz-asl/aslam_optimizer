@@ -16,15 +16,22 @@ namespace aslam {
     class EuclideanExpression
     {
     public:
-        SM_DEFINE_EXCEPTION(Exception, std::runtime_error);
+      SM_DEFINE_EXCEPTION(Exception, std::runtime_error);
+
+      typedef Eigen::Vector3d value_t;
+      typedef Eigen::Vector3d vector_t;
 
       EuclideanExpression(EuclideanExpressionNode * designVariable);
       EuclideanExpression(boost::shared_ptr<EuclideanExpressionNode> designVariable);
       EuclideanExpression(const VectorExpression<3> & vectorExpression);
+      // Create a constant expression
+      EuclideanExpression(const Eigen::Vector3d & p);
+
       virtual ~EuclideanExpression();
       
-      Eigen::Vector3d toEuclidean();
-      Eigen::Vector3d toValue() { return toEuclidean(); }
+      value_t toEuclidean();
+      value_t evaluate() { return toEuclidean(); }
+      value_t toValue() { return toEuclidean(); }
       HomogeneousExpression toHomogeneousExpression();
 
       void evaluateJacobians(JacobianContainer & outJacobians) const;

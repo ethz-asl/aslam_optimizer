@@ -3,6 +3,7 @@
 #include <aslam/backend/EuclideanExpression.hpp>
 #include <sm/kinematics/rotations.hpp>
 #include <sm/kinematics/quaternion_algebra.hpp>
+#include <aslam/backend/test/ExpressionTests.hpp>
 #include <aslam/backend/RotationQuaternion.hpp>
 #include <aslam/backend/EuclideanPoint.hpp>
 #include <aslam/backend/RotationExpression.hpp>
@@ -13,83 +14,6 @@
 
 using namespace aslam::backend;
 using namespace sm::kinematics;
-
-struct EuclideanExpressionNodeFunctor
-{
-  typedef Eigen::Vector3d value_t;
-  typedef value_t::Scalar scalar_t;
-  typedef Eigen::VectorXd input_t;
-  typedef Eigen::MatrixXd jacobian_t;
-
-  
-  EuclideanExpressionNodeFunctor(EuclideanExpression dv) :
-    _dv(dv) {}
-
-  input_t update(const input_t & x, int c, scalar_t delta) { input_t xnew = x; xnew[c] += delta; return xnew; }
-
-  EuclideanExpression _dv;
-
-  Eigen::VectorXd operator()(const Eigen::VectorXd & dr)
-  {
-    
-    Eigen::Vector3d p = _dv.toEuclidean();
-    JacobianContainer J(3);
-    _dv.evaluateJacobians(J);
-
-    int offset = 0;
-    for(size_t i = 0; i < J.numDesignVariables(); i++)
-      {
-	DesignVariable * d = J.designVariable(i);
-	d->update(&dr[offset],d->minimalDimensions());
-	offset += d->minimalDimensions();
-      }
-
-    p = _dv.toEuclidean();
-    
- 
-    for(size_t i = 0; i < J.numDesignVariables(); i++)
-      {
-	DesignVariable * d = J.designVariable(i);
-	d->revertUpdate();
-      }
-
-    return p;
-   
-  }
-};
-
-void testJacobian(EuclideanExpression dv)
-{
-  EuclideanExpressionNodeFunctor functor(dv);
-
-  sm::eigen::NumericalDiff<EuclideanExpressionNodeFunctor> numdiff(functor);
-  
-  /// Discern the size of the jacobian container
-//  Eigen::Vector3d p = dv.toEuclidean();
-  JacobianContainer Jc(3);
-  JacobianContainer Jccr(3);
-
-  dv.evaluateJacobians(Jc);
-  dv.evaluateJacobians(Jccr, Eigen::Matrix3d::Identity());
-   
-  Eigen::VectorXd dp(Jc.cols());
-  dp.setZero();
-  Eigen::MatrixXd Jest = numdiff.estimateJacobian(dp);
- 
-  //cout << Jc.asSparseMatrix() << endl;
-  //cout << Jccr.asSparseMatrix() << endl;
-  //cout << Jest << endl;
-
-
-
-  sm::eigen::assertNear(Jc.asSparseMatrix(), Jest, 1e-6, SM_SOURCE_FILE_POS, "Testing the quat Jacobian");
-
-  sm::eigen::assertNear(Jccr.asSparseMatrix(), Jest, 1e-6, SM_SOURCE_FILE_POS, "Testing the quat Jacobian");
-
-}
-
-
-
 
 // Test that the jacobian matches the finite difference jacobian
 TEST(EuclideanExpressionNodeTestSuites, testPoint)
@@ -620,7 +544,7 @@ TEST(EuclideanExpressionNodeTestSuites, testLowerMixedMatrixTransformedPoint)
       SCOPED_TRACE("");
       testJacobian(Ap);
 
-      sm::eigen::assertNear(Ap.toEuclidean(), B.toFullMatrix() * A.toFullMatrix() * p.toEuclidean(), 1e-14, SM_SOURCE_FILE_POS, "Testing the result is unchanged");
+      sm::eigen::assertNear(Ap.toEuclidean(), B.toFullMatrix() * A.toFullMatrix() * p.toEuclidean(), 1e-13, SM_SOURCE_FILE_POS, "Testing the result is unchanged");
     }
   catch(std::exception const & e)
     {

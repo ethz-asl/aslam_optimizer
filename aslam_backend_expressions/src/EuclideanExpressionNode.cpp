@@ -259,8 +259,35 @@ namespace aslam {
 
 
 
+    EuclideanExpressionNodeConstant::EuclideanExpressionNodeConstant(const Eigen::Vector3d & p) :
+      _p(p)
+    {
+    }
 
-    EuclideanExpressionNodeSubtractVector::EuclideanExpressionNodeSubtractVector(boost::shared_ptr<EuclideanExpressionNode> lhs, Eigen::Vector3d rhs) :
+    EuclideanExpressionNodeConstant::~EuclideanExpressionNodeConstant()
+    {
+    }
+
+    void EuclideanExpressionNodeConstant::getDesignVariablesImplementation(DesignVariable::set_t & designVariables) const
+    {
+    }
+
+    Eigen::Vector3d EuclideanExpressionNodeConstant::toEuclideanImplementation()
+    {
+      return _p;
+    }
+
+    void EuclideanExpressionNodeConstant::evaluateJacobiansImplementation(JacobianContainer & outJacobians) const
+    {
+    }
+
+    void EuclideanExpressionNodeConstant::evaluateJacobiansImplementation(JacobianContainer & outJacobians, const Eigen::MatrixXd & applyChainRule) const
+    {
+    }
+
+
+
+    EuclideanExpressionNodeSubtractVector::EuclideanExpressionNodeSubtractVector(boost::shared_ptr<EuclideanExpressionNode> lhs, const Eigen::Vector3d & rhs) :
       _lhs(lhs), _rhs(rhs)
     {
 

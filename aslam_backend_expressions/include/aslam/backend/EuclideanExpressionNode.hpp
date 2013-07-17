@@ -179,6 +179,29 @@ namespace aslam {
        boost::shared_ptr<EuclideanExpressionNode> _rhs;
      };
 
+     /**
+     * \class EuclideanExpressionNodeConstant
+     *
+     * \brief A class representing a constant Euclidean expressions.
+     *
+     */
+     class EuclideanExpressionNodeConstant : public EuclideanExpressionNode
+     {
+     public:
+       EIGEN_MAKE_ALIGNED_OPERATOR_NEW
+
+       EuclideanExpressionNodeConstant(const Eigen::Vector3d & p);
+       virtual ~EuclideanExpressionNodeConstant();
+
+         void set(const Eigen::Vector3d & p){ _p = p; }
+     private:
+         virtual Eigen::Vector3d toEuclideanImplementation();
+         virtual void evaluateJacobiansImplementation(JacobianContainer & outJacobians) const;
+         virtual void evaluateJacobiansImplementation(JacobianContainer & outJacobians, const Eigen::MatrixXd & applyChainRule) const;
+         virtual void getDesignVariablesImplementation(DesignVariable::set_t & designVariables) const;
+
+         Eigen::Vector3d _p;
+     };
 
     /**
       * \class EuclideanExpressionNodeSubtractVector
@@ -192,7 +215,7 @@ namespace aslam {
        EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
        EuclideanExpressionNodeSubtractVector(boost::shared_ptr<EuclideanExpressionNode> lhs,
-              Eigen::Vector3d rhs);
+              const Eigen::Vector3d & rhs);
        virtual ~EuclideanExpressionNodeSubtractVector();
 
      private:

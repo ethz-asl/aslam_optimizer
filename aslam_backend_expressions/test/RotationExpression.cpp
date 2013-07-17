@@ -3,84 +3,14 @@
 #include <aslam/backend/RotationExpression.hpp>
 #include <sm/kinematics/rotations.hpp>
 #include <sm/kinematics/quaternion_algebra.hpp>
+#include <aslam/backend/test/RotationExpressionTests.hpp>
+#include <aslam/backend/test/RotationQuaternionAsVectorExpressionNode.hpp>
 #include <aslam/backend/RotationQuaternion.hpp>
 #include <aslam/backend/DesignVariableVector.hpp>
 #include <aslam/backend/Vector2RotationQuaternionExpressionAdapter.hpp>
 
 using namespace aslam::backend;
 using namespace sm::kinematics;
-
-struct RotationExpressionNodeFunctor
-{
-  typedef Eigen::Vector3d value_t;
-  typedef value_t::Scalar scalar_t;
-  typedef Eigen::VectorXd input_t;
-  typedef Eigen::MatrixXd jacobian_t;
-
-  
-  RotationExpressionNodeFunctor(RotationExpression dv, Eigen::Vector3d p) :
-    _p(p), _dv(dv) {}
-
-  input_t update(const input_t & x, int c, scalar_t delta) { input_t xnew = x; xnew[c] += delta; return xnew; }
-
-  Eigen::VectorXd _p;
-  RotationExpression _dv;
-
-  Eigen::VectorXd operator()(const Eigen::VectorXd & dr)
-  {
-    
-    Eigen::Matrix3d C = _dv.toRotationMatrix();
-    JacobianContainer J(3);
-    _dv.evaluateJacobians(J);
-
-    int offset = 0;
-    for(size_t i = 0; i < J.numDesignVariables(); i++)
-      {
-	DesignVariable * d = J.designVariable(i);
-	d->update(&dr[offset],d->minimalDimensions());
-	offset += d->minimalDimensions();
-      }
-
-    C = _dv.toRotationMatrix();
-    
- 
-    for(size_t i = 0; i < J.numDesignVariables(); i++)
-      {
-	DesignVariable * d = J.designVariable(i);
-	d->revertUpdate();
-      }
-
-    return C*_p;
-   
-  }
-};
-
-
-void testJacobian(RotationExpression dv)
-{
-  Eigen::Vector3d p;
-  p.setRandom();
-  RotationExpressionNodeFunctor functor(dv,p);
-  
-  sm::eigen::NumericalDiff<RotationExpressionNodeFunctor> numdiff(functor);
-  
-  /// Discern the size of the jacobian container
-  Eigen::Matrix3d C = dv.toRotationMatrix();
-  JacobianContainer Jc(3);
-  dv.evaluateJacobians(Jc);
-  Eigen::Matrix3d Cp_cross = sm::kinematics::crossMx(C*p);
-  Jc.applyChainRule(Cp_cross);
- 
-  Eigen::VectorXd dp(Jc.cols());
-  dp.setZero();
-  Eigen::MatrixXd Jest = numdiff.estimateJacobian(dp);
- 
-  sm::eigen::assertNear(Jc.asSparseMatrix(), Jest, 1e-6, SM_SOURCE_FILE_POS, "Testing the quat Jacobian");
-}
-
-
-
-
 
 // Test that the quaternion jacobian matches the finite difference jacobian
 TEST(RotationExpressionNodeTestSuites, testQuat)

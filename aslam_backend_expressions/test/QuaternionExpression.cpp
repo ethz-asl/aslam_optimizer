@@ -7,70 +7,11 @@
 #include <aslam/backend/VectorExpression.hpp>
 #include <aslam/backend/DesignVariableVector.hpp>
 #include <sm/kinematics/quaternion_algebra.hpp>
+#include <aslam/backend/test/ExpressionTests.hpp>
 
 using namespace aslam::backend;
 using namespace aslam::backend::quaternion;
 
-template<typename TExpression>
-struct ExpressionNodeFunctor {
-  typedef typename TExpression::value_t value_t;
-  typedef typename value_t::Scalar scalar_t;
-  typedef Eigen::VectorXd input_t;
-  typedef Eigen::MatrixXd jacobian_t;
-
-  ExpressionNodeFunctor(TExpression dv, JacobianContainer & jc)
-      : _expression(dv),
-        _jc(jc) {
-  }
-
-  input_t update(const input_t & x, int c, scalar_t delta) {
-    input_t xnew = x;
-    xnew[c] += delta;
-    return xnew;
-  }
-
-  TExpression _expression;
-  JacobianContainer & _jc;
-
-  Eigen::VectorXd operator()(const Eigen::VectorXd & dr) {
-    int offset = 0;
-    for (size_t i = 0; i < _jc.numDesignVariables(); i++) {
-      DesignVariable * d = _jc.designVariable(i);
-      d->update((const double *) &dr[offset], d->minimalDimensions());
-      offset += d->minimalDimensions();
-    }
-
-    auto p = _expression.evaluate();
-
-    for (size_t i = 0; i < _jc.numDesignVariables(); i++) {
-      DesignVariable * d = _jc.designVariable(i);
-      d->revertUpdate();
-    }
-
-    return p;
-  }
-};
-
-template<typename TExpression>
-void testJacobian(TExpression expression, int rows = TExpression::value_t::RowsAtCompileTime) {
-  typedef ExpressionNodeFunctor<TExpression> functor_t;
-
-  /// Discern the size of the jacobian container
-  expression.evaluate();
-  JacobianContainer Jc(rows);
-  JacobianContainer Jccr(rows);
-  expression.evaluateJacobians(Jc);
-  expression.evaluateJacobians(Jccr, Eigen::MatrixXd::Identity(rows, rows));
-
-  functor_t functor(expression, Jc);
-  sm::eigen::NumericalDiff<ExpressionNodeFunctor<TExpression> > numdiff(functor);
-
-  Eigen::VectorXd dp(Jc.cols());
-  dp.setZero();
-  Eigen::MatrixXd Jest = numdiff.estimateJacobian(dp);
-  sm::eigen::assertNear(Jc.asSparseMatrix(), Jest, 1e-6, SM_SOURCE_FILE_POS, "Testing the Jacobian");
-  sm::eigen::assertNear(Jccr.asSparseMatrix(), Jest, 1e-6, SM_SOURCE_FILE_POS, "Testing the Jacobian");
-}
 
 template<typename TScalar, enum QuaternionMode EMode>
 void testQuaternionBasics() {
