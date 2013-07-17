@@ -23,14 +23,18 @@ namespace backend {
     return sm::kinematics::quat2r(_root->toVector());
   }
 
+  Eigen::MatrixXd Vector2RotationQuaternionExpressionAdapter::getMatrixToLieAlgebra() const {
+    return sm::kinematics::quatOPlus(sm::kinematics::quatInv(_root->toVector() * 2)).topLeftCorner<3, 4>();
+  }
+
   void Vector2RotationQuaternionExpressionAdapter::evaluateJacobiansImplementation(JacobianContainer & outJacobians) const
   {
-    _root->evaluateJacobians(outJacobians);
+  _root->evaluateJacobians(outJacobians, getMatrixToLieAlgebra());
   }
 
   void Vector2RotationQuaternionExpressionAdapter::evaluateJacobiansImplementation(JacobianContainer & outJacobians, const Eigen::MatrixXd & applyChainRule) const
   {
-    _root->evaluateJacobians(outJacobians, applyChainRule);
+    _root->evaluateJacobians(outJacobians, applyChainRule * getMatrixToLieAlgebra());
   }
 
   void Vector2RotationQuaternionExpressionAdapter::getDesignVariablesImplementation(DesignVariable::set_t & designVariables) const

@@ -343,38 +343,34 @@ TEST(RotationExpressionNodeTestSuites, testVector2RotationQuaternionExpressionAd
 {
   try {
     using namespace sm::kinematics;
-    RotationQuaternion quat0(quatIdentity());
+    RotationQuaternion quat0(quatRandom());
     quat0.setActive(true);
     quat0.setBlockIndex(0);
     RotationExpression qr0(&quat0);
 
-    RotationQuaternion quat1Var(quatIdentity());
-    struct TestVectorExpressionNode : public VectorExpressionNode<4> {
-      RotationQuaternion & quat;
-      TestVectorExpressionNode(RotationQuaternion & quat) : quat(quat){
-      }
-      virtual vector_t evaluateImplementation() const{ Eigen::MatrixXd ret; quat.getParameters(ret); return ret; };
-      virtual void evaluateJacobiansImplementation(JacobianContainer & outJacobians) const { quat.evaluateJacobians(outJacobians); };
-      virtual void evaluateJacobiansImplementation(JacobianContainer & outJacobians, const Eigen::MatrixXd & applyChainRule) const { quat.evaluateJacobians(outJacobians, applyChainRule); };
-      virtual void evaluateJacobiansImplementation(JacobianContainer & outJacobians, const differential_t & diff) const { throw std::runtime_error("should not happen");};
-      virtual void getDesignVariablesImplementation(DesignVariable::set_t & designVariables) const { designVariables.insert(&quat);};
-    };
+    RotationQuaternion quat1Var(quatRandom());
 
     quat1Var.setActive(true);
     quat1Var.setBlockIndex(1);
 
-    TestVectorExpressionNode quat1(quat1Var);
+    RotationQuaternionAsVectorExpressionNode<> quat1(quat1Var);
 
     RotationExpression qr1 = Vector2RotationQuaternionExpressionAdapter::adapt(VectorExpression<4>(&quat1));
+    sm::eigen::assertEqual(qr1.toRotationMatrix(), quat1Var.toRotationMatrix(), SM_SOURCE_FILE_POS, "Test multiplications with adapter");
+    {
+      SCOPED_TRACE("");
+      testJacobian(qr1);
+    }
+
     RotationExpression dvMultiply = qr0 * qr1;
-
     sm::eigen::assertEqual(qr0.toRotationMatrix() * qr1.toRotationMatrix(), dvMultiply.toRotationMatrix(), SM_SOURCE_FILE_POS, "Test multiplications with adapter");
-
-    SCOPED_TRACE("");
-    testJacobian(dvMultiply);
+    {
+      SCOPED_TRACE("");
+      testJacobian(dvMultiply);
+    }
   }
   catch(const std::exception & e)
-    {
-      FAIL() << e.what();
-    }
+  {
+    FAIL() << e.what();
+  }
 }

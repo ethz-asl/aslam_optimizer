@@ -30,6 +30,7 @@ class Vector2RotationQuaternionExpressionAdapter : public RotationExpressionNode
   virtual void evaluateJacobiansImplementation(JacobianContainer & outJacobians, const Eigen::MatrixXd & applyChainRule) const;
   virtual void getDesignVariablesImplementation(DesignVariable::set_t & designVariables) const;
  private:
+  Eigen::MatrixXd getMatrixToLieAlgebra() const;
   boost::shared_ptr<VectorExpressionNode<4> > _root;
   Eigen::Matrix3d _C;
 };
