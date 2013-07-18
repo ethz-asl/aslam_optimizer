@@ -14,53 +14,56 @@
 
 namespace aslam {
 namespace backend {
+namespace test {
 
-namespace internal {
 template<typename TExpression>
-struct ExpressionNodeFunctor {
-  typedef typename TExpression::value_t value_t;
-  typedef typename value_t::Scalar scalar_t;
-  typedef Eigen::VectorXd input_t;
-  typedef Eigen::MatrixXd jacobian_t;
+class ExpressionTester {
+ public:
+  static void testJacobian(TExpression & expression, bool printResult = false, double tolerance = 1E-6, double eps = sqrt(std::numeric_limits<double>::epsilon()));
 
-  ExpressionNodeFunctor(TExpression & dv, JacobianContainer & jc)
-      : _expression(dv),
-        _jc(jc) {
-  }
+ private:
+  struct ExpressionNodeFunctor {
+    typedef typename TExpression::value_t value_t;
+    typedef typename value_t::Scalar scalar_t;
+    typedef Eigen::VectorXd input_t;
+    typedef Eigen::MatrixXd jacobian_t;
 
-  input_t update(const input_t & x, int c, scalar_t delta) {
-    input_t xnew = x;
-    xnew[c] += delta;
-    return xnew;
-  }
-
-  TExpression & _expression;
-  JacobianContainer & _jc;
-
-  Eigen::VectorXd operator()(const Eigen::VectorXd & dr) {
-    int offset = 0;
-    for (size_t i = 0; i < _jc.numDesignVariables(); i++) {
-      DesignVariable * d = _jc.designVariable(i);
-      d->update((const double *) &dr[offset], d->minimalDimensions());
-      offset += d->minimalDimensions();
+    ExpressionNodeFunctor(TExpression & dv, JacobianContainer & jc)
+        : _expression(dv),
+          _jc(jc) {
     }
 
-    auto p = _expression.evaluate();
-
-    for (size_t i = 0; i < _jc.numDesignVariables(); i++) {
-      DesignVariable * d = _jc.designVariable(i);
-      d->revertUpdate();
+    input_t update(const input_t & x, int c, scalar_t delta) {
+      input_t xnew = x;
+      xnew[c] += delta;
+      return xnew;
     }
 
-    return p;
-  }
+    TExpression & _expression;
+    JacobianContainer & _jc;
+
+    Eigen::VectorXd operator()(const Eigen::VectorXd & dr) {
+      int offset = 0;
+      for (size_t i = 0; i < _jc.numDesignVariables(); i++) {
+        DesignVariable * d = _jc.designVariable(i);
+        d->update((const double *) &dr[offset], d->minimalDimensions());
+        offset += d->minimalDimensions();
+      }
+
+      auto p = _expression.evaluate();
+
+      for (size_t i = 0; i < _jc.numDesignVariables(); i++) {
+        DesignVariable * d = _jc.designVariable(i);
+        d->revertUpdate();
+      }
+
+      return p;
+    }
+  };
 };
-} // namespace internal
-
 
 template<typename TExpression>
-void testJacobian(TExpression expression, bool printResult = false) {
-  typedef internal::ExpressionNodeFunctor<TExpression> functor_t;
+void ExpressionTester<TExpression>::testJacobian(TExpression & expression, bool printResult, double tolerance, double eps) {
   auto val = expression.evaluate();
   int rows = val.rows();
 
@@ -69,14 +72,13 @@ void testJacobian(TExpression expression, bool printResult = false) {
   expression.evaluateJacobians(Jc);
   expression.evaluateJacobians(Jccr, Eigen::MatrixXd::Identity(rows, rows));
 
-  functor_t functor(expression, Jc);
-  sm::eigen::NumericalDiff<internal::ExpressionNodeFunctor<TExpression> > numdiff(functor);
+  sm::eigen::NumericalDiff<ExpressionNodeFunctor> numdiff(ExpressionNodeFunctor(expression, Jc), eps);
 
   Eigen::VectorXd dp(Jc.cols());
   dp.setZero();
   Eigen::MatrixXd Jest = numdiff.estimateJacobian(dp);
   auto JcM = Jc.asDenseMatrix();
-  sm::eigen::assertNear(Jest, JcM, 1e-6, SM_SOURCE_FILE_POS, "Testing the Jacobian with finite differences");
+  sm::eigen::assertNear(Jest, JcM, tolerance, SM_SOURCE_FILE_POS, "Testing the Jacobian with finite differences");
   sm::eigen::assertEqual(JcM, Jccr.asDenseMatrix(), SM_SOURCE_FILE_POS, "Testing whether appending identity changes nothing.");
 
   if(printResult){
@@ -84,6 +86,13 @@ void testJacobian(TExpression expression, bool printResult = false) {
     std::cout << "Jc=\n" << JcM << std::endl; // XXX: debug output of Jest
     std::cout << "Jccr=\n" << Jccr.asDenseMatrix() << std::endl; // XXX: debug output of Jest
   }
+}
+
+} // namespace test
+
+template<typename TExpression>
+inline void testJacobian(TExpression expression, bool printResult = false, double tolerance = 1E-6, double eps = sqrt(std::numeric_limits<double>::epsilon())) {
+  test::ExpressionTester<TExpression>::testJacobian(expression, printResult, tolerance, eps);
 }
 
 }
