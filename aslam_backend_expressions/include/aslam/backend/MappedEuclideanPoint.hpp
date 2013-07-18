@@ -1,5 +1,5 @@
-#ifndef ASLAM_BACKEND_EUCLIDEAN_POINT_HPP
-#define ASLAM_BACKEND_EUCLIDEAN_POINT_HPP
+#ifndef ASLAM_BACKEND_MAPPED_EUCLIDEAN_POINT_HPP
+#define ASLAM_BACKEND_MAPPED_EUCLIDEAN_POINT_HPP
 
 #include "EuclideanExpressionNode.hpp"
 #include "EuclideanExpression.hpp"

@@ -1,5 +1,5 @@
-#ifndef ASLAM_BACKEND_HOMOGENEOUS_POINT_HPP
-#define ASLAM_BACKEND_HOMOGENEOUS_POINT_HPP
+#ifndef ASLAM_BACKEND_MAPPED_HOMOGENEOUS_POINT_HPP
+#define ASLAM_BACKEND_MAPPED_HOMOGENEOUS_POINT_HPP
 
 #include "HomogeneousExpressionNode.hpp"
 #include "HomogeneousExpression.hpp"
