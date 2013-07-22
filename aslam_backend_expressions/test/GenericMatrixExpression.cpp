@@ -7,6 +7,7 @@
 #include <aslam/backend/VectorExpression.hpp>
 #include <aslam/backend/DesignVariableVector.hpp>
 #include <aslam/backend/VectorExpressionToGenericMatrixTraits.hpp>
+#include <aslam/backend/test/ExpressionTests.hpp>
 
 using namespace aslam::backend;
 
@@ -25,7 +26,6 @@ TEST(GenericMatrixExpressionNodeTestSuites, testGenericMatrixBasicOperations) {
     GMAT matExp(mat);
     GMAT2 matExp2(mat2);
 
-    SCOPED_TRACE("");
     sm::eigen::assertNear(matExp.evaluate(), mat, 1e-14, SM_SOURCE_FILE_POS, "Testing evaluation fits initialization.");
     sm::eigen::assertNear(matExp2.evaluate(), mat2, 1e-14, SM_SOURCE_FILE_POS, "Testing evaluation fits initialization.");
 
@@ -49,8 +49,8 @@ TEST(GenericMatrixExpressionNodeTestSuites, testGenericMatrixBasicOperations) {
     {
       SCOPED_TRACE("");
       JacobianContainer jc(vec.rows());
-      sm::eigen::assertNear(dv.value(), vec, 1e-14, SM_SOURCE_FILE_POS,"Testing evaluation fits initialization.");
-      sm::eigen::assertNear(vecExp.evaluate(), vec, 1e-14, SM_SOURCE_FILE_POS, "Testing evaluation fits initialization.");
+      sm::eigen::assertEqual(dv.value(), vec, SM_SOURCE_FILE_POS,"Testing evaluation fits initialization.");
+      sm::eigen::assertEqual(vecExp.evaluate(), vec, SM_SOURCE_FILE_POS, "Testing evaluation fits initialization.");
       vecExp.evaluateJacobians(jc);
       sm::eigen::assertNear(jc.asDenseMatrix(), identity, 1e-14, SM_SOURCE_FILE_POS, "Testing evaluationJacobian fits theoretical value.");
     }
@@ -96,6 +96,54 @@ TEST(GenericMatrixExpressionNodeTestSuites, testGenericMatrixBasicOperations) {
       exp.evaluateJacobians(jc);
       sm::eigen::assertNear(exp.evaluate(), vecExp.transpose().evaluate() * vecExp.evaluate(), 1e-14, SM_SOURCE_FILE_POS, "Testing the design variable vector square.");
       sm::eigen::assertNear(jc.asDenseMatrix(), 2 * vec.transpose(), 1e-14, SM_SOURCE_FILE_POS, "Testing evaluationJacobian fits theoretical value.");
+    }
+
+    {
+      JacobianContainer jc(1);
+      auto exp = (vecExp.transpose() * vecExp).inverse();
+      Eigen::Matrix<double, 1, 1> val;
+      val(0, 0) = 1/vec.dot(vec);
+      sm::eigen::assertNear(exp.evaluate(), val, 1e-14, SM_SOURCE_FILE_POS, "Testing the inverse operation on a 1 x 1 matrix.");
+      exp.evaluateJacobians(jc);
+      sm::eigen::assertNear(jc.asDenseMatrix(), - 2 * vec.transpose() * (1 / (vec.dot(vec) * vec.dot(vec))), 1e-14, SM_SOURCE_FILE_POS, "Testing evaluationJacobian fits theoretical value.");
+    }
+
+    {
+      auto inv = vecExp * vecExp.transpose();
+      auto invValue = (vec * vec.transpose()).eval();
+      sm::eigen::assertNear(inv.evaluate(), invValue, 1e-14, SM_SOURCE_FILE_POS, "Testing the dyadic product.");
+
+      JacobianContainer jc(VEC_ROWS);
+      for( int i = 0; i < VEC_ROWS; i++){
+        jc.clear();
+        GV::matrix_t testVectorValue = GV::matrix_t::Zero();
+        testVectorValue[i] = 1;
+        GV testVector(testVectorValue);
+        auto exp = inv * testVector;
+        sm::eigen::assertNear(exp.evaluate(), invValue * testVectorValue, 1e-14, SM_SOURCE_FILE_POS, "Testing the dyadic product.");
+        testJacobian(exp, true);
+        exp.evaluateJacobians(jc);
+        sm::eigen::assertNear(jc.asDenseMatrix(), identity * vec.dot(testVectorValue) + vec * (testVectorValue).transpose(), 1e-14, SM_SOURCE_FILE_POS, "Testing evaluationJacobian fits theoretical value.");
+      }
+    }
+
+    {
+      auto inv = (identityExp + vecExp * vecExp.transpose()).inverse();
+      auto invValue = (identity + vec * vec.transpose()).inverse().eval();
+      sm::eigen::assertNear(inv.evaluate(), invValue, 1e-14, SM_SOURCE_FILE_POS, "Testing the inverse operation.");
+
+      JacobianContainer jc(VEC_ROWS);
+      for( int i = 0; i < VEC_ROWS; i++){
+        jc.clear();
+        GV::matrix_t testVectorValue = GV::matrix_t::Zero();
+        testVectorValue[i] = 1;
+        GV testVector(testVectorValue);
+        auto exp = inv * testVector;
+        sm::eigen::assertNear(exp.evaluate(), invValue * testVectorValue, 1e-14, SM_SOURCE_FILE_POS, "Testing the inverse operation.");
+        testJacobian(exp);
+        exp.evaluateJacobians(jc);
+        sm::eigen::assertNear(jc.asDenseMatrix(), - invValue * (identity * vec.dot(invValue * testVectorValue) + vec * (invValue * testVectorValue).transpose()), 1e-14, SM_SOURCE_FILE_POS, "Testing evaluationJacobian fits theoretical value.");
+      }
     }
 
     {
@@ -220,7 +268,6 @@ TEST(GenericMatrixExpressionNodeTestSuites, testVectorExpressionToGenericMatrixE
       exp.evaluateJacobians(jc);
       sm::eigen::assertNear(jc.asDenseMatrix(), identity, 1e-14, SM_SOURCE_FILE_POS, "Testing evaluationJacobian fits theoretical value.");
     }
-
   }
   catch(std::exception const & e)
   {

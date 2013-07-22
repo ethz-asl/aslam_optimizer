@@ -95,6 +95,30 @@ _TEMPLATE GenericMatrixExpression<ICols, IRows, TScalar> _CLASS::transpose() con
   return ResultNode::create(*this);
 }
 
+_TEMPLATE GenericMatrixExpression<ICols, IRows, TScalar> _CLASS::inverse() const {
+  typedef GenericMatrixExpression<ICols, IRows, TScalar> result_t;
+
+  static_assert(ICols == IRows, "generalized inverse not yet supported.");
+
+  class ResultNode : public result_t::template UnaryOperationResult<ResultNode, self_t> {
+  public:
+    typedef typename result_t::template UnaryOperationResult<ResultNode, self_t> base_t;
+
+    virtual ~ResultNode() {}
+
+    virtual void evaluateImplementation() const {
+      this->_currentValue = this->getOperandNode().evaluate().inverse();
+    }
+
+    inline typename base_t::apply_diff_return_t applyDiff(const typename base_t::operand_t::tangent_vector_t & tangent_vector) const {
+      evaluateImplementation();
+      return - this->_currentValue * tangent_vector * this->_currentValue;
+    }
+  };
+
+  return ResultNode::create(*this);
+}
+
 _TEMPLATE template <int IColsOther, typename TOtherNode>
 GenericMatrixExpression<IRows, IColsOther, TScalar> _CLASS::operator*(const GenericMatrixExpression<ICols, IColsOther, TScalar, TOtherNode> & other) const {
   typedef GenericMatrixExpression<IRows, IColsOther, TScalar> result_t;

@@ -42,10 +42,11 @@ class GenericMatrixExpressionNode {
   }
   inline const matrix_t & evaluate() const {
     evaluateImplementation();
+    /* TODO activate value caching again.
     if (!isConstant() && _valueDirty) {
       evaluateImplementation();
       _valueDirty = false;
-    };
+    };*/
     return _currentValue;
   }
 

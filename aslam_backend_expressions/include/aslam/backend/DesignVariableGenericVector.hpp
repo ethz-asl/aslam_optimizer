@@ -29,9 +29,13 @@ class DesignVariableGenericVector : public DesignVariable, public GenericMatrixE
  protected:
   /// \brief Revert the last state update.
   virtual void revertUpdateImplementation() {
-  }  //TODO
+    this->_currentValue = _p_v;
+  }
   /// \brief Update the design variable.
   virtual void updateImplementation(const double * dp, int size) {
+    SM_ASSERT_EQ(std::runtime_error, size, D, "update size must match the vector dimension.")
+    _p_v = this->_currentValue;
+    this->_currentValue += Eigen::Map<const vector_t>(dp);
   }
   /// \brief what is the number of dimensions of the perturbation variable.
   virtual int minimalDimensionsImplementation() const {

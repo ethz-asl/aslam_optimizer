@@ -57,6 +57,8 @@ class GenericMatrixExpression {
 
   /// \brief Evaluate the full Eigen matrix.
   matrix_t toFullMatrix() const;
+
+  /// \brief Evaluate the full Eigen matrix.
   matrix_t evaluate() const {
     return toFullMatrix();
   }
