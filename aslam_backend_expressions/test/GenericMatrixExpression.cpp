@@ -121,7 +121,7 @@ TEST(GenericMatrixExpressionNodeTestSuites, testGenericMatrixBasicOperations) {
         GV testVector(testVectorValue);
         auto exp = inv * testVector;
         sm::eigen::assertNear(exp.evaluate(), invValue * testVectorValue, 1e-14, SM_SOURCE_FILE_POS, "Testing the dyadic product.");
-        testJacobian(exp, true);
+        testJacobian(exp);
         exp.evaluateJacobians(jc);
         sm::eigen::assertNear(jc.asDenseMatrix(), identity * vec.dot(testVectorValue) + vec * (testVectorValue).transpose(), 1e-14, SM_SOURCE_FILE_POS, "Testing evaluationJacobian fits theoretical value.");
       }
