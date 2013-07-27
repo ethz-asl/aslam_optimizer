@@ -35,7 +35,6 @@ aslam_backend_tutorial/tex/backend.pdf
 aslam_backend_tutorial/tex/backend.toc
 build/
 *~
-#*
 bin
 build
 lib
