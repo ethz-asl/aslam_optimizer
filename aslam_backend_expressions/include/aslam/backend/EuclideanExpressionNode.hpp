@@ -3,10 +3,11 @@
 
 #include <aslam/backend/JacobianContainer.hpp>
 #include "RotationExpressionNode.hpp"
+#include "TransformationExpressionNode.hpp"
 #include "MatrixExpressionNode.hpp"
 #include <boost/shared_ptr.hpp>
 #include <Eigen/Core>
-
+#include <sm/kinematics/RotationalKinematics.hpp>
 
 namespace aslam {
   namespace backend {
@@ -273,6 +274,44 @@ namespace aslam {
         boost::shared_ptr<VectorExpressionNode<3> > _vectorExpressionNode;
       };
 
+      class EuclideanExpressionNodeTranslation : public EuclideanExpressionNode
+      {
+      public:
+        EIGEN_MAKE_ALIGNED_OPERATOR_NEW
+
+        EuclideanExpressionNodeTranslation(boost::shared_ptr<TransformationExpressionNode> operand);
+        virtual ~EuclideanExpressionNodeTranslation();
+
+      private:
+        virtual Eigen::Vector3d toEuclideanImplementation();
+        virtual void evaluateJacobiansImplementation(JacobianContainer & outJacobians) const;
+        virtual void evaluateJacobiansImplementation(JacobianContainer & outJacobians, const Eigen::MatrixXd & applyChainRule) const;
+        virtual void getDesignVariablesImplementation(DesignVariable::set_t & designVariables) const;
+
+        boost::shared_ptr<TransformationExpressionNode> _operand;
+      };
+
+
+  class EuclideanExpressionNodeRotationParameters : public EuclideanExpressionNode
+      {
+      public:
+        EIGEN_MAKE_ALIGNED_OPERATOR_NEW
+
+        EuclideanExpressionNodeRotationParameters(boost::shared_ptr<RotationExpressionNode> operand, sm::kinematics::RotationalKinematics::Ptr rk);
+        virtual ~EuclideanExpressionNodeRotationParameters();
+
+      private:
+        virtual Eigen::Vector3d toEuclideanImplementation();
+        virtual void evaluateJacobiansImplementation(JacobianContainer & outJacobians) const;
+        virtual void evaluateJacobiansImplementation(JacobianContainer & outJacobians, const Eigen::MatrixXd & applyChainRule) const;
+        virtual void getDesignVariablesImplementation(DesignVariable::set_t & designVariables) const;
+
+        boost::shared_ptr<RotationExpressionNode> _operand;
+        sm::kinematics::RotationalKinematics::Ptr _rk;
+      };
+
+
+  
   } // namespace backend
 } // namespace aslam
 

@@ -8,6 +8,8 @@
 #include <aslam/backend/RotationQuaternion.hpp>
 #include <aslam/backend/DesignVariableVector.hpp>
 #include <aslam/backend/Vector2RotationQuaternionExpressionAdapter.hpp>
+#include <aslam/backend/MapTransformation.hpp>
+
 
 using namespace aslam::backend;
 using namespace sm::kinematics;
@@ -30,6 +32,33 @@ TEST(RotationExpressionNodeTestSuites, testQuat)
       FAIL() << e.what();
     }
 }
+
+// Test that the quaternion jacobian matches the finite difference jacobian
+TEST(RotationExpressionNodeTestSuites, testFromTransformation)
+{
+  try 
+    {
+      using namespace sm::kinematics;
+      Transformation T;
+      boost::shared_ptr<MappedRotationQuaternion> outQ;
+      boost::shared_ptr<MappedEuclideanPoint> outT;
+      T.setRandom();
+      TransformationExpression A(transformationToExpression(T,outQ,outT));
+      outQ->setActive(true);
+      outQ->setBlockIndex(0);
+      outT->setActive(true);
+      outT->setBlockIndex(1);
+
+      RotationExpression qr = A.toRotationExpression();
+      
+      testJacobian(qr);
+    }
+  catch(std::exception const & e)
+    {
+      FAIL() << e.what();
+    }
+}
+
 
 // Test that the inverse quaternion matches the finite difference.
 TEST(RotationExpressionNodeTestSuites, testQuatInverse1)

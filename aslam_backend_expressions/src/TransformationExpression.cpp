@@ -5,6 +5,7 @@
 #include <aslam/backend/EuclideanExpression.hpp>
 #include <aslam/backend/HomogeneousExpression.hpp>
 #include <aslam/backend/TransformationBasic.hpp>
+#include <aslam/backend/EuclideanExpressionNode.hpp>
 
 namespace aslam {
   namespace backend {
@@ -51,9 +52,15 @@ namespace aslam {
       return _root->toTransformationMatrix();
     }
   
-    // RotationExpression toRotationExpression() const;
-    // HomogeneousExpression toHomogeneousExpression() const;
-    // EuclideanExpression toEuclideanExpression() const;
+  RotationExpression TransformationExpression::toRotationExpression() const {
+    boost::shared_ptr< RotationExpressionNode > een( new RotationExpressionNodeTransformation( _root ) );
+    return RotationExpression(een);
+  }
+  // HomogeneousExpression toHomogeneousExpression() const;
+  EuclideanExpression TransformationExpression::toEuclideanExpression() const {
+    boost::shared_ptr< EuclideanExpressionNode > een( new EuclideanExpressionNodeTranslation( _root ) );
+    return EuclideanExpression(een);
+  }
 
 
     void TransformationExpression::evaluateJacobians(JacobianContainer & outJacobians) const

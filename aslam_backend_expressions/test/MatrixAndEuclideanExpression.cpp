@@ -11,6 +11,7 @@
 #include <aslam/backend/MatrixExpression.hpp>
 #include <aslam/backend/MatrixTransformation.hpp>
 #include <aslam/backend/DesignVariableVector.hpp>
+#include <aslam/backend/MapTransformation.hpp>
 
 using namespace aslam::backend;
 using namespace sm::kinematics;
@@ -551,4 +552,65 @@ TEST(EuclideanExpressionNodeTestSuites, testLowerMixedMatrixTransformedPoint)
       FAIL() << e.what();
     }
 }
+
+
+
+
+
+// Test that the jacobian matches the finite difference jacobian
+TEST(EuclideanExpressionNodeTestSuites, testTransformationTransformedPoint)
+{
+  try
+    {
+      using namespace sm::kinematics;
+      Transformation T;
+      boost::shared_ptr<MappedRotationQuaternion> outQ;
+      boost::shared_ptr<MappedEuclideanPoint> outT;
+      T.setRandom();
+      TransformationExpression A(transformationToExpression(T,outQ,outT));
+      outQ->setActive(true);
+      outQ->setBlockIndex(0);
+      outT->setActive(true);
+      outT->setBlockIndex(1);
+
+      
+      EuclideanExpression p = A.toEuclideanExpression();
+
+      SCOPED_TRACE("");
+      testJacobian(p);
+      SCOPED_TRACE("");
+      sm::eigen::assertNear(p.toEuclidean(), A.toTransformationMatrix().topRightCorner<3,1>(), 1e-14, SM_SOURCE_FILE_POS, "Testing the result is unchanged");
+    }
+  catch(std::exception const & e)
+    {
+      FAIL() << e.what();
+    }
+}
+
+
+// Test that the jacobian matches the finite difference jacobian
+TEST(EuclideanExpressionNodeTestSuites, testRotationParameters)
+{
+  try
+    {
+      using namespace sm::kinematics;
+      RotationQuaternion quat(quatRandom());
+      quat.setActive(true);
+      quat.setBlockIndex(0);
+      RotationExpression qr(&quat);
+      RotationalKinematics::Ptr ypr( new EulerAnglesYawPitchRoll());
+      
+      EuclideanExpression p = qr.toParameters(ypr);
+
+      SCOPED_TRACE("");
+      testJacobian(p);
+      SCOPED_TRACE("");
+      sm::eigen::assertNear(p.toEuclidean(), ypr->rotationMatrixToParameters(qr.toRotationMatrix()), 1e-14, SM_SOURCE_FILE_POS, "Testing the result is unchanged");
+    }
+  catch(std::exception const & e)
+    {
+      FAIL() << e.what();
+    }
+}
+
 
