@@ -7,6 +7,7 @@
 namespace aslam {
   namespace backend {
 
+  // \todo remove this template argument.
     template<int D>
     class ErrorTermTestHarness {
     public:
