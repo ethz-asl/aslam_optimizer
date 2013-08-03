@@ -30,9 +30,6 @@ namespace aslam {
       ErrorTermDs(int dimensionErrorTerm);
       virtual ~ErrorTermDs();
 
-      /// \brief evaluate the Jacobians using finite differences.
-      void evaluateJacobiansFiniteDifference();
-
       /// \brief retrieve the error vector
       const error_t& error() const;
 
@@ -48,7 +45,7 @@ namespace aslam {
       virtual Eigen::MatrixXd vsInvR() const;
       virtual void vsSetInvR(const Eigen::MatrixXd& invR);
 
-      virtual void getWeightedJacobians(JacobianContainer& outJc, bool useMEstimator) const;
+      virtual void getWeightedJacobians(JacobianContainer& outJc, bool useMEstimator);
       virtual void getWeightedError(Eigen::VectorXd& e, bool useMEstimator) const;
 
       /// Check if Jacobians are finite
@@ -60,9 +57,6 @@ namespace aslam {
 
       /// \brief build the hessian.
       virtual void buildHessianImplementation(SparseBlockMatrix& outHessian, Eigen::VectorXd& outRhs, bool useMEstimator);
-
-      /// \brief get the Jacobian container
-      virtual const JacobianContainer& getJacobiansImplementation() const;
 
       /// \brief Clear the Jacobians
       virtual void clearJacobians();
@@ -94,7 +88,7 @@ namespace aslam {
       /// \brief evaluate the squared error from the error vector and
       ///        square root covariance matrix.
       double evaluateChiSquaredError() const;
-
+      
       /// Initializes the jacobian container with a new number of rows
       void resizeJacobianContainer(int nrows);
 

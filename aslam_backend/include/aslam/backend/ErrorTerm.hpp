@@ -40,14 +40,12 @@ namespace aslam {
       double evaluateError();
 
       /// \brief evaluate the Jacobians.
-      void evaluateJacobians();
+      void evaluateJacobians(JacobianContainer & outJacobians);
 
-      /// \brief get the Jacobian container.
-      /// This was put here to make the python interface easier to generate. It doesn't
-      /// fit for quadratic integral terms so it may go away in future versions.
-      const JacobianContainer& getJacobians() const;
-
-      virtual void getWeightedJacobians(JacobianContainer& outJc, bool useMEstimator) const = 0;
+      /// \brief evaluate the Jacobians using finite differences.
+      void evaluateJacobiansFiniteDifference(JacobianContainer & outJacobians);
+      
+      virtual void getWeightedJacobians(JacobianContainer& outJc, bool useMEstimator) = 0;
 
       virtual void getWeightedError(Eigen::VectorXd& e, bool useMEstimator) const = 0;
 
@@ -121,10 +119,7 @@ namespace aslam {
       virtual double evaluateErrorImplementation() = 0;
 
       /// \brief evaluate the Jacobians
-      virtual void evaluateJacobiansImplementation() = 0;
-
-      /// \brief clear the Jacobians.
-      virtual void clearJacobians() = 0;
+      virtual void evaluateJacobiansImplementation(JacobianContainer & outJacobians) = 0;
 
       /// \brief get the number of dimensions of this error term.
       virtual size_t getDimensionImplementation() const = 0;
@@ -135,9 +130,6 @@ namespace aslam {
       /// problem. The correct blocks for each design varible are available from the design
       /// variable as dv.blockIndex()
       virtual void buildHessianImplementation(SparseBlockMatrix& outHessian, Eigen::VectorXd& outRhs, bool useMEstimator) = 0;
-
-      /// \brief get the Jacobian container
-      virtual const JacobianContainer& getJacobiansImplementation() const = 0;
 
       virtual Eigen::VectorXd vsErrorImplementation() const = 0;
 
@@ -192,8 +184,6 @@ namespace aslam {
       ErrorTermFs();
       virtual ~ErrorTermFs();
 
-      /// \brief evaluate the Jacobians using finite differences.
-      void evaluateJacobiansFiniteDifference();
 
       /// \brief retrieve the error vector
       const error_t& error() const;
@@ -210,7 +200,7 @@ namespace aslam {
       virtual Eigen::MatrixXd vsInvR() const;
       virtual void vsSetInvR(const Eigen::MatrixXd& invR);
 
-      virtual void getWeightedJacobians(JacobianContainer& outJc, bool useMEstimator) const;
+      virtual void getWeightedJacobians(JacobianContainer& outJc, bool useMEstimator);
       virtual void getWeightedError(Eigen::VectorXd& e, bool useMEstimator) const;
 
       /// Check if Jacobians are finite
@@ -223,22 +213,12 @@ namespace aslam {
       /// \brief build the hessian.
       virtual void buildHessianImplementation(SparseBlockMatrix& outHessian, Eigen::VectorXd& outRhs, bool useMEstimator);
 
-      /// \brief get the Jacobian container
-      virtual const JacobianContainer& getJacobiansImplementation() const;
-
-      /// \brief Clear the Jacobians
-      virtual void clearJacobians();
-
       /// \brief get the current value of the error.
       Eigen::VectorXd vsErrorImplementation() const;
 
       virtual size_t getDimensionImplementation() const {
         return Dimension;
       }
-
-      // This probably has to have a jacobian container...
-      // \todo make this fixed sized.
-      JacobianContainer _jacobians;
 
       /// \brief set the error vector.
       template<typename DERIVED>

@@ -42,7 +42,7 @@ namespace aslam {
       virtual double evaluateErrorImplementation();
 
       /// \brief evaluate the jacobian
-      virtual void evaluateJacobiansImplementation();
+      virtual void evaluateJacobiansImplementation(JacobianContainer & J);
 
     private:
       aslam::backend::TransformationExpression _T;

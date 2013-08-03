@@ -19,7 +19,7 @@ namespace aslam {
 
 
     template<int C>
-    ErrorTermFs<C>::ErrorTermFs() : _jacobians(C),
+    ErrorTermFs<C>::ErrorTermFs() : 
       _evalJacobianTimer("ErrorTerm: Evaluate Jacobian", true),
       _buildHessianTimer("ErrorTerm: Build Hessian", true)
     {
@@ -92,56 +92,21 @@ namespace aslam {
     } // namespace detail
 
 
-    // This is sub-optimal in terms of efficiency but it is mostly used for
-    // unit testing and prototyping in any case.
-    template<int C>
-    void ErrorTermFs<C>::evaluateJacobiansFiniteDifference()
-    {
-      _jacobians.clear();
-      detail::ErrorTermFsFunctor<C> functor(*this);
-      sm::eigen::NumericalDiff< detail::ErrorTermFsFunctor<C> > numdiff(functor, 1e-6);
-      int inputSize = 0;
-      for (size_t i = 0; i < numDesignVariables(); i++) {
-        inputSize += designVariable(i)->minimalDimensions();
-      }
-      Eigen::MatrixXd J = numdiff.estimateJacobian(Eigen::VectorXd::Zero(inputSize));
-      // Now pack the jacobian container.
-      _jacobians.clear();
-      int offset = 0;
-      for (size_t i = 0; i < numDesignVariables(); i++) {
-        DesignVariable* d = designVariable(i);
-        _jacobians.add(d, J.block(0, offset, C, d->minimalDimensions()));
-        offset += d->minimalDimensions();
-      }
-      // Done.
-    }
-
-    template<int C>
-    const JacobianContainer& ErrorTermFs<C>::getJacobiansImplementation() const
-    {
-      return _jacobians;
-    }
 
     template<int C>
     void ErrorTermFs<C>::buildHessianImplementation(SparseBlockMatrix& outHessian, Eigen::VectorXd& outRhs, bool useMEstimator)
     {
       _evalJacobianTimer.start();
-      evaluateJacobians();
+      JacobianContainer J(C);
+      evaluateJacobians(J);
       _evalJacobianTimer.stop();
       _buildHessianTimer.start();
       double sqrtWeight = 1.0;
       if (useMEstimator)
         sqrtWeight = sqrt(_mEstimatorPolicy->getWeight(getRawSquaredError()));
-      _jacobians.evaluateHessian(_error, sqrtWeight * _sqrtInvR, outHessian, outRhs);
+      J.evaluateHessian(_error, sqrtWeight * _sqrtInvR, outHessian, outRhs);
       _buildHessianTimer.stop();
     }
-
-    template<int C>
-    void ErrorTermFs<C>::clearJacobians()
-    {
-      _jacobians.clear();
-    }
-
 
     template<int C>
     template<typename DERIVED>
@@ -202,10 +167,10 @@ namespace aslam {
     }
 
     template<int C>
-    void ErrorTermFs<C>::getWeightedJacobians(JacobianContainer& outJc, bool useMEstimator) const
+    void ErrorTermFs<C>::getWeightedJacobians(JacobianContainer& outJc, bool useMEstimator) 
     {
       // take a copy. \todo Don't take a copy.
-      outJc = getJacobians();
+      evaluateJacobians(outJc);
       outJc.applyChainRule(_sqrtInvR.transpose());
       JacobianContainer::map_t::iterator it = outJc.begin();
       double sqrtWeight = 1.0;
@@ -228,18 +193,21 @@ namespace aslam {
 
     template<int C>
     void ErrorTermFs<C>::checkJacobiansFinite() const {
-#ifdef BOOST_NO_AUTO_DECLARATIONS
-        for (JacobianContainer::map_t::iterator it = _jacobians.begin(); it != _jacobians.end(); ++it) {      
-#else
-        for (auto it = _jacobians.begin(); it != _jacobians.end(); ++it) {
-#endif
+      JacobianContainer J(C);
+      evaluateJacobians(J);
+      for (JacobianContainer::map_t::iterator it = J.begin(); it != J.end(); ++it) {      
         SM_ASSERT_MAT_IS_FINITE(Exception, it->second,
-          "Jacobian is not finite!");
+                                "Jacobian is not finite!");
       }
     }
 
     template<int C>
     void ErrorTermFs<C>::checkJacobiansNumerical(double tolerance) {
+
+      JacobianContainer J(C);
+      evaluateJacobians(J);
+      
+      
       detail::ErrorTermFsFunctor<C> functor(*this);
       sm::eigen::NumericalDiff<detail::ErrorTermFsFunctor<C> >
         numdiff(functor, tolerance);
@@ -252,7 +220,7 @@ namespace aslam {
       int offset = 0;
       for (size_t i = 0; i < numDesignVariables(); i++) {
         DesignVariable* d = designVariable(i);
-        const Eigen::MatrixXd JAna = _jacobians.Jacobian(d);
+        const Eigen::MatrixXd JAna = J.Jacobian(d);
         const Eigen::MatrixXd JNum =
           JNumComp.block(0, offset, C, d->minimalDimensions());
         for (int r = 0; r < JAna.rows(); ++r)

@@ -63,7 +63,7 @@ namespace aslam {
 
 
   /// \brief evaluate the jacobians
-  void ErrorTermTransformation::evaluateJacobiansImplementation()
+  void ErrorTermTransformation::evaluateJacobiansImplementation(JacobianContainer & _jacobians)
   {
     sm::kinematics::RotationVector rotVector;
     Eigen::MatrixXd J = Eigen::MatrixXd::Identity(6,6);

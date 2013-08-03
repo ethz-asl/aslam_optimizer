@@ -75,8 +75,8 @@ public:
   }
 
   /// \brief evaluate the jacobian
-  virtual void evaluateJacobiansImplementation() {
-    parent_t::_jacobians.add(_p2d, -_J);
+  virtual void evaluateJacobiansImplementation(aslam::backend::JacobianContainer & outJ) {
+    outJ.add(_p2d, -_J);
   }
 
 };
@@ -114,9 +114,9 @@ public:
   }
 
   /// \brief evaluate the jacobian
-  virtual void evaluateJacobiansImplementation() {
-    parent_t::_jacobians.add(_p2d1, -_J1);
-    parent_t::_jacobians.add(_p2d2, -_J2);
+  virtual void evaluateJacobiansImplementation(aslam::backend::JacobianContainer & J) {
+    J.add(_p2d1, -_J1);
+    J.add(_p2d2, -_J2);
   }
 
 };
@@ -160,10 +160,10 @@ public:
   }
 
   /// \brief evaluate the jacobian
-  virtual void evaluateJacobiansImplementation() {
-    parent_t::_jacobians.add(_p2d1, -_J1);
-    parent_t::_jacobians.add(_p2d2, -_J2);
-    parent_t::_jacobians.add(_p3, -_J3);
+  virtual void evaluateJacobiansImplementation(aslam::backend::JacobianContainer & J) {
+    J.add(_p2d1, -_J1);
+    J.add(_p2d2, -_J2);
+    J.add(_p3, -_J3);
   }
 
 };

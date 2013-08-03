@@ -74,44 +74,17 @@ namespace aslam {
     } // namespace detail
 
 
-    // This is sub-optimal in terms of efficiency but it is mostly used for
-    // unit testing and prototyping in any case.
-    void ErrorTermDs::evaluateJacobiansFiniteDifference()
-    {
-      _jacobians.clear();
-      detail::ErrorTermDsFunctor functor(*this);
-      sm::eigen::NumericalDiff< detail::ErrorTermDsFunctor > numdiff(functor, 1e-6);
-      int inputSize = 0;
-      for (size_t i = 0; i < numDesignVariables(); i++) {
-        inputSize += designVariable(i)->minimalDimensions();
-      }
-      Eigen::MatrixXd J = numdiff.estimateJacobian(Eigen::VectorXd::Zero(inputSize));
-      // Now pack the jacobian container.
-      _jacobians.clear();
-      int offset = 0;
-      for (size_t i = 0; i < numDesignVariables(); i++) {
-        DesignVariable* d = designVariable(i);
-        _jacobians.add(d, J.block(0, offset, _dimensionErrorTerm, d->minimalDimensions()));
-        offset += d->minimalDimensions();
-      }
-      // Done.
-    }
-
-    const JacobianContainer& ErrorTermDs::getJacobiansImplementation() const
-    {
-      return _jacobians;
-    }
-
     void ErrorTermDs::buildHessianImplementation(SparseBlockMatrix& outHessian, Eigen::VectorXd& outRhs, bool useMEstimator)
     {
+      JacobianContainer J(dimension());
       _evalJacobianTimer.start();
-      evaluateJacobians();
+      evaluateJacobians(J);
       _evalJacobianTimer.stop();
       _buildHessianTimer.start();
       double sqrtWeight = 1.0;
       if (useMEstimator)
         sqrtWeight = sqrt(_mEstimatorPolicy->getWeight(getRawSquaredError()));
-      _jacobians.evaluateHessian(_error, sqrtWeight * _sqrtInvR, outHessian, outRhs);
+      J.evaluateHessian(_error, sqrtWeight * _sqrtInvR, outHessian, outRhs);
       _buildHessianTimer.stop();
     }
 
@@ -168,10 +141,9 @@ namespace aslam {
       return e.dot(e);
     }
 
-    void ErrorTermDs::getWeightedJacobians(JacobianContainer& outJc, bool useMEstimator) const
+    void ErrorTermDs::getWeightedJacobians(JacobianContainer& outJc, bool useMEstimator)
     {
-      // take a copy. \todo Don't take a copy.
-      outJc = getJacobians();
+      evaluateJacobians(outJc);
       outJc.applyChainRule(_sqrtInvR.transpose());
       JacobianContainer::map_t::iterator it = outJc.begin();
       double sqrtWeight = 1.0;

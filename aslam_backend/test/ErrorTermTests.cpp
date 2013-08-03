@@ -18,8 +18,8 @@ TEST(ErrorTermTestSuite, testInvR)
       boost::shared_ptr<GemanMcClureMEstimator> me(new GemanMcClureMEstimator(errs[i]->getRawSquaredError()));
     }
     buildSystem(D, E, dvs, errs);
-    JacobianContainer jc(1);
     for (size_t i = 0; i < errs.size(); ++i) {
+      JacobianContainer jc(errs[i]->dimension());
       ErrorTerm* e = errs[i];
       Eigen::MatrixXd invR = sm::eigen::randomCovarianceXd(e->dimension());
       e->vsSetInvR(invR);
@@ -44,8 +44,8 @@ TEST(ErrorTermTestSuite, testInvR)
       // with M-estimator.
       wrse = we.dot(we);
       ASSERT_NEAR(wrse, trueWRse, 1e-6);
-      e->evaluateJacobians();
-      const JacobianContainer& jcRaw = e->getJacobians();
+      JacobianContainer jcRaw(e->dimension());
+      e->evaluateJacobians(jcRaw);
       {
         // No M-Estimator
         e->getWeightedJacobians(jc, false);
