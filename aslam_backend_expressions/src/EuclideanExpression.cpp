@@ -2,6 +2,7 @@
 #include <aslam/backend/EuclideanExpressionNode.hpp>
 #include <sm/boost/null_deleter.hpp>
 #include <aslam/backend/HomogeneousExpression.hpp>
+#include <aslam/backend/HomogeneousExpressionNode.hpp>
 #include <aslam/backend/VectorExpression.hpp>
 #include <aslam/backend/VectorExpressionNode.hpp>
 
@@ -49,9 +50,8 @@ namespace aslam {
 
     HomogeneousExpression EuclideanExpression::toHomogeneousExpression()
     {
-      // \todo
-        SM_THROW(Exception, "Not Implemented");
-      return HomogeneousExpression();
+      boost::shared_ptr<HomogeneousExpressionNode> newRoot( new HomogeneousExpressionNodeEuclidean(_root) );
+      return HomogeneousExpression(newRoot);
     }
     
     void EuclideanExpression::evaluateJacobians(JacobianContainer & outJacobians) const

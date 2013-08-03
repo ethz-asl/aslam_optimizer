@@ -180,6 +180,30 @@ TEST(HomogeneousExpressionNodeTestSuites, testPoint)
 }
 
 
+
+// Test that the jacobian matches the finite difference jacobian
+TEST(HomogeneousExpressionNodeTestSuites, testEuclideanPoint)
+{
+  try 
+    {
+      using namespace sm::kinematics;
+      EuclideanPoint point(Eigen::Vector3d::Random());
+      point.setActive(true);
+      point.setBlockIndex(0);
+      HomogeneousExpression qr = point.toHomogeneousExpression();
+      
+      
+      SCOPED_TRACE("");
+      testJacobian(qr);
+    }
+  catch(std::exception const & e)
+    {
+      FAIL() << e.what();
+    }
+}
+
+
+
 // Test that the jacobian matches the finite difference jacobian
 TEST(HomogeneousExpressionNodeTestSuites, testTransformedPoint)
 {
