@@ -91,7 +91,7 @@ class IdentityDifferential : public Differential<TDomain, TScalar> {
   }
 };
 
-template<typename TNextDomain, typename TScalar, typename TMatrix>
+template<typename TNextDomain, typename TScalar, typename TMatrix, int IDomainRows = Eigen::Dynamic>
 class ComposedMatrixDifferential;
 
 namespace internal {
@@ -251,11 +251,11 @@ class MatrixDifferential : public Differential<Eigen::Matrix<TScalar, ICols, 1>,
   }
 
   virtual void addToJacobianContainer(JacobianContainer & jc, const DesignVariable * dv) const {
-    jc.add(const_cast<DesignVariable *>(dv), _mat);
+    jc.add(const_cast<DesignVariable *>(dv), _mat.template cast<double>());
   }
 
   virtual void addToJacobianContainer(JacobianContainer & jc, const DesignVariable * dv, const typename base_t::dyn_matrix_t & jacobian) const {
-    jc.add(const_cast<DesignVariable *>(dv), _mat * jacobian);
+    jc.add(const_cast<DesignVariable *>(dv), (_mat * jacobian).template cast<double>());
   }
 
   virtual void convertIntoMatrix(int rows, int cols, typename base_t::dyn_matrix_t & result) const {
@@ -264,17 +264,20 @@ class MatrixDifferential : public Differential<Eigen::Matrix<TScalar, ICols, 1>,
   }
 };
 
-template<typename TNextDomain, typename TScalar, typename TMatrix>
-class ComposedMatrixDifferential : public ComposedDifferential<Eigen::Matrix<TScalar, Eigen::Dynamic, 1>, TNextDomain, TScalar, ComposedMatrixDifferential<TNextDomain, TScalar, TMatrix> > {
+/**
+ * \brief represents a composition of a TNextDomain-differential after a TMatrix differential.
+ */
+template<typename TNextDomain, typename TScalar, typename TMatrix, int IDomainRows>
+class ComposedMatrixDifferential : public ComposedDifferential<Eigen::Matrix<TScalar, IDomainRows, 1>, TNextDomain, TScalar, ComposedMatrixDifferential<TNextDomain, TScalar, TMatrix, IDomainRows> > {
  protected:
   TMatrix _mat;
  public:
-  typedef ComposedMatrixDifferential<TNextDomain, TScalar, TMatrix> self_t;
-  typedef ComposedDifferential<Eigen::Matrix<TScalar, Eigen::Dynamic, 1>, TNextDomain, TScalar, self_t> base_t;
+  typedef ComposedMatrixDifferential<TNextDomain, TScalar, TMatrix, IDomainRows> self_t;
+  typedef ComposedDifferential<Eigen::Matrix<TScalar, IDomainRows, 1>, TNextDomain, TScalar, self_t> base_t;
   typedef typename base_t::matrix_t matrix_t;
   typedef typename base_t::dyn_matrix_t dyn_matrix_t;
   typedef typename base_t::dyn_vector_t dyn_vector_t;
-  typedef ComposedMatrixDifferential<typename self_t::domain_t, TScalar, Eigen::Matrix<TScalar, Eigen::internal::remove_all<TMatrix>::type::RowsAtCompileTime, matrix_t::ColsAtCompileTime> > compose_result_t;
+  typedef ComposedMatrixDifferential<TNextDomain, TScalar, Eigen::Matrix<TScalar, Eigen::internal::remove_all<TMatrix>::type::RowsAtCompileTime, matrix_t::ColsAtCompileTime> > compose_result_t;
 
   inline ComposedMatrixDifferential(TMatrix mat, const typename base_t::next_differential_t & next_differential)
       : base_t(next_differential),
@@ -285,7 +288,7 @@ class ComposedMatrixDifferential : public ComposedDifferential<Eigen::Matrix<TSc
   }
 
   inline compose_result_t compose(const matrix_t & jacobian) const {
-    return compose_result_t(_mat * jacobian, *this);
+    return compose_result_t(_mat * jacobian, this->_next_differential);
   }
 
   inline typename base_t::next_domain_t apply(const typename base_t::domain_t & tangent_vector) const {
