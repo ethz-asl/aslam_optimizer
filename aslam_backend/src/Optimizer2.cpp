@@ -510,6 +510,8 @@ namespace aslam {
         timeSolve.stop();
         if (!solutionSuccess) {
           _options.verbose && std::cout << "[WARNING] System solution failed\n";
+          _options.verbose && std::cout << "          Reinitializing solver\n";
+          _solver->initMatrixStructure(_designVariables, _errorTerms, _options.doLevenbergMarquardt);
           isLmRegression = true;
           // **** if J is a regression
           revertLastStateUpdate();

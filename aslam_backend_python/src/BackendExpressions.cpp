@@ -109,7 +109,7 @@ void exportBackendExpressions()
 
   class_<TransformationExpression,boost::shared_ptr<TransformationExpression> >("TransformationExpression", init<boost::shared_ptr<TransformationExpressionNode> >() )
     .def("toTransformationMatrix", &TransformationExpression::toTransformationMatrix)
-
+      .def(init< Eigen::Matrix4d>())
     // These guys are not implemented yet.
     //.def("toRotationExpression", &TransformationExpression::toRotationExpression)
     //.def("toHomogeneousExpression", &TransformationExpression::toHomogeneousExpression)
@@ -186,6 +186,7 @@ void exportBackendExpressions()
 
 
   class_<ScalarExpression, boost::shared_ptr<ScalarExpression> >("ScalarExpression", init<boost::shared_ptr<ScalarExpressionNode> > () )
+      .def(init<double>())
       .def("toScalar", &ScalarExpression::toScalar)
       .def("toValue", &ScalarExpression::toScalar)
       .def("evaluateJacobians", &evaluateJacobians1<ScalarExpression>)
