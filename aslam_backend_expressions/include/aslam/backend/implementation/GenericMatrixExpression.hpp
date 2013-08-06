@@ -39,7 +39,7 @@ void _CLASS::evaluateJacobians(JacobianContainer & outJacobians) const
 _TEMPLATE
 void _CLASS::evaluateJacobians(JacobianContainer & outJacobians, const Eigen::MatrixXd & applyChainRule) const
 {
-  _root->evaluateJacobians(outJacobians, MatrixDifferential<TScalar, Eigen::Matrix<TScalar, Eigen::Dynamic, IRows> >(applyChainRule));
+  _root->evaluateJacobians(outJacobians, MatrixDifferential<TScalar, Eigen::Matrix<TScalar, Eigen::Dynamic, IRows> >(applyChainRule.cast<TScalar>()));
 }
 
 _TEMPLATE

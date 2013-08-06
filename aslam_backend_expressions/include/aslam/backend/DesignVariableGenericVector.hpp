@@ -7,16 +7,15 @@
 
 namespace aslam {
 namespace backend {
-template<int D>
-class DesignVariableGenericVector : public DesignVariable, public GenericMatrixExpressionNode<D, 1, double> {
+template<int D, typename Scalar_ = double>
+class DesignVariableGenericVector : public DesignVariable, public GenericMatrixExpressionNode<D, 1, Scalar_> {
  public:
-  typedef GenericMatrixExpressionNode<D, 1, double> base_t;
+  typedef GenericMatrixExpressionNode<D, 1, Scalar_> base_t;
 
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW
-  typedef Eigen::Matrix<double, D, 1> vector_t;
+  typedef Eigen::Matrix<Scalar_, D, 1> vector_t;
 
-  SM_DEFINE_EXCEPTION(Exception, std::runtime_error)
-  ;
+  SM_DEFINE_EXCEPTION(Exception, std::runtime_error);
 
   DesignVariableGenericVector(vector_t v = vector_t::Zero())
       : base_t(v) {
@@ -25,6 +24,12 @@ class DesignVariableGenericVector : public DesignVariable, public GenericMatrixE
   }
   const vector_t & value() const {
     return base_t::evaluate();
+  }
+
+  using DesignVariable::setParameters;
+  void setParameters(const Eigen::Matrix<Scalar_, D, 1>& value) {
+    this->_currentValue = value;
+    this->_valueDirty = false;
   }
  protected:
   /// \brief Revert the last state update.
@@ -35,7 +40,7 @@ class DesignVariableGenericVector : public DesignVariable, public GenericMatrixE
   virtual void updateImplementation(const double * dp, int size) {
     SM_ASSERT_EQ(std::runtime_error, size, D, "update size must match the vector dimension.")
     _p_v = this->_currentValue;
-    this->_currentValue += Eigen::Map<const vector_t>(dp);
+    this->_currentValue += Eigen::Map<const Eigen::Matrix<double, D, 1> >(dp).template cast<Scalar_>();
   }
   /// \brief what is the number of dimensions of the perturbation variable.
   virtual int minimalDimensionsImplementation() const {
@@ -43,11 +48,11 @@ class DesignVariableGenericVector : public DesignVariable, public GenericMatrixE
   }
 
   virtual void getParametersImplementation(Eigen::MatrixXd& value) const {
-    value = this->evaluate();
+    value = this->evaluate().template cast<double>();
   }
 
   virtual void setParametersImplementation(const Eigen::MatrixXd& value) {
-    this->_currentValue = value;
+    this->_currentValue = value.template cast<Scalar_>();
     this->_valueDirty = false;
   }
 
@@ -61,7 +66,7 @@ class DesignVariableGenericVector : public DesignVariable, public GenericMatrixE
   ;
   virtual void evaluateImplementation() const {
   }
- private:
+ protected:
   vector_t _p_v;
 };
 
