@@ -101,7 +101,7 @@ struct EigenQuaternionCalculator {
   }
 
   inline static lie_algebra_vector_t log(const vector_t & v) {
-    return sm::kinematics::quat2AxisAngle(convertToOtherMode<QuaternionMode::LAST_IS_REAL_AND_TRADITIONAL_MULT_ORDER>(v).template cast<double>()).template cast<TScalar>() * TScalar(0.5);
+    return sm::kinematics::quat2AxisAngle(convertToOtherMode<QuaternionMode::LAST_IS_REAL_AND_TRADITIONAL_MULT_ORDER>(v)) * TScalar(0.5);
   }
   
   inline static Eigen::Matrix<TScalar, 3, 4> dlog(const vector_t & v) {
