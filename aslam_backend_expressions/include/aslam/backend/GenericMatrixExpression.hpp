@@ -17,7 +17,7 @@ namespace internal {
 template<typename TNode>
 struct GenericMatrixNodeTraits {
   typedef TNode node_t;
-  typedef typename node_t::ptr_t node_ptr_t;
+  typedef typename boost::shared_ptr<node_t> node_ptr_t;
   typedef typename node_t::matrix_t matrix_t;
   typedef typename node_t::value_t value_t;
   typedef typename node_t::tangent_vector_t tangent_vector_t;
@@ -124,6 +124,10 @@ class GenericMatrixExpression {
       this->getOperandNode().evaluateJacobians(outJacobians, Diff(*static_cast<const TDerived *>(this), diff));
     }
 
+    inline apply_diff_return_t applyDiff(const typename operand_t::tangent_vector_t & tangent_vector) const {
+      throw std::runtime_error("This method must be shadowed or not used!");
+    }
+
     static inline self_t create(const TOperand & operand) {
       TDerived * p = new TDerived();
       p->_operand = operand.root();
@@ -192,6 +196,13 @@ class GenericMatrixExpression {
     virtual void evaluateJacobiansImplementation(JacobianContainer & outJacobians, const typename node_t::differential_t & diff) const {
       this->getLhsNode().evaluateJacobians(outJacobians, Diff<lhs_t, &TDerived::applyLhsDiff>(*static_cast<const TDerived *>(this), diff));
       this->getRhsNode().evaluateJacobians(outJacobians, Diff<rhs_t, &TDerived::applyRhsDiff>(*static_cast<const TDerived *>(this), diff));
+    }
+
+    inline apply_diff_return_t applyLhsDiff(const typename lhs_t::tangent_vector_t & tangent_vector) const {
+      throw std::runtime_error("This method must be shadowed or not used!");
+    }
+    inline apply_diff_return_t applyRhsDiff(const typename rhs_t::tangent_vector_t & tangent_vector) const {
+      throw std::runtime_error("This method must be shadowed or not used!");
     }
 
     static inline self_t create(const TLhs & l, const TRhs & r) {
