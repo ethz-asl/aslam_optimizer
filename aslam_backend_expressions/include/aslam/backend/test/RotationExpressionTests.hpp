@@ -15,6 +15,11 @@ namespace backend {
 namespace test {
 
 template<>
+struct ExpressionValueTraits<RotationExpression> {
+  typedef Eigen::Vector3d value_t;
+};
+
+template<>
 class ExpressionTester<RotationExpression> {
  private:
   struct RotationExpressionNodeFunctor {
