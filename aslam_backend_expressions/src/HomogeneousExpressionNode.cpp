@@ -1,5 +1,7 @@
 #include <aslam/backend/HomogeneousExpressionNode.hpp>
 #include <sm/kinematics/transformations.hpp>
+#include <sm/kinematics/homogeneous_coordinates.hpp>
+#include <aslam/backend/EuclideanExpressionNode.hpp>
 
 namespace aslam {
   namespace backend {
@@ -98,6 +100,31 @@ namespace aslam {
       void HomogeneousExpressionNodeConstant::getDesignVariablesImplementation(DesignVariable::set_t & designVariables) const{}
 
       
+
+  HomogeneousExpressionNodeEuclidean::HomogeneousExpressionNodeEuclidean(boost::shared_ptr<EuclideanExpressionNode> p) : _p(p) {
+
+  }
+
+  HomogeneousExpressionNodeEuclidean::~HomogeneousExpressionNodeEuclidean() {
+
+  }
+
+
+  Eigen::Vector4d HomogeneousExpressionNodeEuclidean::toHomogeneousImplementation() {
+    return sm::kinematics::toHomogeneous(_p->toEuclidean());
+  }
+
+  void HomogeneousExpressionNodeEuclidean::evaluateJacobiansImplementation(JacobianContainer & outJacobians) const {
+    _p->evaluateJacobians( outJacobians, Eigen::MatrixXd::Identity(4,3) );
+  }
+
+  void HomogeneousExpressionNodeEuclidean::evaluateJacobiansImplementation(JacobianContainer & outJacobians, const Eigen::MatrixXd & applyChainRule) const {
+    _p->evaluateJacobians( outJacobians, applyChainRule * Eigen::MatrixXd::Identity(4,3) );
+  }
+
+  void HomogeneousExpressionNodeEuclidean::getDesignVariablesImplementation(DesignVariable::set_t & designVariables) const {
+    return _p->getDesignVariables(designVariables);
+  }
 
 
 

@@ -42,9 +42,9 @@ public:
   }
  
   /// \brief evaluate the jacobian
-  virtual void evaluateJacobiansImplementation()
+  virtual void evaluateJacobiansImplementation(JacobianContainer & _jacobians) const
   {
-    _p.evaluateJacobians(parent_t::_jacobians);
+    _p.evaluateJacobians(_jacobians);
   }
 
   
@@ -205,13 +205,13 @@ TEST(HomogeneousExpressionNodeTestSuites, testSimpleError)
       //SCOPED_TRACE("");
       //testJacobian(qr);
 
+      JacobianContainer estJ( e.dimension() );
+      e.evaluateJacobiansFiniteDifference(estJ);
 
-      e.evaluateJacobiansFiniteDifference();
-      JacobianContainer estJ = e.getJacobians();
       
-      
-      e.evaluateJacobians();
-      JacobianContainer J = e.getJacobians();
+      JacobianContainer J(e.dimension());      
+      e.evaluateJacobians(J);
+
 
       SCOPED_TRACE("");
       sm::eigen::assertNear(J.asSparseMatrix(), estJ.asSparseMatrix(), 1e-6, SM_SOURCE_FILE_POS, "Checking the jacobian vs. finite differences");
@@ -246,6 +246,30 @@ TEST(HomogeneousExpressionNodeTestSuites, testPoint)
       FAIL() << e.what();
     }
 }
+
+
+
+// Test that the jacobian matches the finite difference jacobian
+TEST(HomogeneousExpressionNodeTestSuites, testEuclideanPoint)
+{
+  try 
+    {
+      using namespace sm::kinematics;
+      EuclideanPoint point(Eigen::Vector3d::Random());
+      point.setActive(true);
+      point.setBlockIndex(0);
+      HomogeneousExpression qr = point.toHomogeneousExpression();
+      
+      
+      SCOPED_TRACE("");
+      testJacobian(qr);
+    }
+  catch(std::exception const & e)
+    {
+      FAIL() << e.what();
+    }
+}
+
 
 
 // Test that the jacobian matches the finite difference jacobian

@@ -76,6 +76,9 @@ namespace aslam {
       /// \brief Clear the contents of this container
       void clear();
 
+      /// \brief Clean and set the number of rows
+      void reset(int rows);
+      
       /// \brief Gets a sparse matrix with the Jacobians. The matrix is, in fact, dense
       ///        and the Jacobian ordering matches the sort order.
       SparseBlockMatrix asSparseMatrix() const;

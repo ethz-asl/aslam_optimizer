@@ -92,14 +92,11 @@ namespace aslam {
     template<typename I>
     void CompressedColumnJacobianTransposeBuilder<I>::evaluateJacobians(int threadId, int startIdx, int endIdx, bool useMEstimator)
     {
-      JacobianContainer jc(1);
       Eigen::VectorXd ee;
       for (int i = startIdx; i < endIdx; ++i) {
-        _jacobianPointers[i].errorTerm->evaluateJacobians();
+        JacobianContainer jc(_jacobianPointers[i].errorTerm->dimension());
         _jacobianPointers[i].errorTerm->getWeightedJacobians(jc, useMEstimator);
         _J_transpose.writeJacobians(jc, _jacobianPointers[i].jcp);
-        //_jacobianPointers[i].errorTerm->getWeightedError(ee, useMEstimator);
-        //_e.segment(_jacobianPointers[i].eRow, _jacobianPointers[i].errorTerm->dimension()) = ee;
       }
     }
 

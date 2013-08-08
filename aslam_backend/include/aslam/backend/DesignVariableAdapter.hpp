@@ -14,9 +14,9 @@ namespace aslam {
 
       // a variable wrapped with the DesignVariableAdapter has to define the
       // DesignVariableDimension enum (requirement of apriori error terms)
-      enum {
-        DesignVariableDimension = T::DesignVariableDimension
-      };
+      //enum {
+      //  DesignVariableDimension = T::DesignVariableDimension
+      //};
 
       /// \brief The dv pointer must remain valid for the life of the optimization problem.
       DesignVariableAdapter(T* dv, bool adapterOwnsPointer);

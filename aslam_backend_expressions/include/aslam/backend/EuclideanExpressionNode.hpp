@@ -3,14 +3,17 @@
 
 #include <aslam/backend/JacobianContainer.hpp>
 #include "RotationExpressionNode.hpp"
+#include "TransformationExpressionNode.hpp"
 #include "MatrixExpressionNode.hpp"
 #include <boost/shared_ptr.hpp>
 #include <Eigen/Core>
-
+#include <sm/kinematics/RotationalKinematics.hpp>
 
 namespace aslam {
   namespace backend {
-    
+    template <int D> class VectorExpression;
+    template <int D> class VectorExpressionNode;
+
     /**
      * \class EuclideanExpressionNode
      * \brief The superclass of all classes representing euclidean points.
@@ -155,7 +158,7 @@ namespace aslam {
       /**
       * \class EuclideanExpressionNodeSubtractEuclidean
       *
-      * \brief A class representing the subtraction of two euclidean expressions.
+      * \brief A class representing the subtraction of two Euclidean expressions.
       *
       */
      class EuclideanExpressionNodeSubtractEuclidean : public EuclideanExpressionNode
@@ -177,11 +180,34 @@ namespace aslam {
        boost::shared_ptr<EuclideanExpressionNode> _rhs;
      };
 
+     /**
+     * \class EuclideanExpressionNodeConstant
+     *
+     * \brief A class representing a constant Euclidean expressions.
+     *
+     */
+     class EuclideanExpressionNodeConstant : public EuclideanExpressionNode
+     {
+     public:
+       EIGEN_MAKE_ALIGNED_OPERATOR_NEW
+
+       EuclideanExpressionNodeConstant(const Eigen::Vector3d & p);
+       virtual ~EuclideanExpressionNodeConstant();
+
+         void set(const Eigen::Vector3d & p){ _p = p; }
+     private:
+         virtual Eigen::Vector3d toEuclideanImplementation();
+         virtual void evaluateJacobiansImplementation(JacobianContainer & outJacobians) const;
+         virtual void evaluateJacobiansImplementation(JacobianContainer & outJacobians, const Eigen::MatrixXd & applyChainRule) const;
+         virtual void getDesignVariablesImplementation(DesignVariable::set_t & designVariables) const;
+
+         Eigen::Vector3d _p;
+     };
 
     /**
       * \class EuclideanExpressionNodeSubtractVector
       *
-      * \brief A class representing the subtraction of a vector from an euclidean expression.
+      * \brief A class representing the subtraction of a vector from an Euclidean expression.
       *
       */
      class EuclideanExpressionNodeSubtractVector : public EuclideanExpressionNode
@@ -190,7 +216,7 @@ namespace aslam {
        EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
        EuclideanExpressionNodeSubtractVector(boost::shared_ptr<EuclideanExpressionNode> lhs,
-              Eigen::Vector3d rhs);
+              const Eigen::Vector3d & rhs);
        virtual ~EuclideanExpressionNodeSubtractVector();
 
      private:
@@ -203,6 +229,89 @@ namespace aslam {
        Eigen::Vector3d _rhs;
      };
 
+
+     /**
+       * \class EuclideanExpressionNodeSubtractVector
+       *
+       * \brief A class representing the negated Euclidean expression.
+       *
+       */
+      class EuclideanExpressionNodeNegated : public EuclideanExpressionNode
+      {
+      public:
+        EIGEN_MAKE_ALIGNED_OPERATOR_NEW
+
+        EuclideanExpressionNodeNegated(boost::shared_ptr<EuclideanExpressionNode> operand);
+        virtual ~EuclideanExpressionNodeNegated();
+
+      private:
+        virtual Eigen::Vector3d toEuclideanImplementation();
+        virtual void evaluateJacobiansImplementation(JacobianContainer & outJacobians) const;
+        virtual void evaluateJacobiansImplementation(JacobianContainer & outJacobians, const Eigen::MatrixXd & applyChainRule) const;
+        virtual void getDesignVariablesImplementation(DesignVariable::set_t & designVariables) const;
+
+        boost::shared_ptr<EuclideanExpressionNode> _operand;
+      };
+
+     /**
+       * \class VectorExpression2EuclideanExpressionAdapter
+       *
+       * \brief A class representing an adapted VectorExpression<3>.
+       *
+       */
+      class VectorExpression2EuclideanExpressionAdapter : public EuclideanExpressionNode
+      {
+      public:
+        VectorExpression2EuclideanExpressionAdapter(boost::shared_ptr<VectorExpressionNode<3> > vectorExpressionNode);
+        virtual ~VectorExpression2EuclideanExpressionAdapter();
+
+      private:
+        virtual Eigen::Vector3d toEuclideanImplementation();
+        virtual void evaluateJacobiansImplementation(JacobianContainer & outJacobians) const;
+        virtual void evaluateJacobiansImplementation(JacobianContainer & outJacobians, const Eigen::MatrixXd & applyChainRule) const;
+        virtual void getDesignVariablesImplementation(DesignVariable::set_t & designVariables) const;
+
+        boost::shared_ptr<VectorExpressionNode<3> > _vectorExpressionNode;
+      };
+
+      class EuclideanExpressionNodeTranslation : public EuclideanExpressionNode
+      {
+      public:
+        EIGEN_MAKE_ALIGNED_OPERATOR_NEW
+
+        EuclideanExpressionNodeTranslation(boost::shared_ptr<TransformationExpressionNode> operand);
+        virtual ~EuclideanExpressionNodeTranslation();
+
+      private:
+        virtual Eigen::Vector3d toEuclideanImplementation();
+        virtual void evaluateJacobiansImplementation(JacobianContainer & outJacobians) const;
+        virtual void evaluateJacobiansImplementation(JacobianContainer & outJacobians, const Eigen::MatrixXd & applyChainRule) const;
+        virtual void getDesignVariablesImplementation(DesignVariable::set_t & designVariables) const;
+
+        boost::shared_ptr<TransformationExpressionNode> _operand;
+      };
+
+
+  class EuclideanExpressionNodeRotationParameters : public EuclideanExpressionNode
+      {
+      public:
+        EIGEN_MAKE_ALIGNED_OPERATOR_NEW
+
+        EuclideanExpressionNodeRotationParameters(boost::shared_ptr<RotationExpressionNode> operand, sm::kinematics::RotationalKinematics::Ptr rk);
+        virtual ~EuclideanExpressionNodeRotationParameters();
+
+      private:
+        virtual Eigen::Vector3d toEuclideanImplementation();
+        virtual void evaluateJacobiansImplementation(JacobianContainer & outJacobians) const;
+        virtual void evaluateJacobiansImplementation(JacobianContainer & outJacobians, const Eigen::MatrixXd & applyChainRule) const;
+        virtual void getDesignVariablesImplementation(DesignVariable::set_t & designVariables) const;
+
+        boost::shared_ptr<RotationExpressionNode> _operand;
+        sm::kinematics::RotationalKinematics::Ptr _rk;
+      };
+
+
+  
   } // namespace backend
 } // namespace aslam
 

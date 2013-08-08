@@ -1,5 +1,5 @@
 #include <aslam/backend/EuclideanPoint.hpp>
-
+#include <aslam/backend/HomogeneousExpression.hpp>
 
 namespace aslam {
   namespace backend {
@@ -60,6 +60,10 @@ namespace aslam {
     {
       return EuclideanExpression(this);
     }
+
+  HomogeneousExpression EuclideanPoint::toHomogeneousExpression() {
+    return EuclideanExpression(this).toHomogeneousExpression();
+  }
 
     void EuclideanPoint::getParametersImplementation(
         Eigen::MatrixXd& value) const {

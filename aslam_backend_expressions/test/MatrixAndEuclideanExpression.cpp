@@ -3,94 +3,18 @@
 #include <aslam/backend/EuclideanExpression.hpp>
 #include <sm/kinematics/rotations.hpp>
 #include <sm/kinematics/quaternion_algebra.hpp>
+#include <aslam/backend/test/ExpressionTests.hpp>
 #include <aslam/backend/RotationQuaternion.hpp>
 #include <aslam/backend/EuclideanPoint.hpp>
 #include <aslam/backend/RotationExpression.hpp>
 #include <aslam/backend/EuclideanDirection.hpp>
 #include <aslam/backend/MatrixExpression.hpp>
 #include <aslam/backend/MatrixTransformation.hpp>
+#include <aslam/backend/DesignVariableVector.hpp>
+#include <aslam/backend/MapTransformation.hpp>
 
 using namespace aslam::backend;
 using namespace sm::kinematics;
-
-struct EuclideanExpressionNodeFunctor
-{
-  typedef Eigen::Vector3d value_t;
-  typedef value_t::Scalar scalar_t;
-  typedef Eigen::VectorXd input_t;
-  typedef Eigen::MatrixXd jacobian_t;
-
-  
-  EuclideanExpressionNodeFunctor(EuclideanExpression dv) :
-    _dv(dv) {}
-
-  input_t update(const input_t & x, int c, scalar_t delta) { input_t xnew = x; xnew[c] += delta; return xnew; }
-
-  EuclideanExpression _dv;
-
-  Eigen::VectorXd operator()(const Eigen::VectorXd & dr)
-  {
-    
-    Eigen::Vector3d p = _dv.toEuclidean();
-    JacobianContainer J(3);
-    _dv.evaluateJacobians(J);
-
-    int offset = 0;
-    for(size_t i = 0; i < J.numDesignVariables(); i++)
-      {
-	DesignVariable * d = J.designVariable(i);
-	d->update(&dr[offset],d->minimalDimensions());
-	offset += d->minimalDimensions();
-      }
-
-    p = _dv.toEuclidean();
-    
- 
-    for(size_t i = 0; i < J.numDesignVariables(); i++)
-      {
-	DesignVariable * d = J.designVariable(i);
-	d->revertUpdate();
-      }
-
-    return p;
-   
-  }
-};
-
-
-void testJacobian(EuclideanExpression dv)
-{
-  EuclideanExpressionNodeFunctor functor(dv);
-
-  sm::eigen::NumericalDiff<EuclideanExpressionNodeFunctor> numdiff(functor);
-  
-  /// Discern the size of the jacobian container
-//  Eigen::Vector3d p = dv.toEuclidean();
-  JacobianContainer Jc(3);
-  JacobianContainer Jccr(3);
-
-  dv.evaluateJacobians(Jc);
-  dv.evaluateJacobians(Jccr, Eigen::Matrix3d::Identity());
-   
-  Eigen::VectorXd dp(Jc.cols());
-  dp.setZero();
-  Eigen::MatrixXd Jest = numdiff.estimateJacobian(dp);
- 
-  //cout << Jc.asSparseMatrix() << endl;
-  //cout << Jccr.asSparseMatrix() << endl;
-  //cout << Jest << endl;
-
-
-
-  sm::eigen::assertNear(Jc.asSparseMatrix(), Jest, 1e-6, SM_SOURCE_FILE_POS, "Testing the quat Jacobian");
-
-  sm::eigen::assertNear(Jccr.asSparseMatrix(), Jest, 1e-6, SM_SOURCE_FILE_POS, "Testing the quat Jacobian");
-
-}
-
-
-
-
 
 // Test that the jacobian matches the finite difference jacobian
 TEST(EuclideanExpressionNodeTestSuites, testPoint)
@@ -361,6 +285,31 @@ TEST(EuclideanExpressionNodeTestSuites, testVectorSubtraction)
 }
 
 // Test that the jacobian matches the finite difference jacobian
+TEST(EuclideanExpressionNodeTestSuites, testNegation)
+{
+  try
+    {
+      using namespace sm::kinematics;
+      EuclideanPoint point1(Eigen::Vector3d::Random());
+      point1.setActive(true);
+      point1.setBlockIndex(1);
+      EuclideanExpression p1(&point1);
+
+      EuclideanExpression pNegated = -p1;
+
+      sm::eigen::assertNear(-point1.toEuclidean(), pNegated.toEuclidean(), 1e-14, SM_SOURCE_FILE_POS, "Testing the result is unchanged");
+
+      SCOPED_TRACE("");
+      testJacobian(pNegated);
+
+    }
+  catch(std::exception const & e)
+    {
+      FAIL() << e.what();
+    }
+}
+
+// Test that the jacobian matches the finite difference jacobian
 TEST(EuclideanExpressionNodeTestSuites, testEuclideanDrection)
 {
   try
@@ -381,6 +330,33 @@ TEST(EuclideanExpressionNodeTestSuites, testEuclideanDrection)
       SCOPED_TRACE("");
       testJacobian(p1);
 
+    }
+  catch(std::exception const & e)
+    {
+      FAIL() << e.what();
+    }
+}
+
+// Test that the jacobian matches the finite difference jacobian
+TEST(EuclideanExpressionNodeTestSuites, testAdaptedVectorExpression)
+{
+  try
+    {
+      using namespace sm::kinematics;
+      EuclideanPoint point1(Eigen::Vector3d::Random());
+      point1.setActive(true);
+      point1.setBlockIndex(1);
+      EuclideanExpression p1(&point1);
+
+      DesignVariableVector<3> point2(Eigen::Vector3d::Random());
+      point2.setActive(true);
+      point2.setBlockIndex(2);
+      EuclideanExpression p2(&point2);
+
+      EuclideanExpression p_add = p1 + p2;
+
+      SCOPED_TRACE("");
+      testJacobian(p1);
     }
   catch(std::exception const & e)
     {
@@ -569,11 +545,72 @@ TEST(EuclideanExpressionNodeTestSuites, testLowerMixedMatrixTransformedPoint)
       SCOPED_TRACE("");
       testJacobian(Ap);
 
-      sm::eigen::assertNear(Ap.toEuclidean(), B.toFullMatrix() * A.toFullMatrix() * p.toEuclidean(), 1e-14, SM_SOURCE_FILE_POS, "Testing the result is unchanged");
+      sm::eigen::assertNear(Ap.toEuclidean(), B.toFullMatrix() * A.toFullMatrix() * p.toEuclidean(), 1e-13, SM_SOURCE_FILE_POS, "Testing the result is unchanged");
     }
   catch(std::exception const & e)
     {
       FAIL() << e.what();
     }
 }
+
+
+
+
+
+// Test that the jacobian matches the finite difference jacobian
+TEST(EuclideanExpressionNodeTestSuites, testTransformationTransformedPoint)
+{
+  try
+    {
+      using namespace sm::kinematics;
+      Transformation T;
+      boost::shared_ptr<MappedRotationQuaternion> outQ;
+      boost::shared_ptr<MappedEuclideanPoint> outT;
+      T.setRandom();
+      TransformationExpression A(transformationToExpression(T,outQ,outT));
+      outQ->setActive(true);
+      outQ->setBlockIndex(0);
+      outT->setActive(true);
+      outT->setBlockIndex(1);
+
+      
+      EuclideanExpression p = A.toEuclideanExpression();
+
+      SCOPED_TRACE("");
+      testJacobian(p);
+      SCOPED_TRACE("");
+      sm::eigen::assertNear(p.toEuclidean(), A.toTransformationMatrix().topRightCorner<3,1>(), 1e-14, SM_SOURCE_FILE_POS, "Testing the result is unchanged");
+    }
+  catch(std::exception const & e)
+    {
+      FAIL() << e.what();
+    }
+}
+
+
+// Test that the jacobian matches the finite difference jacobian
+TEST(EuclideanExpressionNodeTestSuites, testRotationParameters)
+{
+  try
+    {
+      using namespace sm::kinematics;
+      RotationQuaternion quat(quatRandom());
+      quat.setActive(true);
+      quat.setBlockIndex(0);
+      RotationExpression qr(&quat);
+      RotationalKinematics::Ptr ypr( new EulerAnglesYawPitchRoll());
+      
+      EuclideanExpression p = qr.toParameters(ypr);
+
+      SCOPED_TRACE("");
+      testJacobian(p);
+      SCOPED_TRACE("");
+      sm::eigen::assertNear(p.toEuclidean(), ypr->rotationMatrixToParameters(qr.toRotationMatrix()), 1e-14, SM_SOURCE_FILE_POS, "Testing the result is unchanged");
+    }
+  catch(std::exception const & e)
+    {
+      FAIL() << e.what();
+    }
+}
+
 

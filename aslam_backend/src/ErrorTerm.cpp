@@ -24,10 +24,10 @@ namespace aslam {
 
 
     /// \brief evaluate the Jacobians.
-    void ErrorTerm::evaluateJacobians()
+    void ErrorTerm::evaluateJacobians(JacobianContainer & outJ)
     {
-      clearJacobians();
-      evaluateJacobiansImplementation();
+      outJ.clear();
+      evaluateJacobiansImplementation(outJ);
     }
 
     /// \brief build this error term's part of the Hessian matrix.
@@ -125,11 +125,6 @@ namespace aslam {
       setDesignVariables(v);
     }
 
-    /// \brief get the Jacobian container.
-    const JacobianContainer& ErrorTerm::getJacobians() const
-    {
-      return getJacobiansImplementation();
-    }
 
     Eigen::VectorXd ErrorTerm::vsError() const
     {
@@ -182,5 +177,69 @@ namespace aslam {
       _rowBase = b;
     }
 
+
+    namespace detail {
+    struct ErrorTermFunctor {
+      typedef Eigen::VectorXd value_t;
+      typedef double scalar_t;
+      typedef Eigen::VectorXd input_t;
+      typedef Eigen::MatrixXd jacobian_t;
+
+        ErrorTerm & _et;
+        ErrorTermFunctor(ErrorTerm & et) :
+          _et(et) {}
+
+        input_t update(const input_t& x, int c, scalar_t delta) {
+          input_t xnew = x;
+          xnew[c] += delta;
+          return xnew;
+        }
+
+        Eigen::VectorXd operator()(const Eigen::VectorXd& dr) {
+          int offset = 0;
+          for (size_t i = 0; i < _et.numDesignVariables(); i++) {
+            DesignVariable* d = _et.designVariable(i);
+            SM_ASSERT_LE_DBG(aslam::Exception, offset + d->minimalDimensions(), dr.size(), "The offset is out of bounds.");
+            d->update(&dr[offset], d->minimalDimensions());
+            offset += d->minimalDimensions();
+          }
+          SM_ASSERT_EQ_DBG(aslam::Exception, offset, dr.size(), "The input vector is too large. It wasn't covered by the design variables.");
+          _et.evaluateError();
+          value_t e = _et.vsError();
+          for (size_t i = 0; i < _et.numDesignVariables(); i++) {
+            DesignVariable* d = _et.designVariable(i);
+            d->revertUpdate();
+          }
+          return e;
+        }
+      };
+
+    } // namespace detail
+
+  
+    // This is sub-optimal in terms of efficiency but it is mostly used for
+    // unit testing and prototyping in any case.
+    void ErrorTerm::evaluateJacobiansFiniteDifference(JacobianContainer & outJacobians)
+    {
+      outJacobians.clear();
+      detail::ErrorTermFunctor functor(*this);
+      sm::eigen::NumericalDiff< detail::ErrorTermFunctor > numdiff(functor, 1e-6);
+      int inputSize = 0;
+      for (size_t i = 0; i < numDesignVariables(); i++) {
+        inputSize += designVariable(i)->minimalDimensions();
+      }
+      Eigen::MatrixXd J = numdiff.estimateJacobian(Eigen::VectorXd::Zero(inputSize));
+      // Now pack the jacobian container.
+      outJacobians.clear();
+      int offset = 0;
+      for (size_t i = 0; i < numDesignVariables(); i++) {
+        DesignVariable* d = designVariable(i);
+        outJacobians.add(d, J.block(0, offset, J.rows(), d->minimalDimensions()));
+        offset += d->minimalDimensions();
+      }
+      // Done.
+    }
+
+  
   } // namespace backend
 } // namespace aslam

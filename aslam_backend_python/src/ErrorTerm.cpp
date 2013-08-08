@@ -24,9 +24,6 @@ void exportErrorTerm()
     /// \brief evaluate the Jacobians.
     .def("evaluateJacobians", &ErrorTerm::evaluateJacobians)
 
-    /// \brief get the Jacobian container.
-    .def("getJacobians", &ErrorTerm::getJacobians,return_internal_reference<>())
-
     /// \brief set the M-Estimator policy. This function takes a squared error
     ///        and returns a weight to apply to that error term.
     .def("setMEstimatorPolicy", &ErrorTerm::setMEstimatorPolicy)

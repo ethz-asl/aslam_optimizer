@@ -8,7 +8,8 @@
 
 namespace aslam {
   namespace backend {
-    
+  class HomogeneousExpression;
+  
     class EuclideanPoint : public EuclideanExpressionNode, public DesignVariable
     {
     public:
@@ -26,6 +27,7 @@ namespace aslam {
       virtual int minimalDimensionsImplementation() const;
 
       EuclideanExpression toExpression();
+      HomogeneousExpression toHomogeneousExpression();
 
         void set(const Eigen::Vector3d & p){ _p = p; _p_p = _p; }
     private:

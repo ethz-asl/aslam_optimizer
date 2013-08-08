@@ -31,7 +31,7 @@ namespace aslam {
      *
      * Some Additions to the standard algorithm:
      * Choice of Lambda:
-     * H.B. Nielsen. Damping Parameter in Marquardt’s Method. Technical Report
+     * H.B. Nielsen. Damping Parameter in Marquardts Method. Technical Report
      * IMM-REP-1999-05, Technical University of Denmark, 1999.
      *
      * Jacobian Normalisation:
@@ -39,7 +39,7 @@ namespace aslam {
      * A Methodology for Estimation of Physical Parameters, Systems Analysis Modelling Simulation, 43:7, 925-943
      *
      * Erik Etien, Damien Halbert, and Thierry Poinot
-     * Improved Jiles–Atherton Model for Least Square Identification Using Sensitivity Function Normalization
+     * Improved JilesAtherton Model for Least Square Identification Using Sensitivity Function Normalization
      * IEEE TRANSACTIONS ON MAGNETICS, VOL. 44, NO. 7, JULY 2008
      *
      */
@@ -114,6 +114,8 @@ namespace aslam {
 
 
         const Matrix * getJacobian() const;
+      
+        const LinearSystemSolver * getBaseSolver() const;
 
     private:
 

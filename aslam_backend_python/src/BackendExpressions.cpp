@@ -87,6 +87,7 @@ void exportBackendExpressions()
     ;
 
   class_<HomogeneousExpression, boost::shared_ptr<HomogeneousExpression> >("HomogeneousExpression", init<boost::shared_ptr<HomogeneousExpressionNode> >() )
+      .def(init<Eigen::Vector4d>())
     .def("toHomogeneous", &HomogeneousExpression::toHomogeneous)
     //.def("toEuclideanExpression", &HomogeneousExpression::toEuclideanExpression)
     .def("evaluateJacobians", &evaluateJacobians1<HomogeneousExpression>)
@@ -108,7 +109,7 @@ void exportBackendExpressions()
 
   class_<TransformationExpression,boost::shared_ptr<TransformationExpression> >("TransformationExpression", init<boost::shared_ptr<TransformationExpressionNode> >() )
     .def("toTransformationMatrix", &TransformationExpression::toTransformationMatrix)
-
+      .def(init< Eigen::Matrix4d>())
     // These guys are not implemented yet.
     //.def("toRotationExpression", &TransformationExpression::toRotationExpression)
     //.def("toHomogeneousExpression", &TransformationExpression::toHomogeneousExpression)
@@ -143,9 +144,10 @@ void exportBackendExpressions()
     ;
 
   class_<EuclideanPoint, boost::shared_ptr<EuclideanPoint>, bases<DesignVariable> >("EuclideanPointDv", init<const Eigen::Vector3d>())
-    .def("toExpression", &EuclideanPoint::toExpression)
-    .def("toEuclidean", &EuclideanPoint::toEuclidean)
-  .def("getDesignVariables", &getDesignVariables<EuclideanPoint>)
+      .def("toExpression", &EuclideanPoint::toExpression)
+      .def("toHomogeneousExpression", &EuclideanPoint::toHomogeneousExpression)
+      .def("toEuclidean", &EuclideanPoint::toEuclidean)
+      .def("getDesignVariables", &getDesignVariables<EuclideanPoint>)
      ;
 
   class_<HomogeneousPoint, boost::shared_ptr<HomogeneousPoint>, bases<DesignVariable> >("HomogeneousPointDv", init<const Eigen::Vector4d>())
@@ -184,6 +186,7 @@ void exportBackendExpressions()
 
 
   class_<ScalarExpression, boost::shared_ptr<ScalarExpression> >("ScalarExpression", init<boost::shared_ptr<ScalarExpressionNode> > () )
+      .def(init<double>())
       .def("toScalar", &ScalarExpression::toScalar)
       .def("toValue", &ScalarExpression::toScalar)
       .def("evaluateJacobians", &evaluateJacobians1<ScalarExpression>)

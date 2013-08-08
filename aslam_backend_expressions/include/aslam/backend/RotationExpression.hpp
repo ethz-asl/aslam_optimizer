@@ -8,6 +8,7 @@
 #include "EuclideanExpression.hpp"
 #include "TransformationExpression.hpp"
 #include <set>
+#include <sm/kinematics/RotationalKinematics.hpp>
 
 namespace aslam {
   namespace backend {
@@ -33,6 +34,8 @@ namespace aslam {
       /// \brief Evaluate the rotation matrix.
       Eigen::Matrix3d toRotationMatrix();
 
+      EuclideanExpression toParameters(sm::kinematics::RotationalKinematics::Ptr rk);
+      
       /// \brief return the expression that inverts the rotation.
       RotationExpression inverse();
       

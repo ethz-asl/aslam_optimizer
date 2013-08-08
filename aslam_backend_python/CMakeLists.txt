@@ -61,5 +61,7 @@ add_python_export_library(${PROJECT_NAME} python/aslam_backend
   src/BackendExpressions.cpp
   src/CompressedColumnMatrix.cpp
   src/LinearSystemSolver.cpp
+  src/ErrorTermTransformation.cpp
+  #src/ErrorTermTransformation.cpp
 )
 

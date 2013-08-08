@@ -1,6 +1,10 @@
 #include <aslam/backend/EuclideanExpression.hpp>
 #include <aslam/backend/EuclideanExpressionNode.hpp>
 #include <sm/boost/null_deleter.hpp>
+#include <aslam/backend/HomogeneousExpression.hpp>
+#include <aslam/backend/HomogeneousExpressionNode.hpp>
+#include <aslam/backend/VectorExpression.hpp>
+#include <aslam/backend/VectorExpressionNode.hpp>
 
 namespace aslam {
   namespace backend {
@@ -21,6 +25,18 @@ namespace aslam {
 
     }
 
+    EuclideanExpression::EuclideanExpression(const VectorExpression<3> & vectorExpression) :
+      _root(new VectorExpression2EuclideanExpressionAdapter(vectorExpression.root()))
+    {
+
+    }
+
+    EuclideanExpression::EuclideanExpression(const Eigen::Vector3d & p) :
+      _root(new EuclideanExpressionNodeConstant(p))
+    {
+    }
+
+
     EuclideanExpression::~EuclideanExpression()
     {
       
@@ -34,9 +50,8 @@ namespace aslam {
 
     HomogeneousExpression EuclideanExpression::toHomogeneousExpression()
     {
-      // \todo
-        SM_THROW(Exception, "Not Implemented");
-      return HomogeneousExpression();
+      boost::shared_ptr<HomogeneousExpressionNode> newRoot( new HomogeneousExpressionNodeEuclidean(_root) );
+      return HomogeneousExpression(newRoot);
     }
     
     void EuclideanExpression::evaluateJacobians(JacobianContainer & outJacobians) const
@@ -49,27 +64,33 @@ namespace aslam {
         _root->evaluateJacobians(outJacobians, applyChainRule);
     }
 
-    EuclideanExpression EuclideanExpression::cross(const EuclideanExpression & p)
+    EuclideanExpression EuclideanExpression::cross(const EuclideanExpression & p) const
     {
       boost::shared_ptr<EuclideanExpressionNode> newRoot( new EuclideanExpressionNodeCrossEuclidean(_root, p._root));
       return EuclideanExpression(newRoot);
     }
 
-    EuclideanExpression EuclideanExpression::operator+(const EuclideanExpression & p)
+    EuclideanExpression EuclideanExpression::operator+(const EuclideanExpression & p) const
     {
       boost::shared_ptr<EuclideanExpressionNode> newRoot( new EuclideanExpressionNodeAddEuclidean(_root, p._root));
       return EuclideanExpression(newRoot);
     }
 
-    EuclideanExpression EuclideanExpression::operator-(const EuclideanExpression & p)
+    EuclideanExpression EuclideanExpression::operator-(const EuclideanExpression & p) const
     {
       boost::shared_ptr<EuclideanExpressionNode> newRoot( new EuclideanExpressionNodeSubtractEuclidean(_root, p._root));
       return EuclideanExpression(newRoot);
     }
 
-    EuclideanExpression EuclideanExpression::operator-(const Eigen::Vector3d & p)
+    EuclideanExpression EuclideanExpression::operator-(const Eigen::Vector3d & p) const
     {
       boost::shared_ptr<EuclideanExpressionNode> newRoot( new EuclideanExpressionNodeSubtractVector(_root, p));
+      return EuclideanExpression(newRoot);
+    }
+
+    EuclideanExpression EuclideanExpression::operator-() const
+    {
+      boost::shared_ptr<EuclideanExpressionNode> newRoot( new EuclideanExpressionNodeNegated(_root));
       return EuclideanExpression(newRoot);
     }
 

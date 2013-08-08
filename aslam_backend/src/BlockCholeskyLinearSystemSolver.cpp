@@ -16,6 +16,7 @@ namespace aslam {
 
     void BlockCholeskyLinearSystemSolver::initMatrixStructureImplementation(const std::vector<DesignVariable*>& dvs, const std::vector<ErrorTerm*>& errors, bool useDiagonalConditioner)
     {
+      _solver.reset(new sparse_block_matrix::LinearSolverCholmod<Eigen::MatrixXd>());
       _useDiagonalConditioner = useDiagonalConditioner;
       _errorTerms = errors;
       std::vector<int> blocks;

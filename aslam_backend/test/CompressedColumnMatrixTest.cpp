@@ -120,8 +120,8 @@ TEST(CompressColumnMatrixTestSuite, testJcBuilder)
       ccjtb.buildSystem(j, false);
       Eigen::MatrixXd J = ccjtb.J_transpose().toDense().transpose();
       int rowStart = 0;
-      JacobianContainer jc(1);
       for (unsigned i = 0; i < errs.size(); ++i) {
+        JacobianContainer jc(errs[i]->dimension());
         Eigen::MatrixXd Jrow = J.block(rowStart, 0, errs[i]->dimension(), J.cols());
         errs[i]->getWeightedJacobians(jc, false);
         Eigen::MatrixXd JrowFromError = jc.asDenseMatrix(blocks);

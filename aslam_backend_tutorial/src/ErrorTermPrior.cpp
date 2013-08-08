@@ -34,7 +34,7 @@ namespace aslam {
 
 
     /// \brief evaluate the jacobian
-    void ErrorTermPrior::evaluateJacobiansImplementation()
+    void ErrorTermPrior::evaluateJacobiansImplementation(aslam::backend::JacobianContainer & _jacobians)
     {
 
       _jacobians.add(_x, Eigen::MatrixXd::Identity(1,1));

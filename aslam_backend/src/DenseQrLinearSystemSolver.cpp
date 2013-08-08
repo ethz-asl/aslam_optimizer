@@ -54,10 +54,9 @@ namespace aslam {
 
     void DenseQrLinearSystemSolver::evaluateJacobians(size_t threadId, size_t startIdx, size_t endIdx, bool useMEstimator)
     {
-      JacobianContainer jc(1);
       for (size_t i = startIdx; i < endIdx; ++i) {
+        JacobianContainer jc(_errorTerms[i]->dimension());
         ErrorTerm* e = _errorTerms[i];
-        e->evaluateJacobians();
         e->getWeightedJacobians(jc, useMEstimator);
         JacobianContainer::map_t::iterator it = jc.begin();
         for (; it != jc.end(); ++it) {

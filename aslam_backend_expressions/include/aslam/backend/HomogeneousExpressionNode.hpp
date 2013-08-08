@@ -5,7 +5,7 @@
 #include "TransformationExpressionNode.hpp"
 #include <boost/shared_ptr.hpp>
 #include <Eigen/Core>
-
+#include "EuclideanExpression.hpp"
 
 
 namespace aslam {
@@ -87,6 +87,23 @@ namespace aslam {
       virtual void getDesignVariablesImplementation(DesignVariable::set_t & designVariables) const;
 
       Eigen::Vector4d _p;
+    };
+
+  class HomogeneousExpressionNodeEuclidean : public HomogeneousExpressionNode
+    {
+    public:
+      EIGEN_MAKE_ALIGNED_OPERATOR_NEW
+
+      HomogeneousExpressionNodeEuclidean( boost::shared_ptr<EuclideanExpressionNode> p);
+      virtual ~HomogeneousExpressionNodeEuclidean();
+
+    private:
+      virtual Eigen::Vector4d toHomogeneousImplementation();
+      virtual void evaluateJacobiansImplementation(JacobianContainer & outJacobians) const;
+      virtual void evaluateJacobiansImplementation(JacobianContainer & outJacobians, const Eigen::MatrixXd & applyChainRule) const;
+      virtual void getDesignVariablesImplementation(DesignVariable::set_t & designVariables) const;
+
+      boost::shared_ptr<EuclideanExpressionNode> _p;
     };
 
 

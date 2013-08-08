@@ -110,15 +110,15 @@ namespace aslam {
       setParametersImplementation(value);
     }
 
-    void DesignVariable::minimalDifference(const Eigen::MatrixXd& xHat, Eigen::VectorXd& outDifference) const
-    {
-    	minimalDifferenceImplementation(xHat, outDifference);
-    }
+    // void DesignVariable::minimalDifference(const Eigen::MatrixXd& xHat, Eigen::VectorXd& outDifference) const
+    // {
+    // 	minimalDifferenceImplementation(xHat, outDifference);
+    // }
 
-    void DesignVariable::minimalDifferenceAndJacobian(const Eigen::MatrixXd& xHat, Eigen::VectorXd& outDifference, Eigen::MatrixXd& outJacobian) const
-    {
-    	minimalDifferenceAndJacobianImplementation(xHat, outDifference, outJacobian);
-    }
+    // void DesignVariable::minimalDifferenceAndJacobian(const Eigen::MatrixXd& xHat, Eigen::VectorXd& outDifference, Eigen::MatrixXd& outJacobian) const
+    // {
+    // 	minimalDifferenceAndJacobianImplementation(xHat, outDifference, outJacobian);
+    // }
 
   } // namespace backend
 } // namespace aslam

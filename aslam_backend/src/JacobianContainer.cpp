@@ -193,6 +193,11 @@ namespace aslam {
       return it->first;
     }
 
+  void JacobianContainer::reset(int rows) {
+    clear();
+    _rows = rows;
+  }
+  
     /// \brief Clear the contents of this container
     void JacobianContainer::clear()
     {

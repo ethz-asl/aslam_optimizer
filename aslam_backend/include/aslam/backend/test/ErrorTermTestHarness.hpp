@@ -7,10 +7,11 @@
 namespace aslam {
   namespace backend {
 
+  // \todo remove this template argument.
     template<int D>
     class ErrorTermTestHarness {
     public:
-      typedef ErrorTermFs<D> error_t;
+      typedef ErrorTerm error_t;
 
       ErrorTermTestHarness(error_t* error) : _error(error) {       }
 
@@ -25,10 +26,11 @@ namespace aslam {
           dv->setActive(true);
           dv->setBlockIndex(i);
         }
-        _error->evaluateJacobiansFiniteDifference();
-        JacobianContainer estJ = _error->getJacobians();
-        _error->evaluateJacobians();
-        JacobianContainer J = _error->getJacobians();
+        JacobianContainer estJ(_error->dimension());
+        _error->evaluateJacobiansFiniteDifference(estJ);
+        JacobianContainer J(_error->dimension());
+        _error->evaluateJacobians(J);
+
         sm::eigen::assertNear(J.asSparseMatrix(), estJ.asSparseMatrix(), tolerance, SM_SOURCE_FILE_POS, "Testing jacobians vs. finite differences (Matrix A are the analytical Jacobians, Matrix B is from finite differences)");
       }
 

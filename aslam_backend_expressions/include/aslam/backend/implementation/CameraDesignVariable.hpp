@@ -50,11 +50,6 @@ namespace aslam {
 			_camera->homogeneousToKeypointDistortionJacobian(ph, Jd);
 			outJacobians.add(_distortionDv.get(), -Jd);
 		}
-		if(_shutterDv->isActive()) {
-			_camera->homogeneousToKeypointShutterJacobian(ph, Js);
-			outJacobians.add(_shutterDv.get(), -Js);
-		}
-
 
 	}
 

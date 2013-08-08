@@ -15,18 +15,21 @@ namespace aslam {
     class HomogeneousExpression
     {
     public:
-        SM_DEFINE_EXCEPTION(Exception, std::runtime_error);
+      SM_DEFINE_EXCEPTION(Exception, std::runtime_error);
+      typedef Eigen::Vector4d value_t;
 
       HomogeneousExpression();
       HomogeneousExpression(HomogeneousExpressionNode * designVariable);
       HomogeneousExpression(boost::shared_ptr<HomogeneousExpressionNode> designVariable);
-        // Create a constant expression
-        HomogeneousExpression(const Eigen::Vector4d & p);
+      // Create a constant expression
+      HomogeneousExpression(const Eigen::Vector4d & p);
+      HomogeneousExpression(const Eigen::Vector3d & p);
 
       virtual ~HomogeneousExpression();
       
-      Eigen::Vector4d toHomogeneous();
-      Eigen::Vector4d toValue() { return toHomogeneous(); }
+      value_t toHomogeneous();
+      value_t toValue() { return toHomogeneous(); }
+      value_t evaluate() { return toHomogeneous(); }
       EuclideanExpression toEuclideanExpression();
       void evaluateJacobians(JacobianContainer & outJacobians) const;
       void evaluateJacobians(JacobianContainer & outJacobians, const Eigen::MatrixXd & applyChainRule) const;

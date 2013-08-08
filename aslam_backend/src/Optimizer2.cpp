@@ -394,6 +394,7 @@ namespace aslam {
 
         void Optimizer2::computeHessian(SparseBlockMatrix& outH, double lambda)
             {
+ 
                 BlockCholeskyLinearSystemSolver* solver = dynamic_cast<BlockCholeskyLinearSystemSolver*>(_solver.get());
                 boost::shared_ptr<BlockCholeskyLinearSystemSolver> solver_sp;
                 if (! solver || _options.trustRegionPolicy != "LevenbergMarquardt") {
@@ -408,6 +409,11 @@ namespace aslam {
                 solver->buildSystem(_options.nThreads, false);
                 solver->copyHessian(outH);
             }
+
+      const LinearSystemSolver * Optimizer2::getBaseSolver() const {
+          return _solver.get();
+      }
+
 
 
         const Matrix * Optimizer2::getJacobian() const {

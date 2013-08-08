@@ -33,7 +33,7 @@ namespace aslam {
 
 
     /// \brief evaluate the jacobian
-    void ErrorTermMotion::evaluateJacobiansImplementation()
+    void ErrorTermMotion::evaluateJacobiansImplementation(aslam::backend::JacobianContainer & _jacobians)
     {
       _jacobians.add(_x_k, -Eigen::MatrixXd::Identity(1,1));
       _jacobians.add(_x_kp1, Eigen::MatrixXd::Identity(1,1));

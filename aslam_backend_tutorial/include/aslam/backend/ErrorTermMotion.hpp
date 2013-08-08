@@ -27,7 +27,7 @@ namespace aslam {
       virtual double evaluateErrorImplementation();
 
       /// \brief evaluate the jacobian
-      virtual void evaluateJacobiansImplementation();
+      virtual void evaluateJacobiansImplementation(aslam::backend::JacobianContainer & J);
 
       double _u;
       ScalarDesignVariable * _x_k;

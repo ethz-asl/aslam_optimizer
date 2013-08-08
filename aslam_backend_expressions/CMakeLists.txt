@@ -9,6 +9,9 @@ include($ENV{ROS_ROOT}/core/rosbuild/rosbuild.cmake)
 #  MinSizeRel     : w/o debug symbols, w/ optimization, stripped binaries
 set(ROS_BUILD_TYPE Debug)
 #set(ROS_BUILD_TYPE Release)
+# just write the upper line into LocalBuildType.cmake to have a ROS_BUILD_TYPE not under version control.
+include(LocalBuildType.cmake OPTIONAL)
+message("ROS_BUILD_TYPE=" ${ROS_BUILD_TYPE})
 
 rosbuild_init()
 
@@ -39,6 +42,8 @@ rosbuild_add_library(${PROJECT_NAME}
   src/RotationExpression.cpp 
   src/RotationExpressionNode.cpp
   src/RotationQuaternion.cpp
+  src/MappedRotationQuaternion.cpp
+  src/Vector2RotationQuaternionExpressionAdapter.cpp
 
   src/MatrixExpression.cpp 
   src/MatrixExpressionNode.cpp
@@ -51,10 +56,12 @@ rosbuild_add_library(${PROJECT_NAME}
   src/EuclideanExpression.cpp 
   src/EuclideanExpressionNode.cpp
   src/EuclideanPoint.cpp
+  src/MappedEuclideanPoint.cpp
 
   src/HomogeneousExpression.cpp 
   src/HomogeneousExpressionNode.cpp
   src/HomogeneousPoint.cpp
+  src/MappedHomogeneousPoint.cpp
 
   src/ScalarExpression.cpp
   src/ScalarExpressionNode.cpp
@@ -63,15 +70,18 @@ rosbuild_add_library(${PROJECT_NAME}
   src/EuclideanDirection.cpp
 
   src/ErrorTermTransformation.cpp
+
+  src/MapTransformation.cpp
   )
 
 
 rosbuild_add_gtest(${PROJECT_NAME}_test
   test/test_main.cpp
   test/RotationExpression.cpp
-  #test/EuclideanExpression.cpp
   test/HomogeneousExpression.cpp
   test/MatrixAndEuclideanExpression.cpp
+  test/GenericMatrixExpression.cpp
+  test/QuaternionExpression.cpp
   #test/CameraDesignVariable.cpp
   test/ScalarExpression.cpp
   test/ErrorTest_Transformation.cpp

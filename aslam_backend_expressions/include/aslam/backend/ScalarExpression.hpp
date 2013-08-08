@@ -15,6 +15,7 @@ namespace aslam {
     class ScalarExpression
     {
     public:
+      ScalarExpression( double value );
       ScalarExpression(ScalarExpressionNode * designVariable);
       ScalarExpression(boost::shared_ptr<ScalarExpressionNode> designVariable);
       virtual ~ScalarExpression();

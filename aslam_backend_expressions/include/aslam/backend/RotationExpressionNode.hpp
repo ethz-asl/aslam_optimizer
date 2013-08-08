@@ -6,6 +6,7 @@
 #include <sm/kinematics/quaternion_algebra.hpp>
 #include <boost/shared_ptr.hpp>
 #include <set>
+#include <aslam/backend/TransformationExpressionNode.hpp>
 
 namespace aslam {
   namespace backend {
@@ -92,6 +93,23 @@ namespace aslam {
       Eigen::Matrix3d _C;
     };
 
+    class RotationExpressionNodeTransformation : public RotationExpressionNode
+    {
+    public:
+      RotationExpressionNodeTransformation(boost::shared_ptr<TransformationExpressionNode> dvRotation);
+
+      virtual ~RotationExpressionNodeTransformation();
+
+    private:
+      virtual Eigen::Matrix3d toRotationMatrixImplementation();
+      virtual void evaluateJacobiansImplementation(JacobianContainer & outJacobians) const;
+      virtual void evaluateJacobiansImplementation(JacobianContainer & outJacobians, const Eigen::MatrixXd & applyChainRule) const;
+      virtual void getDesignVariablesImplementation(DesignVariable::set_t & designVariables) const;
+
+      boost::shared_ptr<TransformationExpressionNode> _transformation;
+    };
+
+  
 
   } // namespace backend
 } // namespace aslam

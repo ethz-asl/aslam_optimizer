@@ -34,7 +34,7 @@ namespace aslam {
 
 
     /// \brief evaluate the jacobians
-    void ErrorTermObservation::evaluateJacobiansImplementation()
+    void ErrorTermObservation::evaluateJacobiansImplementation(aslam::backend::JacobianContainer & _jacobians)
     {
       double hat_y = -1.0/(_w->value() - _x_k->value());
       Eigen::MatrixXd hat_y2(1,1);

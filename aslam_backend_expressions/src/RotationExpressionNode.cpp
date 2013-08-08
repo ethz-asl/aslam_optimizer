@@ -97,5 +97,39 @@ namespace aslam {
     }
 
 
+  RotationExpressionNodeTransformation::RotationExpressionNodeTransformation(boost::shared_ptr<TransformationExpressionNode> transformation) :
+      _transformation(transformation) {
+    
+  }
+
+
+  
+  RotationExpressionNodeTransformation::~RotationExpressionNodeTransformation() {
+
+  }
+
+  Eigen::Matrix3d RotationExpressionNodeTransformation::toRotationMatrixImplementation() {
+    return _transformation->toTransformationMatrix().topLeftCorner<3,3>();
+  }
+
+  void RotationExpressionNodeTransformation::evaluateJacobiansImplementation(JacobianContainer & outJacobians) const {
+    Eigen::MatrixXd J = Eigen::MatrixXd::Zero(3,6);
+    J.topRightCorner<3,3>() = Eigen::Matrix3d::Identity();
+    _transformation->evaluateJacobians(outJacobians, J);
+  }
+
+  void RotationExpressionNodeTransformation::evaluateJacobiansImplementation(JacobianContainer & outJacobians, const Eigen::MatrixXd & applyChainRule) const {
+    Eigen::MatrixXd J = Eigen::MatrixXd::Zero(3,6);
+    J.topRightCorner<3,3>() = Eigen::Matrix3d::Identity();
+    _transformation->evaluateJacobians(outJacobians, applyChainRule*J);
+
+  }
+
+  void RotationExpressionNodeTransformation::getDesignVariablesImplementation(DesignVariable::set_t & designVariables) const {
+    _transformation->getDesignVariables(designVariables);
+  }
+
+
+  
   } // namespace backend
 } // namespace aslam

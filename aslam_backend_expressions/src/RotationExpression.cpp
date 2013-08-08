@@ -83,6 +83,10 @@ namespace aslam {
       return _root->getDesignVariables(designVariables);
     }
     
+  EuclideanExpression RotationExpression::toParameters(sm::kinematics::RotationalKinematics::Ptr rk) {
+    boost::shared_ptr<EuclideanExpressionNode> een( new EuclideanExpressionNodeRotationParameters(_root, rk));
+    return EuclideanExpression(een);
+  }
     
 
   } // namespace backend

@@ -94,11 +94,15 @@ namespace sparse_block_matrix {
         const Eigen::Map<Eigen::VectorXd> bvec(b, n);
 
         // std::cerr << bvec << std::endl;
-
+#ifdef __APPLE__
+        /// THe apple compiler is buggy...crap.
         Eigen::VectorXd mm = H.selfadjointView<Eigen::Upper>().ldlt().solve(Eigen::VectorXd(bvec));
-
-        xvec = mm;
-
+        for(int i = 0; i < mm.size(); ++i) {
+            xvec[i] = mm[i];
+        }
+#else
+        xvec = H.selfadjointView<Eigen::Upper>().ldlt().solve(Eigen::VectorXd(bvec));
+#endif
         // std::cerr << xvec << std::endl;
         
         return true;

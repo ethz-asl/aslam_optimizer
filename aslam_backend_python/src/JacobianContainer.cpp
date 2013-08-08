@@ -65,6 +65,10 @@ void exportJacobianContainer()
     /// \brief Clear the contents of this container
     .def("clear", &JacobianContainer::clear)
 
+      /// \brief Clear the contents of this container
+    .def("reset", &JacobianContainer::reset)
+
+      
     /// \brief Gets a sparse matrix with the Jacobians. The matrix is, in fact, dense
     ///        and the Jacobian ordering matches the sort order. 
     /// 

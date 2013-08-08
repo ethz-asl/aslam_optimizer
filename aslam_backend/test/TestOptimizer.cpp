@@ -86,12 +86,12 @@ TEST(OptimizerTestSuite, testOptimizerMatrices)
     invR.setZero();
     boost::shared_ptr<SparseBlockMatrix> cloneH(optimizer.H().clone());
     cloneH->clear();
-    JacobianContainer jc(1);
+
     Eigen::VectorXd ei;
     for (unsigned i = 0; i < problem.numErrorTerms(); ++i) {
       int ridx = 2 * i;
+      JacobianContainer jc(problem.errorTerm(i)->dimension());
       problem.errorTerm(i)->evaluateError();
-      problem.errorTerm(i)->evaluateJacobians();
       problem.errorTerm(i)->getWeightedJacobians(jc, false);
       J.block<2, P * 2>(ridx, 0) = jc.asDenseMatrix(optimizer.H().colBlockIndices());
       problem.errorTerm(i)->getWeightedError(ei, false);
@@ -108,8 +108,9 @@ TEST(OptimizerTestSuite, testOptimizerMatrices)
       J.setZero();
       int ridx = 2 * i;
       problem.errorTerm(i)->evaluateError();
-      problem.errorTerm(i)->evaluateJacobians();
-      J = problem.errorTerm(i)->getJacobians().asDenseMatrix(optimizer.H().colBlockIndices());
+      JacobianContainer Jc(problem.errorTerm(i)->dimension());
+      problem.errorTerm(i)->evaluateJacobians(Jc);
+      J = Jc.asDenseMatrix(optimizer.H().colBlockIndices());
       e.segment<2>(ridx) = dynamic_cast<ErrorTermFs<2>*>(problem.errorTerm(i))->error();
       Eigen::MatrixXd invR = problem.errorTerm(i)->vsInvR();
       //std::cout << "invR:\n" << invR << std::endl;

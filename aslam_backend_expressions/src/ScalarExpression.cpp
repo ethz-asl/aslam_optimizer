@@ -9,6 +9,11 @@ namespace aslam {
       
         }
 
+    ScalarExpression::ScalarExpression( double value ) :
+        _root( new ScalarExpressionNodeConstant(value) ){
+      
+    }
+    
         ScalarExpression::ScalarExpression(ScalarExpressionNode * designVariable) :
             _root( designVariable, sm::null_deleter() )
         {
