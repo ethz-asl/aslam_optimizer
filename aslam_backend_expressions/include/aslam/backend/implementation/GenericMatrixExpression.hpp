@@ -20,7 +20,7 @@ _root(root, sm::null_deleter() )
 
 _TEMPLATE
 template <typename DERIVED>
-_CLASS::GenericMatrixExpression(const Eigen::MatrixBase<DERIVED> & mat) : _root(new typename node_t::Constant(mat))
+_CLASS::GenericMatrixExpression(const Eigen::MatrixBase<DERIVED> & mat) : _root(new typename node_t::constant_t(mat))
 {
 }
 

@@ -6,6 +6,8 @@
 namespace aslam {
 namespace backend {
 
+template<int IRows, int ICols, typename TScalar> class ConstantGenericMatrixExpressionNode;
+
 template<int IRows, int ICols, typename TScalar>
 class GenericMatrixExpressionNode {
  public:
@@ -79,28 +81,31 @@ class GenericMatrixExpressionNode {
   }
 
  public:
-  class Constant : public GenericMatrixExpressionNode {
-   public:
-    template<typename DERIVED>
-    Constant(const Eigen::MatrixBase<DERIVED> & value)
-        : GenericMatrixExpressionNode(value) {
-    }
-    Constant(int rows = IRows, int cols = ICols)
-        : GenericMatrixExpressionNode(rows, cols, false) {
-    }
-   protected:
-    bool isConstantImplementation() const {
-      return true;
-    }
-    virtual void evaluateImplementation() const {
-    }
-    ;
-    virtual void evaluateJacobiansImplementation(JacobianContainer & outJacobians, const differential_t & diff) const {
-    }
-    virtual void getDesignVariablesImplementation(DesignVariable::set_t & designVariables) const {
-    }
-  };
-  typedef Constant constant_t;
+  typedef ConstantGenericMatrixExpressionNode<IRows, ICols, TScalar> constant_t;
+};
+
+template<int IRows, int ICols, typename TScalar>
+class ConstantGenericMatrixExpressionNode : public GenericMatrixExpressionNode<IRows, ICols, TScalar> {
+ public:
+  typedef GenericMatrixExpressionNode<IRows, ICols, TScalar> base_t;
+  template<typename DERIVED>
+  ConstantGenericMatrixExpressionNode(const Eigen::MatrixBase<DERIVED> & value)
+      : base_t(value) {
+  }
+  ConstantGenericMatrixExpressionNode(int rows = IRows, int cols = ICols)
+      : base_t(rows, cols, false) {
+  }
+ protected:
+  bool isConstantImplementation() const {
+    return true;
+  }
+  virtual void evaluateImplementation() const {
+  }
+  ;
+  virtual void evaluateJacobiansImplementation(JacobianContainer & outJacobians, const typename base_t::differential_t & diff) const {
+  }
+  virtual void getDesignVariablesImplementation(DesignVariable::set_t & designVariables) const {
+  }
 };
 
 }  // namespace backend
