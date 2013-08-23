@@ -22,6 +22,7 @@ namespace aslam {
 
       /// \brief return the Jacobian matrix if available. Null if not available.
       virtual const Matrix* Jacobian() const;
+      const Eigen::MatrixXd& getJacobian() const;
 
       /// Returns the options
       const DenseQRLinearSolverOptions& getOptions() const;
@@ -29,6 +30,8 @@ namespace aslam {
       DenseQRLinearSolverOptions& getOptions();
       /// Sets the options
       void setOptions(const DenseQRLinearSolverOptions& options);
+
+
 
     private:
       /// \brief a method for a thread to evaluate Jacobians
