@@ -99,12 +99,12 @@ namespace aslam {
 		 outDifference = sm::kinematics::R2AxisAngle(_C * xHat.transpose());
       }
 
-      void EuclideanDirection::minimalDifferenceAndJacobianImplementation(const Eigen::MatrixXd& xHat, Eigen::VectorXd& outDifference, Eigen::MatrixXd& outJacobian) const
-      {
-		 minimalDifferenceImplementation(xHat, outDifference);
-		 // outJacobian = ??
-		 outJacobian.setIdentity(3,3);
-      }
+//      void EuclideanDirection::minimalDifferenceAndJacobianImplementation(const Eigen::MatrixXd& xHat, Eigen::VectorXd& outDifference, Eigen::MatrixXd& outJacobian) const
+//      {
+//		 minimalDifferenceImplementation(xHat, outDifference);
+//		 // outJacobian = ??
+//		 outJacobian.setIdentity(3,3);
+//      }
 
     } // namespace backend
 } // namespace aslam

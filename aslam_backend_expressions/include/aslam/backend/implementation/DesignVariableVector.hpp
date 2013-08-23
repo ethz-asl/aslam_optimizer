@@ -101,7 +101,7 @@ namespace aslam {
     template<int D>
     void DesignVariableVector<D>::minimalDifferenceAndJacobianImplementation(const Eigen::MatrixXd& xHat, Eigen::VectorXd& outDifference,	Eigen::MatrixXd& outJacobian) const
     {
-    	//minimalDifference(xHat, outDifference);
+    	minimalDifferenceImplementation(xHat, outDifference);
     	outJacobian.setIdentity(D,D);
     }
 
