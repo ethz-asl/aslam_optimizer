@@ -110,5 +110,18 @@ namespace aslam {
       setParametersImplementation(value);
     }
 
+
+    void aslam::backend::DesignVariable::minimalDifferenceImplementation(const Eigen::MatrixXd& xHat, Eigen::VectorXd& outDifference) const
+    {
+    	SM_THROW(aslam::Exception, "Calling default dummy implementation of minimalDifference(). If you want to use the marginalizer with this design variable, implement a specialization of this function first!");
+    }
+
+    void aslam::backend::DesignVariable::minimalDifferenceAndJacobianImplementation(const Eigen::MatrixXd& xHat, Eigen::VectorXd& outDifference, Eigen::MatrixXd& outJacobian) const
+    {
+    	SM_THROW(aslam::Exception, "Calling default dummy implementation of minimalDifference(). If you want to use the marginalizer with this design variable, implement a specialization of this function first!");
+
+    }
+
   } // namespace backend
 } // namespace aslam
+
