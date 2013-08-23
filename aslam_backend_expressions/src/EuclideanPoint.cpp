@@ -1,5 +1,5 @@
 #include <aslam/backend/EuclideanPoint.hpp>
-#include <aslam/backend/HomogeneousExpression.hpp>
+
 
 namespace aslam {
   namespace backend {
@@ -61,10 +61,6 @@ namespace aslam {
       return EuclideanExpression(this);
     }
 
-  HomogeneousExpression EuclideanPoint::toHomogeneousExpression() {
-    return EuclideanExpression(this).toHomogeneousExpression();
-  }
-
     void EuclideanPoint::getParametersImplementation(
         Eigen::MatrixXd& value) const {
       value = _p;
@@ -74,6 +70,18 @@ namespace aslam {
         const Eigen::MatrixXd& value) {
       _p_p = _p;
       _p = value;
+    }
+
+    void EuclideanPoint::minimalDifferenceImplementation(const Eigen::MatrixXd& xHat, Eigen::VectorXd& outDifference) const
+    {
+    	SM_ASSERT_TRUE(aslam::InvalidArgumentException, (xHat.rows() == 3) && (xHat.cols() == 1), "xHat has incompatible dimensions");
+    	outDifference = _p - xHat;
+    }
+
+    void EuclideanPoint::minimalDifferenceAndJacobianImplementation(const Eigen::MatrixXd& xHat, Eigen::VectorXd& outDifference, Eigen::MatrixXd& outJacobian) const
+    {
+    	minimalDifferenceImplementation(xHat, outDifference);
+    	outJacobian = Eigen::Matrix3d::Identity();
     }
 
   } // namespace backend

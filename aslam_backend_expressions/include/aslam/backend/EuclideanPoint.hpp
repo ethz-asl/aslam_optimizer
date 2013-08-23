@@ -8,8 +8,7 @@
 
 namespace aslam {
   namespace backend {
-  class HomogeneousExpression;
-  
+    
     class EuclideanPoint : public EuclideanExpressionNode, public DesignVariable
     {
     public:
@@ -27,7 +26,6 @@ namespace aslam {
       virtual int minimalDimensionsImplementation() const;
 
       EuclideanExpression toExpression();
-      HomogeneousExpression toHomogeneousExpression();
 
         void set(const Eigen::Vector3d & p){ _p = p; _p_p = _p; }
     private:
@@ -44,6 +42,12 @@ namespace aslam {
 
       /// Sets the content of the design variable
       virtual void setParametersImplementation(const Eigen::MatrixXd& value);
+
+      /// Computes the minimal distance in tangent space between the current value of the DV and xHat
+      virtual void minimalDifferenceImplementation(const Eigen::MatrixXd& xHat, Eigen::VectorXd& outDifference) const;
+
+      /// Computes the minimal distance in tangent space between the current value of the DV and xHat and the jacobian
+      virtual void minimalDifferenceAndJacobianImplementation(const Eigen::MatrixXd& xHat, Eigen::VectorXd& outDifference, Eigen::MatrixXd& outJacobian) const;
 
       /// \brief The current value of the design variable.
       Eigen::Vector3d _p;
