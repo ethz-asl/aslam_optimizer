@@ -23,7 +23,30 @@ MarginalizationPriorErrorTerm::MarginalizationPriorErrorTerm(const std::vector<a
   setInvR(Eigen::MatrixXd::Identity(R.cols(), R.cols()));
 
   //_M = Eigen::MatrixXd::Identity(R.cols(), R.cols());
-ndl;
+
+  // set all design variables
+  for(vector<aslam::backend::DesignVariable*>::iterator it = _designVariables.begin(); it != _designVariables.end(); ++it)
+  {
+    Eigen::MatrixXd values;
+    (*it)->getParameters(values);
+    // PTF: Nice variable name.
+    _designVariableValuesAtMarginalization.push_back(values);
+  }
+  setDesignVariables(designVariables);
+
+}
+
+MarginalizationPriorErrorTerm::~MarginalizationPriorErrorTerm() {
+  // TODO Auto-generated destructor stub
+}
+
+double MarginalizationPriorErrorTerm::evaluateErrorImplementation()
+{
+  Eigen::VectorXd diff = getDifferenceSinceMarginalization();
+  // ASSERT DIMENSIONS MATCH
+  std::cout << "Diff looks like this: " << std::endl << diff << std::endl;
+  std::cout << "R looks like this: " << std::endl << _R << std::endl;
+  std::cout << "d looks like this: " << std::endl << _d << std::endl;
   // PTF: Why a negative here?
   SM_ASSERT_EQ(aslam::Exception, diff.rows(), _R.cols(), "Dimension of R and the minimal difference vector mismatch!");
   SM_ASSERT_EQ(aslam::Exception, _d.rows(), _R.rows(), "Dimension of R and the d mismatch!");
