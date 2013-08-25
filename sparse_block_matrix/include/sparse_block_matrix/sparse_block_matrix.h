@@ -245,6 +245,8 @@ class SparseBlockMatrix {
   //! and the block column is stored as a map row_block -> matrix_block_ptr.
   std::vector <IntBlockMap> _blockCols;
   bool _hasStorage;
+
+  template <typename M> friend class SparseBlockMatrix;
 };
 
 template < class  MatrixType >
