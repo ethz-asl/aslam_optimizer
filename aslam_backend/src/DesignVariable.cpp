@@ -110,15 +110,30 @@ namespace aslam {
       setParametersImplementation(value);
     }
 
-    // void DesignVariable::minimalDifference(const Eigen::MatrixXd& xHat, Eigen::VectorXd& outDifference) const
-    // {
-    // 	minimalDifferenceImplementation(xHat, outDifference);
-    // }
+    /// \brief Computes the minimal distance in tangent space between the current value of the DV and xHat
+    void DesignVariable::minimalDifference(const Eigen::MatrixXd& xHat, Eigen::VectorXd& outDifference) const
+    {
+    	minimalDifferenceImplementation(xHat, outDifference);
+    }
+    /// Computes the minimal distance in tangent space between the current value of the DV and xHat and the jacobian
+    void DesignVariable::minimalDifferenceAndJacobian(const Eigen::MatrixXd& xHat, Eigen::VectorXd& outDifference, Eigen::MatrixXd& outJacobian) const
+    {
+    	minimalDifferenceAndJacobianImplementation(xHat, outDifference, outJacobian);
+    }
 
-    // void DesignVariable::minimalDifferenceAndJacobian(const Eigen::MatrixXd& xHat, Eigen::VectorXd& outDifference, Eigen::MatrixXd& outJacobian) const
-    // {
-    // 	minimalDifferenceAndJacobianImplementation(xHat, outDifference, outJacobian);
-    // }
+
+
+    void DesignVariable::minimalDifferenceImplementation(const Eigen::MatrixXd& xHat, Eigen::VectorXd& outDifference) const
+    {
+    	SM_THROW(aslam::Exception, "Calling default dummy implementation of minimalDifference(). If you want to use the marginalizer with this design variable, implement a specialization of this function first!");
+    }
+
+    void DesignVariable::minimalDifferenceAndJacobianImplementation(const Eigen::MatrixXd& xHat, Eigen::VectorXd& outDifference, Eigen::MatrixXd& outJacobian) const
+    {
+    	SM_THROW(aslam::Exception, "Calling default dummy implementation of minimalDifferenceAndJacobian(). If you want to use the marginalizer with this design variable, implement a specialization of this function first!");
+
+    }
 
   } // namespace backend
 } // namespace aslam
+

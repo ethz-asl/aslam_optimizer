@@ -16,25 +16,24 @@
 namespace aslam {
 namespace backend {
 
-// PTF: As we talked about, this should be a function (unless it needs to hold state in order to be efficient)
-class Marginalizer {
-public:
-	Marginalizer();
-	virtual ~Marginalizer();
-
-    // PTF: The function should have some comments about usage (doxygen style)
-    //      This is especially important here because, as I read your code,
-    //      the ordering of the design variables really matters. it is important
-    //      to document stuff like this.
-	void operator () (
+/// \brief Marginalizes out the given design variables
+///
+///	\param[IN] inDesignVariables list of input design variables to be marginalized
+/// \param[IN] inErrorTerms list of all error terms related to the input design variables
+/// \param[IN] numberOfInputDesignVariablesToRemove Number of input design variables to be removed.
+/// 											The functions removes this many input design variables, starting at the beginning of
+///												the list of input design variables. Therefore, the ordering of the design variables in the
+///												input desing variables list matters!
+/// \param[IN] useMEstimator					Wheter or not to use an M-Estimator in the QR sovler.
+/// \param[OUT] outPriorErrorTermPtr			Shared pointer to the resulting marginalized prior error term.
+///
+void marginalize(
 			std::vector<aslam::backend::DesignVariable*>& inDesignVariables,
 			std::vector<aslam::backend::ErrorTerm*>& inErrorTerms,
 			int numberOfInputDesignVariablesToRemove,
-			boost::shared_ptr<aslam::backend::MarginalizationPriorErrorTerm>& outPriorErrorTermPtr) const;
-
-	int bla() {return 1;}
-};
-
+			bool useMEstimator,
+			boost::shared_ptr<aslam::backend::MarginalizationPriorErrorTerm>& outPriorErrorTermPtr
+		);
 } /* namespace backend */
 } /* namespace aslam */
 #endif /* MARGINALIZER_H_ */

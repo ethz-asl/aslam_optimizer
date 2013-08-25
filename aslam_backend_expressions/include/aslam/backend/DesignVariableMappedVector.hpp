@@ -55,6 +55,7 @@ namespace aslam {
 
       /// Computes the minimal distance in tangent space between the current value of the DV and xHat and the jacobian
       virtual void minimalDifferenceAndJacobianImplementation(const Eigen::MatrixXd& xHat, Eigen::VectorXd& outDifference, Eigen::MatrixXd& outJacobian) const;
+
     private:
       Eigen::Map< vector_t > _v;
       vector_t _p_v;

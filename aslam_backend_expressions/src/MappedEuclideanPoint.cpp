@@ -72,5 +72,17 @@ namespace aslam {
       _p = value;
     }
 
+    void MappedEuclideanPoint::minimalDifferenceImplementation(const Eigen::MatrixXd& xHat, Eigen::VectorXd& outDifference) const
+    {
+     SM_ASSERT_TRUE(aslam::InvalidArgumentException, (xHat.rows() == 3) && (xHat.cols() == 1), "xHat has incompatible dimensions");
+     outDifference = _p_p - xHat;
+    }
+
+    void MappedEuclideanPoint::minimalDifferenceAndJacobianImplementation(const Eigen::MatrixXd& xHat, Eigen::VectorXd& outDifference, Eigen::MatrixXd& outJacobian) const
+    {
+     minimalDifferenceImplementation(xHat, outDifference);
+     outJacobian = Eigen::Matrix3d::Identity();
+    }
+
   } // namespace backend
 } // namespace aslam

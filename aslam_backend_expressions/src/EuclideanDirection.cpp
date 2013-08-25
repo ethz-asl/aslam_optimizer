@@ -95,15 +95,16 @@ namespace aslam {
 
       void EuclideanDirection::minimalDifferenceImplementation(const Eigen::MatrixXd& xHat, Eigen::VectorXd& outDifference) const
       {
-    	  SM_ASSERT_TRUE(aslam::InvalidArgumentException, (xHat.rows()==3)&&(xHat.cols()==3), "xHat does have incompatible dimensions");
-    	  outDifference = sm::kinematics::R2AxisAngle(_C * xHat.transpose());
+		 SM_ASSERT_TRUE(aslam::InvalidArgumentException, (xHat.rows()==3)&&(xHat.cols()==3), "xHat does have incompatible dimensions");
+		 outDifference = sm::kinematics::R2AxisAngle(_C * xHat.transpose());
       }
 
-      void EuclideanDirection::minimalDifferenceAndJacobianImplementation(const Eigen::MatrixXd& xHat, Eigen::VectorXd& outDifference, Eigen::MatrixXd& outJacobian) const
-      {
-    	  minimalDifferenceImplementation(xHat, outDifference);
-    	  // outJacobian = ??
-      }
+//      void EuclideanDirection::minimalDifferenceAndJacobianImplementation(const Eigen::MatrixXd& xHat, Eigen::VectorXd& outDifference, Eigen::MatrixXd& outJacobian) const
+//      {
+//		 minimalDifferenceImplementation(xHat, outDifference);
+//		 // outJacobian = ??
+//		 outJacobian.setIdentity(3,3);
+//      }
 
     } // namespace backend
 } // namespace aslam

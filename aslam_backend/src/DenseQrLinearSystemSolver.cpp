@@ -89,6 +89,10 @@ namespace aslam {
       
       
 
+    const Eigen::MatrixXd& DenseQrLinearSystemSolver::getJacobian() const
+    {
+     return _J._M;
+    }
 
   } // namespace backend
 } // namespace aslam

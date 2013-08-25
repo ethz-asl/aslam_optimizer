@@ -81,6 +81,8 @@ rosbuild_add_library(${PROJECT_NAME}
   src/ErrorTermDs.cpp
   src/GaussNewtonTrustRegionPolicy.cpp
   src/LevenbergMarquardtTrustRegionPolicy.cpp
+  src/Marginalizer.cpp
+  src/MarginalizationPriorErrorTerm.cpp
   src/DogLegTrustRegionPolicy.cpp
   )
 

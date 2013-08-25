@@ -126,10 +126,10 @@ namespace aslam {
       SM_ASSERT_GE_DBG(Exception, dv->blockIndex(), 0, "The design variable is active but the block index is less than zero.");
       map_t::iterator it = _jacobianMap.find(dv);
       if (it == _jacobianMap.end()) {
-        _jacobianMap.insert(_jacobianMap.end(), std::make_pair(dv, Eigen::MatrixXd(Jacobian)));
+        _jacobianMap.insert(_jacobianMap.end(), std::make_pair(dv, Eigen::MatrixXd(Jacobian.template cast<double>())));
       } else {
         SM_ASSERT_TRUE_DBG(Exception, it->first == dv, "Two design variables had the same block index but different pointer values");
-        it->second += Jacobian;
+        it->second += Jacobian.template cast<double>();
       }
     }
 

@@ -33,6 +33,7 @@ public:
   }
   virtual ~HpErr(){}
 
+protected:
   /// \brief evaluate the error term
   virtual double evaluateErrorImplementation()
   {
@@ -42,9 +43,9 @@ public:
   }
  
   /// \brief evaluate the jacobian
-  virtual void evaluateJacobiansImplementation(JacobianContainer & _jacobians) const
+  virtual void evaluateJacobiansImplementation(JacobianContainer & jacobians)
   {
-    _p.evaluateJacobians(_jacobians);
+    _p.evaluateJacobians(jacobians);
   }
 
   

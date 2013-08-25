@@ -24,20 +24,16 @@ public:
 
 	typedef boost::shared_ptr<aslam::backend::MarginalizationPriorErrorTerm> Ptr;
 
-    // PTF: This needs comments
-    //      Also, isn't the dimension implicit in R? (also d, also from the design variables)
-    //      Also, doesn't dimensionErrorTerm == dimensionDesignVariables == R.cols() == R.rows() == d.size()?
-    //      Note again that documentation is important because the order of the DVs in the
-    //      vector is important. Also, the comments should point toward the factory function
+  // creates the marginalization error term of the form e(x) = d - R*x
+  // designVariables: 	the design variables of this marginalization prior error term
   MarginalizationPriorErrorTerm(const std::vector<aslam::backend::DesignVariable*>& designVariables,
-     const Eigen::VectorXd& d, const Eigen::MatrixXd& R, int dimensionErrorTerm, int dimensionDesignVariables);
+     const Eigen::VectorXd& d, const Eigen::MatrixXd& R);
   virtual ~MarginalizationPriorErrorTerm();
 
-    // PTF: comments
-  void removeTopDesignVariable();
+//  // removes the top/first design variable (that is, the design variable a the beginning of the design variable vector) from the error term
+//  // currently only used for integrity testing. may be removed at some point
+//  void removeTopDesignVariable();
 
-    // PTF: comments
-  bool isValid() { return _valid; }
   int numDesignVariables() { return _designVariables.size(); }
   aslam::backend::DesignVariable* getDesignVariable(int i);
 
@@ -45,17 +41,16 @@ private:
   MarginalizationPriorErrorTerm();
 
   virtual double evaluateErrorImplementation();
-  virtual void evaluateJacobiansImplementation();
+  virtual void evaluateJacobiansImplementation(JacobianContainer & outJ);
 
-    // PTF: comments
+  // computes the minimal difference of all design variables between the linearization point at marginalization and the current guess (i.e. log(x_bar - x))
   Eigen::VectorXd getDifferenceSinceMarginalization();
 
-  bool _valid;
   int _dimensionDesignVariables;
   std::vector<aslam::backend::DesignVariable*> _designVariables;
   Eigen::VectorXd _d;
   Eigen::MatrixXd _R; // R from the QR decomposition!!!
-  Eigen::MatrixXd _M;
+  //Eigen::MatrixXd _M;
   // store values of design variables at time of marginalization
   std::vector<Eigen::MatrixXd> _designVariableValuesAtMarginalization;
 };

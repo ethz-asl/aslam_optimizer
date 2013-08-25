@@ -20,7 +20,7 @@ _root(root, sm::null_deleter() )
 
 _TEMPLATE
 template <typename DERIVED>
-_CLASS::GenericMatrixExpression(const Eigen::MatrixBase<DERIVED> & mat) : _root(new typename node_t::Constant(mat))
+_CLASS::GenericMatrixExpression(const Eigen::MatrixBase<DERIVED> & mat) : _root(new typename node_t::constant_t(mat))
 {
 }
 
@@ -39,7 +39,7 @@ void _CLASS::evaluateJacobians(JacobianContainer & outJacobians) const
 _TEMPLATE
 void _CLASS::evaluateJacobians(JacobianContainer & outJacobians, const Eigen::MatrixXd & applyChainRule) const
 {
-  _root->evaluateJacobians(outJacobians, MatrixDifferential<TScalar, Eigen::Matrix<TScalar, Eigen::Dynamic, IRows> >(applyChainRule));
+  _root->evaluateJacobians(outJacobians, MatrixDifferential<TScalar, Eigen::Matrix<TScalar, Eigen::Dynamic, IRows> >(applyChainRule.cast<TScalar>()));
 }
 
 _TEMPLATE

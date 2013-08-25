@@ -10,29 +10,20 @@
 #include <aslam/backend/DenseQrLinearSystemSolver.hpp>
 #include <Eigen/QR>
 #include <Eigen/Dense>
+#include <aslam/backend/DenseMatrix.hpp>
 
 #include <iostream>
 
 namespace aslam {
 namespace backend {
 
-Marginalizer::Marginalizer() {
-	// TODO Auto-generated constructor stub
-
-}
-
-Marginalizer::~Marginalizer() {
-	// TODO Auto-generated destructor stub
-}
-
-void Marginalizer::operator () (
-		std::vector<aslam::backend::DesignVariable*>& inDesignVariables,
-		std::vector<aslam::backend::ErrorTerm*>& inErrorTerms,
-		int numberOfInputDesignVariablesToRemove,
-		boost::shared_ptr<aslam::backend::MarginalizationPriorErrorTerm>& outPriorErrorTermPtr) const
+void marginalize(
+			std::vector<aslam::backend::DesignVariable*>& inDesignVariables,
+			std::vector<aslam::backend::ErrorTerm*>& inErrorTerms,
+			int numberOfInputDesignVariablesToRemove,
+			bool useMEstimator,
+			boost::shared_ptr<aslam::backend::MarginalizationPriorErrorTerm>& outPriorErrorTermPtr)
 {
-
-
           // Partition the design varibles into removed/remaining.
 		  int dimOfDesignVariablesToRemove = 0;
 		  std::vector<aslam::backend::DesignVariable*> remainingDesignVariables;
@@ -75,28 +66,19 @@ void Marginalizer::operator () (
 
           
 		  aslam::backend::DenseQrLinearSystemSolver qrSolver;
-		  // PTF: The "true" here corresponds to "useDiagonalConditioner".
-          //      Why is this being set to true? I don't think we should use
-          //      a diagonal conditioner.
-          qrSolver.initMatrixStructure(inDesignVariables, inErrorTerms, true);
 
-		  std::cout << "Marginalization optimization problem initialized with " << inDesignVariables.size() << " design variables and " << inErrorTerms.size() << " error terms" << std::endl;
-		  std::cout << "The Jacobian matrix is " << dim << " x " << columnBase << std::endl;
+          qrSolver.initMatrixStructure(inDesignVariables, inErrorTerms, false);
 
-          // PTF: The "true" here corresponds to using the m-estimator.
-          //      Is this really what we want to do? I suppose so but it
-          //      makes me uncomfortable. Perhaps we should add this as
-          //      a parameter in the function call
-		  qrSolver.evaluateError(1, true);
-		  qrSolver.buildSystem(1, true);
+		  //std::cout << "Marginalization optimization problem initialized with " << inDesignVariables.size() << " design variables and " << inErrorTerms.size() << " error terms" << std::endl;
+		  //std::cout << "The Jacobian matrix is " << dim << " x " << columnBase << std::endl;
 
-          
-          // PTF: toDense() here incurs a copy of the full matrix.
-          //      This could be very expensive. Why not just add
-          //      matrix access to the qrSolver so you don't have
-          //      to copy anything. (same for the call to e() below)
-		  Eigen::MatrixXd jacobian = qrSolver.Jacobian()->toDense();
-		  const Eigen::VectorXd b = qrSolver.e();
+		  qrSolver.evaluateError(1, useMEstimator);
+		  qrSolver.buildSystem(1, useMEstimator);
+
+
+		  const Eigen::MatrixXd& jacobian = qrSolver.getJacobian();
+		  //Eigen::MatrixXd jacobian = qrSolver.Jacobian()->toDense();
+		  const Eigen::VectorXd& b = qrSolver.e();
 
 		  // check dimension of jacobian
 		  int jrows = jacobian.rows();
@@ -121,34 +103,26 @@ void Marginalizer::operator () (
 			  Eigen::MatrixXd R = qr.matrixQR().triangularView<Eigen::Upper>();
 			  Eigen::VectorXd d = Q.transpose()*b;
 
-			  std::cout << "R matrix is: " << R << std::endl;
-
-              // PTF: Are you sure this cuts out the correct block?
-              //      How is it possible to start at row 0?
+			  //std::cout << "R matrix is: " << std::endl << R << std::endl;
 
               // cut off the zero rows at the bottom
-              R_reduced = R.block(0, dimOfDesignVariablesToRemove, dimOfRemainingDesignVariables, dimOfRemainingDesignVariables);
+              R_reduced = R.block(dimOfDesignVariablesToRemove, dimOfDesignVariablesToRemove, dimOfRemainingDesignVariables, dimOfRemainingDesignVariables);
 
-              // PTF: This one starts at a different row. Doesn't that mean they don't match?
-              //      Also, for vectors, you can use segment() instead of block()
-              //      http://eigen.tuxfamily.org/dox-devel/group__TutorialBlockOperations.html
-              d_reduced = d.block(dimOfDesignVariablesToRemove,0, dimOfRemainingDesignVariables, 1);
+              d_reduced = d.segment(dimOfDesignVariablesToRemove, dimOfRemainingDesignVariables);
               dimOfPriorErrorTerm = dimOfRemainingDesignVariables;
 		  }
 
 
-		  std::cout << "R reduced matrix is: " << R_reduced << std::endl;
-		  std::cout << "The jacobian of the marginalization is: " << std::endl << jacobian << std::endl;
+//		  std::cout << "R reduced matrix is: " << std::endl << R_reduced << std::endl;
+//		  std::cout << "d reduced" << std::endl << d_reduced << std::endl;
+//		  std::cout << "The jacobian of the marginalization is: " << std::endl << jacobian << std::endl;
 
 		  // now create the new error term
-		  boost::shared_ptr<aslam::backend::MarginalizationPriorErrorTerm> err(new aslam::backend::MarginalizationPriorErrorTerm(remainingDesignVariables, d_reduced, R_reduced, dimOfPriorErrorTerm, dimOfRemainingDesignVariables));
-		  std::cout << "address of new prior error term: " << err.get() << std::endl;
-          // PTF: Nice use of swap!
-		  outPriorErrorTermPtr.swap(err);
-		  std::cout << "address of new prior error term: " << outPriorErrorTermPtr.get() << std::endl;
+		  boost::shared_ptr<aslam::backend::MarginalizationPriorErrorTerm> err(new aslam::backend::MarginalizationPriorErrorTerm(remainingDesignVariables, d_reduced, R_reduced));
+		  //std::cout << "address of new prior error term: " << err.get() << std::endl;
 
-          // PTF: What is this n for?
-		  int n = outPriorErrorTermPtr->numDesignVariables();
+		  outPriorErrorTermPtr.swap(err);
+		  //std::cout << "address of new prior error term: " << outPriorErrorTermPtr.get() << std::endl;
 
 		  // restore initial block indices to prevent side effects
           for (size_t i = 0; i < inDesignVariables.size(); ++i) {
@@ -163,7 +137,5 @@ void Marginalizer::operator () (
 }
 
 
-}
-
- /* namespace backend */
+} /* namespace backend */
 } /* namespace aslam */

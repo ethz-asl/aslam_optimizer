@@ -113,17 +113,17 @@ namespace aslam {
     template<int D>
     void DesignVariableMappedVector<D>::minimalDifferenceImplementation(const Eigen::MatrixXd& xHat, Eigen::VectorXd& outDifference) const
     {
-    	// TODO: asser dimensions?
-    	outDifference = _v - xHat;
+    	SM_ASSERT_TRUE(aslam::Exception, (xHat.rows() == D)&&(xHat.cols() == 1), "Dimension mismatch!");
+    	outDifference = _p_v - xHat;
     }
 
     template<int D>
     void DesignVariableMappedVector<D>::minimalDifferenceAndJacobianImplementation(const Eigen::MatrixXd& xHat, Eigen::VectorXd& outDifference, Eigen::MatrixXd& outJacobian) const
     {
-    	// TODO: asser dimensions?
-    	minimalDifferenceImplementation(xHat, outDifference);
-    	outJacobian = Eigen::MatrixXd::Identity(D,D);
+    	minimalDifference(xHat, outDifference);
+    	outJacobian.setIdentity(D,D);
     }
+
 
   } // namespace backend
 } // namespace aslam

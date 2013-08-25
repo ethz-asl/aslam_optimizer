@@ -94,17 +94,17 @@ namespace aslam {
     template<int D>
     void DesignVariableVector<D>::minimalDifferenceImplementation(const Eigen::MatrixXd& xHat, Eigen::VectorXd& outDifference) const
     {
-    	// Todo: assert dimensions
+    	SM_ASSERT_TRUE(aslam::Exception, (xHat.rows() == D)&&(xHat.cols() == 1), "Incompatible dimension of xHat.");
     	outDifference = _v - xHat;
     }
 
     template<int D>
-    void DesignVariableVector<D>::minimalDifferenceAndJacobianImplementation(const Eigen::MatrixXd& xHat, Eigen::VectorXd& outDifference, Eigen::MatrixXd& outJacobian) const
+    void DesignVariableVector<D>::minimalDifferenceAndJacobianImplementation(const Eigen::MatrixXd& xHat, Eigen::VectorXd& outDifference,	Eigen::MatrixXd& outJacobian) const
     {
     	minimalDifferenceImplementation(xHat, outDifference);
-    	outJacobian = Eigen::MatrixXd::Identity(D,D);
-
+    	outJacobian.setIdentity(D,D);
     }
+
 
   } // namespace backend
 } // namespace aslam

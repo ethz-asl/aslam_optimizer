@@ -41,10 +41,10 @@ namespace aslam {
       virtual void setParametersImplementation(const Eigen::MatrixXd& value);
 
       /// Computes the minimal distance in tangent space between the current value of the DV and xHat
-      virtual void minimalDifferenceImplementation(const Eigen::MatrixXd& xHat, Eigen::VectorXd& outDifference) const;
+	  virtual void minimalDifferenceImplementation(const Eigen::MatrixXd& xHat, Eigen::VectorXd& outDifference) const;
 
-      /// Computes the minimal distance in tangent space between the current value of the DV and xHat and the jacobian
-      virtual void minimalDifferenceAndJacobianImplementation(const Eigen::MatrixXd& xHat, Eigen::VectorXd& outDifference, Eigen::MatrixXd& outJacobian) const;
+	  /// Computes the minimal distance in tangent space between the current value of the DV and xHat and the jacobian
+	  virtual void minimalDifferenceAndJacobianImplementation(const Eigen::MatrixXd& xHat, Eigen::VectorXd& outDifference, Eigen::MatrixXd& outJacobian) const;
 
     private:
       vector_t _v;
@@ -55,6 +55,8 @@ namespace aslam {
 
   } // namespace backend
 } // namespace aslam
+
+
 
 #include "implementation/DesignVariableVector.hpp"
 
