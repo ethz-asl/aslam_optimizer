@@ -268,6 +268,16 @@ bool SparseBlockMatrix<MatrixType>::transpose(SparseBlockMatrix<MatrixTransposed
 }
 
 template<class MatrixType>
+SparseBlockMatrix<typename SparseBlockMatrix<MatrixType>::TransposedMatrixType> SparseBlockMatrix<MatrixType>::transpose() const{
+  SparseBlockMatrix<TransposedMatrixType> ret(&_colBlockIndices[0], &_rowBlockIndices[0], _colBlockIndices.size(), _rowBlockIndices.size()), *p = &ret;
+  if(transpose(p))
+    return ret;
+  else
+    throw std::runtime_error("BUG in SparseBlockMatrix.transpose().");
+}
+
+
+template<class MatrixType>
 bool SparseBlockMatrix<MatrixType>::add(SparseBlockMatrix*& dest) const {
   if (!dest) {
     dest = new SparseBlockMatrix(&_rowBlockIndices[0], &_colBlockIndices[0], _rowBlockIndices.size(), _colBlockIndices.size());

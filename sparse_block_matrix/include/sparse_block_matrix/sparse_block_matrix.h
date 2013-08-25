@@ -57,6 +57,8 @@ class SparseBlockMatrix {
   //! this is the scalar type of the matrix entries.
   typedef typename MatrixType::Scalar Scalar;
   
+  typedef typename std::remove_const<decltype(MatrixType().transpose().eval())>::type TransposedMatrixType;
+
   SM_DEFINE_EXCEPTION(Exception, std::runtime_error);
   SM_DEFINE_EXCEPTION(IndexException, Exception);
 
@@ -161,6 +163,8 @@ class SparseBlockMatrix {
   //! transposes a block matrix, The transposed type should match the argument false on failure
   template <class MatrixTransposedType>
   bool transpose(SparseBlockMatrix<MatrixTransposedType>*& dest) const;
+  //! return transposed sparse matrix
+  inline SparseBlockMatrix<TransposedMatrixType> transpose() const;
 
   //! adds the current matrix to the destination
   bool add(SparseBlockMatrix<MatrixType>*& dest) const ;

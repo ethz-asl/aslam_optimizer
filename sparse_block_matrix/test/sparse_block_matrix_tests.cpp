@@ -247,6 +247,10 @@ TEST(sparse_block_matrixTestSuite, testTranspose) {
     SCOPED_TRACE("");
     sparse_block_matrix::expectEqual((*M1t), D1t);
   }
+  {
+    SCOPED_TRACE("");
+    sparse_block_matrix::expectEqual(M1.transpose(), D1t);
+  }
 
   // Now the non null version.
   sparse_block_matrix::SparseBlockMatrix<MatrixXd> M2t(M1t->rowBlockIndices(),
@@ -274,6 +278,15 @@ TEST(sparse_block_matrixTestSuite, testTranspose) {
     //sparse_block_matrix::expectEqual( M3t.toDense(), D1t);
   }
 
+
+  // test with statically sized matrices
+  rows << 2, 4, 6, 8;
+  cols << 1, 2, 3;
+  sparse_block_matrix::SparseBlockMatrix<Matrix<double, 2, 1> > M3 = buildRandomMatrix<Matrix<double, 2, 1> >(rows, cols, 0.5);
+  {
+    SCOPED_TRACE("");
+    sm::eigen::assertEqual(M3.transpose().toDense(), M3.toDense().transpose().eval(), SM_SOURCE_FILE_POS);
+  }
 }
 
 TEST(sparse_block_matrixTestSuite, testEigenVectorMultiplication) {
