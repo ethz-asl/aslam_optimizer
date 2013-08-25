@@ -1,7 +1,8 @@
 #include <aslam/backend/EuclideanExpressionNode.hpp>
 #include <aslam/backend/VectorExpressionNode.hpp>
 #include <sm/kinematics/rotations.hpp>
-
+#include <sm/kinematics/homogeneous_coordinates.hpp>
+#include <aslam/backend/HomogeneousExpressionNode.hpp>
 namespace aslam {
   namespace backend {
     
@@ -449,6 +450,36 @@ namespace aslam {
     return _operand->getDesignVariables(designVariables);
   }
 
+
+  EuclideanExpressionNodeFromHomogeneous::EuclideanExpressionNodeFromHomogeneous(boost::shared_ptr<HomogeneousExpressionNode> root) : _root(root) {
+
+  }
+  EuclideanExpressionNodeFromHomogeneous:: ~EuclideanExpressionNodeFromHomogeneous() {
+
+  }
+
+
+  Eigen::Vector3d EuclideanExpressionNodeFromHomogeneous::toEuclideanImplementation() {
+    return sm::kinematics::fromHomogeneous( _root->toHomogeneous() );
+  }
+
+  void EuclideanExpressionNodeFromHomogeneous::evaluateJacobiansImplementation(JacobianContainer & outJacobians) const {
+    //Eigen::Vector3d fromHomogeneous(const Eigen::Vector4d & v, Eigen::Matrix<double,3,4> * jacobian = NULL);
+    Eigen::Matrix<double,3,4> Jh;
+    sm::kinematics::fromHomogeneous( _root->toHomogeneous(), &Jh );
+    _root->evaluateJacobians( outJacobians, Jh );
+  }
+
+  void EuclideanExpressionNodeFromHomogeneous::evaluateJacobiansImplementation(JacobianContainer & outJacobians, const Eigen::MatrixXd & applyChainRule) const {
+    Eigen::Matrix<double,3,4> Jh;
+    sm::kinematics::fromHomogeneous( _root->toHomogeneous(), &Jh );
+    _root->evaluateJacobians( outJacobians, applyChainRule * Jh );
+
+  }
+
+  void EuclideanExpressionNodeFromHomogeneous::getDesignVariablesImplementation(DesignVariable::set_t & designVariables) const {
+    _root->getDesignVariables(designVariables);
+  }
 
   
 

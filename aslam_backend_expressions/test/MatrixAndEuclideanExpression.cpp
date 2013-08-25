@@ -12,6 +12,7 @@
 #include <aslam/backend/MatrixTransformation.hpp>
 #include <aslam/backend/DesignVariableVector.hpp>
 #include <aslam/backend/MapTransformation.hpp>
+#include <aslam/backend/HomogeneousPoint.hpp>
 
 using namespace aslam::backend;
 using namespace sm::kinematics;
@@ -613,4 +614,25 @@ TEST(EuclideanExpressionNodeTestSuites, testRotationParameters)
     }
 }
 
+
+// Test that the jacobian matches the finite difference jacobian
+TEST(EuclideanExpressionNodeTestSuites, testToHomogeneous)
+{
+  try 
+    {
+      using namespace sm::kinematics;
+      aslam::backend::HomogeneousPoint point(Eigen::Vector4d::Random());
+      point.setActive(true);
+      point.setBlockIndex(0);
+      HomogeneousExpression qr(&point);
+      EuclideanExpression p = qr.toEuclideanExpression();
+      
+      SCOPED_TRACE("");
+      testJacobian(p);
+    }
+  catch(std::exception const & e)
+    {
+      FAIL() << e.what();
+    }
+}
 

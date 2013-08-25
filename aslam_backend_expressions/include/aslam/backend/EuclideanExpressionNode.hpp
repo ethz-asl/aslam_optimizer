@@ -13,7 +13,7 @@ namespace aslam {
   namespace backend {
     template <int D> class VectorExpression;
     template <int D> class VectorExpressionNode;
-
+  class HomogeneousExpressionNode;
     /**
      * \class EuclideanExpressionNode
      * \brief The superclass of all classes representing euclidean points.
@@ -311,6 +311,25 @@ namespace aslam {
       };
 
 
+  class EuclideanExpressionNodeFromHomogeneous : public EuclideanExpressionNode
+      {
+      public:
+        EIGEN_MAKE_ALIGNED_OPERATOR_NEW
+
+        EuclideanExpressionNodeFromHomogeneous(boost::shared_ptr<HomogeneousExpressionNode> root);
+        virtual ~EuclideanExpressionNodeFromHomogeneous();
+
+      private:
+        virtual Eigen::Vector3d toEuclideanImplementation();
+        virtual void evaluateJacobiansImplementation(JacobianContainer & outJacobians) const;
+        virtual void evaluateJacobiansImplementation(JacobianContainer & outJacobians, const Eigen::MatrixXd & applyChainRule) const;
+        virtual void getDesignVariablesImplementation(DesignVariable::set_t & designVariables) const;
+
+        boost::shared_ptr<HomogeneousExpressionNode> _root;
+      };
+
+
+  
   
   } // namespace backend
 } // namespace aslam

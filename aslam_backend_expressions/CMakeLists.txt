@@ -80,9 +80,9 @@ rosbuild_add_gtest(${PROJECT_NAME}_test
   test/RotationExpression.cpp
   test/HomogeneousExpression.cpp
   test/MatrixAndEuclideanExpression.cpp
+  # \todo reenable after I can talk to Hannes.
   test/GenericMatrixExpression.cpp
   test/QuaternionExpression.cpp
-  #test/CameraDesignVariable.cpp
   test/ScalarExpression.cpp
   test/ErrorTest_Transformation.cpp
   )
