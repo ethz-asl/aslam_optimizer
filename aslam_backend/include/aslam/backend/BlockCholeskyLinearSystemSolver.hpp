@@ -16,7 +16,7 @@ namespace aslam {
       typedef sparse_block_matrix::LinearSolver<Eigen::MatrixXd> LinearSolver;
       typedef sparse_block_matrix::SparseBlockMatrix<Eigen::MatrixXd> SparseBlockMatrix;
 
-      BlockCholeskyLinearSystemSolver();
+      BlockCholeskyLinearSystemSolver(const std::string & solver = "cholesky");
       virtual ~BlockCholeskyLinearSystemSolver();
 
 
@@ -61,6 +61,7 @@ namespace aslam {
       /// Options
       BlockCholeskyLinearSolverOptions _options;
 
+      std::string _solverType;
     };
 
   } // namespace backend

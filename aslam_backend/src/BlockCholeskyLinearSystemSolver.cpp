@@ -1,12 +1,21 @@
 #include <aslam/backend/BlockCholeskyLinearSystemSolver.hpp>
 #include <sparse_block_matrix/linear_solver_cholmod.h>
+#include <sparse_block_matrix/linear_solver_spqr.h>
 #include <aslam/backend/ErrorTerm.hpp>
 
 namespace aslam {
   namespace backend {
-    BlockCholeskyLinearSystemSolver::BlockCholeskyLinearSystemSolver()
+  BlockCholeskyLinearSystemSolver::BlockCholeskyLinearSystemSolver(const std::string & solver) :
+      _solverType(solver)
     {
-      _solver.reset(new sparse_block_matrix::LinearSolverCholmod<Eigen::MatrixXd>());
+      if(_solverType == "cholesky") {
+        _solver.reset(new sparse_block_matrix::LinearSolverCholmod<Eigen::MatrixXd>());
+      } else if(solver == "spqr") {
+        _solver.reset(new sparse_block_matrix::LinearSolverQr<Eigen::MatrixXd>());
+      } else {
+        std::cout << "Unknown block solver type " << _solverType << ". Try \"cholesky\" or \"spqr\"\nDefaulting to cholesky.\n";
+        _solver.reset(new sparse_block_matrix::LinearSolverCholmod<Eigen::MatrixXd>());
+      }
     }
 
     BlockCholeskyLinearSystemSolver::~BlockCholeskyLinearSystemSolver()
@@ -16,7 +25,15 @@ namespace aslam {
 
     void BlockCholeskyLinearSystemSolver::initMatrixStructureImplementation(const std::vector<DesignVariable*>& dvs, const std::vector<ErrorTerm*>& errors, bool useDiagonalConditioner)
     {
-      _solver.reset(new sparse_block_matrix::LinearSolverCholmod<Eigen::MatrixXd>());
+      if(_solverType == "cholesky") {
+        _solver.reset(new sparse_block_matrix::LinearSolverCholmod<Eigen::MatrixXd>());
+      } else if(_solverType == "spqr") {
+        _solver.reset(new sparse_block_matrix::LinearSolverQr<Eigen::MatrixXd>());
+      } else {
+        std::cout << "Unknown block solver type " << _solverType << ". Try \"cholesky\" or \"spqr\"\nDefaulting to cholesky.\n";
+        _solver.reset(new sparse_block_matrix::LinearSolverCholmod<Eigen::MatrixXd>());
+      }
+      _solver->init();
       _useDiagonalConditioner = useDiagonalConditioner;
       _errorTerms = errors;
       std::vector<int> blocks;

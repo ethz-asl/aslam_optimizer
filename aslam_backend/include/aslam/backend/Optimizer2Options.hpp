@@ -9,16 +9,9 @@ namespace aslam {
         convergenceDeltaJ(1e-3),
         convergenceDeltaX(1e-3),
         maxIterations(20),
-        levenbergMarquardtLambdaInit(1e-3),
-        levenbergMarquardtLambdaGamma(3),
-        levenbergMarquardtLambdaBeta(2),
-        levenbergMarquardtLambdaP(3),
-        levenbergMarquardtLambdaMuInit(2),
-        levenbergMarquardtEstimateLambdaScale(-1),
         doSchurComplement(false),
         verbose(false),
         linearSolverMaximumFails(0),
-        linearSolver("block_cholesky"),
         trustRegionPolicy("LevenbergMarquardt"),
         nThreads(4)
         // LevenbergMarquardt, DogLeg, GaussNewton

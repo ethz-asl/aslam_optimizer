@@ -5,7 +5,7 @@
 #include <boost/shared_ptr.hpp>
 #include <sm/boost/null_deleter.hpp>
 #include "VectorExpressionNode.hpp"
-s#include <aslam/backend/ScalarExpression.hpp>
+#include <aslam/backend/ScalarExpression.hpp>
 #include <aslam/backend/ScalarExpressionNode.hpp>
 
 namespace aslam {

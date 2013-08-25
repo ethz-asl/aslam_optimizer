@@ -631,7 +631,7 @@ namespace aslam {
         sparseVariable(i)->update(&dsi[0], dsi.size());
         // Track the maximum delta
         // \todo Do something better.
-        deltaX = std::max(deltaX, dsi.maxCoeff());
+        deltaX = std::max(deltaX, dsi.array().abs().maxCoeff());
       }
       return deltaX;
     }
