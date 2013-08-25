@@ -298,9 +298,6 @@ TEST(sparse_block_matrixTestSuite, testEigenVectorMultiplication) {
 
   // existing impl.
   double* dstp2 = NULL;
-  double src2[7];
-  for (int i = 0; i < src.rows(); i++)
-    src2[i] = src(i);
   //
   M1.multiply(dstp2, &src[0]);
 
