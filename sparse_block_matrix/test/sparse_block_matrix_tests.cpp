@@ -334,7 +334,8 @@ TEST(sparse_block_matrixTestSuite, testEigenVectorMultiplication) {
   sm::eigen::assertNear(dstDense3.transpose(), dstp2Map2, 1e-6,
                         SM_SOURCE_FILE_POS);
 
-  delete dstp4;
+  delete[] dstp2;
+  delete[] dstp4;
 
 }
 
