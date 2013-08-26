@@ -339,20 +339,57 @@ TEST(sparse_block_matrixTestSuite, testEigenVectorMultiplication) {
 
 }
 
+TEST(sparse_block_matrixTestSuite, testScaleMatrix) {
+
+  using namespace Eigen;
+  using namespace sparse_block_matrix;
+  VectorXi rows(4);
+  rows << 2, 4, 14, 15;
+  VectorXi cols(3);
+  cols << 3, 5, 7;
+
+  // Create an not empty matrix.
+  sparse_block_matrix::SparseBlockMatrix<MatrixXd> M1 = buildRandomMatrix<MatrixXd>(rows, cols, 0.5);
+
+  double scale = std::rand();
+
+  try{
+    sm::eigen::assertNear((M1 * scale).toDense(), (M1.toDense() * scale).eval(), 1e-6, SM_SOURCE_FILE_POS);
+  }catch(const std::exception & e)
+  {
+    FAIL() << e.what();
+  }
+}
+
+TEST(sparse_block_matrixTestSuite, testMatrixMatrixMultiplication) {
+
+  using namespace Eigen;
+  using namespace sparse_block_matrix;
+  VectorXi rows(4);
+  rows << 2, 4, 14, 15;
+  VectorXi cols(3);
+  cols << 3, 5, 7;
+
+  // Create an not empty matrix.
+  sparse_block_matrix::SparseBlockMatrix<MatrixXd> M1 = buildRandomMatrix<MatrixXd>(rows, cols, 0.5);
+
+  // Create an not empty matrix.
+  sparse_block_matrix::SparseBlockMatrix<MatrixXd> M2 = buildRandomMatrix<MatrixXd>(cols, rows, 0.5);
+
+  try{
+    sm::eigen::assertNear((M1 * M2).toDense(), (M1.toDense() * M2.toDense()).eval(), 1e-6, SM_SOURCE_FILE_POS);
+  }catch(const std::exception & e)
+  {
+    FAIL() << e.what();
+  }
+}
 // //! adds the current matrix to the destination
 // bool add(SparseBlockMatrix<MatrixType>*& dest) const ;
-
-// //! dest = (*this) *  M
-// template <class MatrixResultType, class MatrixFactorType>
-// bool multiply(SparseBlockMatrix<MatrixResultType> *& dest, const SparseBlockMatrix<MatrixFactorType>* M) const;
 
 // //! dest = (*this) *  src
 // void multiply(double*& dest, const double* src) const;
 
 // //! dest = M * (*this)
 // void rightMultiply(double*& dest, const double* src) const;
-
-// //! *this *= a
-// void scale( double a);
 
 // SparseBlockMatrix*  slice(int rmin, int rmax, int cmin, int cmax, bool alloc=true) const;

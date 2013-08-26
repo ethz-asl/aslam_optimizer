@@ -100,6 +100,9 @@ class SparseBlockMatrix {
   // a copy constructor
   SparseBlockMatrix(const SparseBlockMatrix& source);
 
+  // move constructor
+  SparseBlockMatrix(SparseBlockMatrix&& source);
+
   SparseBlockMatrix();
 
   ~SparseBlockMatrix();
@@ -135,6 +138,10 @@ class SparseBlockMatrix {
   //! deep copy of a sparse-block-matrix;
   SparseBlockMatrix* clone() const ;
   void cloneInto(SparseBlockMatrix & destination) const ;
+  //! assign operator
+  inline SparseBlockMatrix & operator= (const SparseBlockMatrix & source){ source.cloneInto(*this); return *this; }
+  //! move assign operator
+  SparseBlockMatrix & operator= (SparseBlockMatrix&& source);
 
   Eigen::MatrixXd toDense() const;
   void toDenseInto(Eigen::MatrixXd & M) const;
@@ -161,6 +168,9 @@ class SparseBlockMatrix {
   //! dest = (*this) *  M
   template <class MatrixResultType, class MatrixFactorType>
   bool multiply(SparseBlockMatrix<MatrixResultType> *& dest, const SparseBlockMatrix<MatrixFactorType>* M) const;
+  //multiply via operator
+  template <class MatrixFactorType>
+  inline SparseBlockMatrix<Eigen::MatrixXd> operator * (const SparseBlockMatrix<MatrixFactorType> & M) const;
 
   //! dest = (*this) *  src // returns dense
   void multiply(double*& dest, const double* src) const;
@@ -175,6 +185,10 @@ class SparseBlockMatrix {
 
   //! *this *= a
   void scale( double a);
+  //scale inplace operator
+  inline SparseBlockMatrix & operator *= (double a) { scale(a); return *this; }
+  //copy and scale as operator
+  inline SparseBlockMatrix operator * (double a) const { SparseBlockMatrix ret(*this); ret.scale(a); return ret; }
 
   /**
    * writes in dest a block permutaton specified by pinv.

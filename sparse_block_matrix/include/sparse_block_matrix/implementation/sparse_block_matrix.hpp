@@ -69,6 +69,25 @@ SparseBlockMatrix<MatrixType>::SparseBlockMatrix(const SparseBlockMatrix& source
 }
 
 template<class MatrixType>
+SparseBlockMatrix<MatrixType>::SparseBlockMatrix(SparseBlockMatrix&& source) : _rowBlockIndices(std::move(source._rowBlockIndices)), _colBlockIndices(std::move(source._colBlockIndices)), _blockCols(std::move(source._blockCols)), _hasStorage(source._hasStorage) {
+  source._hasStorage = false;
+}
+
+template<class MatrixType>
+SparseBlockMatrix<MatrixType> & SparseBlockMatrix<MatrixType>::operator= (SparseBlockMatrix&& source) {
+  if(this != &source){
+    clear(true);
+    _rowBlockIndices = std::move(source._rowBlockIndices);
+    _colBlockIndices = std::move(source._colBlockIndices);
+    _blockCols = std::move(source._blockCols);
+    _hasStorage = source._hasStorage;
+    source._hasStorage = false;
+  }
+  return *this;
+}
+
+
+template<class MatrixType>
 SparseBlockMatrix<MatrixType>::SparseBlockMatrix()
     : _blockCols(0),
       _hasStorage(true) {
@@ -312,6 +331,16 @@ bool SparseBlockMatrix<MatrixType>::multiply(SparseBlockMatrix<MatrixResultType>
     }
   }
   return true;
+}
+
+template<class MatrixType>
+template<class MatrixFactorType>
+SparseBlockMatrix<Eigen::MatrixXd> SparseBlockMatrix<MatrixType>::operator*(const SparseBlockMatrix<MatrixFactorType> & M) const {
+  SparseBlockMatrix<Eigen::MatrixXd> ret(&_rowBlockIndices[0], &(M._colBlockIndices[0]), _rowBlockIndices.size(), M._colBlockIndices.size()), *p = &ret;
+  if (multiply(p, &M))
+    return ret;
+  else
+    throw std::runtime_error("Incompatible matrices multiplied.");
 }
 
 template<typename MatrixType>
