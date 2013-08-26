@@ -311,7 +311,7 @@ bool SparseBlockMatrix<MatrixType>::multiply(SparseBlockMatrix<MatrixResultType>
       }
     }
   }
-  return false;
+  return true;
 }
 
 template<typename MatrixType>
