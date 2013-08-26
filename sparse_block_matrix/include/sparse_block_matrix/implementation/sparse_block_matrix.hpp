@@ -335,6 +335,7 @@ bool SparseBlockMatrix<MatrixType>::multiply(SparseBlockMatrix<MatrixResultType>
         typename SparseBlockMatrix<MatrixResultType>::SparseMatrixBlock *c = dest->block(rowA, colM, true);
         assert(c->rows() == a->rows());
         assert(c->cols() == b->cols());
+        assert(a->cols() == b->rows());
         rbt++;
         (*c) += (*a) * (*b);
       }

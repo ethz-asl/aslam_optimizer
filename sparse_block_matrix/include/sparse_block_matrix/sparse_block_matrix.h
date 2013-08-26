@@ -145,6 +145,8 @@ class SparseBlockMatrix {
   //! move assign operator
   SparseBlockMatrix & operator= (SparseBlockMatrix&& source);
 
+
+
   Eigen::MatrixXd toDense() const;
   void toDenseInto(Eigen::MatrixXd & M) const;
 
@@ -240,7 +242,8 @@ class SparseBlockMatrix {
    */
   bool writeOctave(const char* filename, bool upperTriangle = true) const;
 
-  
+  //! Returns just a reference to *this (at the moment). But useful already to have more interface compatibility with Eigen dense matrices.
+  inline SparseBlockMatrix & eval() { return *this; }
 
  protected:
   std::vector<int> _rowBlockIndices; ///< vector of the indices of the blocks along the rows.
