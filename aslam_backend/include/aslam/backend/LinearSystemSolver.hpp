@@ -41,6 +41,8 @@ namespace aslam {
       /// \brief solve the system storing the solution in outDx and returning true on success.
       virtual bool solveSystem(Eigen::VectorXd& outDx) = 0;
 
+      virtual std::string name() const = 0;
+
       /// \brief return the right-hand side of the equation system.
       virtual const Eigen::VectorXd& rhs() const;
 

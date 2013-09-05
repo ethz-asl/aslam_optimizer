@@ -2,7 +2,8 @@
 #include <aslam/backend/OptimizerOptions.hpp>
 #include <aslam/backend/Optimizer2Options.hpp>
 #include <boost/shared_ptr.hpp>
-
+#include <aslam/backend/LinearSystemSolver.hpp>
+#include <aslam/backend/TrustRegionPolicy.hpp>
 void exportOptimizerOptions()
 {
   using namespace boost::python;
@@ -28,16 +29,12 @@ void exportOptimizerOptions()
   class_<Optimizer2Options>("Optimizer2Options", init<>())
     .def_readwrite("convergenceDeltaJ",&Optimizer2Options::convergenceDeltaJ)
     .def_readwrite("convergenceDeltaX",&Optimizer2Options::convergenceDeltaX)
-    .def_readwrite("levenbergMarquardtLambdaInit",&Optimizer2Options::levenbergMarquardtLambdaInit)   
-    .def_readwrite("levenbergMarquardtLambdaBeta", &Optimizer2Options::levenbergMarquardtLambdaBeta)
-    .def_readwrite("levenbergMarquardtLambdaP", &Optimizer2Options::levenbergMarquardtLambdaP)
-    .def_readwrite("levenbergMarquardtLambdaMuInit",&Optimizer2Options::levenbergMarquardtLambdaMuInit)
-    .def_readwrite("levenbergMarquardtEstimateLambdaScale",&Optimizer2Options::levenbergMarquardtEstimateLambdaScale)
+
       //.def_readwrite("doLevenbergMarquardt",&Optimizer2Options::doLevenbergMarquardt) 
     .def_readwrite("doSchurComplement",&Optimizer2Options::doSchurComplement)
     .def_readwrite("maxIterations",&Optimizer2Options::maxIterations)
     .def_readwrite("verbose",&Optimizer2Options::verbose)
-    .def_readwrite("linearSolver",&Optimizer2Options::linearSolver)
+    .def_readwrite("linearSolver",&Optimizer2Options::linearSystemSolver)
     .def_readwrite("nThreads", &Optimizer2Options::nThreads)
       .def_readwrite("trustRegionPolicy", &Optimizer2Options::trustRegionPolicy)
     ;

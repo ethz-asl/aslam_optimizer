@@ -43,50 +43,45 @@ namespace aslam {
         
         void Optimizer2::initializeTrustRegionPolicy()
         {
-            // \todo remove this check when the sparse qr solver supports an augmented diagonal
-            if(_options.linearSolver != "sparse_qr" && _options.trustRegionPolicy == "LevenbergMarquardt") {
-                _options.verbose && std::cout << "Using the LM trust region policy\n";
-                _trustRegionPolicy.reset(new LevenbergMarquardtTrustRegionPolicy(_options));
-            } else if(_options.trustRegionPolicy == "DogLeg") {
-                _options.verbose && std::cout << "Using the Dog Leg trust region policy\n";
-                _trustRegionPolicy.reset(new DogLegTrustRegionPolicy(_options));
-                } else {
-                _options.verbose && std::cout << "Using the GN trust region policy\n";
-                _trustRegionPolicy.reset(new GaussNewtonTrustRegionPolicy(_options));
-            }
+          if( !_options.trustRegionPolicy ) {
+            _options.verbose && std::cout << "No trust region policy set in the options. Defaulting to levenberg_marquardt\n";
+            _trustRegionPolicy.reset( new LevenbergMarquardtTrustRegionPolicy() );
+          } else {
+            _trustRegionPolicy = _options.trustRegionPolicy;
+          }
+          
+          
+          // \todo remove this check when the sparse qr solver supports an augmented diagonal
+          if(_solver->name() == "sparse_qr" && _options.trustRegionPolicy->name() == "levenberg_marquardt") {
+            _options.verbose && std::cout << "The sparse_qr solver is not compatible with levenberg_marquardt. Changing to the dog_leg trust region policy\n";
+            _trustRegionPolicy.reset( new DogLegTrustRegionPolicy() );
+          }
+          
+          _options.verbose && std::cout << "Using the " << _trustRegionPolicy->name() << " trust region policy\n";
+          
         }
 
 
         void Optimizer2::initializeLinearSolver()
         {
-            // \todo Add the remaining sparse_block_matrix solvers here.
-            if (_options.linearSolver == "block_cholesky") {
-                _options.verbose && std::cout << "Using the block cholesky linear solver.\n";
-                _solver.reset(new BlockCholeskyLinearSystemSolver());
-            } else if (_options.linearSolver == "sparse_cholesky") {
-                _options.verbose && std::cout << "Using the sparse cholesky linear solver.\n";
-                _solver.reset(new SparseCholeskyLinearSystemSolver());
-            }
-#ifndef QRSOLVER_DISABLED
-            else if ( _options.linearSolver == "sparse_qr") {
-                _options.verbose && std::cout << "Using the sparse qr linear solver.\n";
-                _solver.reset(new SparseQrLinearSystemSolver());
-            }
-#endif
-            else if (_options.linearSolver == "dense_qr") {
-                _options.verbose && std::cout << "Using the dense qr linear solver.\n";
-                _solver.reset(new DenseQrLinearSystemSolver());
-            } else {
-                _options.verbose && std::cout << "Unknown linear solver specified: " << _options.linearSolver << ". Using the block cholesky linear solver.\n";
-                _solver.reset(new BlockCholeskyLinearSystemSolver());
-            }
+          if( ! _options.linearSystemSolver ) {
+            _options.verbose && std::cout << "No linear system solver set in the options. Defaulting to the sparse_cholesky solver\n";
+            _solver.reset(new SparseCholeskyLinearSystemSolver());
+          } else {
+            _solver = _options.linearSystemSolver;
+          }
+
+          _options.verbose && std::cout << "Using the " << _solver->name() << " linear system solver\n";
         }
 
         /// \brief initialize the optimizer to run on an optimization problem.
         ///        This should be called before calling optimize()
         void Optimizer2::initialize()
         {
-            SM_ASSERT_FALSE(Exception, _problem.get() == NULL, "No optimization problem has been set");
+          initializeLinearSolver();
+          initializeTrustRegionPolicy();
+
+          SM_ASSERT_FALSE(Exception, _problem.get() == NULL, "No optimization problem has been set");
             _options.verbose && std::cout << "Initializing\n";
             Timer init("Optimizer2: Initialize Total");
             _designVariables.clear();
@@ -128,7 +123,7 @@ namespace aslam {
             // Set up the block matrix structure.
             // std::cout << "init structure\n";
             //      initializeLinearSolver();
-            _solver->initMatrixStructure(_designVariables, _errorTerms, _options.trustRegionPolicy == "LevenbergMarquardt");
+            _solver->initMatrixStructure(_designVariables, _errorTerms, _trustRegionPolicy->requiresAugmentedDiagonal());
             initMx.stop();
             _options.verbose && std::cout << "Optimization problem initialized with " << _designVariables.size() << " design variables and " << _errorTerms.size() << " error terms\n";
             // \todo Say how big the problem is.
@@ -197,7 +192,7 @@ namespace aslam {
             bool linearSolverFailure = false;
 
             SM_ASSERT_TRUE(Exception, _solver.get() != NULL, "The solver is null");
-            _trustRegionPolicy->setSolver(_solver, _options);
+            _trustRegionPolicy->setSolver(_solver);
             _trustRegionPolicy->optimizationStarting(_J);
 
             // Loop until convergence
@@ -207,7 +202,7 @@ namespace aslam {
                    !linearSolverFailure) {
         
                 timeSolve.start();
-                bool solutionSuccess = _trustRegionPolicy->solveSystem(_J, previousIterationFailed, _dx);
+                bool solutionSuccess = _trustRegionPolicy->solveSystem(_J, previousIterationFailed, _options.nThreads, _dx);
                 timeSolve.stop();
 
         
@@ -363,19 +358,6 @@ namespace aslam {
             {
                 SM_THROW(Exception, "Broken");
 
-                BlockCholeskyLinearSystemSolver* solver = dynamic_cast<BlockCholeskyLinearSystemSolver*>(_solver.get());
-                boost::shared_ptr<BlockCholeskyLinearSystemSolver> solver_sp;
-                if (! solver || _options.trustRegionPolicy != "LevenbergMarquardt") {
-                    _options.verbose && std::cout << "Creating a new block Cholesky solver to retrieve the covariance.\n";
-                    /// \todo Figure out properly why I have to create a new linear solver here.
-                    solver_sp.reset(new BlockCholeskyLinearSystemSolver());
-                    // True here for creating the diagonal conditioning.
-                    solver->initMatrixStructure(_designVariables, _errorTerms, true);
-                }
-                _options.verbose && std::cout << "Setting the diagonal conditioner to: " << lambda << ".\n";
-                solver->setConstantConditioner(lambda);
-                solver->buildSystem(_options.nThreads, false);
-                solver->computeCovarianceBlocks(blockIndices, outP);
             }
 
 
@@ -383,13 +365,6 @@ namespace aslam {
             {
                 SM_THROW(Exception, "Broken");
 
-                std::vector<std::pair<int, int> > blockIndices;
-                for (size_t i = 0; i < _designVariables.size(); ++i) {
-                    for (size_t j = i; j < _designVariables.size(); ++j) {
-                        blockIndices.push_back(std::make_pair(i, j));
-                    }
-                }
-                computeCovarianceBlocks(blockIndices, outP, lambda);
             }
 
         void Optimizer2::computeHessian(SparseBlockMatrix& outH, double lambda)
@@ -397,13 +372,10 @@ namespace aslam {
  
                 BlockCholeskyLinearSystemSolver* solver = dynamic_cast<BlockCholeskyLinearSystemSolver*>(_solver.get());
                 boost::shared_ptr<BlockCholeskyLinearSystemSolver> solver_sp;
-                if (! solver || _options.trustRegionPolicy != "LevenbergMarquardt") {
-                    _options.verbose && std::cout << "Creating a new block Cholesky solver to retrieve the covariance.\n";
-                    /// \todo Figure out properly why I have to create a new linear solver here.
-                    solver_sp.reset(new BlockCholeskyLinearSystemSolver());
-                    // True here for creating the diagonal conditioning.
-                    solver->initMatrixStructure(_designVariables, _errorTerms, true);
-                }
+                solver_sp.reset(new BlockCholeskyLinearSystemSolver());
+                // True here for creating the diagonal conditioning.
+                solver->initMatrixStructure(_designVariables, _errorTerms, true);
+                
                 _options.verbose && std::cout << "Setting the diagonal conditioner to: " << lambda << ".\n";
                 solver->setConstantConditioner(lambda);
                 solver->buildSystem(_options.nThreads, false);

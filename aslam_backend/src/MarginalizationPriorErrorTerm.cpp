@@ -77,7 +77,7 @@ Eigen::VectorXd MarginalizationPriorErrorTerm::getDifferenceSinceMarginalization
       //Eigen::MatrixXd Mblock;
       (*it_current)->minimalDifference(xHat, diffVector);
       std::cout << "diffVector:" << std::endl << diffVector << std::endl;
-      int base = index;
+      //int base = index;
       int dim = diffVector.rows();
       diff.segment(index, dim) = diffVector;
       index += dim;

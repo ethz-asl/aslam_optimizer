@@ -3,7 +3,7 @@
 namespace aslam {
     namespace backend {
         
-        TrustRegionPolicy::TrustRegionPolicy(Optimizer2Options & options) : _options(options){}
+        TrustRegionPolicy::TrustRegionPolicy(){}
         TrustRegionPolicy::~TrustRegionPolicy(){}
             
 
@@ -14,10 +14,9 @@ namespace aslam {
         }
 
         /// \brief set the linear system solver
-        void TrustRegionPolicy::setSolver(boost::shared_ptr<LinearSystemSolver> solver, Optimizer2Options options)
+        void TrustRegionPolicy::setSolver(boost::shared_ptr<LinearSystemSolver> solver)
         {
             _solver = solver;
-            _options = options;
         }
             
         bool TrustRegionPolicy::revertOnFailure()
@@ -36,7 +35,7 @@ namespace aslam {
         }
             
         // Returns true if the solution was successful
-        bool TrustRegionPolicy::solveSystem(double J, bool previousIterationFailed, Eigen::VectorXd& outDx)
+    bool TrustRegionPolicy::solveSystem(double J, bool previousIterationFailed, int nThreads, Eigen::VectorXd& outDx)
         {
             if(!previousIterationFailed)
             {
@@ -44,7 +43,7 @@ namespace aslam {
             }
             _J = J;
 
-            bool success = solveSystemImplementation(J, previousIterationFailed, outDx);
+            bool success = solveSystemImplementation(J, previousIterationFailed, nThreads, outDx);
             _isFirstIteration = false;
             return success;
         }

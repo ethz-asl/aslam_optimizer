@@ -140,7 +140,7 @@ TEST(LinearSolverTestSuite, testSparseQR)
   }
 }
 
-
+/*
 TEST(LinearSolverTestSuite, testOptimizerLevenbergMarquardt)
 {
   using namespace aslam::backend;
@@ -205,7 +205,7 @@ TEST(LinearSolverTestSuite, testOptimizerLevenbergMarquardt)
 }
 
 
-
+*/
 
 
 

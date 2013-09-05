@@ -22,6 +22,8 @@ namespace aslam {
       // virtual void solveConstantAugmentedSystem(double diagonalConditioner, Eigen::VectorXd & outDx);
       // virtual void solveAugmentedSystem(const Eigen::VectorXd & diagonalConditioner, Eigen::VectorXd & outDx);
 
+      virtual std::string name() const { return "sparse_qr"; }
+
       /// Returns the current Jacobian transpose
       const CompressedColumnMatrix<index_t>& getJacobianTranspose() const;
       /// Returns the current estimated numerical rank

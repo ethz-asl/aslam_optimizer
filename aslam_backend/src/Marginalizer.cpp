@@ -85,7 +85,7 @@ void marginalize(
 		  int jcols = jacobian.cols();
 
 		  int dimOfRemainingDesignVariables = jcols - dimOfDesignVariablesToRemove;
-		  int dimOfPriorErrorTerm = jrows;
+		  //int dimOfPriorErrorTerm = jrows;
 
 		  Eigen::MatrixXd R_reduced;
 		  Eigen::VectorXd d_reduced;
@@ -109,7 +109,7 @@ void marginalize(
               R_reduced = R.block(dimOfDesignVariablesToRemove, dimOfDesignVariablesToRemove, dimOfRemainingDesignVariables, dimOfRemainingDesignVariables);
 
               d_reduced = d.segment(dimOfDesignVariablesToRemove, dimOfRemainingDesignVariables);
-              dimOfPriorErrorTerm = dimOfRemainingDesignVariables;
+              //dimOfPriorErrorTerm = dimOfRemainingDesignVariables;
 		  }
 
 

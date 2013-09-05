@@ -31,6 +31,8 @@ namespace aslam {
         return &_H;
       }
 
+      virtual std::string name() const { return "block_" + _solverType; }
+
       /// \brief compute only the covariance blocks associated with the block indices passed as an argument
       void computeCovarianceBlocks(const std::vector<std::pair<int, int> >& blockIndices, SparseBlockMatrix& outP);
 

@@ -65,7 +65,6 @@ rosbuild_add_library(${PROJECT_NAME}
   # src/CompressedColumnJacobianTransposeBuilder.cpp
   src/LinearSystemSolver.cpp
   src/BlockCholeskyLinearSystemSolver.cpp
-  src/Optimizer2.cpp
  # src/Cholmod.cpp
   src/SparseCholeskyLinearSystemSolver.cpp
   src/SparseQrLinearSystemSolver.cpp
@@ -84,6 +83,7 @@ rosbuild_add_library(${PROJECT_NAME}
   src/Marginalizer.cpp
   src/MarginalizationPriorErrorTerm.cpp
   src/DogLegTrustRegionPolicy.cpp
+  src/Optimizer2.cpp
   )
 
 target_link_libraries(${PROJECT_NAME} ${CHOLMOD_LIBRARIES} ${EXTRA_LIBS}  ${CSPARSE_LIBRARY})

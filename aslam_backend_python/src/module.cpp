@@ -6,7 +6,7 @@ void exportBackend();
 void exportCompressedColumnMatrix() ;
 void exportLinearSystemSolver();
 void exportErrorTermTransformation();
-
+void exportTrustRegionPolicies();
 // The title of this library must match exactly
 BOOST_PYTHON_MODULE(libaslam_backend_python)
 {
@@ -15,5 +15,5 @@ BOOST_PYTHON_MODULE(libaslam_backend_python)
   exportCompressedColumnMatrix();
   exportLinearSystemSolver();
   exportErrorTermTransformation();
-
+  exportTrustRegionPolicies();
 }

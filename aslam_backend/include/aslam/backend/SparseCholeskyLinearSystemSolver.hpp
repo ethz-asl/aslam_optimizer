@@ -25,7 +25,7 @@ namespace aslam {
       /// Sets the options
       void setOptions(const SparseCholeskyLinearSolverOptions& options);
 
-        
+      virtual std::string name() const {  return "sparse_cholesky"; };        
       /// Helper Function for DogLeg implementation; returns parts required for the steepest descent solution
       double rhsJtJrhs();
    

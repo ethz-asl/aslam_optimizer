@@ -3,15 +3,13 @@
 namespace aslam {
     namespace backend {
         
-        DogLegTrustRegionPolicy::DogLegTrustRegionPolicy(Optimizer2Options & options) : TrustRegionPolicy(options)  {}
+        DogLegTrustRegionPolicy::DogLegTrustRegionPolicy()   {}
         DogLegTrustRegionPolicy::~DogLegTrustRegionPolicy() {}
         
         
         /// \brief called by the optimizer when an optimization is starting
         void DogLegTrustRegionPolicy::optimizationStartingImplementation(double J)
         {
-            // initialise lambda:
-            //_lambda = _options.levenbergMarquardtLambdaInit;
             _dx_sd_norm = 0;
             _dx_gn_norm = 0;
             _L0 = 0;
@@ -24,7 +22,7 @@ namespace aslam {
         }
         
         // Returns true if the solution was successful
-        bool DogLegTrustRegionPolicy::solveSystemImplementation(double J, bool previousIterationFailed, Eigen::VectorXd& outDx)
+    bool DogLegTrustRegionPolicy::solveSystemImplementation(double J, bool previousIterationFailed, int nThreads, Eigen::VectorXd& outDx)
         {
             SM_ASSERT_TRUE(Exception, _solver.get() != NULL, "The solver is null");
             bool solutionSuccess = true;
@@ -66,7 +64,7 @@ namespace aslam {
             if(!previousIterationFailed) {
                 // update GN matrices:
                 //std::cout << "Building system\n";
-                _solver->buildSystem(_options.nThreads, true);
+                _solver->buildSystem(nThreads, true);
                 
                 // calculate steepest descent step:
                 
@@ -146,7 +144,7 @@ namespace aslam {
         }
         
         /// \brief print the current state to a stream (no newlines).
-        std::ostream & DogLegTrustRegionPolicy::printState(std::ostream & out)
+        std::ostream & DogLegTrustRegionPolicy::printState(std::ostream & out) const
         {
             out << "DL - delta:" << _delta << ", " << _stepType;
             if(_stepType == "DL")
@@ -160,7 +158,9 @@ namespace aslam {
             return true;
         }
 
-        
+    bool DogLegTrustRegionPolicy::requiresAugmentedDiagonal() const {
+      return false;
+    }
         
     } // namespace backend
 } // namespace aslam

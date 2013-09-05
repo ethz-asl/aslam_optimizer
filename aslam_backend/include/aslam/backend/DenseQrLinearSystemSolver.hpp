@@ -24,6 +24,8 @@ namespace aslam {
       virtual const Matrix* Jacobian() const;
       const Eigen::MatrixXd& getJacobian() const;
 
+      virtual std::string name() const { return "dense_qr";};
+      
       /// Returns the options
       const DenseQRLinearSolverOptions& getOptions() const;
       /// Returns the options

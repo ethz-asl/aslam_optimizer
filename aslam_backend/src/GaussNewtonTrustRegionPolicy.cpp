@@ -4,7 +4,7 @@ namespace aslam {
     namespace backend {
         
         
-        GaussNewtonTrustRegionPolicy::GaussNewtonTrustRegionPolicy(Optimizer2Options & options) : TrustRegionPolicy(options)  {}
+        GaussNewtonTrustRegionPolicy::GaussNewtonTrustRegionPolicy()  {}
         GaussNewtonTrustRegionPolicy::~GaussNewtonTrustRegionPolicy() {}
         
         
@@ -15,14 +15,14 @@ namespace aslam {
         }
         
         // Returns true if the solution was successful
-        bool GaussNewtonTrustRegionPolicy::solveSystemImplementation(double J, bool previousIterationFailed, Eigen::VectorXd& outDx)
+    bool GaussNewtonTrustRegionPolicy::solveSystemImplementation(double J, bool previousIterationFailed, int nThreads, Eigen::VectorXd& outDx)
         {
-            _solver->buildSystem(_options.nThreads, true);
+            _solver->buildSystem(nThreads, true);
             return _solver->solveSystem(outDx);
         }
         
         /// \brief print the current state to a stream (no newlines).
-        std::ostream & GaussNewtonTrustRegionPolicy::printState(std::ostream & out)
+        std::ostream & GaussNewtonTrustRegionPolicy::printState(std::ostream & out) const
         {
             out << "GN" << std::endl;
             return out;
@@ -33,6 +33,10 @@ namespace aslam {
         {
             return false;
         }
+
+    bool GaussNewtonTrustRegionPolicy::requiresAugmentedDiagonal() const {
+      return false;
+    }
         
     } // namespace backend
 } // namespace aslam
