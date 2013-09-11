@@ -462,8 +462,8 @@ namespace aslam {
         return;
       _rows = cs->nrow;
       _cols = cs->ncol;
-      const SuiteSparse_long* row_ind = reinterpret_cast<const I*>(cs->i);
-      const SuiteSparse_long* col_ptr = reinterpret_cast<const I*>(cs->p);
+      const I* row_ind = reinterpret_cast<const I*>(cs->i);
+      const I* col_ptr = reinterpret_cast<const I*>(cs->p);
       const double* values = reinterpret_cast<const double*>(cs->x);
       const size_t nzmax = cs->nzmax;
       _col_ptr.resize(_cols + 1);
