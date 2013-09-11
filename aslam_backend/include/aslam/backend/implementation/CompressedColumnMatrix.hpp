@@ -451,7 +451,7 @@ namespace aslam {
       for (size_t j = 0; j < _cols; ++j)
         for (I p = _col_ptr[j]; p < _col_ptr[j + 1]; ++p)
           if (std::fabs(_values[p]) > std::numeric_limits<double>::epsilon())
-            stream << std::fixed << std::setprecision(16) <<
+            stream << std::fixed << std::setprecision(18) <<
               _row_ind[p] + 1 << " " << j + 1 << " " << _values[p] << std::endl;
     }
 
