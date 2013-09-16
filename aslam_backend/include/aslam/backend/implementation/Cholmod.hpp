@@ -494,14 +494,12 @@ namespace aslam {
     template<typename I>
     double Cholmod<I>::colNorm(cholmod_sparse* A, size_t n) {
       SM_ASSERT_LT(Exception, n, A->ncol, "Index out of bounds");
-      const SuiteSparse_long* col_ptr =
-        reinterpret_cast<const SuiteSparse_long*>(A->p);
-      const double* values =
-        reinterpret_cast<const double*>(A->x);
-      const SuiteSparse_long p = col_ptr[n];
-      const SuiteSparse_long numElements = col_ptr[n + 1] - p;
+      const I* col_ptr = reinterpret_cast<const I*>(A->p);
+      const double* values = reinterpret_cast<const double*>(A->x);
+      const I p = col_ptr[n];
+      const I numElements = col_ptr[n + 1] - p;
       double norm = 0;
-      for (SuiteSparse_long i = 0; i < numElements; ++i)
+      for (I i = 0; i < numElements; ++i)
         norm += values[p + i] * values[p + i];
       return sqrt(norm);
     }

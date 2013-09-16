@@ -451,7 +451,7 @@ namespace aslam {
       for (size_t j = 0; j < _cols; ++j)
         for (I p = _col_ptr[j]; p < _col_ptr[j + 1]; ++p)
           if (std::fabs(_values[p]) > std::numeric_limits<double>::epsilon())
-            stream << std::fixed << std::setprecision(16) <<
+            stream << std::fixed << std::setprecision(18) <<
               _row_ind[p] + 1 << " " << j + 1 << " " << _values[p] << std::endl;
     }
 
@@ -462,8 +462,8 @@ namespace aslam {
         return;
       _rows = cs->nrow;
       _cols = cs->ncol;
-      const SuiteSparse_long* row_ind = reinterpret_cast<const I*>(cs->i);
-      const SuiteSparse_long* col_ptr = reinterpret_cast<const I*>(cs->p);
+      const I* row_ind = reinterpret_cast<const I*>(cs->i);
+      const I* col_ptr = reinterpret_cast<const I*>(cs->p);
       const double* values = reinterpret_cast<const double*>(cs->x);
       const size_t nzmax = cs->nzmax;
       _col_ptr.resize(_cols + 1);

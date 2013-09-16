@@ -68,10 +68,10 @@ class DesignVariableGenericVector : public DesignVariable, public GenericMatrixE
   }
 
 	/// Computes the minimal distance in tangent space between the current value of the DV and xHat
-	virtual void minimalDifferenceImplementation(const Eigen::MatrixXd& xHat, Eigen::VectorXd& outDifference) const;
+	//TODO implement: virtual void minimalDifferenceImplementation(const Eigen::MatrixXd& xHat, Eigen::VectorXd& outDifference) const;
 
 	/// Computes the minimal distance in tangent space between the current value of the DV and xHat and the jacobian
-	virtual void minimalDifferenceAndJacobianImplementation(const Eigen::MatrixXd& xHat, Eigen::VectorXd& outDifference, Eigen::MatrixXd& outJacobian) const;
+	//TODO implement: virtual void minimalDifferenceAndJacobianImplementation(const Eigen::MatrixXd& xHat, Eigen::VectorXd& outDifference, Eigen::MatrixXd& outJacobian) const;
 
  protected:
   vector_t _p_v;

@@ -90,8 +90,8 @@ class ExpressionTester<RotationExpression> {
       auto JcM = Jc.asSparseMatrix();
       sm::eigen::assertNear(Jc.asSparseMatrix(), Jest, 1e-6, SM_SOURCE_FILE_POS, static_cast<std::stringstream&>(std::stringstream("Testing the RotationExpression's Jacobian (column=") << i <<")").str());
       if (printResult) {
-        std::cout << "Jest=\n" << Jest << std::endl;  // XXX: debug output of Jest
-        std::cout << "Jc=\n" << JcM << std::endl;  // XXX: debug output of Jest
+        std::cout << "Jest=\n" << Jest << std::endl;
+        std::cout << "Jc=\n" << JcM << std::endl;
       }
     }
   }
