@@ -52,7 +52,7 @@ namespace aslam {
           
           
           // \todo remove this check when the sparse qr solver supports an augmented diagonal
-          if(_solver->name() == "sparse_qr" && _options.trustRegionPolicy->name() == "levenberg_marquardt") {
+          if(_solver->name() == "sparse_qr" && _trustRegionPolicy->name() == "levenberg_marquardt") {
             _options.verbose && std::cout << "The sparse_qr solver is not compatible with levenberg_marquardt. Changing to the dog_leg trust region policy\n";
             _trustRegionPolicy.reset( new DogLegTrustRegionPolicy() );
           }
