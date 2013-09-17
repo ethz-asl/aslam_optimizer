@@ -55,6 +55,8 @@ namespace aslam {
       bool colNorm;
       /// Tolerance for QR
       double qrTol;
+      /// Tolerance for a zero 2-norm column
+      double normTol;
       /** @}
         */
 

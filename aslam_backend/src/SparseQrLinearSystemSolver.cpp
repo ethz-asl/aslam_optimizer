@@ -66,7 +66,7 @@ namespace aslam {
       // Now we can solve the system.
       outDx.resize(J_transpose.rows());
       cholmod_dense* sol = _cholmod.solve(&_cholmodLhs, _factor, &_cholmodRhs,
-        _options.qrTol, _options.colNorm);
+        _options.qrTol, _options.colNorm, _options.normTol);
       if (_useDiagonalConditioner) {
         J_transpose.popDiagonalBlock();
       }

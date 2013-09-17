@@ -29,13 +29,15 @@ namespace aslam {
 
     SparseQRLinearSolverOptions::SparseQRLinearSolverOptions() :
         colNorm(false),
-        qrTol(SPQR_DEFAULT_TOL) {
+        qrTol(SPQR_DEFAULT_TOL),
+        normTol(1e-8) {
     }
 
     SparseQRLinearSolverOptions::SparseQRLinearSolverOptions(
         const SparseQRLinearSolverOptions& other) :
         colNorm(other.colNorm),
-        qrTol(other.qrTol) {
+        qrTol(other.qrTol),
+        normTol(other.normTol) {
     }
 
     SparseQRLinearSolverOptions& SparseQRLinearSolverOptions::operator =
@@ -43,6 +45,7 @@ namespace aslam {
       if (this != &other) {
         colNorm = other.colNorm;
         qrTol = other.qrTol;
+        normTol = other.normTol;
       }
       return *this;
     }

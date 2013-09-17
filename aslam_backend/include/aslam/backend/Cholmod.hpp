@@ -84,7 +84,8 @@ namespace aslam {
 
 #ifndef QRSOLVER_DISABLED
       cholmod_dense* solve(cholmod_sparse* A, spqr_factor* L, cholmod_dense* b,
-                           double tol = SPQR_DEFAULT_TOL, bool norm = true);
+                           double tol = SPQR_DEFAULT_TOL, bool norm = true,
+                           double normTol = 1e-8);
 #endif
 
       cholmod_sparse* aat(cholmod_sparse* A);
