@@ -367,6 +367,86 @@ TEST(RotationExpressionNodeTestSuites, testQuatInverseTemplate1)
     }
 }
 
+TEST(RotationExpressionNodeTestSuites, testMinimalDifference)
+{
+  try {
+    using namespace sm::kinematics;
+    Eigen::Vector4d initialValue = quatRandom();
+    RotationQuaternion quat(initialValue);
+    quat.setActive(true);
+    quat.setBlockIndex(0);
+
+    Eigen::Vector4d epsQ = quatRandom();
+    Eigen::Vector3d eps = sm::kinematics::qlog(epsQ);
+    double updateValues[3] = {eps(0), eps(1), eps(2)};
+    quat.update(updateValues, 3);
+
+    Eigen::VectorXd diff;
+    quat.minimalDifference(initialValue, diff);
+
+    EXPECT_TRUE(eps.isApprox(diff));
+
+  }
+  catch(const std::exception & e)
+    {
+      FAIL() << e.what();
+    }
+}
+
+TEST(RotationExpressionNodeTestSuites, testMinimalDifferenceAndJacobian)
+{
+  try {
+    using namespace sm::kinematics;
+    Eigen::Vector4d quatInitial = quatRandom();
+    RotationQuaternion quat(quatInitial);
+    quat.setActive(true);
+    quat.setBlockIndex(0);
+
+    Eigen::Vector4d updatedQuat = quatRandom();
+    Eigen::Vector3d updateAA = sm::kinematics::qlog(updatedQuat);
+    double updateValues[3] = {updateAA(0), updateAA(1), updateAA(2)};
+    quat.update(updateValues, 3);
+
+    //std::cout << "initial value is " << std::endl << quatInitial << std::endl;
+
+    Eigen::MatrixXd quatHat = Eigen::MatrixXd(4,1);
+    quatHat(0,0) = quatInitial(0); quatHat(1,0) = quatInitial(1); quatHat(2,0) = quatInitial(2,0); quatHat(3,0) = quatInitial(3,0);
+
+
+    Eigen::MatrixXd params;
+    quat.getParameters(params);
+    Eigen::Vector4d quatBar;
+    quatBar(0) = params(0,0); quatBar(1) = params(1,0); quatBar(2) = params(2,0); quatBar(3) = params(3,0);
+
+    Eigen::VectorXd minDist;
+    Eigen::MatrixXd M;
+    quat.minimalDifferenceAndJacobian(quatInitial, minDist, M);
+
+    // choose small
+    Eigen::Vector3d epsV; epsV.setRandom();epsV = epsV * 0.05;//epsV(0) = 0.001; epsV(1) = 0.001; epsV(2) = 0.001;
+    double eps[3] = {epsV(0), epsV(1), epsV(2)};
+    quat.update(eps, 3);
+
+    Eigen::MatrixXd params2;
+    quat.getParameters(params2);
+    Eigen::Vector4d quatFinal;
+    quatFinal(0) = params2(0,0); quatFinal(1) = params2(1,0); quatFinal(2) = params2(2,0); quatFinal(3) = params2(3,0);
+
+    Eigen::Vector3d realMinDist = sm::kinematics::qlog(sm::kinematics::qplus(quatFinal, sm::kinematics::quatInv(quatInitial)));
+
+    Eigen::Vector3d estMinDist = minDist + M*epsV;
+
+//    std::cout << "realMinDist" << std::endl << realMinDist << std::endl;
+//    std::cout << "estMinDist" << std::endl << estMinDist << std::endl;
+
+    sm::eigen::assertNear(realMinDist, estMinDist, 1e-2, SM_SOURCE_FILE_POS, "Test min difference with jacobian");
+  }
+  catch(const std::exception & e)
+    {
+      FAIL() << e.what();
+    }
+}
+
 // Test that the binary multiplication produces the correct result.
 TEST(RotationExpressionNodeTestSuites, testVector2RotationQuaternionExpressionAdapter)
 {
