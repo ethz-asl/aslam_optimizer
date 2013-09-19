@@ -9,12 +9,12 @@
 
 namespace aslam {
   namespace backend {
-    class HomogeneousExpression;
     class ScalarExpressionNode;
     
     class ScalarExpression
     {
     public:
+      typedef double Value;
       ScalarExpression( double value );
       ScalarExpression(ScalarExpressionNode * designVariable);
       ScalarExpression(boost::shared_ptr<ScalarExpressionNode> designVariable);
@@ -40,12 +40,9 @@ namespace aslam {
 
 
     private:
-
       /// \todo make the default constructor private.
       ScalarExpression();
 
-      friend class RotationExpression;
-      
       boost::shared_ptr<ScalarExpressionNode> _root;
     };
     
