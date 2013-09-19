@@ -51,7 +51,7 @@ namespace aslam {
         }
 
     
-        Eigen::Vector3d EuclideanDirection::toEuclideanImplementation()
+        Eigen::Vector3d EuclideanDirection::toEuclideanImplementation() const
         {
             return _magnitude * _C.col(2);
         }

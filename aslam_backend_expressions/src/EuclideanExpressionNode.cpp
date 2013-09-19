@@ -18,7 +18,7 @@ namespace aslam {
 
 
     /// \brief Evaluate the euclidean matrix.
-    Eigen::Vector3d EuclideanExpressionNode::toEuclidean()
+    Eigen::Vector3d EuclideanExpressionNode::toEuclidean() const
     {
       return toEuclideanImplementation();
     }
@@ -65,7 +65,7 @@ namespace aslam {
     }
 
 
-    Eigen::Vector3d EuclideanExpressionNodeMultiply::toEuclideanImplementation()
+    Eigen::Vector3d EuclideanExpressionNodeMultiply::toEuclideanImplementation() const
     {
       _C_lhs = _lhs->toRotationMatrix();
       _p_rhs = _rhs->toEuclidean();
@@ -107,7 +107,7 @@ namespace aslam {
     }
 
     
-    Eigen::Vector3d EuclideanExpressionNodeMatrixMultiply::toEuclideanImplementation()
+    Eigen::Vector3d EuclideanExpressionNodeMatrixMultiply::toEuclideanImplementation() const
     {
       _A_lhs = _lhs->toFullMatrix();
       _p_rhs = _rhs->toEuclidean();
@@ -161,7 +161,7 @@ namespace aslam {
     }
 
 
-    Eigen::Vector3d EuclideanExpressionNodeCrossEuclidean::toEuclideanImplementation()
+    Eigen::Vector3d EuclideanExpressionNodeCrossEuclidean::toEuclideanImplementation() const
     {
       return sm::kinematics::crossMx(_lhs->toEuclidean()) * _rhs->toEuclidean();;
     }
@@ -201,7 +201,7 @@ namespace aslam {
     }
 
 
-    Eigen::Vector3d EuclideanExpressionNodeAddEuclidean::toEuclideanImplementation()
+    Eigen::Vector3d EuclideanExpressionNodeAddEuclidean::toEuclideanImplementation() const
     {
       return _lhs->toEuclidean() + _rhs->toEuclidean();
     }
@@ -241,7 +241,7 @@ namespace aslam {
     }
 
 
-    Eigen::Vector3d EuclideanExpressionNodeSubtractEuclidean::toEuclideanImplementation()
+    Eigen::Vector3d EuclideanExpressionNodeSubtractEuclidean::toEuclideanImplementation() const
     {
       return _lhs->toEuclidean() - _rhs->toEuclidean();
     }
@@ -273,7 +273,7 @@ namespace aslam {
     {
     }
 
-    Eigen::Vector3d EuclideanExpressionNodeConstant::toEuclideanImplementation()
+    Eigen::Vector3d EuclideanExpressionNodeConstant::toEuclideanImplementation() const
     {
       return _p;
     }
@@ -304,7 +304,7 @@ namespace aslam {
       _lhs->getDesignVariables(designVariables);
     }
 
-    Eigen::Vector3d EuclideanExpressionNodeSubtractVector::toEuclideanImplementation()
+    Eigen::Vector3d EuclideanExpressionNodeSubtractVector::toEuclideanImplementation() const
     {
       return _lhs->toEuclidean() - _rhs;
     }
@@ -336,7 +336,7 @@ namespace aslam {
       _operand->getDesignVariables(designVariables);
     }
 
-    Eigen::Vector3d EuclideanExpressionNodeNegated::toEuclideanImplementation()
+    Eigen::Vector3d EuclideanExpressionNodeNegated::toEuclideanImplementation() const
     {
       return - _operand->toEuclidean();
     }
@@ -368,7 +368,7 @@ namespace aslam {
       _vectorExpressionNode->getDesignVariables(designVariables);
     }
 
-    Eigen::Vector3d VectorExpression2EuclideanExpressionAdapter::toEuclideanImplementation()
+    Eigen::Vector3d VectorExpression2EuclideanExpressionAdapter::toEuclideanImplementation() const
     {
       return _vectorExpressionNode->toVector();
     }
@@ -394,7 +394,7 @@ namespace aslam {
   }
 
 
-  Eigen::Vector3d EuclideanExpressionNodeTranslation::toEuclideanImplementation() {
+  Eigen::Vector3d EuclideanExpressionNodeTranslation::toEuclideanImplementation() const {
     return _operand->toTransformationMatrix().topRightCorner<3,1>();
   }
 
@@ -428,7 +428,7 @@ namespace aslam {
   }
 
 
-  Eigen::Vector3d EuclideanExpressionNodeRotationParameters::toEuclideanImplementation() {
+  Eigen::Vector3d EuclideanExpressionNodeRotationParameters::toEuclideanImplementation() const {
     return _rk->rotationMatrixToParameters(_operand->toRotationMatrix());
   }
 
@@ -459,7 +459,7 @@ namespace aslam {
   }
 
 
-  Eigen::Vector3d EuclideanExpressionNodeFromHomogeneous::toEuclideanImplementation() {
+  Eigen::Vector3d EuclideanExpressionNodeFromHomogeneous::toEuclideanImplementation() const {
     return sm::kinematics::fromHomogeneous( _root->toHomogeneous() );
   }
 

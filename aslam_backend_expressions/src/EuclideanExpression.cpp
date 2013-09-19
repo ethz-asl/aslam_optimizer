@@ -43,12 +43,12 @@ namespace aslam {
     }
   
       
-    Eigen::Vector3d EuclideanExpression::toEuclidean()
+    Eigen::Vector3d EuclideanExpression::toEuclidean() const
     {
       return _root->toEuclidean();
     }
 
-    HomogeneousExpression EuclideanExpression::toHomogeneousExpression()
+    HomogeneousExpression EuclideanExpression::toHomogeneousExpression() const
     {
       boost::shared_ptr<HomogeneousExpressionNode> newRoot( new HomogeneousExpressionNodeEuclidean(_root) );
       return HomogeneousExpression(newRoot);
