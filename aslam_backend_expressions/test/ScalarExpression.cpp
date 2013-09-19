@@ -79,54 +79,54 @@ void testJacobian(ScalarExpression dv)
 
 TEST(ScalarExpressionNodeTestSuites,testMinimalDifferenceJacobian)
 {
-	try {
-	    using namespace sm::kinematics;
-	    double initialValue = sm::random::rand();
-	    Scalar point1(initialValue);
-	    point1.setActive(true);
-	    point1.setBlockIndex(1);
+  try {
+    using namespace sm::kinematics;
+    double initialValue = sm::random::rand();
+    Scalar point1(initialValue);
+    point1.setActive(true);
+    point1.setBlockIndex(1);
 
-	    double u = sm::random::rand();
+    double u = sm::random::rand();
 
-	    point1.update(&u, 1);
-	    // now x is equal to x_bar
+    point1.update(&u, 1);
+    // now x is equal to x_bar
 
-	    Eigen::MatrixXd xHat = Eigen::MatrixXd(1,1);
-	    xHat(0,0) = initialValue;
-	    Eigen::VectorXd diffV1;
-	    point1.minimalDifference(xHat, diffV1);
+    Eigen::MatrixXd xHat = Eigen::MatrixXd(1,1);
+    xHat(0,0) = initialValue;
+    Eigen::VectorXd diffV1;
+    point1.minimalDifference(xHat, diffV1);
 
-	    // now update again with eps
-	    double eps = sm::random::rand();
-	    point1.update(&eps, 1);
-	    Eigen::VectorXd diffV2;
-	    Eigen::MatrixXd J;
-	    point1.minimalDifferenceAndJacobian(xHat, diffV2, J);
+    // now update again with eps
+    double eps = sm::random::rand();
+    point1.update(&eps, 1);
+    Eigen::VectorXd diffV2;
+    Eigen::MatrixXd J;
+    point1.minimalDifferenceAndJacobian(xHat, diffV2, J);
 
-	    // delta e is now diffV1 - diffV1
-	    Eigen::VectorXd delta_e = diffV2 - diffV1;
-	    Eigen::VectorXd delta_eps = Eigen::VectorXd(1);
-	    delta_eps(0) = eps;
+    // delta e is now diffV1 - diffV1
+    Eigen::VectorXd delta_e = diffV2 - diffV1;
+    Eigen::VectorXd delta_eps = Eigen::VectorXd(1);
+    delta_eps(0) = eps;
 
-	    Eigen::VectorXd v1 = J*delta_eps;
+    Eigen::VectorXd v1 = J*delta_eps;
 
-	    std::cout << "initialValue is: " << initialValue << std::endl;
-	    std::cout << "xHat is: " << xHat << std::endl;
-	    std::cout << "diffV1 is: " << diffV1 << std::endl;
-	    std::cout << "diffV2 is: " << diffV2 << std::endl;
-	    std::cout << "J is: " << J << std::endl;
-	    std::cout << "u is: " << u << std::endl;
-	    std::cout << "eps is: " << eps << std::endl;
-	    std::cout << "delta_e is: " << delta_e << std::endl;
-	    std::cout << "v1 is: " << v1 << std::endl;
+//    std::cout << "initialValue is: " << initialValue << std::endl;
+//    std::cout << "xHat is: " << xHat << std::endl;
+//    std::cout << "diffV1 is: " << diffV1 << std::endl;
+//    std::cout << "diffV2 is: " << diffV2 << std::endl;
+//    std::cout << "J is: " << J << std::endl;
+//    std::cout << "u is: " << u << std::endl;
+//    std::cout << "eps is: " << eps << std::endl;
+//    std::cout << "delta_e is: " << delta_e << std::endl;
+//    std::cout << "v1 is: " << v1 << std::endl;
 
 
-	    sm::eigen::assertNear(v1, delta_e, 1e-6, SM_SOURCE_FILE_POS, "Testing the minimal difference jacobian");
-	}
-	catch(std::exception const & e)
-    {
-        FAIL() << e.what();
-    }
+    sm::eigen::assertNear(v1, delta_e, 1e-6, SM_SOURCE_FILE_POS, "Testing the minimal difference jacobian");
+  }
+  catch(std::exception const & e)
+  {
+    FAIL() << e.what();
+  }
 
 }
 
