@@ -18,7 +18,7 @@ namespace aslam {
       ScalarExpression( double value );
       ScalarExpression(ScalarExpressionNode * designVariable);
       ScalarExpression(boost::shared_ptr<ScalarExpressionNode> designVariable);
-      virtual ~ScalarExpression();
+      ~ScalarExpression();
       
       double toScalar() const;
       double toValue() const { return toScalar(); }
