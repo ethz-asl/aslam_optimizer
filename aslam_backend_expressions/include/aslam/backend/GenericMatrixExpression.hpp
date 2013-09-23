@@ -117,13 +117,6 @@ class GenericMatrixExpression {
     virtual ~UnaryOperationResult() {
     }
 
-    virtual void getDesignVariablesImplementation(DesignVariable::set_t & designVariables) const {
-      _operand->getDesignVariables(designVariables);
-    }
-    virtual void evaluateJacobiansImplementation(JacobianContainer & outJacobians, const typename node_t::differential_t & diff) const {
-      this->getOperandNode().evaluateJacobians(outJacobians, Diff(*static_cast<const TDerived *>(this), diff));
-    }
-
     inline apply_diff_return_t applyDiff(const typename operand_t::tangent_vector_t & tangent_vector) const {
       throw std::runtime_error("This method must be shadowed or not used!");
     }
@@ -133,7 +126,6 @@ class GenericMatrixExpression {
       p->_operand = operand.root();
       return self_t(node_ptr_t(p));
     }
-
     template<typename TData>
     static inline self_t create(const TOperand & operand, TData data) {
       TDerived * p = new TDerived(data);
@@ -142,8 +134,16 @@ class GenericMatrixExpression {
     }
 
    protected:
+    inline UnaryOperationResult() {
+    }
     const operand_node_t& getOperandNode() const {
       return *_operand;
+    }
+    virtual void getDesignVariablesImplementation(DesignVariable::set_t & designVariables) const {
+      _operand->getDesignVariables(designVariables);
+    }
+    virtual void evaluateJacobiansImplementation(JacobianContainer & outJacobians, const typename node_t::differential_t & chainRuleDifferentail) const {
+      this->getOperandNode().evaluateJacobians(outJacobians, Diff(*static_cast<const TDerived *>(this), chainRuleDifferentail));
     }
    private:
     typename TOperand::node_ptr_t _operand;
@@ -175,28 +175,10 @@ class GenericMatrixExpression {
     virtual ~BinaryOperationResult() {
     }
 
-    virtual void getDesignVariablesImplementation(DesignVariable::set_t & designVariables) const {
-      _lhs->getDesignVariables(designVariables);
-      _rhs->getDesignVariables(designVariables);
-    }
-
     typedef TLhs lhs_t;
     typedef TRhs rhs_t;
     typedef typename TLhs::node_t lhs_node_t;
     typedef typename TRhs::node_t rhs_node_t;
-
-    const lhs_node_t & getLhsNode() const {
-      return *_lhs;
-    }
-
-    const rhs_node_t & getRhsNode() const {
-      return *_rhs;
-    }
-
-    virtual void evaluateJacobiansImplementation(JacobianContainer & outJacobians, const typename node_t::differential_t & diff) const {
-      this->getLhsNode().evaluateJacobians(outJacobians, Diff<lhs_t, &TDerived::applyLhsDiff>(*static_cast<const TDerived *>(this), diff));
-      this->getRhsNode().evaluateJacobians(outJacobians, Diff<rhs_t, &TDerived::applyRhsDiff>(*static_cast<const TDerived *>(this), diff));
-    }
 
     inline apply_diff_return_t applyLhsDiff(const typename lhs_t::tangent_vector_t & tangent_vector) const {
       throw std::runtime_error("This method must be shadowed or not used!");
@@ -213,6 +195,20 @@ class GenericMatrixExpression {
     }
    protected:
     inline BinaryOperationResult() {
+    }
+    const lhs_node_t & getLhsNode() const {
+      return *_lhs;
+    }
+    const rhs_node_t & getRhsNode() const {
+      return *_rhs;
+    }
+    virtual void getDesignVariablesImplementation(DesignVariable::set_t & designVariables) const {
+      _lhs->getDesignVariables(designVariables);
+      _rhs->getDesignVariables(designVariables);
+    }
+    virtual void evaluateJacobiansImplementation(JacobianContainer & outJacobians, const typename node_t::differential_t & diff) const {
+      this->getLhsNode().evaluateJacobians(outJacobians, Diff<lhs_t, &TDerived::applyLhsDiff>(*static_cast<const TDerived *>(this), diff));
+      this->getRhsNode().evaluateJacobians(outJacobians, Diff<rhs_t, &TDerived::applyRhsDiff>(*static_cast<const TDerived *>(this), diff));
     }
    private:
     typename TLhs::node_ptr_t _lhs;

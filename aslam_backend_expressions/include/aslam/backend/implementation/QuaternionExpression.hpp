@@ -179,16 +179,15 @@ inline typename _CLASS::self_with_default_node_t _CLASS::operator * (const Quate
     typedef typename result_t::template BinaryOperationResult<ResultNode, self_t, other_t> base_t;
 
     virtual ~ResultNode() {}
-
-    virtual void evaluateImplementation() const {
-      this->_currentValue = internal::EigenQuaternionCalculator<TScalar, EMode>::quatMult(this->getLhsNode().evaluate(), this->getRhsNode().evaluate());
-    }
-
     inline typename base_t::apply_diff_return_t applyLhsDiff(const typename base_t::lhs_t::tangent_vector_t & tangent_vector) const {
       return internal::EigenQuaternionCalculator<TScalar, EMode>::quatMult(tangent_vector, this->getRhsNode().evaluate());  //TODO add matrix version?
     }
     inline typename base_t::apply_diff_return_t applyRhsDiff(const typename base_t::rhs_t::tangent_vector_t & tangent_vector) const {
       return internal::EigenQuaternionCalculator<TScalar, EMode>::quatMult(this->getLhsNode().evaluate(), tangent_vector);
+    }
+  private:
+    virtual void evaluateImplementation() const {
+      this->_currentValue = internal::EigenQuaternionCalculator<TScalar, EMode>::quatMult(this->getLhsNode().evaluate(), this->getRhsNode().evaluate());
     }
   };
 
@@ -205,11 +204,6 @@ inline typename _CLASS::self_with_default_node_t _CLASS::inverse() const {
     typedef typename result_t::template UnaryOperationResult<ResultNode, self_t> base_t;
 
     virtual ~ResultNode() {}
-
-    virtual void evaluateImplementation() const {
-      this->_currentValue = calc::invert(this->getOperandNode().evaluate());
-    }
-
     inline typename base_t::apply_diff_return_t applyDiff(const typename base_t::operand_t::tangent_vector_t & tangent_vector) const {
       /*
        * d_q q^{-1} (v) = -(\bar q v \bar q) / (q\bar q)^2
@@ -218,6 +212,10 @@ inline typename _CLASS::self_with_default_node_t _CLASS::inverse() const {
       auto operandValConj = calc::conjugate(this->getOperandNode().evaluate());
       double valSquared = operandValConj.dot(operandValConj);
       return -calc::quatMult(operandValConj, calc::quatMult(tangent_vector, operandValConj)) / (valSquared * valSquared);
+    }
+  private:
+    virtual void evaluateImplementation() const {
+      this->_currentValue = calc::invert(this->getOperandNode().evaluate());
     }
   };
 
@@ -232,13 +230,12 @@ typename _CLASS::self_with_default_node_t _CLASS::conjugate() const {
     typedef typename result_t::template UnaryOperationResult<ResultNode, self_t> base_t;
 
     virtual ~ResultNode() {}
-
-    virtual void evaluateImplementation() const {
-      this->_currentValue = internal::EigenQuaternionCalculator<TScalar, EMode>::conjugate(this->getOperandNode().evaluate());
-    }
-
     inline typename base_t::apply_diff_return_t applyDiff(const typename base_t::operand_t::tangent_vector_t & tangent_vector) const {
       return internal::EigenQuaternionCalculator<TScalar, EMode>::conjugate(tangent_vector);
+    }
+  private:
+    virtual void evaluateImplementation() const {
+      this->_currentValue = internal::EigenQuaternionCalculator<TScalar, EMode>::conjugate(this->getOperandNode().evaluate());
     }
   };
 
@@ -261,11 +258,6 @@ GenericMatrixExpression<3, 1,TScalar> _CLASS::rotate3Vector(const GenericMatrixE
 
     virtual ~ResultNode() {}
 
-    virtual void evaluateImplementation() const {
-      auto lhsVal = this->getLhsNode().evaluate();
-      this->_currentValue = calc::getImagPart(calc::quatMult(calc::quatMult(lhsVal, this->getRhsNode().evaluate()), calc::conjugate(lhsVal)));
-    }
-
     inline typename base_t::apply_diff_return_t applyLhsDiff(const typename base_t::lhs_t::tangent_vector_t & tangent_vector) const {
       auto lhsVal = this->getLhsNode().evaluate();
       auto rhsVal = this->getRhsNode().evaluate();
@@ -274,6 +266,11 @@ GenericMatrixExpression<3, 1,TScalar> _CLASS::rotate3Vector(const GenericMatrixE
     inline typename base_t::apply_diff_return_t applyRhsDiff(const typename base_t::rhs_t::tangent_vector_t & tangent_vector) const {
       auto lhsVal = this->getLhsNode().evaluate();
       return calc::getImagPart(calc::quatMult(calc::quatMult(lhsVal, tangent_vector), calc::conjugate(lhsVal)));
+    }
+  private:
+    virtual void evaluateImplementation() const {
+      auto lhsVal = this->getLhsNode().evaluate();
+      this->_currentValue = calc::getImagPart(calc::quatMult(calc::quatMult(lhsVal, this->getRhsNode().evaluate()), calc::conjugate(lhsVal)));
     }
   };
 
@@ -293,14 +290,13 @@ typename _CLASS::tangent_vector_expression_t _CLASS::log(const UnitQuaternionExp
     typedef typename result_t::template UnaryOperationResult<ResultNode, other_t> base_t;
 
     virtual ~ResultNode() {}
-
-    virtual void evaluateImplementation() const {
-      this->_currentValue = calc::log(this->getOperandNode().evaluate());
-    }
-
     virtual void evaluateJacobiansImplementation(JacobianContainer & outJacobians, const typename result_t::differential_t & diff) const {
       Eigen::Matrix<TScalar, 3, 4> M = calc::dlog(this->getOperandNode().evaluate());
       this->getOperandNode().evaluateJacobians(outJacobians, ComposedMatrixDifferential<typename result_t::differential_t::domain_t, TScalar, decltype(M) &, 4>(M, diff));
+    }
+  private:
+    virtual void evaluateImplementation() const {
+      this->_currentValue = calc::log(this->getOperandNode().evaluate());
     }
   };
 
@@ -319,14 +315,13 @@ typename _CLASS::self_with_default_node_t _CLASS::exp(const GenericMatrixExpress
     typedef typename result_t::template UnaryOperationResult<ResultNode, other_t> base_t;
 
     virtual ~ResultNode() {}
-
-    virtual void evaluateImplementation() const {
-      this->_currentValue = calc::exp(this->getOperandNode().evaluate());
-    }
-
     virtual void evaluateJacobiansImplementation(JacobianContainer & outJacobians, const typename result_t::differential_t & diff) const {
       Eigen::Matrix<TScalar, 4, 3> M = calc::dexp(this->getOperandNode().evaluate());
       this->getOperandNode().evaluateJacobians(outJacobians, ComposedMatrixDifferential<typename result_t::differential_t::domain_t, TScalar, decltype(M) &, 3>(M, diff));
+    }
+  private:
+    virtual void evaluateImplementation() const {
+      this->_currentValue = calc::exp(this->getOperandNode().evaluate());
     }
   };
 

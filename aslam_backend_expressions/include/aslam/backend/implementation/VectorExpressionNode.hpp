@@ -33,13 +33,13 @@ void VectorExpressionNode<D>::evaluateJacobians(JacobianContainer & outJacobians
 
 template<int D>
 void VectorExpressionNode<D>::evaluateJacobians(JacobianContainer & outJacobians, const differential_t & diff) const {
-  evaluateJacobiansImplementation(outJacobians, diff);
+  evaluateJacobiansImplementationWithDifferential(outJacobians, diff);
 }
 
 template<int D>
-void VectorExpressionNode<D>::evaluateJacobiansImplementation(JacobianContainer & outJacobians, const differential_t & diff) const {
+void VectorExpressionNode<D>::evaluateJacobiansImplementationWithDifferential(JacobianContainer & outJacobians, const differential_t & chainRuleDifferentail) const {
   Eigen::MatrixXd chainRule(outJacobians.rows(), D);
-  diff.convertIntoMatrix(outJacobians.rows(), D, chainRule);
+  chainRuleDifferentail.convertIntoMatrix(outJacobians.rows(), D, chainRule);
   evaluateJacobiansImplementation(outJacobians, chainRule);
 }
 
