@@ -402,7 +402,7 @@ namespace aslam {
 #ifndef QRSOLVER_DISABLED
     template<typename I>
     cholmod_dense* Cholmod<I>::solve(cholmod_sparse* A, spqr_factor* L,
-        cholmod_dense* b, double tol, bool norm) {
+        cholmod_dense* b, double tol, bool norm, double normTol) {
       cholmod_sparse* qrJ = cholmod_l_transpose(A, 1, &_cholmod);
       cholmod_dense* scaling = NULL;
       if (norm) {
@@ -413,7 +413,7 @@ namespace aslam {
           reinterpret_cast<double*>(scaling->x);
         for (size_t i = 0; i < qrJ->ncol; ++i) {
           const double normCol = colNorm(qrJ, i);
-          if (fabs(normCol) < std::numeric_limits<double>::epsilon())
+          if (normCol < normTol)
             values[i] = 0.0;
           else
             values[i] = 1.0 / normCol;

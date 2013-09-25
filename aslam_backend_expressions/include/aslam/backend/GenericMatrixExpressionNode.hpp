@@ -52,8 +52,8 @@ class GenericMatrixExpressionNode {
     return _currentValue;
   }
 
-  void evaluateJacobians(JacobianContainer & outJacobians, const differential_t & diff) const {
-    evaluateJacobiansImplementation(outJacobians, diff);
+  void evaluateJacobians(JacobianContainer & outJacobians, const differential_t & chainRuleDifferentail) const {
+    evaluateJacobiansImplementation(outJacobians, chainRuleDifferentail);
   }
 
   const matrix_t toMatrix() const {
@@ -75,7 +75,7 @@ class GenericMatrixExpressionNode {
  protected:
   virtual void evaluateImplementation() const = 0;
   virtual void getDesignVariablesImplementation(DesignVariable::set_t & designVariables) const = 0;
-  virtual void evaluateJacobiansImplementation(JacobianContainer & outJacobians, const differential_t & diff) const = 0;
+  virtual void evaluateJacobiansImplementation(JacobianContainer & outJacobians, const differential_t & chainRuleDifferentail) const = 0;
   virtual bool isConstantImplementation() const {
     return false;
   }
@@ -96,13 +96,12 @@ class ConstantGenericMatrixExpressionNode : public GenericMatrixExpressionNode<I
       : base_t(rows, cols, false) {
   }
  protected:
-  bool isConstantImplementation() const {
+  virtual bool isConstantImplementation() const {
     return true;
   }
   virtual void evaluateImplementation() const {
   }
-  ;
-  virtual void evaluateJacobiansImplementation(JacobianContainer & outJacobians, const typename base_t::differential_t & diff) const {
+  virtual void evaluateJacobiansImplementation(JacobianContainer & outJacobians, const typename base_t::differential_t & chainRuleDifferentail) const {
   }
   virtual void getDesignVariablesImplementation(DesignVariable::set_t & designVariables) const {
   }

@@ -41,31 +41,18 @@ struct GenericMatrixNodeTraits<VectorExpressionNode<D> > {
       }
       SM_ASSERT_EQ_DBG(std::runtime_error, cols, 1, "there is only one column supported as vector expression.");
     }
-   protected:
-    virtual vector_t & getCurrentValue() {
-      return value;
-    }
-    ;
-    virtual const vector_t & getCurrentValue() const {
-      return value;
-    }
-    ;
+   private:
     virtual vector_t evaluateImplementation() const {
       return value;
     }
-    ;
     virtual void evaluateJacobiansImplementation(JacobianContainer & outJacobians) const {
     }
-    ;
     virtual void evaluateJacobiansImplementation(JacobianContainer & outJacobians, const Eigen::MatrixXd & applyChainRule) const {
     }
-    ;
-    virtual void evaluateJacobiansImplementation(JacobianContainer & outJacobians, const differential_t & diff) const {
+    virtual void evaluateJacobiansImplementationWithDifferential(JacobianContainer & outJacobians, const differential_t & chainRuleDifferentail) const {
     }
-    ;
     virtual void getDesignVariablesImplementation(DesignVariable::set_t & designVariables) const {
     }
-    ;
    private:
     vector_t value;
   };

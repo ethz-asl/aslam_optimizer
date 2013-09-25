@@ -120,6 +120,7 @@ namespace aslam {
     void JacobianContainer::add(DesignVariable* dv, const Eigen::MatrixBase<DERIVED>& Jacobian)
     {
       SM_ASSERT_EQ(Exception, Jacobian.rows(), _rows, "The Jacobian must have the same number of rows as this container");
+      SM_ASSERT_EQ(Exception, Jacobian.cols(), dv->minimalDimensions(), "The Jacobian must have the same number of cols as dv->minimalDimensions()");
       // If the designe variable isn't active. Don't bother adding it.
       if (! dv->isActive())
         return;

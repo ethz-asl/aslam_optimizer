@@ -95,7 +95,7 @@ void ExpressionTester<TExpression>::testJacobian(TExpression & expression, bool 
   for(DesignVariable * dp : designVariables){
     minimalDimensionSum += dp->minimalDimensions();
   }
-  ASSERT_EQ(jacobianCols, minimalDimensionSum);
+  SM_ASSERT_EQ(std::runtime_error, jacobianCols, minimalDimensionSum, "There seem to be some design variables inactive. This is most likely not intended here!");
   sm::eigen::NumericalDiff<ExpressionNodeFunctor> numdiff(ExpressionNodeFunctor(expression, Jc), eps);
   typename ExpressionNodeFunctor::input_t dp(jacobianCols);
 

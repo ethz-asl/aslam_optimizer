@@ -41,6 +41,13 @@ namespace aslam {
       /// Sets the content of the design variable
       virtual void setParametersImplementation(const Eigen::MatrixXd& value);
 
+      /// Computes the minimal distance in tangent space between the current value of the DV and xHat
+      virtual void minimalDifferenceImplementation(const Eigen::MatrixXd& xHat, Eigen::VectorXd& outDifference) const;
+
+      /// Computes the minimal distance in tangent space between the current value of the DV and xHat and the jacobian
+      virtual void minimalDifferenceAndJacobianImplementation(const Eigen::MatrixXd& xHat, Eigen::VectorXd& outDifference, Eigen::MatrixXd& outJacobian) const;
+
+
       Eigen::Matrix3d _A;
       Eigen::Matrix3d _A_a;
       Eigen::Matrix3d _UpdatePattern;		// 3x3 Matrix containing 1 at the position that should be estimated and 0 for constants

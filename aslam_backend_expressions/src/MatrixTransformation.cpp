@@ -100,6 +100,18 @@ namespace aslam {
       _A = value;
     }
 
+    void MatrixTransformation::minimalDifferenceImplementation(const Eigen::MatrixXd& xHat, Eigen::VectorXd& outDifference) const
+    {
+    	SM_ASSERT_TRUE(aslam::InvalidArgumentException, (xHat.rows() == 3)&&(xHat.cols() == 3), "xHat has incompatible dimensions");
+    		outDifference = sm::kinematics::R2AxisAngle(_A*xHat.transpose());
+    }
+
+    void MatrixTransformation::minimalDifferenceAndJacobianImplementation(const Eigen::MatrixXd& xHat, Eigen::VectorXd& outDifference, Eigen::MatrixXd& outJacobian) const
+    {
+    	minimalDifferenceImplementation(xHat, outDifference);
+    	// outJacobian = ???
+    }
+
   } // namespace backend
 } // namespace aslam
 

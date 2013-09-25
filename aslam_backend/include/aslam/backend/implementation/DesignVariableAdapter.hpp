@@ -89,5 +89,18 @@ namespace aslam {
       _dv->setParameters(value);
     }
 
+    template<typename T>
+    void DesignVariableAdapter<T>::minimalDifferenceImplementation(const Eigen::MatrixXd& xHat, Eigen::VectorXd& outDifference) const
+    {
+    	// TODO: implement
+    }
+
+    template<typename T>
+    void DesignVariableAdapter<T>::minimalDifferenceAndJacobianImplementation(const Eigen::MatrixXd& xHat, Eigen::VectorXd& outDifference, Eigen::MatrixXd& outJacobian) const
+    {
+    	// TODO: implement
+    }
+
+
   } // namespace backend
 } // namespace aslam

@@ -96,6 +96,15 @@ namespace aslam {
         const SparseCholeskyLinearSolverOptions& options) {
       _options = options;
     }
+      
+    double SparseCholeskyLinearSystemSolver::rhsJtJrhs() {
+        CompressedColumnMatrix<int>& J_transpose = _jacobianBuilder.J_transpose();
+        Eigen::VectorXd Jrhs;
+        J_transpose.leftMultiply(_rhs, Jrhs);
+        return Jrhs.squaredNorm();
+    }
+      
+      
 
   } // namespace backend
 } // namespace aslam

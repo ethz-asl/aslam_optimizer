@@ -140,8 +140,8 @@ TEST(LinearSolverTestSuite, testSparseQR)
   }
 }
 
-
-TEST(LinearSolverTestSuite, testOptimizer)
+/*
+TEST(LinearSolverTestSuite, testOptimizerLevenbergMarquardt)
 {
   using namespace aslam::backend;
   std::vector<DesignVariable*> dvs;
@@ -151,12 +151,19 @@ TEST(LinearSolverTestSuite, testOptimizer)
   const int seed = 1;
   try {
     std::string baseline_solver = "block_cholesky";
+    std::string baseline_policy = "LevenbergMarquardt";
     std::vector<std::string> solvers;
+    std::vector<std::string> policies;
     solvers.push_back("sparse_cholesky");
     solvers.push_back("dense_qr");
+      
+    policies.push_back("LevenbergMarquardt");
+    policies.push_back("DogLeg");
+    policies.push_back("GaussNewton");
+      
     boost::shared_ptr<OptimizationProblem> pb = buildProblem(seed, D, E);
     std::vector< boost::shared_ptr<OptimizationProblem> > problems;
-    for (size_t i = 0; i < solvers.size(); ++i) {
+    for (size_t i = 0; i < solvers.size()*policies.size(); ++i) {
       boost::shared_ptr<OptimizationProblem> pi = buildProblem(seed, D, E);
       problems.push_back(pi);
       for (size_t j = 0; j < pb->numErrorTerms(); ++j) {
@@ -168,28 +175,38 @@ TEST(LinearSolverTestSuite, testOptimizer)
     }
     Optimizer2Options options;
     options.linearSolver = baseline_solver;
-    options.maxIterations = 1;
+    options.maxIterations = 5;
     options.verbose = true;
+    options.trustRegionPolicy = baseline_policy;
     Optimizer2 optimizer(options);
     optimizer.setProblem(pb);
     optimizer.optimize();
-    for (size_t i = 0; i < solvers.size(); ++i) {
-      options.linearSolver = solvers[i];
-      Optimizer2 optimizer_i(options);
-      optimizer_i.setProblem(problems[i]);
-      optimizer_i.optimize();
-      for (size_t j = 0; j < pb->numErrorTerms(); ++j) {
-        double eb = pb->errorTerm(j)->evaluateError();
-        double ei = problems[i]->errorTerm(j)->evaluateError();
-        ASSERT_NEAR(ei, eb, 1e-6) << "The errors did not reduce in the same way";
-        //std::cout << "ei: " << ei << ", eb: " << eb << std::endl;
+      int p = 0;
+      for(size_t k = 0; k < policies.size(); ++k) {
+        for (size_t i = 0; i < solvers.size(); ++i) {
+          options.linearSolver = solvers[i];
+          options.trustRegionPolicy = policies[k];
+          Optimizer2 optimizer_i(options);
+          optimizer_i.setProblem(problems[p]);
+          p++;
+          optimizer_i.optimize();
+          for (size_t j = 0; j < pb->numErrorTerms(); ++j) {
+            double eb = pb->errorTerm(j)->evaluateError();
+            double ei = problems[i*k]->errorTerm(j)->evaluateError();
+            ASSERT_NEAR(ei, eb, 1e-6) << "The errors did not reduce in the same way";
+            //std::cout << "ei: " << ei << ", eb: " << eb << std::endl;
+          }
+        }
       }
-    }
   } catch (const std::exception& e) {
     deleteSystem(dvs, errs);
     FAIL() << e.what();
   }
 }
+
+
+*/
+
 
 
 

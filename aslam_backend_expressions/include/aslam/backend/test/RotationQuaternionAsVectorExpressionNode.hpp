@@ -29,7 +29,7 @@ struct RotationQuaternionAsVectorExpressionNode : public VectorExpressionNode<4>
       quat.evaluateJacobians(outJacobians, applyChainRule);
     }
   };
-  virtual void evaluateJacobiansImplementation(JacobianContainer & outJacobians, const differential_t & diff) const { throw std::runtime_error("should not happen");};
+  virtual void evaluateJacobiansImplementationWithDifferential(JacobianContainer & outJacobians, const differential_t & chainRuleDifferentail) const { throw std::runtime_error("should not happen");};
   virtual void getDesignVariablesImplementation(DesignVariable::set_t & designVariables) const { designVariables.insert(&quat);};
 };
 

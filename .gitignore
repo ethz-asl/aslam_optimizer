@@ -45,3 +45,4 @@ lib
 .project
 .cproject
 .pydevproject
+*.orig

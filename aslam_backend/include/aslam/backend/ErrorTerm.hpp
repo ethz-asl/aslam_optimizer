@@ -33,6 +33,8 @@ namespace aslam {
     public:
       EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
+      typedef boost::shared_ptr<aslam::backend::ErrorTerm> Ptr;
+
       ErrorTerm();
       virtual ~ErrorTerm();
 

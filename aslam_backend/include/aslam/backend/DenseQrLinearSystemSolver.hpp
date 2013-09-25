@@ -24,6 +24,8 @@ namespace aslam {
       virtual const Matrix* Jacobian() const;
       const Eigen::MatrixXd& getJacobian() const;
 
+      virtual std::string name() const { return "dense_qr";};
+      
       /// Returns the options
       const DenseQRLinearSolverOptions& getOptions() const;
       /// Returns the options
@@ -33,6 +35,9 @@ namespace aslam {
 
 
 
+      /// Helper Function for DogLeg implementation; returns parts required for the steepest descent solution
+      double rhsJtJrhs();
+    
     private:
       /// \brief a method for a thread to evaluate Jacobians
       void evaluateJacobians(size_t threadId, size_t startIdx, size_t endIdx, bool useMEstimator);

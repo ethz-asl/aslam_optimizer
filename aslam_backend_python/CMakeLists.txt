@@ -50,30 +50,18 @@ include(${numpy_eigen_PACKAGE_PATH}/cmake/add_python_export_library.cmake)
 # This functions take TARGET_NAME PYTHON_MODULE_DIRECTORY sourceFile1 [sourceFile2 ...]
 add_python_export_library(${PROJECT_NAME} python/aslam_backend
   src/module.cpp
-  #src/CameraGeometries.cpp
-  #src/CameraGeometry.cpp
-  #src/PinholeCameraGeometry.cpp
-  #src/OmniCameraGeometry.cpp
-  #src/PinholeRSCameraGeometry.cpp
-  #src/PinholeCameraDesignVariables.cpp
-  #src/BackendDesignVariables.cpp
-  #src/Time.cpp
   src/Backend.cpp
   src/Optimizer.cpp
   src/OptimizerOptions.cpp
   src/OptimizationProblem.cpp
   src/DesignVariable.cpp
   src/ErrorTerm.cpp
-  #src/BSplineMotionError.cpp
   src/MEstimators.cpp
   src/JacobianContainer.cpp
   src/BackendExpressions.cpp
   src/CompressedColumnMatrix.cpp
-  #src/Frontend.cpp
-  #src/Frame.cpp
-  #src/Descriptors.cpp
-  #src/CameraProjections.cpp
-  #src/CameraShutters.cpp
+  src/LinearSystemSolver.cpp
   src/ErrorTermTransformation.cpp
+  src/TrustRegionPolicies.cpp
 )
 

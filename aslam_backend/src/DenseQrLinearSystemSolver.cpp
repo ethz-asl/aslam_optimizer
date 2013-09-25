@@ -79,6 +79,15 @@ namespace aslam {
         const DenseQRLinearSolverOptions& options) {
       _options = options;
     }
+      
+      
+    double DenseQrLinearSystemSolver::rhsJtJrhs() {
+        Eigen::VectorXd Jrhs;
+        _J.rightMultiply(_rhs, Jrhs);
+        return Jrhs.squaredNorm();
+    }
+      
+      
 
     const Eigen::MatrixXd& DenseQrLinearSystemSolver::getJacobian() const
     {

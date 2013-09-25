@@ -14,6 +14,7 @@
   <depend package="sm_random"/>
   <depend package="sm_timing"/>
   <depend package="sm_logging"/>
+  <depend package="sm_property_tree"/>
   <!-- depend package="custom_suitesparse"/ -->
 
   <export>

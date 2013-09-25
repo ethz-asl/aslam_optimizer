@@ -42,10 +42,10 @@ private:
   // computes the minimal difference of all design variables between the linearization point at marginalization and the current guess (i.e. log(x_bar - x))
   Eigen::VectorXd getDifferenceSinceMarginalization();
 
-  int _dimensionDesignVariables;
   std::vector<aslam::backend::DesignVariable*> _designVariables;
   Eigen::VectorXd _d;
   Eigen::MatrixXd _R; // R from the QR decomposition!!!
+  int _dimensionDesignVariables;
   // store values of design variables at time of marginalization
   std::vector<Eigen::MatrixXd> _designVariableValuesAtMarginalization;
 };

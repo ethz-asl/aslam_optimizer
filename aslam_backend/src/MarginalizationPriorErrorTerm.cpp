@@ -67,7 +67,7 @@ Eigen::VectorXd MarginalizationPriorErrorTerm::getDifferenceSinceMarginalization
       //get minimal difference in tangent space
       Eigen::VectorXd diffVector;
       (*it_current)->minimalDifference(xHat, diffVector);
-      int base = index;
+      //int base = index;
       int dim = diffVector.rows();
       diff.segment(index, dim) = diffVector;
       index += dim;

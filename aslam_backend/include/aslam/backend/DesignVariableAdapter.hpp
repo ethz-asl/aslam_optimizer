@@ -33,6 +33,7 @@ namespace aslam {
       boost::shared_ptr<T> valuePtr();
       boost::shared_ptr<const T> constValuePtr() const;
 
+
     private:
       /// \brief what is the number of dimensions of the perturbation variable.
       virtual int minimalDimensionsImplementation() const;
@@ -54,6 +55,11 @@ namespace aslam {
 
       /// \brief a backup for reverting the state.
       Eigen::MatrixXd _backup;
+
+      virtual void minimalDifferenceImplementation(const Eigen::MatrixXd& xHat, Eigen::VectorXd& outDifference) const;
+
+      virtual void minimalDifferenceAndJacobianImplementation(const Eigen::MatrixXd& xHat, Eigen::VectorXd& outDifference, Eigen::MatrixXd& outJacobian) const;
+
     };
 
   } // namespace backend

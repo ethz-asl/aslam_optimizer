@@ -13,6 +13,10 @@
 #include <sm/timing/Timer.hpp>
 #include <boost/thread.hpp>
 #include <sparse_block_matrix/linear_solver.h>
+#include <aslam/backend/TrustRegionPolicy.hpp>
+#include <aslam/backend/LevenbergMarquardtTrustRegionPolicy.hpp>
+#include <aslam/backend/GaussNewtonTrustRegionPolicy.hpp>
+#include <aslam/backend/DogLegTrustRegionPolicy.hpp>
 
 namespace aslam {
   namespace backend {
@@ -27,7 +31,7 @@ namespace aslam {
      *
      * Some Additions to the standard algorithm:
      * Choice of Lambda:
-     * H.B. Nielsen. Damping Parameter in Marquardt’s Method. Technical Report
+     * H.B. Nielsen. Damping Parameter in Marquardts Method. Technical Report
      * IMM-REP-1999-05, Technical University of Denmark, 1999.
      *
      * Jacobian Normalisation:
@@ -35,7 +39,7 @@ namespace aslam {
      * A Methodology for Estimation of Physical Parameters, Systems Analysis Modelling Simulation, 43:7, 925-943
      *
      * Erik Etien, Damien Halbert, and Thierry Poinot
-     * Improved Jiles–Atherton Model for Least Square Identification Using Sensitivity Function Normalization
+     * Improved JilesAtherton Model for Least Square Identification Using Sensitivity Function Normalization
      * IEEE TRANSACTIONS ON MAGNETICS, VOL. 44, NO. 7, JULY 2008
      *
      */
@@ -45,7 +49,6 @@ namespace aslam {
       /// Swapping this to the dummy timer will disable timing
        typedef sm::timing::DummyTimer Timer;
       typedef sparse_block_matrix::SparseBlockMatrix<Eigen::MatrixXd> SparseBlockMatrix;
-
 
       SM_DEFINE_EXCEPTION(Exception, aslam::Exception);
 
@@ -60,6 +63,8 @@ namespace aslam {
 
       /// \brief initialize the linear solver specified in the optimizer options.
       void initializeLinearSolver();
+      
+      void initializeTrustRegionPolicy();
 
       /// \brief Run the optimization
       SolutionReturnValue optimize();
@@ -107,6 +112,8 @@ namespace aslam {
       template <class L>
       L* getSolver();
 
+
+        const Matrix * getJacobian() const;
       
         const LinearSystemSolver * getBaseSolver() const;
 
@@ -121,15 +128,6 @@ namespace aslam {
       /// \brief Apply a state update.
       double applyStateUpdate();
 
-      /// \brief Returns Rho for the LM lambda update
-      double getLmRho();
-
-      /// \brief Set the initial lambda by looking at the entries of the Hessian matrix.
-      void setInitialLambda();
-
-      /// \brief The current value of LM lambda.
-      double _lambda;
-
       /// \brief The dense update vector.
       Eigen::VectorXd _dx;
 
@@ -140,6 +138,8 @@ namespace aslam {
       double _p_J;
 
       boost::shared_ptr<LinearSystemSolver> _solver;
+
+      boost::shared_ptr<TrustRegionPolicy> _trustRegionPolicy;
 
       /// \brief The current optimization problem.
       boost::shared_ptr<OptimizationProblemBase> _problem;

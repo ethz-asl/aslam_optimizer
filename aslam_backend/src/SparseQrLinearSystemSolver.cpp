@@ -66,7 +66,7 @@ namespace aslam {
       // Now we can solve the system.
       outDx.resize(J_transpose.rows());
       cholmod_dense* sol = _cholmod.solve(&_cholmodLhs, _factor, &_cholmodRhs,
-        _options.qrTol, _options.colNorm);
+        _options.qrTol, _options.colNorm, _options.normTol);
       if (_useDiagonalConditioner) {
         J_transpose.popDiagonalBlock();
       }
@@ -132,6 +132,14 @@ namespace aslam {
         _factor->Q1fill + _cholmodLhs.nrow);
     }
 
+      Eigen::Matrix<SparseQrLinearSystemSolver::index_t, Eigen::Dynamic, 1> SparseQrLinearSystemSolver::getPermutationVectorEigen() const
+      {
+          SM_ASSERT_FALSE(Exception, _factor == NULL,
+                          "QR decomposition has not run yet");
+          Eigen::Map< Eigen::Matrix<SparseQrLinearSystemSolver::index_t, Eigen::Dynamic, 1> > pv( _factor->Q1fill, _cholmodLhs.nrow );
+          return pv;
+      }
+
     const CompressedColumnMatrix<SuiteSparse_long>&
         SparseQrLinearSystemSolver::getR() {
       if (_R.nnz() == 0) {
@@ -160,5 +168,14 @@ namespace aslam {
         _options.qrTol, true), "QR decomposition failed");
     }
 
+    double SparseQrLinearSystemSolver::rhsJtJrhs() {
+        CompressedColumnMatrix<SuiteSparse_long>& J_transpose = _jacobianBuilder.J_transpose();
+        Eigen::VectorXd Jrhs;
+        J_transpose.leftMultiply(_rhs, Jrhs);
+        return Jrhs.squaredNorm();
+    }
+      
+      
+      
   } // namespace backend
 } // namespace aslam

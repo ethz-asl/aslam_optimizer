@@ -22,6 +22,8 @@ namespace aslam {
       // virtual void solveConstantAugmentedSystem(double diagonalConditioner, Eigen::VectorXd & outDx);
       // virtual void solveAugmentedSystem(const Eigen::VectorXd & diagonalConditioner, Eigen::VectorXd & outDx);
 
+      virtual std::string name() const { return "sparse_qr"; }
+
       /// Returns the current Jacobian transpose
       const CompressedColumnMatrix<index_t>& getJacobianTranspose() const;
       /// Returns the current estimated numerical rank
@@ -30,6 +32,8 @@ namespace aslam {
       double getTol() const;
       /// Returns the current permutation vector
       std::vector<index_t> getPermutationVector() const;
+      /// Returns the current permutation vector
+      Eigen::Matrix<index_t, Eigen::Dynamic, 1> getPermutationVectorEigen() const;
       /// Performs QR decomposition and returns the R matrix
       const CompressedColumnMatrix<index_t>& getR();
       /// Returns the current memory usage in bytes
@@ -43,6 +47,9 @@ namespace aslam {
       SparseQRLinearSolverOptions& getOptions();
       /// Sets the options
       void setOptions(const SparseQRLinearSolverOptions& options);
+        
+      /// Helper Function for DogLeg implementation; returns parts required for the steepest descent solution
+      double rhsJtJrhs();
 
     private:
       virtual void initMatrixStructureImplementation(const std::vector<DesignVariable*>& dvs, const std::vector<ErrorTerm*>& errors, bool useDiagonalConditioner);

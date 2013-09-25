@@ -16,7 +16,7 @@ namespace aslam {
       typedef sparse_block_matrix::LinearSolver<Eigen::MatrixXd> LinearSolver;
       typedef sparse_block_matrix::SparseBlockMatrix<Eigen::MatrixXd> SparseBlockMatrix;
 
-      BlockCholeskyLinearSystemSolver();
+      BlockCholeskyLinearSystemSolver(const std::string & solver = "cholesky");
       virtual ~BlockCholeskyLinearSystemSolver();
 
 
@@ -31,6 +31,8 @@ namespace aslam {
         return &_H;
       }
 
+      virtual std::string name() const { return "block_" + _solverType; }
+
       /// \brief compute only the covariance blocks associated with the block indices passed as an argument
       void computeCovarianceBlocks(const std::vector<std::pair<int, int> >& blockIndices, SparseBlockMatrix& outP);
 
@@ -43,6 +45,9 @@ namespace aslam {
       /// Sets the options
       void setOptions(const BlockCholeskyLinearSolverOptions& options);
 
+      /// Helper Function for DogLeg implementation; returns parts required for the steepest descent solution
+      double rhsJtJrhs();
+        
     private:
 
       /// \brief initialized the matrix structure for the problem with these error terms and errors.
@@ -58,6 +63,7 @@ namespace aslam {
       /// Options
       BlockCholeskyLinearSolverOptions _options;
 
+      std::string _solverType;
     };
 
   } // namespace backend
