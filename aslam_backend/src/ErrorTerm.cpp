@@ -1,11 +1,12 @@
 #include <aslam/backend/ErrorTerm.hpp>
 #include <aslam/backend/MEstimatorPolicies.hpp>
 #include <boost/make_shared.hpp>
+#include <sm/logging.hpp>
 
 namespace aslam {
   namespace backend {
     ErrorTerm::ErrorTerm() :
-      _squaredError(0.0)
+      _squaredError(0.0), _timestamp(0)
     {
       _mEstimatorPolicy = boost::make_shared<NoMEstimator>();
     }
@@ -177,6 +178,12 @@ namespace aslam {
       _rowBase = b;
     }
 
+    void ErrorTerm::setTime(const sm::timing::NsecTime& t)
+    {
+    	_timestamp = t;
+    }
+
+
 
     namespace detail {
     struct ErrorTermFunctor {
@@ -243,3 +250,4 @@ namespace aslam {
   
   } // namespace backend
 } // namespace aslam
+
