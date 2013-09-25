@@ -30,10 +30,6 @@ public:
      const Eigen::VectorXd& d, const Eigen::MatrixXd& R);
   virtual ~MarginalizationPriorErrorTerm();
 
-//  // removes the top/first design variable (that is, the design variable a the beginning of the design variable vector) from the error term
-//  // currently only used for integrity testing. may be removed at some point
-//  void removeTopDesignVariable();
-
   int numDesignVariables() { return _designVariables.size(); }
   aslam::backend::DesignVariable* getDesignVariable(int i);
 
@@ -50,7 +46,6 @@ private:
   std::vector<aslam::backend::DesignVariable*> _designVariables;
   Eigen::VectorXd _d;
   Eigen::MatrixXd _R; // R from the QR decomposition!!!
-  //Eigen::MatrixXd _M;
   // store values of design variables at time of marginalization
   std::vector<Eigen::MatrixXd> _designVariableValuesAtMarginalization;
 };
