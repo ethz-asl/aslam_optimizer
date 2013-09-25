@@ -10,6 +10,7 @@
 #include <sm/timing/Timer.hpp>
 #include "MEstimatorPolicies.hpp"
 #include <sm/eigen/matrix_sqrt.hpp>
+#include <sm/timing/NsecTimeUtilities.hpp>
 
 namespace aslam {
   namespace backend {
@@ -113,6 +114,9 @@ namespace aslam {
       /// \brief Set the column base of this error term in the Jacobian matrix.
       void setRowBase(size_t);
 
+      void setTime(const sm::timing::NsecTime& t);
+      sm::timing::NsecTime getTime() { return _timestamp; }
+
     protected:
 
       /// \brief evaluate the error term and return the weighted squared error e^T invR e
@@ -158,6 +162,7 @@ namespace aslam {
 
       size_t _rowBase;
 
+      sm::timing::NsecTime _timestamp;
     };
 
 
