@@ -14,6 +14,8 @@
 
 #include <iostream>
 
+#include <sm/logging.hpp>
+
 namespace aslam {
 namespace backend {
 
@@ -24,6 +26,7 @@ void marginalize(
 			bool useMEstimator,
 			boost::shared_ptr<aslam::backend::MarginalizationPriorErrorTerm>& outPriorErrorTermPtr)
 {
+		  SM_WARN_STREAM_COND(inDesignVariables.size() == 0, "Zero input design variables in the marginalizer!");
           // Partition the design varibles into removed/remaining.
 		  int dimOfDesignVariablesToRemove = 0;
 		  std::vector<aslam::backend::DesignVariable*> remainingDesignVariables;
@@ -66,18 +69,16 @@ void marginalize(
 
           
 		  aslam::backend::DenseQrLinearSystemSolver qrSolver;
-
           qrSolver.initMatrixStructure(inDesignVariables, inErrorTerms, false);
 
-		  //std::cout << "Marginalization optimization problem initialized with " << inDesignVariables.size() << " design variables and " << inErrorTerms.size() << " error terms" << std::endl;
-		  //std::cout << "The Jacobian matrix is " << dim << " x " << columnBase << std::endl;
+		  SM_INFO_STREAM("Marginalization optimization problem initialized with " << inDesignVariables.size() << " design variables and " << inErrorTerms.size() << " error terrms");
+		  SM_INFO_STREAM("The Jacobian matrix is " << dim << " x " << columnBase);
 
 		  qrSolver.evaluateError(1, useMEstimator);
 		  qrSolver.buildSystem(1, useMEstimator);
 
 
 		  const Eigen::MatrixXd& jacobian = qrSolver.getJacobian();
-		  //Eigen::MatrixXd jacobian = qrSolver.Jacobian()->toDense();
 		  const Eigen::VectorXd& b = qrSolver.e();
 
 		  // check dimension of jacobian
@@ -91,9 +92,10 @@ void marginalize(
 		  Eigen::VectorXd d_reduced;
 		  if (jrows < jcols)
 		  {
-			  // overdetermined LSE, don't do QR
-			  R_reduced = jacobian;
+			  // underdetermined LSE, don't do QR
+			  R_reduced = jacobian.block(0, dimOfDesignVariablesToRemove, jrows, jcols - dimOfDesignVariablesToRemove);
 			  d_reduced = b;
+
 		  } else {
 			  // PTF: Do we know what will happen when the jacobian matrix is rank deficient?
 
@@ -103,8 +105,6 @@ void marginalize(
 			  Eigen::MatrixXd R = qr.matrixQR().triangularView<Eigen::Upper>();
 			  Eigen::VectorXd d = Q.transpose()*b;
 
-			  //std::cout << "R matrix is: " << std::endl << R << std::endl;
-
               // cut off the zero rows at the bottom
               R_reduced = R.block(dimOfDesignVariablesToRemove, dimOfDesignVariablesToRemove, dimOfRemainingDesignVariables, dimOfRemainingDesignVariables);
 
@@ -112,17 +112,10 @@ void marginalize(
               dimOfPriorErrorTerm = dimOfRemainingDesignVariables;
 		  }
 
-
-//		  std::cout << "R reduced matrix is: " << std::endl << R_reduced << std::endl;
-//		  std::cout << "d reduced" << std::endl << d_reduced << std::endl;
-//		  std::cout << "The jacobian of the marginalization is: " << std::endl << jacobian << std::endl;
-
 		  // now create the new error term
 		  boost::shared_ptr<aslam::backend::MarginalizationPriorErrorTerm> err(new aslam::backend::MarginalizationPriorErrorTerm(remainingDesignVariables, d_reduced, R_reduced));
-		  //std::cout << "address of new prior error term: " << err.get() << std::endl;
 
 		  outPriorErrorTermPtr.swap(err);
-		  //std::cout << "address of new prior error term: " << outPriorErrorTermPtr.get() << std::endl;
 
 		  // restore initial block indices to prevent side effects
           for (size_t i = 0; i < inDesignVariables.size(); ++i) {
