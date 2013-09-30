@@ -57,6 +57,8 @@ namespace aslam {
       double qrTol;
       /// Tolerance for a zero 2-norm column
       double normTol;
+      /// Verbose mode
+      bool verbose;
       /** @}
         */
 

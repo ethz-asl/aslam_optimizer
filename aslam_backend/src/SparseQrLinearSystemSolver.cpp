@@ -88,6 +88,8 @@ namespace aslam {
         throw;
       }
       _cholmod.free(sol);
+      if (_options.verbose)
+        std::cout << "numerical rank: " << _factor->rank << std::endl;
       // std::cout << "solve system complete\n";
       return true;
     }
