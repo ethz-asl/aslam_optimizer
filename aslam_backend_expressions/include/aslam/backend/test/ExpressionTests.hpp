@@ -32,14 +32,24 @@ struct ExpressionTraits {
   }
 };
 
+template <typename TExpression>
+struct ExpressionEvaluationTraits {
+  typedef typename ExpressionValueTraits<TExpression>::value_t value_t;
+  static value_t evaluate(const TExpression & expr) {
+    return expr.evaluate();
+  }
+};
+
 template<typename TExpression>
 class ExpressionTester {
  public:
+  typedef typename ExpressionValueTraits<TExpression>::value_t value_t;
+  typedef typename value_t::Scalar scalar_t;
   static void testJacobian(TExpression & expression, bool printResult = false, double tolerance = ExpressionTraits<TExpression>::defaultTolerance(), double eps = ExpressionTraits<TExpression>::defaultEps());
 
  private:
   struct ExpressionNodeFunctor {
-    typedef typename TExpression::value_t value_t;
+    typedef typename ExpressionValueTraits<TExpression>::value_t value_t;
     typedef typename value_t::Scalar scalar_t;
     typedef Eigen::Matrix<double, Eigen::Dynamic, 1> input_t;
     typedef Eigen::Matrix<scalar_t, Eigen::Dynamic, Eigen::Dynamic> jacobian_t;
@@ -66,7 +76,7 @@ class ExpressionTester {
         offset += d->minimalDimensions();
       }
 
-      auto p = _expression.evaluate();
+      auto p = ExpressionEvaluationTraits<TExpression>::evaluate(_expression);
 
       for (size_t i = 0; i < _jc.numDesignVariables(); i++) {
         DesignVariable * d = _jc.designVariable(i);
@@ -80,8 +90,8 @@ class ExpressionTester {
 
 template<typename TExpression>
 void ExpressionTester<TExpression>::testJacobian(TExpression & expression, bool printResult, double tolerance, double eps) {
-  auto val = expression.evaluate();
-  int rows = val.rows();
+  auto val = ExpressionEvaluationTraits<TExpression>::evaluate(expression);
+  const size_t rows = val.rows();
 
   JacobianContainer Jc(rows);
   JacobianContainer Jccr(rows);
