@@ -24,11 +24,13 @@ struct ExpressionValueTraits {
 template <typename TExpression>
 struct ExpressionTraits {
   typedef typename ExpressionValueTraits<TExpression>::value_t::Scalar scalar_t;
-  static scalar_t defaultTolerance() {
-    return sqrt(std::numeric_limits<scalar_t>::epsilon()) * 1E2;
+  typedef std::numeric_limits<scalar_t> Limits;
+
+  static double defaultTolerance() {
+    return Limits::is_integer ? 0.001 : sqrt(Limits::epsilon()) * 1E2;
   }
-  static scalar_t defaulEps() {
-    return sqrt(std::numeric_limits<scalar_t>::epsilon()) * 10;
+  static double defaulEps() {
+    return Limits::is_integer ? 1 : sqrt(Limits::epsilon()) * 10;
   }
 };
 
@@ -40,13 +42,15 @@ struct ExpressionEvaluationTraits {
   }
 };
 
-template<typename TExpression>
-class ExpressionTester {
- public:
+template <typename TExpression>
+struct ExpressionNumDiffTraits {
   typedef typename ExpressionValueTraits<TExpression>::value_t value_t;
-  typedef typename value_t::Scalar scalar_t;
-  static void testJacobian(TExpression & expression, bool printResult = false, double tolerance = ExpressionTraits<TExpression>::defaultTolerance(), double eps = ExpressionTraits<TExpression>::defaultEps());
-
+  inline static Eigen::MatrixXd  numericallyCalcJacobian(TExpression expression, int jacobianCols, std::vector<DesignVariable*>dvs, double eps) {
+      typename ExpressionNodeFunctor::input_t dp(jacobianCols);
+      dp.setZero();
+      sm::eigen::NumericalDiff<ExpressionNodeFunctor> numdiff(ExpressionNodeFunctor(expression, dvs), eps);
+      return numdiff.estimateJacobian(dp).template cast<double>();
+  }
  private:
   struct ExpressionNodeFunctor {
     typedef typename ExpressionValueTraits<TExpression>::value_t value_t;
@@ -54,10 +58,12 @@ class ExpressionTester {
     typedef Eigen::Matrix<double, Eigen::Dynamic, 1> input_t;
     typedef Eigen::Matrix<scalar_t, Eigen::Dynamic, Eigen::Dynamic> jacobian_t;
 
-    ExpressionNodeFunctor(TExpression & dv, JacobianContainer & jc)
+    ExpressionNodeFunctor(TExpression & dv, const std::vector<DesignVariable*> & dvs)
         : _expression(dv),
-          _jc(jc) {
+          _dvs(dvs) {
     }
+
+    // TODO optimize : this update should directly affect the design variables without having this extra input_t.
 
     input_t update(const input_t & x, int c, scalar_t delta) {
       input_t xnew = x;
@@ -65,69 +71,150 @@ class ExpressionTester {
       return xnew;
     }
 
-    TExpression & _expression;
-    JacobianContainer & _jc;
-
     value_t operator()(const input_t & dr) {
       int offset = 0;
-      for (size_t i = 0; i < _jc.numDesignVariables(); i++) {
-        DesignVariable * d = _jc.designVariable(i);
+      for (auto d : _dvs) {
         d->update((const double *) &dr[offset], d->minimalDimensions());
         offset += d->minimalDimensions();
       }
 
       auto p = ExpressionEvaluationTraits<TExpression>::evaluate(_expression);
 
-      for (size_t i = 0; i < _jc.numDesignVariables(); i++) {
-        DesignVariable * d = _jc.designVariable(i);
+      for (auto d : _dvs) {
         d->revertUpdate();
       }
-
       return p;
     }
+
+    TExpression & _expression;
+    const std::vector<DesignVariable*> & _dvs;
   };
 };
 
 template<typename TExpression>
-void ExpressionTester<TExpression>::testJacobian(TExpression & expression, bool printResult, double tolerance, double eps) {
-  auto val = ExpressionEvaluationTraits<TExpression>::evaluate(expression);
-  const size_t rows = val.rows();
+class ExpressionJacobianTestTraits;
 
-  JacobianContainer Jc(rows);
-  JacobianContainer Jccr(rows);
-  expression.evaluateJacobians(Jc);
-  expression.evaluateJacobians(Jccr, Eigen::MatrixXd::Identity(rows, rows));
+template<typename TExpression>
+class ExpressionTester {
+ public:
+  typedef typename ExpressionValueTraits<TExpression>::value_t value_t;
+  typedef typename value_t::Scalar scalar_t;
 
-  int jacobianCols = Jc.cols();
-  DesignVariable::set_t designVariables;
-  expression.getDesignVariables(designVariables);
-  int minimalDimensionSum = 0;
-  for(DesignVariable * dp : designVariables){
-    minimalDimensionSum += dp->minimalDimensions();
+
+  ExpressionTester(const TExpression & exp, int expectedNumberOfDesignVariables, bool setBlockIndices, bool setActive, bool printResult = false, double tolerance = test::ExpressionTraits<TExpression>::defaultTolerance(), double eps = test::ExpressionTraits<TExpression>::defaulEps())
+  : _exp(exp),
+    _expectedNumberOfDesignVariables(expectedNumberOfDesignVariables),
+    _printResult(printResult),
+    _tolerance(tolerance),
+    _eps(eps),
+    _colIndices(),
+    _dvs(prepareAndCheckDesignVariables(exp, setBlockIndices, setActive, _colIndices))
+  {
   }
-  SM_ASSERT_EQ(std::runtime_error, jacobianCols, minimalDimensionSum, "There seem to be some design variables inactive. This is most likely not intended here!");
-  sm::eigen::NumericalDiff<ExpressionNodeFunctor> numdiff(ExpressionNodeFunctor(expression, Jc), eps);
-  typename ExpressionNodeFunctor::input_t dp(jacobianCols);
 
-  dp.setZero();
-  Eigen::MatrixXd Jest = numdiff.estimateJacobian(dp).template cast<double>();
-  auto JcM = Jc.asDenseMatrix();
-  sm::eigen::assertNear(Jest, JcM, tolerance, SM_SOURCE_FILE_POS, "Testing the Jacobian with finite differences");
-  sm::eigen::assertEqual(JcM, Jccr.asDenseMatrix(), SM_SOURCE_FILE_POS, "Testing whether appending identity changes nothing.");
+  inline static std::vector<DesignVariable *> prepareAndCheckDesignVariables(const TExpression & exp, bool setBlockIndices, bool setActive, std::vector<int> & colIndices){
+    DesignVariable::set_t designVariables;
+    exp.getDesignVariables(designVariables);
 
-  if(printResult){
-    std::cout << "Jest=\n" << Jest << std::endl;
-    std::cout << "Jc=\n" << JcM << std::endl;
-    std::cout << "Jccr=\n" << Jccr.asDenseMatrix() << std::endl;
+    std::vector<DesignVariable *> dvs(designVariables.begin(), designVariables.end());
+    if(!setBlockIndices){
+      sort(dvs.begin(), dvs.end(), [](DesignVariable * a, DesignVariable * b) { return a->blockIndex() < b->blockIndex();});
+    }
+
+    int minimalDimensionSum = 0;
+    int blockIndex = 0;
+    for(DesignVariable * dp : dvs){
+      minimalDimensionSum += dp->minimalDimensions();
+      colIndices.push_back(minimalDimensionSum);
+      if(setBlockIndices){
+        dp->setBlockIndex(blockIndex++);
+      }
+      if(setActive){
+        dp->setActive(true);
+      }
+      else{
+        SM_ASSERT_TRUE(std::runtime_error, dp->isActive(), "There are design variables inactive. This is most likely not intended here!");
+      }
+    }
+
+    SM_ASSERT_EQ_DBG(std::runtime_error, colIndices.size(), designVariables.size(), "");
+    return dvs;
   }
-}
+
+  void test(){
+    if(_expectedNumberOfDesignVariables > 0)
+      ASSERT_EQ(_expectedNumberOfDesignVariables, _dvs.size());
+    ExpressionJacobianTestTraits<TExpression>::testJacobian(*this);
+  }
+
+  const TExpression & getExp() const { return _exp; }
+  bool getPrintResult() const { return _printResult; }
+  double getEps() const { return _eps; }
+  double getTolerance() const { return _tolerance; }
+  const std::vector<DesignVariable *> & getDesignVariables() const { return _dvs; }
+  inline Eigen::MatrixXd getJacobian(const JacobianContainer & jc) const { return jc.asDenseMatrix(_colIndices);}
+ private:
+  TExpression _exp;
+  int _expectedNumberOfDesignVariables;
+  bool _printResult;
+  double _tolerance;
+  double _eps;
+  std::vector<int> _colIndices;
+  std::vector<DesignVariable *> _dvs;
+};
+
+template<typename TExpression>
+class ExpressionJacobianTestTraits {
+ public:
+  typedef typename ExpressionValueTraits<TExpression>::value_t value_t;
+  typedef typename value_t::Scalar scalar_t;
+
+  static void testJacobian(const ExpressionTester<TExpression> & expressionTester){
+    const TExpression & expression = expressionTester.getExp();
+    auto val = ExpressionEvaluationTraits<TExpression>::evaluate(expression);
+    const size_t rows = val.rows();
+
+    JacobianContainer Jc(rows);
+    JacobianContainer Jccr(rows);
+    expression.evaluateJacobians(Jc);
+    expression.evaluateJacobians(Jccr, Eigen::MatrixXd::Identity(rows, rows));
+
+    auto JcM = expressionTester.getJacobian(Jc);
+    int jacobianCols = JcM.cols();
+    Eigen::MatrixXd Jest = ExpressionNumDiffTraits<TExpression>::numericallyCalcJacobian(expression, jacobianCols, expressionTester.getDesignVariables(), expressionTester.getEps());
+
+    sm::eigen::assertNear(Jest, JcM, expressionTester.getTolerance(), SM_SOURCE_FILE_POS, "Testing the Jacobian with finite differences");
+    sm::eigen::assertEqual(JcM, expressionTester.getJacobian(Jccr), SM_SOURCE_FILE_POS, "Testing whether chaining identity changes nothing.");
+
+    if(expressionTester.getPrintResult()){
+      std::cout << "Jest=\n" << Jest << std::endl;
+      std::cout << "Jc=\n" << JcM << std::endl;
+      std::cout << "Jccr=\n" << expressionTester.getJacobian(Jccr) << std::endl;
+    }
+  }
+};
 
 } // namespace test
 
 template<typename TExpression>
-inline void testJacobian(TExpression expression, bool printResult = false, double tolerance = test::ExpressionTraits<TExpression>::defaultTolerance(), double eps = test::ExpressionTraits<TExpression>::defaulEps()) {
-  test::ExpressionTester<TExpression>::testJacobian(expression, printResult, tolerance, eps);
+inline void testJacobian(TExpression expression, int expectedNumberOfDesignVariables = -1, bool printResult = false, double tolerance = test::ExpressionTraits<TExpression>::defaultTolerance(), double eps = test::ExpressionTraits<TExpression>::defaulEps()) {
+  test::ExpressionTester<TExpression>(expression, expectedNumberOfDesignVariables, false, false, printResult, tolerance, eps).test();
 }
+
+/**
+ * Tests an expression. So far the number of design variables is checked against expectedNumberOfDesignVariables and the expression's jacobian is compared to a finite difference approach (parameterized by tolerance and eps).
+ * This method activates all the expressions design variables and sets their blockIndex().
+ * @param expression
+ * @param expectedNumberOfDesignVariables
+ * @param printResult
+ * @param tolerance
+ * @param eps
+ */
+template<typename TExpression>
+inline void testExpression(TExpression expression, int expectedNumberOfDesignVariables, bool printResult = false, double tolerance = test::ExpressionTraits<TExpression>::defaultTolerance(), double eps = test::ExpressionTraits<TExpression>::defaulEps()) {
+  test::ExpressionTester<TExpression>(expression, expectedNumberOfDesignVariables, true, true, printResult, tolerance, eps).test();
+}
+
 
 }
 }
