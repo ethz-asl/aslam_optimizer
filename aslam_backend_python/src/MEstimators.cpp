@@ -23,7 +23,10 @@ void exportMEstimators()
 
   class_< HuberMEstimator, boost::shared_ptr<HuberMEstimator>, bases<MEstimator> >("HuberMEstimator", init<double>())
   ;
-         
+
+  class_< BlakeZissermanMEstimator, boost::shared_ptr<BlakeZissermanMEstimator>, bases<MEstimator> >("BlakeZissermanMEstimator", init<int,double,double>("BlakeZissermanMEstimator( dim, probabilityCutoff, weightAtCutoff"))
+  ;
+
 
 
 }
