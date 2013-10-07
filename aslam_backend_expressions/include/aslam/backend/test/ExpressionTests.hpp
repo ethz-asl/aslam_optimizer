@@ -58,8 +58,8 @@ struct ExpressionNumDiffTraits {
     typedef Eigen::Matrix<double, Eigen::Dynamic, 1> input_t;
     typedef Eigen::Matrix<scalar_t, Eigen::Dynamic, Eigen::Dynamic> jacobian_t;
 
-    ExpressionNodeFunctor(TExpression & dv, const std::vector<DesignVariable*> & dvs)
-        : _expression(dv),
+    ExpressionNodeFunctor(TExpression & exp, const std::vector<DesignVariable*> & dvs)
+        : _expression(exp),
           _dvs(dvs) {
     }
 
@@ -74,6 +74,7 @@ struct ExpressionNumDiffTraits {
     value_t operator()(const input_t & dr) {
       int offset = 0;
       for (auto d : _dvs) {
+        SM_ASSERT_LE(std::runtime_error, offset + d->minimalDimensions(), dr.size(), "Bug in ExpressionNodeFunctor!");
         d->update((const double *) &dr[offset], d->minimalDimensions());
         offset += d->minimalDimensions();
       }
