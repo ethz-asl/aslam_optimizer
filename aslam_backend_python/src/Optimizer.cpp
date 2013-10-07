@@ -43,7 +43,7 @@ void exportOptimizer()
 
     class_<Optimizer, boost::shared_ptr<Optimizer> >("Optimizer",init<>())
         .def(init<OptimizerOptions>())
-        .def("setProblem", &Optimizer::setProblem)
+        .def("setProblem", static_cast<void(Optimizer::*)(boost::shared_ptr<OptimizationProblemBase>)>(&Optimizer::setProblem))
 
         /// \brief initialize the optimizer to run on an optimization problem.
         ///        This should be called before calling optimize()

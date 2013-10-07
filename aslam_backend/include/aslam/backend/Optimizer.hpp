@@ -12,6 +12,7 @@
 #include "OptimizationProblemBase.hpp"
 #include <aslam/Exceptions.hpp>
 #include <sm/timing/Timer.hpp>
+#include <sm/boost/null_deleter.hpp>
 #include <boost/thread.hpp>
 
 namespace aslam {
@@ -25,7 +26,7 @@ namespace aslam {
      *
      * Some Additions to the standard algorithm:
      * Choice of Lambda:
-     * H.B. Nielsen. Damping Parameter in MarquardtÕs Method. Technical Report
+     * H.B. Nielsen. Damping Parameter in Marquardtï¿½s Method. Technical Report
      * IMM-REP-1999-05, Technical University of Denmark, 1999.
      *
      * Jacobian Normalisation:
@@ -33,7 +34,7 @@ namespace aslam {
      * A Methodology for Estimation of Physical Parameters, Systems Analysis Modelling Simulation, 43:7, 925-943
      *
      * Erik Etien, Damien Halbert, and Thierry Poinot
-     * Improved JilesÐAtherton Model for Least Square Identification Using Sensitivity Function Normalization
+     * Improved Jilesï¿½Atherton Model for Least Square Identification Using Sensitivity Function Normalization
      * IEEE TRANSACTIONS ON MAGNETICS, VOL. 44, NO. 7, JULY 2008
      *
      */
@@ -52,6 +53,9 @@ namespace aslam {
 
       /// \brief Set up to work on the optimization problem.
       void setProblem(boost::shared_ptr<OptimizationProblemBase> problem);
+
+      /// \brief Set up to work on the optimization problem.
+      void setProblem(OptimizationProblemBase * problem, bool optimizerOwnsProblem) { setProblem(optimizerOwnsProblem ? boost::shared_ptr<OptimizationProblemBase>(problem) : boost::shared_ptr<OptimizationProblemBase>(problem, sm::null_deleter())); }
 
       /// \brief initialize the optimizer to run on an optimization problem.
       void initialize();
