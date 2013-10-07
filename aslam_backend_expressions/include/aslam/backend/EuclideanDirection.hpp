@@ -30,7 +30,7 @@ namespace aslam {
 
             EuclideanExpression toExpression();
         private:
-            virtual Eigen::Vector3d toEuclideanImplementation();
+            virtual Eigen::Vector3d toEuclideanImplementation() const;
 
             virtual void evaluateJacobiansImplementation(JacobianContainer & outJacobians) const;
 

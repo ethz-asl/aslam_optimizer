@@ -34,7 +34,7 @@ namespace aslam {
       return 3; 
     }
     
-    Eigen::Matrix3d MappedRotationQuaternion::toRotationMatrixImplementation()
+    Eigen::Matrix3d MappedRotationQuaternion::toRotationMatrixImplementation() const
     {
       return _C;
     }

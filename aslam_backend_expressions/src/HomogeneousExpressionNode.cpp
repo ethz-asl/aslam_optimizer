@@ -18,7 +18,7 @@ namespace aslam {
 
 
     /// \brief Evaluate the homogeneous matrix.
-    Eigen::Vector4d HomogeneousExpressionNode::toHomogeneous()
+    Eigen::Vector4d HomogeneousExpressionNode::toHomogeneous() const
     {
       return toHomogeneousImplementation();
     }
@@ -60,7 +60,7 @@ namespace aslam {
 
 
     
-    Eigen::Vector4d HomogeneousExpressionNodeMultiply::toHomogeneousImplementation()
+    Eigen::Vector4d HomogeneousExpressionNodeMultiply::toHomogeneousImplementation() const
     {
       _T_lhs = _lhs->toTransformationMatrix();
       _p_rhs = _rhs->toHomogeneous();
@@ -94,7 +94,7 @@ namespace aslam {
       HomogeneousExpressionNodeConstant::~HomogeneousExpressionNodeConstant(){}
 
 
-      Eigen::Vector4d HomogeneousExpressionNodeConstant::toHomogeneousImplementation(){ return _p; }
+      Eigen::Vector4d HomogeneousExpressionNodeConstant::toHomogeneousImplementation() const{ return _p; }
       void HomogeneousExpressionNodeConstant::evaluateJacobiansImplementation(JacobianContainer & outJacobians) const{}
       void HomogeneousExpressionNodeConstant::evaluateJacobiansImplementation(JacobianContainer & outJacobians, const Eigen::MatrixXd & applyChainRule) const{}
       void HomogeneousExpressionNodeConstant::getDesignVariablesImplementation(DesignVariable::set_t & designVariables) const{}
@@ -110,7 +110,7 @@ namespace aslam {
   }
 
 
-  Eigen::Vector4d HomogeneousExpressionNodeEuclidean::toHomogeneousImplementation() {
+  Eigen::Vector4d HomogeneousExpressionNodeEuclidean::toHomogeneousImplementation() const {
     return sm::kinematics::toHomogeneous(_p->toEuclidean());
   }
 

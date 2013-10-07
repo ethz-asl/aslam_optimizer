@@ -40,7 +40,7 @@ namespace aslam {
 
       void set( const Eigen::Vector4d & q){ _q = q; _p_q = q; }
     private:
-      virtual Eigen::Matrix3d toRotationMatrixImplementation();
+      virtual Eigen::Matrix3d toRotationMatrixImplementation() const;
       virtual void evaluateJacobiansImplementation(JacobianContainer & outJacobians) const;
       virtual void evaluateJacobiansImplementation(JacobianContainer & outJacobians, const Eigen::MatrixXd & applyChainRule) const;
       virtual void getDesignVariablesImplementation(DesignVariable::set_t & designVariables) const;
