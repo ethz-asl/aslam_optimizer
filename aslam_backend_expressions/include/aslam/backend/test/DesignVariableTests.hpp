@@ -9,6 +9,7 @@
 #define DESIGNVARIABLETESTS_HPP_
 
 #include <aslam/backend/DesignVariableMinimalDifferenceExpression.hpp>
+#include <aslam/backend/FixedPointNumber.hpp>
 #include "ExpressionTests.hpp"
 
 namespace aslam {
@@ -30,19 +31,20 @@ struct DesignVariableUpdateTraits {
 };
 
 
-template <typename Scalar_, std::uintmax_t UpdateFactor_>
-struct DesignVariableUpdateTraits<GenericScalar<Scalar_, UpdateFactor_> > {
+template <typename Scalar_>
+struct DesignVariableUpdateTraits<GenericScalar<Scalar_> > {
   typedef std::numeric_limits<Scalar_> Limits;
   constexpr static bool is_iteger = Limits::is_integer;
 
   static double defaultTolerance() {
-    return DesignVariableUpdateTraits<double>::defaultTolerance();
+    return defaulEps() * 50;
   }
-  static double defaulEps() {
-    return is_iteger ? 1.0/UpdateFactor_ : sqrt(Limits::epsilon());
-  }
-};
 
+  static double defaulEps() {
+    return is_iteger ? 1.0 : (is_fixed_point_number<Scalar_>::value ? Limits::epsilon() : sqrt(Limits::epsilon()));
+  }
+
+};
 
 template <typename DesignVariable_, int MinimalDimensions = DesignVariable_::MinimalDimension>
 void testDesignVariable(DesignVariable_ & dv, const double tolerance = DesignVariableUpdateTraits<DesignVariable_>::defaultTolerance(), const double eps = DesignVariableUpdateTraits<DesignVariable_>::defaulEps()) {
