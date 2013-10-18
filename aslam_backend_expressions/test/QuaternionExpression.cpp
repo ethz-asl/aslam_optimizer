@@ -20,7 +20,7 @@ template<> constexpr double getTolerance<float>(){
   return 1e-5;
 }
 
-#define testExpression(exp, numVars) { SCOPED_TRACE("testJacobian(" #exp ")"); aslam::backend::testExpression(exp, numVars); }
+#define testExp(exp, numVars) { SCOPED_TRACE("testJacobian(" #exp ")"); aslam::backend::testExpression(exp, numVars); }
 
 template<typename TScalar, enum QuaternionMode EMode>
 void testQuaternionBasics() {
@@ -30,12 +30,8 @@ void testQuaternionBasics() {
   typedef aslam::backend::quaternion::internal::EigenQuaternionCalculator<TScalar, EMode> qcalc;
 
   const int VEC_ROWS = 4;
-  typename QE::vector_t val = QE::value_t::Random()
-  // {1, 1, 0, 0},
-      , val2 = QE::value_t::Random(), valUnit = QE::value_t::Random(), valUnit2 = QE::value_t::Random();
+  typename QE::vector_t val = QE::value_t::Random(), val2 = QE::value_t::Random(), valUnit = QE::value_t::Random(), valUnit2 = QE::value_t::Random();
   valUnit /= valUnit.norm();
-  valUnit.setZero();
-  valUnit[quaternion::internal::isRealFirst(EMode) ? 0 : 3] = 1;
   valUnit2 /= valUnit2.norm();
 
   QE qExp(val), qExp2(val2);
@@ -65,34 +61,35 @@ void testQuaternionBasics() {
   sm::eigen::assertNear(qExpUnit.rotate3Vector(vec3dGV).evaluate(), qcalc::getImagPart(qcalc::quatMult(qcalc::quatMult(valUnit, vec3d), qcalc::invert(valUnit))), tolerance, SM_SOURCE_FILE_POS, "Testing conformance with quaternion rotation implementation.");
 
   DesignVariableGenericVector<VEC_ROWS, TScalar> dvec, dvec2;
-  DesignVariableUnitQuaternion<TScalar, EMode> dvecUnit, dvecUnit2;
+  DesignVariableUnitQuaternion<TScalar, EMode> dUnitQuat, dUnitQuat2;
   DesignVariableGenericVector<3, TScalar> dvec3d;
   dvec.setParameters(val);
   dvec2.setParameters(val2);
-  dvecUnit.setParameters(valUnit);
-  dvecUnit2.setParameters(valUnit2);
+  dUnitQuat.setParameters(valUnit);
+  dUnitQuat2.setParameters(valUnit2);
   dvec3d.setParameters(vec3d);
   QE qDVarExp(&dvec);
   QE qDVarExp2(&dvec2);
-  UnitQuaternionExpression<TScalar, EMode, decltype(dvecUnit)> qDVarUnitExp(&dvecUnit);
-  UQE qDVarUnitExp2(&dvecUnit2);
+  UnitQuaternionExpression<TScalar, EMode, decltype(dUnitQuat)> qDVarUnitExp(&dUnitQuat);
+  UQE qDVarUnitExp2(&dUnitQuat2);
   GenericMatrixExpression<3, 1, TScalar> dVarVec3d(&dvec3d);
 
   {
-    testExpression(qDVarUnitExp, 1);
-    testExpression(qDVarExp, 1);
-    testExpression(qDVarExp.inverse(), 1);
-    testExpression(qDVarUnitExp.inverse(), 1);
-    testExpression(qDVarExp.conjugate(), 1);
-    testExpression(qDVarExp * qExp2, 1);
-    testExpression(qExp - qDVarExp, 1);
-    testExpression(qDVarExp * qDVarExp2, 2);
-    testExpression(qDVarExp2 - qDVarExp, 2);
-    testExpression(qDVarUnitExp.rotate3Vector(vec3dGV), 1);
-    testExpression(qDVarUnitExp.rotate3Vector(dVarVec3d), 2);
-    testExpression(qDVarUnitExp.geoExp(vec3dGV), 1);
-    testExpression(qDVarUnitExp.geoExp(dVarVec3d), 2);
-    testExpression(qDVarUnitExp.geoLog(qDVarUnitExp2), 2);
+    testExp(qDVarUnitExp, 1);
+    testExp(qDVarExp, 1);
+    testExp(qDVarExp.inverse(), 1);
+    testExp(qDVarUnitExp.inverse(), 1);
+    testExp(qDVarExp.conjugate(), 1);
+    testExp(qDVarExp * qExp2, 1);
+    testExp(qExp - qDVarExp, 1);
+    testExp(qDVarExp * qDVarExp2, 2);
+    testExp(qDVarExp2 - qDVarExp, 2);
+    testExp(qDVarUnitExp.rotate3Vector(vec3dGV), 1);
+    testExp(qDVarUnitExp.rotate3Vector(dVarVec3d), 2);
+    testExp(qDVarUnitExp.geoExp(vec3dGV), 1);
+    testExp(qDVarUnitExp.geoExp(dVarVec3d), 2);
+    testExp(qDVarUnitExp.geoLog(qDVarUnitExp2), 2);
+    testExp((qDVarUnitExp.inverse() * qDVarUnitExp2).rotate3Vector(dVarVec3d), 3);
   }
 }
 
