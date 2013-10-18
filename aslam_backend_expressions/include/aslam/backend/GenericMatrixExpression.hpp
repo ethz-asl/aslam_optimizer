@@ -102,7 +102,6 @@ class GenericMatrixExpression {
  protected:
   GenericMatrixExpression() {
   }
-  ;
  private:
   node_ptr_t _root;
 
