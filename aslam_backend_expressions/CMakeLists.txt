@@ -81,6 +81,8 @@ rosbuild_add_gtest(${PROJECT_NAME}_test
   test/HomogeneousExpression.cpp
   test/MatrixAndEuclideanExpression.cpp
   # \todo reenable after I can talk to Hannes.
+  test/FixedPointNumberTest.cpp
+  test/GenericScalarExpressionTest.cpp
   test/GenericMatrixExpression.cpp
   test/QuaternionExpression.cpp
   test/ScalarExpression.cpp

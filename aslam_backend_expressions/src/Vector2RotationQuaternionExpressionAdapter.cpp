@@ -18,7 +18,7 @@ namespace backend {
 
   Vector2RotationQuaternionExpressionAdapter::~Vector2RotationQuaternionExpressionAdapter(){}
 
-  Eigen::Matrix3d Vector2RotationQuaternionExpressionAdapter::toRotationMatrixImplementation()
+  Eigen::Matrix3d Vector2RotationQuaternionExpressionAdapter::toRotationMatrixImplementation() const
   {
     return sm::kinematics::quat2r(_root->toVector());
   }

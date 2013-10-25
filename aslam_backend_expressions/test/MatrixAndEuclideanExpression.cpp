@@ -22,15 +22,8 @@ TEST(EuclideanExpressionNodeTestSuites, testPoint)
 {
   try 
     {
-      using namespace sm::kinematics;
-      EuclideanPoint point(Eigen::Vector3d::Random());
-      point.setActive(true);
-      point.setBlockIndex(0);
-      EuclideanExpression qr(&point);
-      
       SCOPED_TRACE("");
-      SCOPED_TRACE("");
-      testJacobian(qr);
+      testExpression(EuclideanPoint(Eigen::Vector3d::Random()).toExpression(), 1);
     }
   catch(std::exception const & e)
     {
@@ -59,7 +52,7 @@ TEST(EuclideanExpressionNodeTestSuites, testRotatedPoint)
       EuclideanExpression Cp = C * p;
       
       SCOPED_TRACE("");
-      testJacobian(Cp);
+      testJacobian(Cp, 2);
 
       sm::eigen::assertNear(Cp.toEuclidean(), C.toRotationMatrix() * p.toEuclidean(), 1e-14, SM_SOURCE_FILE_POS, "Testing the result is unchanged");
     }
@@ -91,7 +84,7 @@ TEST(EuclideanExpressionNodeTestSuites, testRotatedInverse)
       EuclideanExpression Cp = C.inverse() * p;
       
       SCOPED_TRACE("");
-      testJacobian(Cp);
+      testJacobian(Cp, 2);
 
       sm::eigen::assertNear(Cp.toEuclidean(), C.toRotationMatrix().transpose() * p.toEuclidean(), 1e-14, SM_SOURCE_FILE_POS, "Testing the result is unchanged");
     }
@@ -113,7 +106,6 @@ TEST(EuclideanExpressionNodeTestSuites, testRotationExpression1)
       quat0.setBlockIndex(0);
       RotationExpression C0(&quat0);
 
-      using namespace sm::kinematics;
       RotationQuaternion quat1(quatRandom());
       quat1.setActive(true);
       quat1.setBlockIndex(1);
@@ -129,7 +121,7 @@ TEST(EuclideanExpressionNodeTestSuites, testRotationExpression1)
       EuclideanExpression C01p = C01 * p;
       
       SCOPED_TRACE("");
-      testJacobian(C01p);
+      testJacobian(C01p, 3);
 
       sm::eigen::assertNear(C01p.toEuclidean(), C0.toRotationMatrix() * C1.toRotationMatrix() * p.toEuclidean(), 1e-14, SM_SOURCE_FILE_POS, "Testing the result is unchanged");
     }
@@ -150,12 +142,10 @@ TEST(EuclideanExpressionNodeTestSuites, testRotationExpression2)
       quat0.setBlockIndex(0);
       RotationExpression C0(&quat0);
 
-      using namespace sm::kinematics;
       RotationQuaternion quat1(quatRandom());
       quat1.setActive(true);
       quat1.setBlockIndex(1);
       RotationExpression C1(&quat1);
-
 
       EuclideanPoint point(Eigen::Vector3d::Random());
       point.setActive(true);
@@ -166,7 +156,7 @@ TEST(EuclideanExpressionNodeTestSuites, testRotationExpression2)
       EuclideanExpression C01p = C0 * C1p;
       
       SCOPED_TRACE("");
-      testJacobian(C01p);
+      testJacobian(C01p, 3);
 
       sm::eigen::assertNear(C01p.toEuclidean(), C0.toRotationMatrix() * C1.toRotationMatrix() * p.toEuclidean(), 1e-14, SM_SOURCE_FILE_POS, "Testing the result is unchanged");
     }
@@ -181,22 +171,14 @@ TEST(EuclideanExpressionNodeTestSuites, testEuclideanCrossproduct)
 {
   try
     {
-      using namespace sm::kinematics;
       EuclideanPoint point1(Eigen::Vector3d::Random());
-      point1.setActive(true);
-      point1.setBlockIndex(1);
       EuclideanExpression p1(&point1);
 
       EuclideanPoint point2(Eigen::Vector3d::Random());
-      point2.setActive(true);
-      point2.setBlockIndex(2);
       EuclideanExpression p2(&point2);
 
-      EuclideanExpression p_cross = p1.cross(p2);
-
       SCOPED_TRACE("");
-      testJacobian(p_cross);
-
+      testExpression(p1.cross(p2), 2);
     }
   catch(std::exception const & e)
     {
@@ -209,22 +191,10 @@ TEST(EuclideanExpressionNodeTestSuites, testEuclideanAddition)
 {
   try
     {
-      using namespace sm::kinematics;
-      EuclideanPoint point1(Eigen::Vector3d::Random());
-      point1.setActive(true);
-      point1.setBlockIndex(1);
-      EuclideanExpression p1(&point1);
-
-      EuclideanPoint point2(Eigen::Vector3d::Random());
-      point2.setActive(true);
-      point2.setBlockIndex(2);
-      EuclideanExpression p2(&point2);
-
-      EuclideanExpression p_add = p1 + p2;
-
+      EuclideanPoint p1(Eigen::Vector3d::Random());
+      EuclideanPoint p2(Eigen::Vector3d::Random());
       SCOPED_TRACE("");
-      testJacobian(p_add);
-
+      testExpression(p1.toExpression() + p2.toExpression(), 2);
     }
   catch(std::exception const & e)
     {
@@ -237,22 +207,14 @@ TEST(EuclideanExpressionNodeTestSuites, testEuclideanSubtraction)
 {
   try
     {
-      using namespace sm::kinematics;
       EuclideanPoint point1(Eigen::Vector3d::Random());
-      point1.setActive(true);
-      point1.setBlockIndex(1);
       EuclideanExpression p1(&point1);
 
       EuclideanPoint point2(Eigen::Vector3d::Random());
-      point2.setActive(true);
-      point2.setBlockIndex(2);
       EuclideanExpression p2(&point2);
 
-      EuclideanExpression p_diff = p1 - p2;
-
       SCOPED_TRACE("");
-      testJacobian(p_diff);
-
+      testExpression(p1 - p2, 2);
     }
   catch(std::exception const & e)
     {
@@ -265,10 +227,7 @@ TEST(EuclideanExpressionNodeTestSuites, testVectorSubtraction)
 {
   try
     {
-      using namespace sm::kinematics;
       EuclideanPoint point1(Eigen::Vector3d::Random());
-      point1.setActive(true);
-      point1.setBlockIndex(1);
       EuclideanExpression p1(&point1);
 
       Eigen::Vector3d p2(Eigen::Vector3d::Random());
@@ -276,8 +235,7 @@ TEST(EuclideanExpressionNodeTestSuites, testVectorSubtraction)
       EuclideanExpression p_diff = p1 - p2;
 
       SCOPED_TRACE("");
-      testJacobian(p_diff);
-
+      testExpression(p_diff, 1);
     }
   catch(std::exception const & e)
     {
@@ -290,7 +248,6 @@ TEST(EuclideanExpressionNodeTestSuites, testNegation)
 {
   try
     {
-      using namespace sm::kinematics;
       EuclideanPoint point1(Eigen::Vector3d::Random());
       point1.setActive(true);
       point1.setBlockIndex(1);
@@ -301,8 +258,7 @@ TEST(EuclideanExpressionNodeTestSuites, testNegation)
       sm::eigen::assertNear(-point1.toEuclidean(), pNegated.toEuclidean(), 1e-14, SM_SOURCE_FILE_POS, "Testing the result is unchanged");
 
       SCOPED_TRACE("");
-      testJacobian(pNegated);
-
+      testExpression(pNegated, 1);
     }
   catch(std::exception const & e)
     {
@@ -311,26 +267,16 @@ TEST(EuclideanExpressionNodeTestSuites, testNegation)
 }
 
 // Test that the jacobian matches the finite difference jacobian
-TEST(EuclideanExpressionNodeTestSuites, testEuclideanDrection)
+TEST(EuclideanExpressionNodeTestSuites, testEuclideanDirection)
 {
   try
     {
-      using namespace sm::kinematics;
       Eigen::Vector3d p = Eigen::Vector3d::Random() * 10;
       EuclideanDirection point1(p);
       ASSERT_DOUBLE_MX_EQ(p, point1.toEuclidean(),1e-2, "Checking if the euclidean point is recovered correctly")
 
-      point1.setActive(true);
-      point1.setBlockIndex(1);
-      EuclideanExpression p1 = point1.toExpression();
-
-      //Eigen::Vector3d p2(Eigen::Vector3d::Random());
-      
-      //EuclideanExpression p_diff = p1 - p2;
-
       SCOPED_TRACE("");
-      testJacobian(p1);
-
+      testExpression(point1.toExpression(), 1);
     }
   catch(std::exception const & e)
     {
@@ -343,21 +289,16 @@ TEST(EuclideanExpressionNodeTestSuites, testAdaptedVectorExpression)
 {
   try
     {
-      using namespace sm::kinematics;
       EuclideanPoint point1(Eigen::Vector3d::Random());
-      point1.setActive(true);
-      point1.setBlockIndex(1);
       EuclideanExpression p1(&point1);
 
       DesignVariableVector<3> point2(Eigen::Vector3d::Random());
-      point2.setActive(true);
-      point2.setBlockIndex(2);
       EuclideanExpression p2(&point2);
 
       EuclideanExpression p_add = p1 + p2;
 
       SCOPED_TRACE("");
-      testJacobian(p1);
+      testExpression(p_add, 2);
     }
   catch(std::exception const & e)
     {
@@ -370,7 +311,6 @@ TEST(EuclideanExpressionNodeTestSuites, testMatrixTransformedPoint)
 {
   try
     {
-      using namespace sm::kinematics;
       MatrixTransformation a(Eigen::Matrix3d::Random());
       a.setActive(true);
       a.setBlockIndex(0);
@@ -400,7 +340,6 @@ TEST(EuclideanExpressionNodeTestSuites, testMatrixdoubleTransformedPoint)
 {
   try
     {
-      using namespace sm::kinematics;
       MatrixTransformation a(Eigen::Matrix3d::Random());
       a.setActive(true);
       a.setBlockIndex(0);
@@ -420,7 +359,7 @@ TEST(EuclideanExpressionNodeTestSuites, testMatrixdoubleTransformedPoint)
       EuclideanExpression Ap = B*(A * p);
 
       SCOPED_TRACE("");
-      testJacobian(Ap);
+      testJacobian(Ap, 3);
 
       sm::eigen::assertNear(Ap.toEuclidean(), B.toFullMatrix()* (A.toFullMatrix() * p.toEuclidean()), 1e-14, SM_SOURCE_FILE_POS, "Testing the result is unchanged");
     }
@@ -435,7 +374,6 @@ TEST(EuclideanExpressionNodeTestSuites, testDiagonalMatrixTransformedPoint)
 {
   try
     {
-      using namespace sm::kinematics;
       Eigen::Matrix3d S = Eigen::Matrix3d::Zero();
       S(0,0)= 10*(float)drand48();
       S(1,1)= 10*(float)drand48();
@@ -454,7 +392,7 @@ TEST(EuclideanExpressionNodeTestSuites, testDiagonalMatrixTransformedPoint)
       EuclideanExpression Ap = A * p;
 
       SCOPED_TRACE("");
-      testJacobian(Ap);
+      testJacobian(Ap, 2);
 
       sm::eigen::assertNear(Ap.toEuclidean(), A.toFullMatrix() * p.toEuclidean(), 1e-14, SM_SOURCE_FILE_POS, "Testing the result is unchanged");
     }
@@ -469,7 +407,6 @@ TEST(EuclideanExpressionNodeTestSuites, testLowerTriangleMatrixTransformedPoint)
 {
   try
     {
-      using namespace sm::kinematics;
       Eigen::Matrix3d M = Eigen::Matrix3d::Identity();
       Eigen::Matrix3d M_pattern = Eigen::Matrix3d::Zero();
       M(1,0)= 10*(float)drand48();
@@ -493,7 +430,7 @@ TEST(EuclideanExpressionNodeTestSuites, testLowerTriangleMatrixTransformedPoint)
       EuclideanExpression Ap = A * p;
 
       SCOPED_TRACE("");
-      testJacobian(Ap);
+      testJacobian(Ap, 2);
 
       sm::eigen::assertNear(Ap.toEuclidean(), A.toFullMatrix() * p.toEuclidean(), 1e-14, SM_SOURCE_FILE_POS, "Testing the result is unchanged");
     }
@@ -508,7 +445,6 @@ TEST(EuclideanExpressionNodeTestSuites, testLowerMixedMatrixTransformedPoint)
 {
   try
     {
-      using namespace sm::kinematics;
       Eigen::Matrix3d M = Eigen::Matrix3d::Identity();
       Eigen::Matrix3d M_pattern = Eigen::Matrix3d::Zero();
       M(1,0)= 10*(float)drand48();
@@ -544,7 +480,7 @@ TEST(EuclideanExpressionNodeTestSuites, testLowerMixedMatrixTransformedPoint)
       EuclideanExpression Ap = B * (A * p);
 
       SCOPED_TRACE("");
-      testJacobian(Ap);
+      testJacobian(Ap, 3);
 
       sm::eigen::assertNear(Ap.toEuclidean(), B.toFullMatrix() * A.toFullMatrix() * p.toEuclidean(), 1e-13, SM_SOURCE_FILE_POS, "Testing the result is unchanged");
     }
@@ -563,7 +499,6 @@ TEST(EuclideanExpressionNodeTestSuites, testTransformationTransformedPoint)
 {
   try
     {
-      using namespace sm::kinematics;
       Transformation T;
       boost::shared_ptr<MappedRotationQuaternion> outQ;
       boost::shared_ptr<MappedEuclideanPoint> outT;
@@ -594,7 +529,6 @@ TEST(EuclideanExpressionNodeTestSuites, testRotationParameters)
 {
   try
     {
-      using namespace sm::kinematics;
       RotationQuaternion quat(quatRandom());
       quat.setActive(true);
       quat.setBlockIndex(0);
@@ -620,7 +554,6 @@ TEST(EuclideanExpressionNodeTestSuites, testToHomogeneous)
 {
   try 
     {
-      using namespace sm::kinematics;
       aslam::backend::HomogeneousPoint point(Eigen::Vector4d::Random());
       point.setActive(true);
       point.setBlockIndex(0);

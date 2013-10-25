@@ -232,7 +232,6 @@ TEST(HomogeneousExpressionNodeTestSuites, testPoint)
 {
   try 
     {
-      using namespace sm::kinematics;
       HomogeneousPoint point(Eigen::Vector4d::Random());
       point.setActive(true);
       point.setBlockIndex(0);
@@ -255,7 +254,6 @@ TEST(HomogeneousExpressionNodeTestSuites, testEuclideanPoint)
 {
   try 
     {
-      using namespace sm::kinematics;
       EuclideanPoint point(Eigen::Vector3d::Random());
       point.setActive(true);
       point.setBlockIndex(0);
@@ -278,7 +276,6 @@ TEST(HomogeneousExpressionNodeTestSuites, testTransformedPoint)
 {
   try 
     {
-      using namespace sm::kinematics;
       RotationQuaternion quat(quatRandom());
       quat.setActive(true);
       quat.setBlockIndex(0);
@@ -316,8 +313,6 @@ TEST(HomogeneousExpressionNodeTestSuites, testTransformedInverse)
 {
   try 
     {
-
-      using namespace sm::kinematics;
       RotationQuaternion quat(quatRandom());
       quat.setActive(true);
       quat.setBlockIndex(0);
@@ -354,8 +349,6 @@ TEST(HomogeneousExpressionNodeTestSuites, testTransformationExpression1)
 {
   try 
     {
-
-      using namespace sm::kinematics;
       RotationQuaternion quat0(quatRandom());
       quat0.setActive(true);
       quat0.setBlockIndex(0);
@@ -404,9 +397,6 @@ TEST(HomogeneousExpressionNodeTestSuites, testTransformationExpression2)
 {
   try 
     {
-
-
-      using namespace sm::kinematics;
       RotationQuaternion quat0(quatRandom());
       quat0.setActive(true);
       quat0.setBlockIndex(0);
@@ -455,7 +445,6 @@ TEST(HomogeneousExpressionNodeTestSuites, testTransformationExpression3)
 {
   try 
     {
-      using namespace sm::kinematics;
       RotationQuaternion quat0(quatRandom());
       quat0.setActive(true);
       quat0.setBlockIndex(0);

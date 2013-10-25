@@ -459,7 +459,6 @@ Design variables represent parameters that we want to estimate. To implement a d
 \subsubsection{What is Important in the Design Variable Interface?}
 \begin{itemize}
 \item {\bf Active: true or false} : If the \txt{isActive} flag is set to true, the design variable will be estimated in the optimization problem. Otherwise, its value will be used to compute error terms, but the value will remain unchanged during optimization.
-\item {\bf Marginalized: true or false} : If the \txt{isMarginalized} flag is set to true, this variable will be included in the marginalized parameters ($\mbf x_b$ in Section~\ref{ss:Schur}). {\em Warning: This is only valid if no two marginalized parameters appear in an error term together!}
 \end{itemize}
 \subsubsection{How Do I Implement a Design Variable?}
 To implement a design variable, you must create a class that derives from \txt{DesignVariable} and implement three functions:
@@ -483,9 +482,7 @@ Please note that the above file listing has two class definitions, \txt{ErrorTer
 \subsubsection{What is Important in the Error Term Interface?}
 \begin{itemize}
 \item {\bf The M-Estimator policy} : setting the M-Estimator policy causes the error term to use a robust error function instead of the normal squared error term. The implemented error terms are in the file {MEstimatorPolicies.hpp} and the M-Estimation interface is described in \ref{ss:M-Estimators}. For a review of M-Estimators, please see \citet{Zhang9700}.
-\item {\bf Member Variable \txt{\_jacobians}, the Jacobian Container} : The Jacobian Container abstraction is explained in Section~\ref{ss:JacobianContainer}.
-\item {\bf Member Variable \txt{\_error}} : This variable must be filled in to hold $\mbf e_n(\mbf x)$.
-\item {\bf Member Variable \txt{\_invR}} : This variable must be filled in to hold $\mbf R^{-1}$.
+\item {\bf The Jacobian Container} : The Jacobian Container abstraction is explained in Section~\ref{ss:JacobianContainer}.
 \end{itemize}
 
 \subsubsection{How Do I Implement a Error Term?}
@@ -543,11 +540,11 @@ To implement an optimization problem, derive a class from \txt{OptimizationProbl
 \end{itemize}
 
 \subsection{The Optimizer \label{ss:Optimizer}}
-Once you have defined some design variables and error terms and build up an optimization problem, it is is very straightforward to use the optimizer. The optimizer can be initialized with some options that are used to guide the optimization process.
-\listcpp{OptimizerOptions.hpp}{../../aslam_backend/include/aslam/backend/OptimizerOptions.hpp}
+Once you have defined some design variables and error terms and build up an optimization problem, it is is very straightforward to use the optimizer. The optimizer can be initialized with some options that are used to guide the optimization process. There are two versions of the optimizer. We currently reccomend using the Optimizer2
+\listcpp{Optimizer2Options.hpp}{../../aslam_backend/include/aslam/backend/Optimizer2Options.hpp}
 
 The basic optimizer interface is very simple but it includes functionality to get the internal matrices and compute covariances after optimization is completed.
-\listcpp{Optimizer.hpp}{../../aslam_backend/include/aslam/backend/Optimizer.hpp}
+\listcpp{Optimizer2.hpp}{../../aslam_backend/include/aslam/backend/Optimizer2.hpp}
 
 \subsubsection{How Do I Use the Optimizer?}
 This is easy:

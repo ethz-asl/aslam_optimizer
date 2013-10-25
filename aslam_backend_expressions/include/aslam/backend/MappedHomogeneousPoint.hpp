@@ -27,7 +27,7 @@ namespace aslam {
 
       HomogeneousExpression toExpression();
     private:
-      virtual Eigen::Vector4d toHomogeneousImplementation();
+      virtual Eigen::Vector4d toHomogeneousImplementation() const;
 
       virtual void evaluateJacobiansImplementation(JacobianContainer & outJacobians) const;
 

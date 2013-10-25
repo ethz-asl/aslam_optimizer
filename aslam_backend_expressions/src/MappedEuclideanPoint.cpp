@@ -36,7 +36,7 @@ namespace aslam {
       return 3;
     }
     
-    Eigen::Vector3d MappedEuclideanPoint::toEuclideanImplementation()
+    Eigen::Vector3d MappedEuclideanPoint::toEuclideanImplementation() const
     {
       return _p;
     }

@@ -78,7 +78,6 @@ Eigen::VectorXd MarginalizationPriorErrorTerm::getDifferenceSinceMarginalization
 void MarginalizationPriorErrorTerm::evaluateJacobiansImplementation(JacobianContainer & outJ)
 {
   int colIndex = 0;
-  size_t numDvs = _designVariableValuesAtMarginalization.size();
   std::vector<Eigen::MatrixXd>::iterator it_marg = _designVariableValuesAtMarginalization.begin();
   for(vector<aslam::backend::DesignVariable*>::iterator it = _designVariables.begin(); it != _designVariables.end(); ++it, ++it_marg)
   {

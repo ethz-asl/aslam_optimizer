@@ -226,6 +226,7 @@ namespace aslam {
       map_t::const_iterator it = _jacobianMap.begin();
       for (int col = 0; it != _jacobianMap.end(); ++it, col++) {
         const bool allocateBlock = true;
+        SM_ASSERT_GE_LT_DBG(aslam::IndexOutOfBoundsException, (size_t)it->first->blockIndex(), 0, colBlockIndices.size(), "Block index is out of bounds");
         Eigen::MatrixXd& Ji = *J.block(0, it->first->blockIndex(), allocateBlock);
         Ji = it->second;
       }
