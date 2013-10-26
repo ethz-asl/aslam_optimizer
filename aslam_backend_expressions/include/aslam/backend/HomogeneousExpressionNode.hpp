@@ -25,17 +25,17 @@ namespace aslam {
       virtual ~HomogeneousExpressionNode();
 
       /// \brief Evaluate the homogeneous matrix.
-      Eigen::Vector4d toHomogeneous();
+      Eigen::Vector4d toHomogeneous() const;
       
       /// \brief Evaluate the Jacobians
-      void evaluateJacobians(JacobianContainer & outJacobians) const;   
+      void evaluateJacobians(JacobianContainer & outJacobians) const;
     
       /// \brief Evaluate the Jacobians and apply the chain rule.
       void evaluateJacobians(JacobianContainer & outJacobians, const Eigen::MatrixXd & applyChainRule) const;
       virtual void getDesignVariables(DesignVariable::set_t & designVariables) const;
     protected:        
       // These functions must be implemented by child classes.
-      virtual Eigen::Vector4d toHomogeneousImplementation() = 0;
+      virtual Eigen::Vector4d toHomogeneousImplementation() const = 0;
       virtual void evaluateJacobiansImplementation(JacobianContainer & outJacobians) const = 0;
       virtual void evaluateJacobiansImplementation(JacobianContainer & outJacobians, const Eigen::MatrixXd & applyChainRule) const = 0;
       virtual void getDesignVariablesImplementation(DesignVariable::set_t & designVariables) const = 0;
@@ -59,15 +59,15 @@ namespace aslam {
       virtual ~HomogeneousExpressionNodeMultiply();
 
     private:
-      virtual Eigen::Vector4d toHomogeneousImplementation();
+      virtual Eigen::Vector4d toHomogeneousImplementation() const;
       virtual void evaluateJacobiansImplementation(JacobianContainer & outJacobians) const;
       virtual void evaluateJacobiansImplementation(JacobianContainer & outJacobians, const Eigen::MatrixXd & applyChainRule) const;
       virtual void getDesignVariablesImplementation(DesignVariable::set_t & designVariables) const;
 
       boost::shared_ptr<TransformationExpressionNode> _lhs;
-      Eigen::Matrix4d _T_lhs;
+      mutable Eigen::Matrix4d _T_lhs;
       boost::shared_ptr<HomogeneousExpressionNode> _rhs;
-      Eigen::Vector4d _p_rhs;
+      mutable Eigen::Vector4d _p_rhs;
     };
 
 
@@ -81,7 +81,7 @@ namespace aslam {
 
         void set(const Eigen::Vector4d & p){ _p = p; }
     private:
-      virtual Eigen::Vector4d toHomogeneousImplementation();
+      virtual Eigen::Vector4d toHomogeneousImplementation() const;
       virtual void evaluateJacobiansImplementation(JacobianContainer & outJacobians) const;
       virtual void evaluateJacobiansImplementation(JacobianContainer & outJacobians, const Eigen::MatrixXd & applyChainRule) const;
       virtual void getDesignVariablesImplementation(DesignVariable::set_t & designVariables) const;
@@ -98,7 +98,7 @@ namespace aslam {
       virtual ~HomogeneousExpressionNodeEuclidean();
 
     private:
-      virtual Eigen::Vector4d toHomogeneousImplementation();
+      virtual Eigen::Vector4d toHomogeneousImplementation() const;
       virtual void evaluateJacobiansImplementation(JacobianContainer & outJacobians) const;
       virtual void evaluateJacobiansImplementation(JacobianContainer & outJacobians, const Eigen::MatrixXd & applyChainRule) const;
       virtual void getDesignVariablesImplementation(DesignVariable::set_t & designVariables) const;

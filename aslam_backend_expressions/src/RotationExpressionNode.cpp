@@ -10,7 +10,7 @@ namespace aslam {
 
     RotationExpressionNode::~RotationExpressionNode(){}
 
-    Eigen::Matrix3d RotationExpressionNode::toRotationMatrix(){ return toRotationMatrixImplementation(); }
+    Eigen::Matrix3d RotationExpressionNode::toRotationMatrix() const { return toRotationMatrixImplementation(); }
 
     void RotationExpressionNode::evaluateJacobians(JacobianContainer & outJacobians) const{
       evaluateJacobiansImplementation(outJacobians);
@@ -38,7 +38,7 @@ namespace aslam {
 
     RotationExpressionNodeMultiply::~RotationExpressionNodeMultiply(){}
 
-    Eigen::Matrix3d RotationExpressionNodeMultiply::toRotationMatrixImplementation()
+    Eigen::Matrix3d RotationExpressionNodeMultiply::toRotationMatrixImplementation() const
     {
       _C_lhs = _lhs->toRotationMatrix();
 	_C_rhs = _rhs->toRotationMatrix();
@@ -46,7 +46,7 @@ namespace aslam {
       }
 
       void RotationExpressionNodeMultiply::evaluateJacobiansImplementation(JacobianContainer & outJacobians) const
-      {	
+      {
 	_rhs->evaluateJacobians(outJacobians,_C_lhs);
 	_lhs->evaluateJacobians(outJacobians);
       }
@@ -75,7 +75,7 @@ namespace aslam {
     
     RotationExpressionNodeInverse::~RotationExpressionNodeInverse(){}
 
-    Eigen::Matrix3d RotationExpressionNodeInverse::toRotationMatrixImplementation()
+    Eigen::Matrix3d RotationExpressionNodeInverse::toRotationMatrixImplementation() const
     {
       _C = _dvRotation->toRotationMatrix();
       return  _C.transpose();
@@ -108,7 +108,7 @@ namespace aslam {
 
   }
 
-  Eigen::Matrix3d RotationExpressionNodeTransformation::toRotationMatrixImplementation() {
+  Eigen::Matrix3d RotationExpressionNodeTransformation::toRotationMatrixImplementation() const {
     return _transformation->toTransformationMatrix().topLeftCorner<3,3>();
   }
 

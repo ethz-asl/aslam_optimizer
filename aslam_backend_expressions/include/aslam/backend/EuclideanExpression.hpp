@@ -29,10 +29,10 @@ namespace aslam {
 
       virtual ~EuclideanExpression();
       
-      value_t toEuclidean();
-      value_t evaluate() { return toEuclidean(); }
-      value_t toValue() { return toEuclidean(); }
-      HomogeneousExpression toHomogeneousExpression();
+      value_t toEuclidean() const;
+      value_t evaluate() const { return toEuclidean(); }
+      value_t toValue() const { return toEuclidean(); }
+      HomogeneousExpression toHomogeneousExpression() const;
 
       void evaluateJacobians(JacobianContainer & outJacobians) const;
       void evaluateJacobians(JacobianContainer & outJacobians, const Eigen::MatrixXd & applyChainRule) const;

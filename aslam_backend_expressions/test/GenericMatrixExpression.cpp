@@ -41,7 +41,7 @@ TEST(GenericMatrixExpressionNodeTestSuites, testGenericMatrixBasicOperations) {
     GV::matrix_t vec = GV::matrix_t::Random();
     DGvec dv(vec);
     dv.setActive(true);
-    dv.setBlockIndex(1);
+    dv.setBlockIndex(0);
     GV vecExp(&dv);
 
     sm::eigen::assertNear((matExp2 * vecExp).evaluate(), mat2 * vec, 1e-14, SM_SOURCE_FILE_POS, "Testing the matrix vector design variable product.");
@@ -170,7 +170,7 @@ TEST(GenericMatrixExpressionNodeTestSuites, testGenericMatrixBasicOperations) {
     GV::matrix_t vec2 = GV::matrix_t::Random();
     DGvec dv2(vec2);
     dv2.setActive(true);
-    dv2.setBlockIndex(2);
+    dv2.setBlockIndex(1);
     GV vecExp2(&dv2);
 
     {
@@ -219,7 +219,7 @@ TEST(GenericMatrixExpressionNodeTestSuites, testVectorExpressionToGenericMatrixE
 
     DesignVariableVector<VEC_ROWS> dvec;
     dvec.setActive(true);
-    dvec.setBlockIndex(1);
+    dvec.setBlockIndex(0);
     Eigen::MatrixXd vec = Eigen::MatrixXd::Random(VEC_ROWS, 1);
     dvec.setParameters(vec);
 
@@ -282,9 +282,9 @@ TEST(GenericMatrixExpressionNodeTestSuites, testCrossProduct) {
     typedef Eigen::Matrix<double, VEC_ROWS, 1> vector_t;
     DesignVariableVector<VEC_ROWS> dvec, dvec2;
     dvec.setActive(true);
-    dvec.setBlockIndex(1);
+    dvec.setBlockIndex(0);
     dvec2.setActive(true);
-    dvec2.setBlockIndex(2);
+    dvec2.setBlockIndex(1);
     vector_t vec = vector_t::Random();
     vector_t vec2 = vector_t::Random();
 

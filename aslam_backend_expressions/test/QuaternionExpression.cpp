@@ -20,7 +20,7 @@ template<> constexpr double getTolerance<float>(){
   return 1e-5;
 }
 
-#define testJacobian(exp) { SCOPED_TRACE("testJacobian(" #exp ")"); aslam::backend::testJacobian(exp); }
+#define testExpression(exp, numVars) { SCOPED_TRACE("testJacobian(" #exp ")"); aslam::backend::testExpression(exp, numVars); }
 
 template<typename TScalar, enum QuaternionMode EMode>
 void testQuaternionBasics() {
@@ -67,20 +67,10 @@ void testQuaternionBasics() {
   DesignVariableGenericVector<VEC_ROWS, TScalar> dvec, dvec2;
   DesignVariableUnitQuaternion<TScalar, EMode> dvecUnit, dvecUnit2;
   DesignVariableGenericVector<3, TScalar> dvec3d;
-  dvec.setActive(true);
-  dvec.setBlockIndex(1);
   dvec.setParameters(val);
-  dvec2.setActive(true);
-  dvec2.setBlockIndex(2);
   dvec2.setParameters(val2);
-  dvecUnit.setActive(true);
-  dvecUnit.setBlockIndex(3);
   dvecUnit.setParameters(valUnit);
-  dvecUnit2.setActive(true);
-  dvecUnit2.setBlockIndex(4);
   dvecUnit2.setParameters(valUnit2);
-  dvec3d.setActive(true);
-  dvec3d.setBlockIndex(4);
   dvec3d.setParameters(vec3d);
   QE qDVarExp(&dvec);
   QE qDVarExp2(&dvec2);
@@ -89,20 +79,20 @@ void testQuaternionBasics() {
   GenericMatrixExpression<3, 1, TScalar> dVarVec3d(&dvec3d);
 
   {
-    testJacobian(qDVarUnitExp);
-    testJacobian(qDVarExp);
-    testJacobian(qDVarExp.inverse());
-    testJacobian(qDVarUnitExp.inverse());
-    testJacobian(qDVarExp.conjugate());
-    testJacobian(qDVarExp * qExp2);
-    testJacobian(qExp - qDVarExp);
-    testJacobian(qDVarExp * qDVarExp2);
-    testJacobian(qDVarExp2 - qDVarExp);
-    testJacobian(qDVarUnitExp.rotate3Vector(vec3dGV));
-    testJacobian(qDVarUnitExp.rotate3Vector(dVarVec3d));
-    testJacobian(qDVarUnitExp.geoExp(vec3dGV));
-    testJacobian(qDVarUnitExp.geoExp(dVarVec3d));
-    testJacobian(qDVarUnitExp.geoLog(qDVarUnitExp2));
+    testExpression(qDVarUnitExp, 1);
+    testExpression(qDVarExp, 1);
+    testExpression(qDVarExp.inverse(), 1);
+    testExpression(qDVarUnitExp.inverse(), 1);
+    testExpression(qDVarExp.conjugate(), 1);
+    testExpression(qDVarExp * qExp2, 1);
+    testExpression(qExp - qDVarExp, 1);
+    testExpression(qDVarExp * qDVarExp2, 2);
+    testExpression(qDVarExp2 - qDVarExp, 2);
+    testExpression(qDVarUnitExp.rotate3Vector(vec3dGV), 1);
+    testExpression(qDVarUnitExp.rotate3Vector(dVarVec3d), 2);
+    testExpression(qDVarUnitExp.geoExp(vec3dGV), 1);
+    testExpression(qDVarUnitExp.geoExp(dVarVec3d), 2);
+    testExpression(qDVarUnitExp.geoLog(qDVarUnitExp2), 2);
   }
 }
 
