@@ -31,7 +31,7 @@ namespace aslam {
         colNorm(false),
         qrTol(SPQR_DEFAULT_TOL),
         normTol(1e-8),
-        verbose(true) {
+        verbose(false) {
     }
 
     SparseQRLinearSolverOptions::SparseQRLinearSolverOptions(
