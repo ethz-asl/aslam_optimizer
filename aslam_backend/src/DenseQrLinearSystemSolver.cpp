@@ -1,12 +1,18 @@
 #include <aslam/backend/DenseQrLinearSystemSolver.hpp>
 #include <aslam/backend/ErrorTerm.hpp>
 #include <Eigen/Dense> // householderQr.solve
+#include <sm/PropertyTree.hpp>
 
 namespace aslam {
   namespace backend {
 
-    DenseQrLinearSystemSolver::DenseQrLinearSystemSolver()
-    {
+    DenseQrLinearSystemSolver::DenseQrLinearSystemSolver(const DenseQRLinearSolverOptions& options) :
+        _options(options) {
+    }
+
+    DenseQrLinearSystemSolver::DenseQrLinearSystemSolver(const sm::PropertyTree& config) {
+      // NO OPTIONS CURRENTLY IMPLEMENTED
+      // USING C++11 would allow to do constructor delegation and more elegant code
     }
 
     DenseQrLinearSystemSolver::~DenseQrLinearSystemSolver()
