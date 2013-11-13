@@ -14,7 +14,7 @@ namespace aslam {
     struct SolutionReturnValue {
       SolutionReturnValue() :
         JStart(0.0), JFinal(0.0), iterations(0), failedIterations(0), lmLambdaFinal(0.0),
-        dXFinal(0.0), dJFinal(0.0) {}
+        dXFinal(0.0), dJFinal(0.0), linearSolverFailure(false) {}
 
       double JStart;
       double JFinal;
@@ -23,6 +23,7 @@ namespace aslam {
       double lmLambdaFinal;
       double dXFinal;
       double dJFinal;
+      bool linearSolverFailure;
     };
 
 
