@@ -18,6 +18,11 @@
 #include <aslam/backend/GaussNewtonTrustRegionPolicy.hpp>
 #include <aslam/backend/DogLegTrustRegionPolicy.hpp>
 
+namespace sm {
+
+  class PropertyTree;
+
+}
 namespace aslam {
   namespace backend {
     class LinearSystemSolver;
@@ -53,6 +58,7 @@ namespace aslam {
       SM_DEFINE_EXCEPTION(Exception, aslam::Exception);
 
       Optimizer2(const Optimizer2Options& options = Optimizer2Options());
+      Optimizer2(const sm::PropertyTree& config, boost::shared_ptr<LinearSystemSolver> linearSystemSolver, boost::shared_ptr<TrustRegionPolicy> trustRegionPolicy);
       virtual ~Optimizer2();
 
       /// \brief Set up to work on the optimization problem.

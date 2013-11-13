@@ -1,8 +1,14 @@
 #include <aslam/backend/SparseCholeskyLinearSystemSolver.hpp>
+#include <sm/PropertyTree.hpp>
 
 namespace aslam {
   namespace backend {
-    SparseCholeskyLinearSystemSolver::SparseCholeskyLinearSystemSolver() : _factor(NULL) {}
+    SparseCholeskyLinearSystemSolver::SparseCholeskyLinearSystemSolver(const SparseCholeskyLinearSolverOptions& options) : _factor(NULL), _options(options) {}
+    SparseCholeskyLinearSystemSolver::SparseCholeskyLinearSystemSolver(const sm::PropertyTree& config) :
+        _factor(NULL) {
+      // NO OPTIONS CURRENTLY IMPLEMENTED
+      // USING C++11 would allow to do constructor delegation and more elegant code
+    }
     SparseCholeskyLinearSystemSolver::~SparseCholeskyLinearSystemSolver() {}
 
     void SparseCholeskyLinearSystemSolver::initMatrixStructureImplementation(const std::vector<DesignVariable*>& dvs, const std::vector<ErrorTerm*>& errors, bool useDiagonalConditioner)

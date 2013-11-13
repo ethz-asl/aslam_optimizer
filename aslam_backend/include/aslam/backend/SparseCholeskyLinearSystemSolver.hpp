@@ -6,12 +6,18 @@
 
 #include "aslam/backend/SparseCholeskyLinearSolverOptions.h"
 
+namespace sm {
+
+  class PropertyTree;
+
+}
 namespace aslam {
   namespace backend {
 
     class SparseCholeskyLinearSystemSolver : public LinearSystemSolver {
     public:
-      SparseCholeskyLinearSystemSolver();
+      SparseCholeskyLinearSystemSolver(const SparseCholeskyLinearSolverOptions& options = SparseCholeskyLinearSolverOptions());
+      SparseCholeskyLinearSystemSolver(const sm::PropertyTree& config);
       virtual ~SparseCholeskyLinearSystemSolver();
 
 

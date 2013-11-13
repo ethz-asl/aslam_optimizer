@@ -1,9 +1,22 @@
 #include <aslam/backend/SparseQrLinearSystemSolver.hpp>
+#include <sm/PropertyTree.hpp>
 
 namespace aslam {
   namespace backend {
-    SparseQrLinearSystemSolver::SparseQrLinearSystemSolver() :
+    SparseQrLinearSystemSolver::SparseQrLinearSystemSolver(const SparseQRLinearSolverOptions& options) :
+        _factor(NULL),
+        _options(options) {
+    }
+
+    SparseQrLinearSystemSolver::SparseQrLinearSystemSolver(const sm::PropertyTree& config) :
         _factor(NULL) {
+      SparseQRLinearSolverOptions options;
+      options.colNorm = config.getBool("colNorm", options.colNorm);
+      options.qrTol = config.getDouble("qrTol", options.qrTol);
+      options.normTol = config.getDouble("normTol", options.normTol);
+      options.verbose = config.getBool("verbose", options.verbose);
+      _options = options;
+      // USING C++11 would allow to do constructor delegation and more elegant code
     }
 
     SparseQrLinearSystemSolver::~SparseQrLinearSystemSolver() {

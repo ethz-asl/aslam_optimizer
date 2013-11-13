@@ -2,15 +2,30 @@
 #include <sparse_block_matrix/linear_solver_cholmod.h>
 #include <sparse_block_matrix/linear_solver_spqr.h>
 #include <aslam/backend/ErrorTerm.hpp>
+#include <sm/PropertyTree.hpp>
 
 namespace aslam {
   namespace backend {
-  BlockCholeskyLinearSystemSolver::BlockCholeskyLinearSystemSolver(const std::string & solver) :
-      _solverType(solver)
-    {
+  BlockCholeskyLinearSystemSolver::BlockCholeskyLinearSystemSolver(const std::string & solver, const BlockCholeskyLinearSolverOptions& options) :
+      _options(options),
+      _solverType(solver) {
       if(_solverType == "cholesky") {
         _solver.reset(new sparse_block_matrix::LinearSolverCholmod<Eigen::MatrixXd>());
-      } else if(solver == "spqr") {
+      } else if(_solverType == "spqr") {
+        _solver.reset(new sparse_block_matrix::LinearSolverQr<Eigen::MatrixXd>());
+      } else {
+        std::cout << "Unknown block solver type " << _solverType << ". Try \"cholesky\" or \"spqr\"\nDefaulting to cholesky.\n";
+        _solver.reset(new sparse_block_matrix::LinearSolverCholmod<Eigen::MatrixXd>());
+      }
+    }
+
+    BlockCholeskyLinearSystemSolver::BlockCholeskyLinearSystemSolver(const sm::PropertyTree& config) {
+      _solverType = config.getString("solverType", "cholesky");
+      // NO OPTIONS CURRENTLY IMPLEMENTED
+      // USING C++11 would allow to do constructor delegation and more elegant code
+      if(_solverType == "cholesky") {
+        _solver.reset(new sparse_block_matrix::LinearSolverCholmod<Eigen::MatrixXd>());
+      } else if(_solverType == "spqr") {
         _solver.reset(new sparse_block_matrix::LinearSolverQr<Eigen::MatrixXd>());
       } else {
         std::cout << "Unknown block solver type " << _solverType << ". Try \"cholesky\" or \"spqr\"\nDefaulting to cholesky.\n";

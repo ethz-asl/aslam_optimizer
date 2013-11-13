@@ -6,12 +6,18 @@
 
 #include "aslam/backend/DenseQRLinearSolverOptions.h"
 
+namespace sm {
+
+  class PropertyTree;
+
+}
 namespace aslam {
   namespace backend {
 
     class DenseQrLinearSystemSolver : public LinearSystemSolver {
     public:
-      DenseQrLinearSystemSolver();
+      DenseQrLinearSystemSolver(const DenseQRLinearSolverOptions& options = DenseQRLinearSolverOptions());
+      DenseQrLinearSystemSolver(const sm::PropertyTree& config);
       virtual ~DenseQrLinearSystemSolver();
 
       /// \brief build the system of equations.

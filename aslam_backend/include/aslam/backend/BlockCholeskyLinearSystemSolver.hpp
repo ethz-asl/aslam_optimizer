@@ -8,6 +8,11 @@
 
 #include "aslam/backend/BlockCholeskyLinearSolverOptions.h"
 
+namespace sm {
+
+  class PropertyTree;
+
+}
 namespace aslam {
   namespace backend {
 
@@ -16,7 +21,8 @@ namespace aslam {
       typedef sparse_block_matrix::LinearSolver<Eigen::MatrixXd> LinearSolver;
       typedef sparse_block_matrix::SparseBlockMatrix<Eigen::MatrixXd> SparseBlockMatrix;
 
-      BlockCholeskyLinearSystemSolver(const std::string & solver = "cholesky");
+      BlockCholeskyLinearSystemSolver(const std::string & solver = "cholesky", const BlockCholeskyLinearSolverOptions& options= BlockCholeskyLinearSolverOptions());
+      BlockCholeskyLinearSystemSolver(const sm::PropertyTree& config);
       virtual ~BlockCholeskyLinearSystemSolver();
 
 

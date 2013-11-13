@@ -15,7 +15,7 @@
 #include <aslam/backend/BlockCholeskyLinearSystemSolver.hpp>
 #include <aslam/backend/SparseCholeskyLinearSystemSolver.hpp>
 #include <aslam/backend/DenseQrLinearSystemSolver.hpp>
-
+#include <sm/PropertyTree.hpp>
 
 
 namespace aslam {
@@ -29,6 +29,22 @@ namespace aslam {
             initializeTrustRegionPolicy();
         }
 
+        Optimizer2::Optimizer2(const sm::PropertyTree& config, boost::shared_ptr<LinearSystemSolver> linearSystemSolver, boost::shared_ptr<TrustRegionPolicy> trustRegionPolicy) {
+          Optimizer2Options options;
+          options.convergenceDeltaJ = config.getDouble("convergenceDeltaJ", options.convergenceDeltaJ);
+          options.convergenceDeltaX = config.getDouble("convergenceDeltaX", options.convergenceDeltaX);
+          options.maxIterations = config.getInt("maxIterations", options.maxIterations);
+          options.doSchurComplement = config.getBool("doSchurComplement", options.doSchurComplement);
+          options.verbose = config.getBool("verbose", options.verbose);
+          options.linearSolverMaximumFails = config.getInt("linearSolverMaximumFails", options.linearSolverMaximumFails);
+          options.nThreads = config.getInt("nThreads", options.nThreads);
+          options.linearSystemSolver = linearSystemSolver;
+          options.trustRegionPolicy = trustRegionPolicy;
+          _options = options;
+          initializeLinearSolver();
+          initializeTrustRegionPolicy();
+          // USING C++11 would allow to do constructor delegation and more elegant code, i.e., directly call the upper constructor
+        }
 
         Optimizer2::~Optimizer2()
         {

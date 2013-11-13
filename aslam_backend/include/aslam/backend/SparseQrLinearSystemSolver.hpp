@@ -6,6 +6,11 @@
 
 #include "aslam/backend/SparseQRLinearSolverOptions.h"
 
+namespace sm {
+
+  class PropertyTree;
+
+}
 namespace aslam {
   namespace backend {
 
@@ -13,7 +18,8 @@ namespace aslam {
     public:
       typedef SuiteSparse_long index_t;
 
-      SparseQrLinearSystemSolver();
+      SparseQrLinearSystemSolver(const SparseQRLinearSolverOptions& options = SparseQRLinearSolverOptions());
+      SparseQrLinearSystemSolver(const sm::PropertyTree& config);
       virtual ~SparseQrLinearSystemSolver();
 
       // virtual void evaluateError(size_t nThreads, bool useMEstimator);
