@@ -78,21 +78,31 @@ class ExpressionErrorTerm : public aslam::backend::ErrorTermFs<IDimension> {
   inline TExpression getExpression() {
     return _expression;
   }
+
+  using parent_t::setInvR;
+  using parent_t::setSqrtInvR;
  private:
   const TExpression _expression;
 };
 
 template<typename TExpression, int IDimension = internal::ExpressionDimensionTraits<TExpression>::Dimension>
-inline ::boost::shared_ptr<ErrorTerm> toErrorTerm(TExpression expression) {
-  return ::boost::shared_ptr<ErrorTerm>(new ExpressionErrorTerm<TExpression, IDimension>(expression));
+inline ::boost::shared_ptr<ExpressionErrorTerm<TExpression, IDimension>> toErrorTerm(TExpression expression) {
+  return ::boost::shared_ptr<ExpressionErrorTerm<TExpression, IDimension>>(new ExpressionErrorTerm<TExpression, IDimension>(expression));
 }
 
-template<typename TExpression, int IDimension = internal::ExpressionDimensionTraits<TExpression>::Dimension>
-inline ::boost::shared_ptr<ErrorTerm> toErrorTerm(TExpression expression, const Eigen::Matrix<double, IDimension, IDimension> & RInv) {
-  ::boost::shared_ptr<ErrorTerm> errorTerm = toErrorTerm(expression);
-  errorTerm->vsSetInvR(RInv);
+template<typename TExpression, int IDimension = internal::ExpressionDimensionTraits<TExpression>::Dimension, typename DERIVED_MATRIX>
+inline ::boost::shared_ptr<ErrorTerm> toErrorTerm(TExpression expression, const Eigen::MatrixBase<DERIVED_MATRIX> & invR) {
+  auto errorTerm = toErrorTerm(expression);
+  errorTerm->setInvR(invR);
   return errorTerm;
 }
+template<typename TExpression, int IDimension = internal::ExpressionDimensionTraits<TExpression>::Dimension, typename DERIVED_MATRIX>
+inline ::boost::shared_ptr<ErrorTerm> toErrorTermSqrt(TExpression expression, const Eigen::MatrixBase<DERIVED_MATRIX> & sqrtInvR) {
+  auto errorTerm = toErrorTerm(expression);
+  errorTerm->setSqrtInvR(sqrtInvR);
+  return errorTerm;
+}
+
 
 }
 }
