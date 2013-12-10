@@ -31,7 +31,7 @@ namespace aslam {
       virtual double evaluateErrorImplementation();
 
       /// \brief evaluate the jacobian
-      virtual void evaluateJacobiansImplementation();
+      virtual void evaluateJacobiansImplementation(JacobianContainer & outJacobians);
 
     private:
       aslam::backend::ScalarExpression _observationErrorTerm;

@@ -38,9 +38,9 @@ namespace aslam {
 
 
     /// \brief evaluate the jacobian
-    void ErrorTermPriorBST::evaluateJacobiansImplementation()
+    void ErrorTermPriorBST::evaluateJacobiansImplementation(JacobianContainer & outJacobians)
     {
-      _robotPos.evaluateJacobians(ErrorTermFs<1>::_jacobians);
+      _robotPos.evaluateJacobians(outJacobians);
     }
 
 

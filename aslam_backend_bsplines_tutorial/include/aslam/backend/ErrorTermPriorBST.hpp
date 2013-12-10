@@ -25,7 +25,7 @@ namespace aslam {
       virtual double evaluateErrorImplementation();
 
       /// \brief evaluate the jacobian
-      virtual void evaluateJacobiansImplementation();
+      virtual void evaluateJacobiansImplementation(JacobianContainer & outJacobians);
 
       aslam::backend::VectorExpression<1> _robotPos;
       double _hat_x;

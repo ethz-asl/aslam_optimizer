@@ -4,7 +4,7 @@ namespace aslam {
   namespace backend {
     
     ErrorTermMotionBST::ErrorTermMotionBST(aslam::backend::VectorExpression<1> robotVelocity, double u, double sigma2_u) :
-    		_motionErrorTerm(ScalarExpression(boost::shared_ptr<ScalarExpressionNode>(new ScalarExpressionNodeConstant(u))) - robotVelocity.toScalarExpression())
+      _motionErrorTerm(ScalarExpression(boost::shared_ptr<ScalarExpressionNode>(new ScalarExpressionNodeConstant(u))) - robotVelocity.toScalarExpression())
     {
 
         Eigen::Matrix<double,1,1> invR;
@@ -36,9 +36,9 @@ namespace aslam {
 
 
     /// \brief evaluate the jacobian
-    void ErrorTermMotionBST::evaluateJacobiansImplementation()
+    void ErrorTermMotionBST::evaluateJacobiansImplementation(JacobianContainer & outJacobians)
     {
-    	_motionErrorTerm.evaluateJacobians(ErrorTermFs<1>::_jacobians);
+      _motionErrorTerm.evaluateJacobians(outJacobians);
     }
 
   } // namespace backend

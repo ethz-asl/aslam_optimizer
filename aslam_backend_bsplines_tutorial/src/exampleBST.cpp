@@ -4,6 +4,7 @@
 #include <aslam/backend/OptimizationProblem.hpp>
 #include <aslam/backend/Optimizer2.hpp>
 #include <aslam/backend/Optimizer2Options.hpp>
+#include <aslam/backend/DenseQrLinearSystemSolver.hpp>
 #include <iostream>
 // Bring in some random number generation from Schweizer Messer.
 #include <sm/random.hpp>
@@ -130,7 +131,7 @@ int main(int argc, char ** argv)
 		std::cout << "Init point is: " << std::endl << initPoint << std::endl;
 		//std::cout << "v is: " << std::endl << v << std::endl;
 		// add the robot pose spline to the problem
-		for(int i = 0; i < robotPosSpline.numDesignVariables(); i++)
+		for(size_t i = 0; i < robotPosSpline.numDesignVariables(); i++)
 		{
 			robotPosSpline.designVariable(i)->setActive(true);
 			problem->addDesignVariable(robotPosSpline.designVariable(i), false);
@@ -176,10 +177,10 @@ int main(int argc, char ** argv)
       // Create some optimization options.
       aslam::backend::Optimizer2Options options;
       options.verbose = true;
-      options.linearSolver = "dense_qr";
-      options.levenbergMarquardtLambdaInit = 10;
+      options.linearSystemSolver.reset(new DenseQrLinearSystemSolver());
+//      options.levenbergMarquardtLambdaInit = 10;
       options.doSchurComplement = false;
-      options.doLevenbergMarquardt = true;
+//      options.doLevenbergMarquardt = true;
       // Force it to over-optimize
       options.convergenceDeltaX = 1e-12;
       options.convergenceDeltaJ = 1e-12;

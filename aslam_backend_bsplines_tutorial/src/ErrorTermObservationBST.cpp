@@ -42,9 +42,9 @@ namespace aslam {
 
 
     /// \brief evaluate the jacobians
-    void ErrorTermObservationBST::evaluateJacobiansImplementation()
+    void ErrorTermObservationBST::evaluateJacobiansImplementation(JacobianContainer & outJacobians)
     {
-    	_observationErrorTerm.evaluateJacobians(ErrorTermFs<1>::_jacobians);
+    	_observationErrorTerm.evaluateJacobians(outJacobians);
     }
 
 

@@ -9,6 +9,8 @@
 #define EXPRESSIONERRORTERM_HPP_
 
 #include <aslam/backend/ErrorTerm.hpp>
+#include <aslam/backend/VectorExpression.hpp>
+#include <aslam/backend/EuclideanExpression.hpp>
 #include <aslam/backend/GenericMatrixExpression.hpp>
 #include <aslam/backend/GenericScalarExpression.hpp>
 
@@ -29,6 +31,14 @@ struct ExpressionDimensionTraits<VectorExpression<IDimension> > {
     Dimension = IDimension
   };
 };
+
+template<>
+struct ExpressionDimensionTraits<EuclideanExpression> {
+  enum {
+    Dimension = 3
+  };
+};
+
 template<typename TScalar, int IDimension, typename TNode>
 struct ExpressionDimensionTraits<GenericMatrixExpression<IDimension, 1, TScalar, TNode> > {
   enum {
