@@ -12,7 +12,7 @@
 #include <algorithm>
 #include <boost/foreach.hpp>
 
-#include <bsplines/BSplinePose.hpp>
+//#include <bsplines/BSplinePose.hpp>
 //#include <aslam/splines/BSplinePoseDesignVariable.hpp>
 #include <aslam/backend/EuclideanPoint.hpp>
 #include <sm/kinematics/RotationVector.hpp>
