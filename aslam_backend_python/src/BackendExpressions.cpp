@@ -77,6 +77,7 @@ void exportBackendExpressions()
 {
 
   class_<EuclideanExpression, boost::shared_ptr<EuclideanExpression> >("EuclideanExpression", init<boost::shared_ptr<EuclideanExpressionNode> >() )
+    .def(init<Eigen::Vector3d>())
     .def("toEuclidean", &EuclideanExpression::toEuclidean)
     .def("toHomogeneousExpression", &EuclideanExpression::toHomogeneousExpression)
     .def("evaluateJacobians", &evaluateJacobians1<EuclideanExpression>)

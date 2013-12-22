@@ -267,6 +267,7 @@ namespace aslam {
             srv.JFinal = _p_J;
             srv.dXFinal = deltaX;
             srv.dJFinal = deltaJ;
+            srv.linearSolverFailure = linearSolverFailure;
             return srv;
         }
 

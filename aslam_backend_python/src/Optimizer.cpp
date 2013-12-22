@@ -35,6 +35,7 @@ void exportOptimizer()
         .def_readwrite("lmLambdaFinal",&SolutionReturnValue::lmLambdaFinal)
         .def_readwrite("dXFinal",&SolutionReturnValue::dXFinal)
         .def_readwrite("dJFinal",&SolutionReturnValue::dJFinal)
+        .def_readwrite("linearSolverFailure",&SolutionReturnValue::linearSolverFailure)
         ;
 
 
