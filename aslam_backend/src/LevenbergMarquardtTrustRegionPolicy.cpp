@@ -58,11 +58,14 @@ namespace aslam {
                 ///get Rho and update Lambda:
                 double rho = getLmRho();
               
-                if (rho <= 0) {
-                    // The last step was a regression.
-                    _lambda *= _mu;
-                    _mu *= 2;
-                    // No need to rebuild the system. Just reset the conditioner
+                if (previousIterationFailed ) {
+                  // The last step was a regression.
+                  _mu *= 2;
+                  _lambda *= _mu;
+                } else if (rho <= 0 ) {
+                  // No need to rebuild the system. Just reset the conditioner
+                  _mu *= 10;
+                  _lambda *= _mu;
                 } else {
                     // The last iteration was successful
                     // Here we need to rebuild the system

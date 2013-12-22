@@ -89,8 +89,13 @@ class LinearSolverCholmod : public LinearSolver<MatrixType>
             
       cholmod_factorize(_cholmodSparse, _cholmodFactor, &_cholmodCommon);
       if (_cholmodCommon.status == CHOLMOD_NOT_POSDEF) {
-        std::cerr << "Cholesky failure, writing debug.txt (Hessian loadable by Octave)" << std::endl;
-        writeCCSMatrix("debug.txt", _cholmodSparse->nrow, _cholmodSparse->ncol, (int*)_cholmodSparse->p, (int*)_cholmodSparse->i, (double*)_cholmodSparse->x, true);
+        if (_cholmodFactor) {
+          cholmod_free_factor(&_cholmodFactor, &_cholmodCommon);
+          _cholmodFactor = 0;
+        }
+
+        //std::cerr << "Cholesky failure\n";//, writing debug.txt (Hessian loadable by Octave)" << std::endl;
+        //writeCCSMatrix("debug.txt", _cholmodSparse->nrow, _cholmodSparse->ncol, (int*)_cholmodSparse->p, (int*)_cholmodSparse->i, (double*)_cholmodSparse->x, true);
         return false;
       }
 

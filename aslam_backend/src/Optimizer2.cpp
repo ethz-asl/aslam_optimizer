@@ -213,9 +213,10 @@ namespace aslam {
 
             // Loop until convergence
             while (srv.iterations <  _options.maxIterations &&
-                   deltaX > _options.convergenceDeltaX &&
-                   fabs(deltaJ) > _options.convergenceDeltaJ &&
-                   !linearSolverFailure) {
+                   srv.failedIterations < _options.maxIterations &&
+                   ((deltaX > _options.convergenceDeltaX &&
+                     fabs(deltaJ) > _options.convergenceDeltaJ) ||
+                    linearSolverFailure)) {
         
                 timeSolve.start();
                 bool solutionSuccess = _trustRegionPolicy->solveSystem(_J, previousIterationFailed, _options.nThreads, _dx);

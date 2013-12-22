@@ -56,6 +56,8 @@ namespace aslam {
         
     private:
 
+      void initSolver();
+      
       /// \brief initialized the matrix structure for the problem with these error terms and errors.
       virtual void initMatrixStructureImplementation(const std::vector<DesignVariable*>& dvs, const std::vector<ErrorTerm*>& errors, bool useDiagonalConditioner);
 

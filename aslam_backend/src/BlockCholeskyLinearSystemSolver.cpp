@@ -9,15 +9,8 @@ namespace aslam {
   BlockCholeskyLinearSystemSolver::BlockCholeskyLinearSystemSolver(const std::string & solver, const BlockCholeskyLinearSolverOptions& options) :
       _options(options),
       _solverType(solver) {
-      if(_solverType == "cholesky") {
-        _solver.reset(new sparse_block_matrix::LinearSolverCholmod<Eigen::MatrixXd>());
-      } else if(_solverType == "spqr") {
-        _solver.reset(new sparse_block_matrix::LinearSolverQr<Eigen::MatrixXd>());
-      } else {
-        std::cout << "Unknown block solver type " << _solverType << ". Try \"cholesky\" or \"spqr\"\nDefaulting to cholesky.\n";
-        _solver.reset(new sparse_block_matrix::LinearSolverCholmod<Eigen::MatrixXd>());
-      }
-    }
+    initSolver();
+  }
 
     BlockCholeskyLinearSystemSolver::BlockCholeskyLinearSystemSolver(const sm::PropertyTree& config) {
       _solverType = config.getString("solverType", "cholesky");
@@ -103,11 +96,27 @@ namespace aslam {
           rowBase += block.rows();
         }
       }
+      if( ! solutionSuccess ) {
+        //std::cout << "Solution failed...creating a new solver\n";
+        // This seems to help when the CHOLMOD stuff gets into a bad state
+        initSolver();
+      }
+      
       return solutionSuccess;
     }
 
 
+  void BlockCholeskyLinearSystemSolver::initSolver() {
+      if(_solverType == "cholesky") {
+        _solver.reset(new sparse_block_matrix::LinearSolverCholmod<Eigen::MatrixXd>());
+      } else if(_solverType == "spqr") {
+        _solver.reset(new sparse_block_matrix::LinearSolverQr<Eigen::MatrixXd>());
+      } else {
+        std::cout << "Unknown block solver type " << _solverType << ". Try \"cholesky\" or \"spqr\"\nDefaulting to cholesky.\n";
+        _solver.reset(new sparse_block_matrix::LinearSolverCholmod<Eigen::MatrixXd>());
+      }
 
+  }
 
     /// \brief compute only the covariance blocks associated with the block indices passed as an argument
     void BlockCholeskyLinearSystemSolver::computeCovarianceBlocks(const std::vector<std::pair<int, int> >& blockIndices, SparseBlockMatrix& outP)
