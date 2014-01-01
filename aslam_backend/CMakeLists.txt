@@ -88,6 +88,10 @@ rosbuild_add_library(${PROJECT_NAME}
 
 target_link_libraries(${PROJECT_NAME} ${CHOLMOD_LIBRARIES} ${EXTRA_LIBS}  ${CSPARSE_LIBRARY})
 rosbuild_link_boost(${PROJECT_NAME} thread system)
+
+# Avoid clash with tr1::tuple: https://code.google.com/p/googletest/source/browse/trunk/README?r=589#257
+add_definitions(-DGTEST_USE_OWN_TR1_TUPLE=0)
+
 rosbuild_add_gtest(${PROJECT_NAME}_test
   test/test_main.cpp
   test/JacobianContainer.cpp

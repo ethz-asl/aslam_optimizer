@@ -59,6 +59,8 @@ rosbuild_add_executable( example
 # Tell CMake to link against the project.
 target_link_libraries(example ${PROJECT_NAME})
 
+# Avoid clash with tr1::tuple: https://code.google.com/p/googletest/source/browse/trunk/README?r=589#257
+add_definitions(-DGTEST_USE_OWN_TR1_TUPLE=0)
 
 rosbuild_add_gtest(${PROJECT_NAME}_test
   test/test_main.cpp
