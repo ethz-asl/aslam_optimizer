@@ -75,6 +75,9 @@ rosbuild_add_library(${PROJECT_NAME}
 
 target_link_libraries(${PROJECT_NAME} ${CHOLMOD_LIBRARIES} ${CSPARSE_LIBRARY} )
 
+# Avoid clash with tr1::tuple: https://code.google.com/p/googletest/source/browse/trunk/README?r=589#257
+add_definitions(-DGTEST_USE_OWN_TR1_TUPLE=0)
+
 rosbuild_add_gtest( ${PROJECT_NAME}_tests 
   test/test_main.cpp
   test/solver_tests.cpp
