@@ -33,6 +33,7 @@ void exportErrorTerm()
       
     /// \brief compute the M-estimator weight from a squared error.
     .def("getMEstimatorWeight", &ErrorTerm::getMEstimatorWeight)
+      .def("getCurrentMEstimatorWeight", &ErrorTerm::getCurrentMEstimatorWeight)
       
     /// \brief get the name of the M-Estimator.
     .def("getMEstimatorName", &ErrorTerm::getMEstimatorName)
