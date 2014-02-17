@@ -179,6 +179,15 @@ namespace aslam {
       }
     }
 
-
+    size_t OptimizationProblem::countActiveDesignVariables() {
+      size_t c = 0;
+      for(boost::shared_ptr<DesignVariable> dv : _designVariables){
+        if(dv->isActive()){
+          c ++;
+        }
+      }
+      return c;
+    }
   } // namespace backend
-} // namespace aslam
+}  // namespace aslam
+

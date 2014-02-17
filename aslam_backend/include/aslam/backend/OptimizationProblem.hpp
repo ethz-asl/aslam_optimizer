@@ -50,6 +50,9 @@ namespace aslam {
 
       /// \brief used for debugging...is the design variable in the problem.
       bool isDesignVariableInProblem(const DesignVariable* dv);
+
+      size_t countActiveDesignVariables();
+
     protected:
       virtual size_t numDesignVariablesImplementation() const;
       virtual DesignVariable* designVariableImplementation(size_t i);
