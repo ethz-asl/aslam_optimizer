@@ -21,6 +21,11 @@ void exportMEstimators()
   class_< GemanMcClureMEstimator, boost::shared_ptr<GemanMcClureMEstimator>, bases<MEstimator> >("GemanMcClureMEstimator", init<double>())
   ;
 
+    class_< CauchyMEstimator, boost::shared_ptr<CauchyMEstimator>, bases<MEstimator> >("CauchyMEstimator", init<double>())
+  ;
+
+  
+  
   class_< HuberMEstimator, boost::shared_ptr<HuberMEstimator>, bases<MEstimator> >("HuberMEstimator", init<double>())
   ;
 

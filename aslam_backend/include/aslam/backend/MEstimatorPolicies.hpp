@@ -30,6 +30,17 @@ namespace aslam {
       double _sigma2;
     };
 
+    class  CauchyMEstimator : public MEstimator {
+    public:
+      CauchyMEstimator(double sigma2);
+      virtual ~CauchyMEstimator();
+      virtual double getWeight(double error) const;
+      virtual std::string name() const;
+
+      double _sigma2;
+    };
+
+  
     class HuberMEstimator : public MEstimator {
     public:
       HuberMEstimator(double k);
