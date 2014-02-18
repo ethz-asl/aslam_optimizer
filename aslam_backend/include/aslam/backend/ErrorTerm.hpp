@@ -69,7 +69,9 @@ namespace aslam {
       void clearMEstimatorPolicy();
 
       /// \brief compute the M-estimator weight from a squared error.
-      double getMEstimatorWeight(double squaredError);
+      double getMEstimatorWeight(double squaredError) const;
+
+      double getCurrentMEstimatorWeight() const;
 
       /// \brief get the name of the M-Estimator.
       std::string getMEstimatorName();

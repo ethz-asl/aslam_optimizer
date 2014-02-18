@@ -57,11 +57,18 @@ namespace aslam {
 
 
     /// \brief compute the M-estimator weight from a squared error.
-    double ErrorTerm::getMEstimatorWeight(double squaredError)
+    double ErrorTerm::getMEstimatorWeight(double squaredError) const
     {
       return _mEstimatorPolicy->getWeight(squaredError);
     }
 
+    /// \brief compute the M-estimator weight from a squared error.
+    double ErrorTerm::getCurrentMEstimatorWeight() const
+    {
+      return _mEstimatorPolicy->getWeight(_squaredError);
+    }
+
+  
 
     /// \brief How many design varibles is this error term connected to?
     size_t ErrorTerm::numDesignVariables() const
