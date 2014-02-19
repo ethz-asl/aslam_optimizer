@@ -34,7 +34,6 @@ class GenericMatrixExpressionNode {
   }
   virtual ~GenericMatrixExpressionNode() {
   }
-  ;
 
   inline matrix_t & getCurrentValue() {
     return _currentValue;

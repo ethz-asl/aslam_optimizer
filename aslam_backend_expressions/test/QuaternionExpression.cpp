@@ -42,6 +42,8 @@ void testQuaternionBasics() {
   for (int i = 0; i < 3; i++)
     sm::eigen::assertNear((ImaginaryBases[i] * ImaginaryBases[(i + 1) % 3]).evaluate(), ImaginaryBases[(i + 2) % 3].evaluate() * (QE::IsTraditionalMultOrder ? 1 : -1), tolerance, SM_SOURCE_FILE_POS, "Testing first Hamiltonian equation.");
 
+  sm::eigen::assertNear((qExp + qExp2).evaluate(), val + val2, tolerance, SM_SOURCE_FILE_POS, "Testing +.");
+  sm::eigen::assertNear((qExp - qExp2).evaluate(), val - val2, tolerance, SM_SOURCE_FILE_POS, "Testing -.");
   sm::eigen::assertNear((qExp + qExp.conjugate()).evaluate(), 2 * val(aslam::backend::quaternion::internal::isRealFirst(EMode) ? 0 : 3) * one.evaluate(), tolerance, SM_SOURCE_FILE_POS, "Testing an important conjugate equality.");
   sm::eigen::assertNear((qExp * qExp.inverse()).evaluate(), one.evaluate(), tolerance, SM_SOURCE_FILE_POS, "Testing the important inverse equality.");
   sm::eigen::assertNear((qExpUnit * qExpUnit.inverse()).evaluate(), one.evaluate(), tolerance, SM_SOURCE_FILE_POS, "Testing the important inverse equality.");
@@ -77,6 +79,9 @@ void testQuaternionBasics() {
   {
     testExp(qDVarUnitExp, 1);
     testExp(qDVarExp, 1);
+
+    testExp(qDVarExp.imaginaryPart(), 1);
+
     testExp(qDVarExp.inverse(), 1);
     testExp(qDVarUnitExp.inverse(), 1);
     testExp(qDVarExp.conjugate(), 1);
@@ -84,6 +89,9 @@ void testQuaternionBasics() {
     testExp(qExp - qDVarExp, 1);
     testExp(qDVarExp * qDVarExp2, 2);
     testExp(qDVarExp2 - qDVarExp, 2);
+
+    testExp((qDVarExp + qDVarExp2).inverse() * (qDVarExp2 - qDVarExp), 2);
+
     testExp(qDVarUnitExp.rotate3Vector(vec3dGV), 1);
     testExp(qDVarUnitExp.rotate3Vector(dVarVec3d), 2);
     testExp(qDVarUnitExp.geoExp(vec3dGV), 1);

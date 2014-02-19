@@ -81,7 +81,7 @@ class QuaternionExpression : public GenericMatrixExpression<4, 1, TScalar, TNode
     return self_with_default_node_t(base_t::operator+(other));
   }
   template<typename TOtherNode> inline self_with_default_node_t operator -(const QuaternionExpression<TScalar, EMode, TOtherNode> & other) const {
-    return self_with_default_node_t(base_t::operator+(other));
+    return self_with_default_node_t(base_t::operator-(other));
   }
   inline self_with_default_node_t operator -() const {
     return self_with_default_node_t(base_t::operator-());
@@ -89,6 +89,8 @@ class QuaternionExpression : public GenericMatrixExpression<4, 1, TScalar, TNode
 
   inline self_with_default_node_t inverse() const;
   inline self_with_default_node_t conjugate() const;
+
+  inline GenericMatrixExpression<3, 1, TScalar> imaginaryPart() const;
 
   inline base_t toVectorExpression() {
     return base_t(this->root());

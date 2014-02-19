@@ -204,14 +204,14 @@ inline typename _CLASS::self_with_default_node_t _CLASS::inverse() const {
     typedef typename result_t::template UnaryOperationResult<ResultNode, self_t> base_t;
 
     virtual ~ResultNode() {}
-    inline typename base_t::apply_diff_return_t applyDiff(const typename base_t::operand_t::tangent_vector_t & tangent_vector) const {
+    inline typename base_t::apply_diff_return_t applyDiff(const typename base_t::operand_t::tangent_vector_t & tangentVector) const {
       /*
        * d_q q^{-1} (v) = -(\bar q v \bar q) / (q\bar q)^2
        * while q\bar q = q.dot(q) = \bar q.dot(\bar q)
        */
       auto operandValConj = calc::conjugate(this->getOperandNode().evaluate());
       double valSquared = operandValConj.dot(operandValConj);
-      return -calc::quatMult(operandValConj, calc::quatMult(tangent_vector, operandValConj)) / (valSquared * valSquared);
+      return -calc::quatMult(operandValConj, calc::quatMult(tangentVector, operandValConj)) / (valSquared * valSquared);
     }
   private:
     virtual void evaluateImplementation() const {
@@ -230,8 +230,8 @@ typename _CLASS::self_with_default_node_t _CLASS::conjugate() const {
     typedef typename result_t::template UnaryOperationResult<ResultNode, self_t> base_t;
 
     virtual ~ResultNode() {}
-    inline typename base_t::apply_diff_return_t applyDiff(const typename base_t::operand_t::tangent_vector_t & tangent_vector) const {
-      return internal::EigenQuaternionCalculator<TScalar, EMode>::conjugate(tangent_vector);
+    inline typename base_t::apply_diff_return_t applyDiff(const typename base_t::operand_t::tangent_vector_t & tangentVector) const {
+      return internal::EigenQuaternionCalculator<TScalar, EMode>::conjugate(tangentVector);
     }
   private:
     virtual void evaluateImplementation() const {
@@ -241,6 +241,30 @@ typename _CLASS::self_with_default_node_t _CLASS::conjugate() const {
 
   return ResultNode::create(*this);
 }
+
+
+_TEMPLATE
+inline GenericMatrixExpression<3, 1, TScalar> _CLASS::imaginaryPart() const {
+  typedef GenericMatrixExpression<3, 1, TScalar> result_t;
+  typedef internal::EigenQuaternionCalculator<TScalar, EMode> calc;
+
+  class ResultNode : public result_t::template UnaryOperationResult<ResultNode, self_t> {
+  public:
+    typedef typename result_t::template UnaryOperationResult<ResultNode, self_t> base_t;
+
+    virtual ~ResultNode() {}
+    inline typename base_t::apply_diff_return_t applyDiff(const typename base_t::operand_t::tangent_vector_t & tangentVector) const {
+      return calc::getImagPart(tangentVector);
+    }
+  private:
+    virtual void evaluateImplementation() const {
+      this->_currentValue = calc::getImagPart(this->getOperandNode().evaluate());
+    }
+  };
+
+  return ResultNode::create(*this);
+}
+
 
 #undef _CLASS
 #define _CLASS UnitQuaternionExpression<TScalar, EMode, TNode>
