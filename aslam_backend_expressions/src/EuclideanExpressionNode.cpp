@@ -352,6 +352,40 @@ namespace aslam {
     }
 
 
+    EuclideanExpressionNodeScalarMultiply::EuclideanExpressionNodeScalarMultiply(boost::shared_ptr<EuclideanExpressionNode> p, boost::shared_ptr<ScalarExpressionNode> s) :
+      _p(p),
+      _s(s)
+    {
+
+    }
+
+    EuclideanExpressionNodeScalarMultiply::~EuclideanExpressionNodeScalarMultiply()
+    {
+    }
+
+    void EuclideanExpressionNodeScalarMultiply::getDesignVariablesImplementation(DesignVariable::set_t & designVariables) const
+    {
+      _p->getDesignVariables(designVariables);
+      _s->getDesignVariables(designVariables);
+    }
+
+    Eigen::Vector3d EuclideanExpressionNodeScalarMultiply::toEuclideanImplementation() const
+    {
+      return _p->toEuclidean() * _s->toScalar();
+    }
+
+    void EuclideanExpressionNodeScalarMultiply::evaluateJacobiansImplementation(JacobianContainer & outJacobians) const
+    {
+      _p->evaluateJacobians(outJacobians, Eigen::Matrix3d::Identity() * _s->toScalar());
+      _s->evaluateJacobians(outJacobians, _p->toEuclidean());
+    }
+
+    void EuclideanExpressionNodeScalarMultiply::evaluateJacobiansImplementation(JacobianContainer & outJacobians, const Eigen::MatrixXd & applyChainRule) const
+    {
+      _p->evaluateJacobians(outJacobians, applyChainRule * _s->toScalar());
+      _s->evaluateJacobians(outJacobians, applyChainRule * _p->toEuclidean());
+    }
+
 
     VectorExpression2EuclideanExpressionAdapter::VectorExpression2EuclideanExpressionAdapter(boost::shared_ptr<VectorExpressionNode<3> > vectorExpressionNode) :
       _vectorExpressionNode(vectorExpressionNode)

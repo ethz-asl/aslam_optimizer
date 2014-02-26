@@ -6,11 +6,11 @@
 #include <aslam/backend/JacobianContainer.hpp>
 #include <set>
 
-
 namespace aslam {
   namespace backend {
     class HomogeneousExpression;
     class EuclideanExpressionNode;
+    class ScalarExpression;
     template <int D> class VectorExpression;
     
     class EuclideanExpression
@@ -42,6 +42,7 @@ namespace aslam {
       EuclideanExpression operator-(const EuclideanExpression & p) const;
       EuclideanExpression operator-(const Eigen::Vector3d & p) const;
       EuclideanExpression operator-() const;
+      EuclideanExpression operator*(const ScalarExpression& s) const;
 
       void getDesignVariables(DesignVariable::set_t & designVariables) const;
 

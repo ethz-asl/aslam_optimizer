@@ -6,7 +6,6 @@
 #include <aslam/backend/JacobianContainer.hpp>
 #include <set>
 
-
 namespace aslam {
   namespace backend {
     class ScalarExpressionNode;
@@ -44,6 +43,9 @@ namespace aslam {
       ScalarExpression();
 
       boost::shared_ptr<ScalarExpressionNode> _root;
+
+      friend class EuclideanExpression;
+
     };
     
   } // namespace backend

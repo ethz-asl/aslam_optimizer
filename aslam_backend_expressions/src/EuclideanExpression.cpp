@@ -5,6 +5,8 @@
 #include <aslam/backend/HomogeneousExpressionNode.hpp>
 #include <aslam/backend/VectorExpression.hpp>
 #include <aslam/backend/VectorExpressionNode.hpp>
+#include <aslam/backend/ScalarExpression.hpp>
+#include <aslam/backend/ScalarExpressionNode.hpp>
 
 namespace aslam {
   namespace backend {
@@ -91,6 +93,12 @@ namespace aslam {
     EuclideanExpression EuclideanExpression::operator-() const
     {
       boost::shared_ptr<EuclideanExpressionNode> newRoot( new EuclideanExpressionNodeNegated(_root));
+      return EuclideanExpression(newRoot);
+    }
+
+    EuclideanExpression EuclideanExpression::operator*(const ScalarExpression& s) const
+    {
+      boost::shared_ptr<EuclideanExpressionNode> newRoot(new EuclideanExpressionNodeScalarMultiply(_root, s._root));
       return EuclideanExpression(newRoot);
     }
 

@@ -3,6 +3,7 @@
 
 #include <aslam/backend/JacobianContainer.hpp>
 #include "RotationExpressionNode.hpp"
+#include "ScalarExpressionNode.hpp"
 #include "TransformationExpressionNode.hpp"
 #include "MatrixExpressionNode.hpp"
 #include <boost/shared_ptr.hpp>
@@ -251,6 +252,30 @@ namespace aslam {
         virtual void getDesignVariablesImplementation(DesignVariable::set_t & designVariables) const;
 
         boost::shared_ptr<EuclideanExpressionNode> _operand;
+      };
+
+     /**
+       * \class EuclideanExpressionNodeScalarMultiply
+       *
+       * \brief A class representing the multiplication of a ScalarExpression with an Euclidean expression.
+       *
+       */
+      class EuclideanExpressionNodeScalarMultiply : public EuclideanExpressionNode
+      {
+      public:
+        EIGEN_MAKE_ALIGNED_OPERATOR_NEW
+
+        EuclideanExpressionNodeScalarMultiply(boost::shared_ptr<EuclideanExpressionNode> p, boost::shared_ptr<ScalarExpressionNode> s);
+        virtual ~EuclideanExpressionNodeScalarMultiply();
+
+      private:
+        virtual Eigen::Vector3d toEuclideanImplementation() const;
+        virtual void evaluateJacobiansImplementation(JacobianContainer & outJacobians) const;
+        virtual void evaluateJacobiansImplementation(JacobianContainer & outJacobians, const Eigen::MatrixXd & applyChainRule) const;
+        virtual void getDesignVariablesImplementation(DesignVariable::set_t & designVariables) const;
+
+        boost::shared_ptr<EuclideanExpressionNode> _p;
+        boost::shared_ptr<ScalarExpressionNode> _s;
       };
 
      /**
