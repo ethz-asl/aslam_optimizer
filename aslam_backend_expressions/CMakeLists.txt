@@ -70,6 +70,7 @@ rosbuild_add_library(${PROJECT_NAME}
   src/EuclideanDirection.cpp
 
   src/ErrorTermTransformation.cpp
+  src/ErrorTermEuclidean.cpp
 
   src/MapTransformation.cpp
   )
@@ -89,6 +90,7 @@ rosbuild_add_gtest(${PROJECT_NAME}_test
   test/QuaternionExpression.cpp
   test/ScalarExpression.cpp
   test/ErrorTest_Transformation.cpp
+  test/ErrorTest_Euclidean.cpp
   )
 
 target_link_libraries(${PROJECT_NAME}_test ${PROJECT_NAME})
