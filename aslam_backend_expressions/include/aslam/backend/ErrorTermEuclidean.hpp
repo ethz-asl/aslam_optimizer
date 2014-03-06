@@ -9,9 +9,7 @@
 #define ASLAM_BACKEND_ERROR_EUCLIDEAN_HPP
 
 #include <aslam/backend/ErrorTerm.hpp>
-#include <sm/kinematics/Transformation.hpp>
-#include <sm/kinematics/RotationVector.hpp>
-#include <aslam/backend/TransformationExpression.hpp>
+#include <aslam/backend/EuclideanExpression.hpp>
 #include <Eigen/Core>
 
 namespace aslam {
