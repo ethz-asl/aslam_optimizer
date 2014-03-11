@@ -1,5 +1,6 @@
 FIND_PATH(CHOLMOD_INCLUDE_DIR NAMES cholmod.h amd.h camd.h
     PATHS
+    /usr/include
     /usr/include/suitesparse
     /usr/include/ufsparse
     /opt/local/include/ufsparse
