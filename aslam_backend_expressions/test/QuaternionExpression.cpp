@@ -91,6 +91,7 @@ void testQuaternionBasics() {
     testExp(qDVarExp2 - qDVarExp, 2);
 
     testExp((qDVarExp + qDVarExp2).inverse() * (qDVarExp2 - qDVarExp), 2);
+    testExp(((qDVarExp + qDVarExp2).inverse() * (qDVarExp2 - qDVarExp)).imaginaryPart(), 2);
 
     testExp(qDVarUnitExp.rotate3Vector(vec3dGV), 1);
     testExp(qDVarUnitExp.rotate3Vector(dVarVec3d), 2);

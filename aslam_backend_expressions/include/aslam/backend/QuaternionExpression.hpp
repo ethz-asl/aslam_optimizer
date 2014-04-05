@@ -138,6 +138,8 @@ class UnitQuaternionExpression : public QuaternionExpression<TScalar, EMode, TNo
   inline self_with_default_node_t operator -() const {
     return self_with_default_node_t(base_t::operator-());
   }
+  using base_t::operator -;
+
   inline self_with_default_node_t inverse() const {
     return conjugate();
   }
