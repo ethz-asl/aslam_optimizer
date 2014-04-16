@@ -19,7 +19,7 @@ namespace aslam {
 
       // Tell the super class about the design variables:
         JacobianContainer::set_t dvs;
-        //_observationErrorTerm.getDesignVariables(dvs);
+        _observationErrorTerm.getDesignVariables(dvs);
         ErrorTermFs<1>::setDesignVariablesIterator(dvs.begin(), dvs.end());
     }
 
@@ -35,7 +35,7 @@ namespace aslam {
       // Build the error from the measurement _y and the design variables
     	error_t error;
         error(0) = _observationErrorTerm.toScalar();
-        std::cout << "The observation error is: " << std::endl << error(0) << std::endl;
+//        std::cout << "The observation error is: " << std::endl << error(0) << std::endl;
         setError(error);
         return evaluateChiSquaredError();
     }

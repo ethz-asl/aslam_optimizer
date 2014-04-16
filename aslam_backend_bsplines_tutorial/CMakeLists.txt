@@ -29,9 +29,21 @@ set(LIBRARY_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/lib)
 #rosbuild_add_executable(example examples/example.cpp)
 #target_link_libraries(example ${PROJECT_NAME})
 
-rosbuild_add_executable(${PROJECT_NAME}
+rosbuild_add_library(${PROJECT_NAME}
   src/ErrorTermObservationBST.cpp
   src/ErrorTermMotionBST.cpp
   src/ErrorTermPriorBST.cpp
   src/exampleBST.cpp
 )
+
+rosbuild_add_executable(${PROJECT_NAME}_exec
+  src/exampleBST.cpp
+)
+
+rosbuild_add_gtest(${PROJECT_NAME}_test
+  test/test_main.cpp
+  test/TestErrorTestObservationBST.cpp
+  )
+
+target_link_libraries(${PROJECT_NAME}_exec ${PROJECT_NAME})
+target_link_libraries(${PROJECT_NAME}_test ${PROJECT_NAME})
