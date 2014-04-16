@@ -47,3 +47,4 @@ lib
 .pydevproject
 *.orig
 .#*
+sparse_block_matrix/cflags.export
