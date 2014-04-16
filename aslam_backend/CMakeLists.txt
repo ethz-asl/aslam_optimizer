@@ -58,7 +58,7 @@ catkin_add_gtest(${PROJECT_NAME}_test
   test/LinearSolverTests.cpp
   test/ErrorTermTests.cpp
 )
-#target_link_libraries(${PROJECT_NAME}_tests )
+target_link_libraries(${PROJECT_NAME}_test ${PROJECT_NAME})
 
 cs_install()
 cs_export()
