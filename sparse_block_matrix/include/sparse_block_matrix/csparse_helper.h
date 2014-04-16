@@ -20,7 +20,7 @@
 #ifndef NCOMPLEX
 #define NCOMPLEX
 #endif
-//#include <suitesparse/cs.h>
+
 #include <cs.h>
 namespace sparse_block_matrix {
 
