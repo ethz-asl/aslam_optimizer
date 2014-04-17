@@ -3,29 +3,7 @@ project(aslam_backend_expressions)
 
 include_directories(include ${catkin_INCLUDE_DIRS})
 
-# Set the build type.  Options are:
-#  Coverage       : w/ debug symbols, w/o optimization, w/ code-coverage
-#  Debug          : w/ debug symbols, w/o optimization
-#  Release        : w/o debug symbols, w/ optimization
-#  RelWithDebInfo : w/ debug symbols, w/ optimization
-#  MinSizeRel     : w/o debug symbols, w/ optimization, stripped binaries
-
-#add_definitions (-Wall -std=c++0x -O3 -march=native)
-
 SET(CMAKE_CXX_FLAGS "-std=c++0x")
-
-#uncomment if you have defined messages
-#rosbuild_genmsg()
-#uncomment if you have defined services
-#rosbuild_gensrv()
-
-#common commands for building c++ executables and libraries
-#rosbuild_add_library(${PROJECT_NAME} src/example.cpp)
-#target_link_libraries(${PROJECT_NAME} another_library)
-#rosbuild_add_boost_directories()
-#rosbuild_link_boost(${PROJECT_NAME} thread)
-#rosbuild_add_executable(example examples/example.cpp)
-#target_link_libraries(example ${PROJECT_NAME})
 
 find_package(catkin_simple REQUIRED)
 
@@ -69,9 +47,6 @@ cs_add_library(${PROJECT_NAME}
 
   src/MapTransformation.cpp
   )
-
-# Avoid clash with tr1::tuple: https://code.google.com/p/googletest/source/browse/trunk/README?r=589#257
-add_definitions(-DGTEST_USE_OWN_TR1_TUPLE=0)
 
 catkin_add_gtest(${PROJECT_NAME}_test
   test/test_main.cpp
