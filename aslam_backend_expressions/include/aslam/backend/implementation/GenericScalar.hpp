@@ -20,7 +20,7 @@ MEMBER(void, revertUpdateImplementation()) {
 }
 
 /// \brief Update the design variable.
-MEMBER(void, updateImplementation(const double * dp, int size)) {
+MEMBER(void, updateImplementation(const double * dp, int /* size */)) {
   _p_p = _p;
   _p += Scalar(double(*dp));
 }

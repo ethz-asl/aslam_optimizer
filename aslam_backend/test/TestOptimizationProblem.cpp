@@ -17,7 +17,7 @@ protected:
   }
 
   /// \brief Update the design variable.
-  virtual void updateImplementation(const double* dp, int size) {
+  virtual void updateImplementation(const double* /* dp */, int /* size */) {
   }
 
   /// \brief what is the number of dimensions of the perturbation variable.
@@ -26,11 +26,11 @@ protected:
   }
 
   /// Returns the content of the design variable
-  virtual void getParametersImplementation(Eigen::MatrixXd& value) const {
+  virtual void getParametersImplementation(Eigen::MatrixXd& /* value */) const {
   }
 
   /// Sets the content of the design variable
-  virtual void setParametersImplementation(const Eigen::MatrixXd& value) {
+  virtual void setParametersImplementation(const Eigen::MatrixXd& /* value */) {
   }
 
 };
@@ -49,7 +49,7 @@ protected:
   }
 
   /// \brief evaluate the jacobian
-  virtual void evaluateJacobiansImplementation(JacobianContainer & J) {
+  virtual void evaluateJacobiansImplementation(JacobianContainer & /* J */) {
   }
 
 };
@@ -68,7 +68,7 @@ protected:
   }
 
   /// \brief evaluate the jacobian
-  virtual void evaluateJacobiansImplementation(JacobianContainer & J) {
+  virtual void evaluateJacobiansImplementation(JacobianContainer & /* J */) {
   }
 
 };

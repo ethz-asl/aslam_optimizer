@@ -33,7 +33,7 @@ namespace aslam {
 
       
     /// \brief Update the design variable.
-    void ScalarDesignVariable::updateImplementation(const double * dp, int size)
+  void ScalarDesignVariable::updateImplementation(const double * dp, int /* size */)
     {
       // Backup the value so we can revert if necessary
       _p_value = _value;

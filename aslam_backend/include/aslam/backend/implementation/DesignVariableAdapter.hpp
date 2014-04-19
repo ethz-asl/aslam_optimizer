@@ -40,7 +40,7 @@ namespace aslam {
 
     /// \brief Update the design variable.
     template<typename T>
-    void DesignVariableAdapter<T>::updateImplementation(const double* dp, int size)
+    void DesignVariableAdapter<T>::updateImplementation(const double* dp, int /* size */)
     {
       _dv->getParameters(_backup);
       _dv->update(dp);
@@ -90,13 +90,13 @@ namespace aslam {
     }
 
     template<typename T>
-    void DesignVariableAdapter<T>::minimalDifferenceImplementation(const Eigen::MatrixXd& xHat, Eigen::VectorXd& outDifference) const
+    void DesignVariableAdapter<T>::minimalDifferenceImplementation(const Eigen::MatrixXd& /* xHat */, Eigen::VectorXd& /* outDifference */) const
     {
     	// TODO: implement
     }
 
     template<typename T>
-    void DesignVariableAdapter<T>::minimalDifferenceAndJacobianImplementation(const Eigen::MatrixXd& xHat, Eigen::VectorXd& outDifference, Eigen::MatrixXd& outJacobian) const
+    void DesignVariableAdapter<T>::minimalDifferenceAndJacobianImplementation(const Eigen::MatrixXd& /* xHat */, Eigen::VectorXd& /* outDifference */, Eigen::MatrixXd& /* outJacobian */) const
     {
     	// TODO: implement
     }

@@ -23,7 +23,7 @@ protected:
   }
 
   /// \brief Update the design variable.
-  virtual void updateImplementation(const double* dp, int size) {
+  virtual void updateImplementation(const double* dp, int /* size */) {
     _p_v = _v;
     _v[0] += dp[0];
     _v[1] += dp[1];

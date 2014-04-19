@@ -90,8 +90,8 @@ class GenericScalarExpressionNodeConstant : public GenericScalarExpressionNode<S
   virtual ~GenericScalarExpressionNodeConstant() {}
  protected:
   virtual Scalar toScalarImplementation() const { return _s; }
-  virtual void evaluateJacobiansImplementation(JacobianContainer & outJacobians, const Eigen::MatrixXd * applyChainRule) const {}
-  virtual void getDesignVariablesImplementation(DesignVariable::set_t & designVariables) const {}
+  virtual void evaluateJacobiansImplementation(JacobianContainer & /* outJacobians */, const Eigen::MatrixXd * /* applyChainRule */) const {}
+  virtual void getDesignVariablesImplementation(DesignVariable::set_t & /* designVariables */) const {}
 
   Scalar _s;
 };

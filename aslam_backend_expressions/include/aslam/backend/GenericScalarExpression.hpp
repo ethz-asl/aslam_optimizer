@@ -23,7 +23,7 @@ namespace aslam {
       inline GenericScalarExpression(Scalar value);
       inline GenericScalarExpression(NodeType * node, bool expressionOwnsNode = false);
       inline GenericScalarExpression(SharedNodePointer node) { _root = node; }
-      inline GenericScalarExpression(const GenericScalarExpression& other) = default;
+      inline GenericScalarExpression(const GenericScalarExpression& /* other */) = default;
 
       template <typename OtherScalar, typename = decltype(Scalar_(OtherScalar()))>
       inline GenericScalarExpression(const GenericScalarExpression<OtherScalar> & other);
