@@ -63,7 +63,7 @@ namespace aslam {
       
     }
 
-    HomogeneousExpression RotationExpression::operator*(const HomogeneousExpression & p)
+  HomogeneousExpression RotationExpression::operator*(const HomogeneousExpression & /* p */)
     {
       // \todo
         SM_THROW(Exception, "Not implemented yet")

@@ -74,7 +74,7 @@ namespace aslam {
 
       /// \brief Set the row base and column base of the design variables (to tweak the ordering)
       ///        The default implementation doesn't do anything.
-      virtual void setOrdering(const std::vector<DesignVariable*>& dvs, const std::vector<ErrorTerm*>& errors) { }
+      virtual void setOrdering(const std::vector<DesignVariable*>& /* dvs */, const std::vector<ErrorTerm*>& /* errors */ ) { }
 
       /// \brief a function for one thread to evaluate a set of error terms.
       void evaluateErrors(size_t threadId, size_t startIdx, size_t endIdx, bool useMEstimator);

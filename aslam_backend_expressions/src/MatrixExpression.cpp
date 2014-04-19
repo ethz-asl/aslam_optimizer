@@ -54,7 +54,7 @@ namespace aslam {
     }
 
     
-    MatrixExpression MatrixExpression::operator*(const MatrixExpression & p)
+  MatrixExpression MatrixExpression::operator*(const MatrixExpression & /* p */)
     {
     	// \todo
     	        SM_THROW(aslam::NotImplementedException, "Not implemented yet")
@@ -68,7 +68,7 @@ namespace aslam {
       
     }
 
-    HomogeneousExpression MatrixExpression::operator*(const HomogeneousExpression & p)
+  HomogeneousExpression MatrixExpression::operator*(const HomogeneousExpression & /* p */)
     {
       // \todo
         SM_THROW(aslam::NotImplementedException, "Not implemented yet")

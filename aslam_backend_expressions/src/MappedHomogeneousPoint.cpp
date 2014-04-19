@@ -23,7 +23,7 @@ namespace aslam {
     }
     
     /// \brief Update the design variable.
-    void MappedHomogeneousPoint::updateImplementation(const double * dp, int size)
+  void MappedHomogeneousPoint::updateImplementation(const double * dp, int /* size */)
     {
       _p_p = _p;
       Eigen::Map<const Eigen::Vector3d> dpv(dp);

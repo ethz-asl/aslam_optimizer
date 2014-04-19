@@ -372,14 +372,14 @@ namespace aslam {
                 computeCovarianceBlocks(blockIndices, outP, lambda);
             }
 
-            void Optimizer2::computeCovarianceBlocks(const std::vector<std::pair<int, int> > & blockIndices, SparseBlockMatrix& outP, double lambda)
+    void Optimizer2::computeCovarianceBlocks(const std::vector<std::pair<int, int> > & /* blockIndices */, SparseBlockMatrix& /* outP */, double /* lambda */)
             {
                 SM_THROW(Exception, "Broken");
 
             }
 
 
-            void Optimizer2::computeCovariances(SparseBlockMatrix& outP, double lambda)
+    void Optimizer2::computeCovariances(SparseBlockMatrix& /* outP */, double /* lambda */)
             {
                 SM_THROW(Exception, "Broken");
 

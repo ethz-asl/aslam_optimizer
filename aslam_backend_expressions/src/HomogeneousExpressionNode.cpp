@@ -95,9 +95,9 @@ namespace aslam {
 
 
       Eigen::Vector4d HomogeneousExpressionNodeConstant::toHomogeneousImplementation() const{ return _p; }
-      void HomogeneousExpressionNodeConstant::evaluateJacobiansImplementation(JacobianContainer & outJacobians) const{}
-      void HomogeneousExpressionNodeConstant::evaluateJacobiansImplementation(JacobianContainer & outJacobians, const Eigen::MatrixXd & applyChainRule) const{}
-      void HomogeneousExpressionNodeConstant::getDesignVariablesImplementation(DesignVariable::set_t & designVariables) const{}
+      void HomogeneousExpressionNodeConstant::evaluateJacobiansImplementation(JacobianContainer & /* outJacobians */) const{}
+  void HomogeneousExpressionNodeConstant::evaluateJacobiansImplementation(JacobianContainer & /* outJacobians */, const Eigen::MatrixXd & /* applyChainRule */) const{}
+  void HomogeneousExpressionNodeConstant::getDesignVariablesImplementation(DesignVariable::set_t & /* designVariables */) const{}
 
       
 

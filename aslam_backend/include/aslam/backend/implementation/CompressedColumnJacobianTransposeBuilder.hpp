@@ -90,7 +90,7 @@ namespace aslam {
 
     /// \brief a function to be run by a single thread.
     template<typename I>
-    void CompressedColumnJacobianTransposeBuilder<I>::evaluateJacobians(int threadId, int startIdx, int endIdx, bool useMEstimator)
+    void CompressedColumnJacobianTransposeBuilder<I>::evaluateJacobians(int /* threadId */, int startIdx, int endIdx, bool useMEstimator)
     {
       Eigen::VectorXd ee;
       for (int i = startIdx; i < endIdx; ++i) {

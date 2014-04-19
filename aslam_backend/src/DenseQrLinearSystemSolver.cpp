@@ -10,7 +10,7 @@ namespace aslam {
         _options(options) {
     }
 
-    DenseQrLinearSystemSolver::DenseQrLinearSystemSolver(const sm::PropertyTree& config) {
+  DenseQrLinearSystemSolver::DenseQrLinearSystemSolver(const sm::PropertyTree& /* config */) {
       // NO OPTIONS CURRENTLY IMPLEMENTED
       // USING C++11 would allow to do constructor delegation and more elegant code
     }
@@ -24,7 +24,7 @@ namespace aslam {
       return &_J;
     }
 
-    void DenseQrLinearSystemSolver::initMatrixStructureImplementation(const std::vector<DesignVariable*>& dvs, const std::vector<ErrorTerm*>& errors, bool useDiagonalConditioner)
+  void DenseQrLinearSystemSolver::initMatrixStructureImplementation(const std::vector<DesignVariable*>& /* dvs */, const std::vector<ErrorTerm*>& /* errors */, bool /* useDiagonalConditioner */)
     {
       // \todo Verify that this is similar to the "reserve()" feature in a standard vector.
       _J._M.resize(_JRows, _JCols);
@@ -58,7 +58,7 @@ namespace aslam {
     }
 
 
-    void DenseQrLinearSystemSolver::evaluateJacobians(size_t threadId, size_t startIdx, size_t endIdx, bool useMEstimator)
+  void DenseQrLinearSystemSolver::evaluateJacobians(size_t /* threadId */, size_t startIdx, size_t endIdx, bool useMEstimator)
     {
       for (size_t i = startIdx; i < endIdx; ++i) {
         JacobianContainer jc(_errorTerms[i]->dimension());

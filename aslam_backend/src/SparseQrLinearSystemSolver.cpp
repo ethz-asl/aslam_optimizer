@@ -27,7 +27,7 @@ namespace aslam {
     }
 
 
-    void SparseQrLinearSystemSolver::initMatrixStructureImplementation(const std::vector<DesignVariable*>& dvs, const std::vector<ErrorTerm*>& errors, bool useDiagonalConditioner)
+  void SparseQrLinearSystemSolver::initMatrixStructureImplementation(const std::vector<DesignVariable*>& dvs, const std::vector<ErrorTerm*>& errors, bool /* useDiagonalConditioner */)
     {
       _errorTerms = errors;
       if (_factor) {

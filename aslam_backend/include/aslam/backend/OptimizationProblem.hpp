@@ -5,11 +5,7 @@
 #include <boost/shared_ptr.hpp>
 #include <vector>
 
-#ifdef _WIN32
 #include <unordered_map>
-#else
-#include <tr1/unordered_map>
-#endif
 
 namespace aslam {
   namespace backend {
@@ -70,7 +66,7 @@ namespace aslam {
       //       just how bad this is.
       std::vector< boost::shared_ptr<DesignVariable> > _designVariables;
       std::vector< boost::shared_ptr<ErrorTerm> > _errorTerms;
-      typedef std::tr1::unordered_multimap< DesignVariable*, ErrorTerm*> error_map_t;
+      typedef std::unordered_multimap< DesignVariable*, ErrorTerm*> error_map_t;
       error_map_t _errorTermMap;
     };
 

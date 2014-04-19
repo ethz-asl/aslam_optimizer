@@ -26,7 +26,7 @@ namespace aslam {
 		  const aslam::backend::EuclideanExpression& t,
 		  const Eigen::Vector3d& prior,
 		  double weight,
-		  int debug) :
+		  int /* debug */) :
     _t(t), _prior(prior), _debug(0)
       {
           Eigen::Matrix<double, 3, 1> W;

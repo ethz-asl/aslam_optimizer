@@ -4,7 +4,7 @@
 namespace aslam {
   namespace backend {
     SparseCholeskyLinearSystemSolver::SparseCholeskyLinearSystemSolver(const SparseCholeskyLinearSolverOptions& options) : _factor(NULL), _options(options) {}
-    SparseCholeskyLinearSystemSolver::SparseCholeskyLinearSystemSolver(const sm::PropertyTree& config) :
+  SparseCholeskyLinearSystemSolver::SparseCholeskyLinearSystemSolver(const sm::PropertyTree& /* config */) :
         _factor(NULL) {
       // NO OPTIONS CURRENTLY IMPLEMENTED
       // USING C++11 would allow to do constructor delegation and more elegant code

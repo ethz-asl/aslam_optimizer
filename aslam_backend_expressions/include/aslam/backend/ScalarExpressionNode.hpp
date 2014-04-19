@@ -115,9 +115,9 @@ namespace aslam {
       protected:
           // These functions must be implemented by child classes.
           virtual double toScalarImplementation() const{return _s;}
-          virtual void evaluateJacobiansImplementation(JacobianContainer & outJacobians) const{}
-          virtual void evaluateJacobiansImplementation(JacobianContainer & outJacobians, const Eigen::MatrixXd & applyChainRule) const{}
-          virtual void getDesignVariablesImplementation(DesignVariable::set_t & designVariables) const{}
+        virtual void evaluateJacobiansImplementation(JacobianContainer & /* outJacobians */) const{}
+        virtual void evaluateJacobiansImplementation(JacobianContainer & /* outJacobians */, const Eigen::MatrixXd & /* applyChainRule */) const{}
+        virtual void getDesignVariablesImplementation(DesignVariable::set_t & /* designVariables */) const{}
 
           double _s;
       };

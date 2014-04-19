@@ -30,7 +30,7 @@ namespace aslam {
 
 
         /// \brief Update the design variable.
-        void EuclideanDirection::updateImplementation(const double * dp, int size)
+    void EuclideanDirection::updateImplementation(const double * dp, int /* size */)
         {
             Eigen::Vector3d parameters(0.0, dp[0], dp[1]);
             _p_C = _C;
@@ -100,7 +100,7 @@ namespace aslam {
         outDifference = sm::kinematics::R2AxisAngle(_C * xHat.transpose());
       }
 
-     void EuclideanDirection::minimalDifferenceAndJacobianImplementation(const Eigen::MatrixXd& xHat, Eigen::VectorXd& outDifference, Eigen::MatrixXd& outJacobian) const
+    void EuclideanDirection::minimalDifferenceAndJacobianImplementation(const Eigen::MatrixXd& /* xHat */, Eigen::VectorXd& /* outDifference */, Eigen::MatrixXd& /* outJacobian */) const
      {
        SM_THROW(std::runtime_error, "Not implemented");
        //minimalDifferenceImplementation(xHat, outDifference);

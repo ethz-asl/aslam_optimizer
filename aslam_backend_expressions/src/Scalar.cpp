@@ -20,7 +20,7 @@ namespace aslam {
         }
     
         /// \brief Update the design variable.
-        void Scalar::updateImplementation(const double * dp, int size)
+    void Scalar::updateImplementation(const double * dp, int /* size */)
         {
             _p_p = _p;
       

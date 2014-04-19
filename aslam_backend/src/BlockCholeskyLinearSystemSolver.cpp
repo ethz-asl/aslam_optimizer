@@ -55,7 +55,7 @@ namespace aslam {
     }
 
 
-    void BlockCholeskyLinearSystemSolver::buildSystem(size_t nThreads, bool useMEstimator)
+  void BlockCholeskyLinearSystemSolver::buildSystem(size_t /* nThreads */, bool useMEstimator)
     {
       // \todo make multithreaded. This is complicated as it requires synchronized access to the block matrix.
       //       A little bit of effort should make this possible by initializing the structure and adding

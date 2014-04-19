@@ -2,11 +2,7 @@
 #define ASLAM_DESIGN_VARIABLE_HPP
 
 #include <sm/Id.hpp>
-#ifdef _WIN32
 #include <unordered_set>
-#else
-#include <tr1/unordered_set>
-#endif
 #include <set>
 
 #include <Eigen/Core>
@@ -38,7 +34,7 @@ namespace aslam {
        * \typedef unordered_set_t
        * \brief A fast unordered set of design variables.
        */
-      typedef std::tr1::unordered_set< DesignVariable* > set_t;
+      typedef std::unordered_set< DesignVariable* > set_t;
 
         typedef boost::shared_ptr< DesignVariable > Ptr;
 
@@ -46,7 +42,7 @@ namespace aslam {
        * \typedef blockordered_set_t
        * \brief a set of design variables ordered by block index.
        */
-      //      typedef std::tr1::unordered_set//set<DesignVariable *, BlockIndexOrdering> blockordered_set_t;
+      //      typedef std::unordered_set//set<DesignVariable *, BlockIndexOrdering> blockordered_set_t;
 
       DesignVariable();
 

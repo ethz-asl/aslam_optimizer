@@ -106,7 +106,7 @@ namespace aslam {
     		outDifference = sm::kinematics::R2AxisAngle(_A*xHat.transpose());
     }
 
-    void MatrixTransformation::minimalDifferenceAndJacobianImplementation(const Eigen::MatrixXd& xHat, Eigen::VectorXd& outDifference, Eigen::MatrixXd& outJacobian) const
+  void MatrixTransformation::minimalDifferenceAndJacobianImplementation(const Eigen::MatrixXd& xHat, Eigen::VectorXd& outDifference, Eigen::MatrixXd& /* outJacobian */) const
     {
     	minimalDifferenceImplementation(xHat, outDifference);
     	// outJacobian = ???

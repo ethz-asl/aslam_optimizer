@@ -269,7 +269,7 @@ namespace aslam {
     {
     }
 
-    void EuclideanExpressionNodeConstant::getDesignVariablesImplementation(DesignVariable::set_t & designVariables) const
+  void EuclideanExpressionNodeConstant::getDesignVariablesImplementation(DesignVariable::set_t & /* designVariables */) const
     {
     }
 
@@ -278,11 +278,11 @@ namespace aslam {
       return _p;
     }
 
-    void EuclideanExpressionNodeConstant::evaluateJacobiansImplementation(JacobianContainer & outJacobians) const
+  void EuclideanExpressionNodeConstant::evaluateJacobiansImplementation(JacobianContainer & /* outJacobians */) const
     {
     }
 
-    void EuclideanExpressionNodeConstant::evaluateJacobiansImplementation(JacobianContainer & outJacobians, const Eigen::MatrixXd & applyChainRule) const
+  void EuclideanExpressionNodeConstant::evaluateJacobiansImplementation(JacobianContainer & /* outJacobians */, const Eigen::MatrixXd & /* applyChainRule */) const
     {
     }
 

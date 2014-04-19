@@ -110,9 +110,9 @@ namespace aslam {
 
     
       Eigen::Matrix4d TransformationExpressionNodeConstant::toTransformationMatrixImplementation(){ return _T; }
-      void TransformationExpressionNodeConstant::evaluateJacobiansImplementation(JacobianContainer & outJacobians) const{}
-      void TransformationExpressionNodeConstant::evaluateJacobiansImplementation(JacobianContainer & outJacobians, const Eigen::MatrixXd & applyChainRule) const{}
-      void TransformationExpressionNodeConstant::getDesignVariablesImplementation(DesignVariable::set_t & designVariables) const{}
+  void TransformationExpressionNodeConstant::evaluateJacobiansImplementation(JacobianContainer & /* outJacobians */) const{}
+  void TransformationExpressionNodeConstant::evaluateJacobiansImplementation(JacobianContainer & /* outJacobians */, const Eigen::MatrixXd & /* applyChainRule */) const{}
+  void TransformationExpressionNodeConstant::getDesignVariablesImplementation(DesignVariable::set_t & /* designVariables */) const{}
 
 
   } // namespace backend
