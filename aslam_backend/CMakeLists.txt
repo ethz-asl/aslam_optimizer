@@ -4,6 +4,8 @@ project(aslam_backend)
 find_package(catkin_simple REQUIRED)
 catkin_simple()
 
+include_directories(${EIGEN_INCLUDE_DIRS})
+
 add_definitions( -fPIC -msse2 -mssse3 -march=nocona -Wextra -Winit-self -Woverloaded-virtual -Wnon-virtual-dtor -Wsign-promo -Wno-long-long -std=c++0x -O3)
 
 #target_link_libraries(${PROJECT_NAME} ${CHOLMOD_LIBRARIES} ${EXTRA_LIBS}  ${CSPARSE_LIBRARY})
