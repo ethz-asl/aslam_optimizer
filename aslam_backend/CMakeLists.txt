@@ -1,58 +1,15 @@
-cmake_minimum_required(VERSION 2.4.6)
-include($ENV{ROS_ROOT}/core/rosbuild/rosbuild.cmake)
+cmake_minimum_required(VERSION 2.8.3)
+project(aslam_backend)
 
-# Set the build type.  Options are:
-#  Coverage       : w/ debug symbols, w/o optimization, w/ code-coverage
-#  Debug          : w/ debug symbols, w/o optimization
-#  Release        : w/o debug symbols, w/ optimization
-#  RelWithDebInfo : w/ debug symbols, w/ optimization
-#  MinSizeRel     : w/o debug symbols, w/ optimization, stripped binaries
-#set(ROS_BUILD_TYPE Debug)
-set(ROS_BUILD_TYPE Release)
-# just write the upper line into LocalBuildType.cmake to have a ROS_BUILD_TYPE not under version control as it should be.
-include(LocalBuildType.cmake OPTIONAL)
-message("ROS_BUILD_TYPE=" ${ROS_BUILD_TYPE})
+find_package(catkin_simple REQUIRED)
+catkin_simple()
 
-rosbuild_init()
+add_definitions( -fPIC -msse2 -mssse3 -march=nocona -Wextra -Winit-self -Woverloaded-virtual -Wnon-virtual-dtor -Wsign-promo -Wno-long-long -std=c++0x -O3)
 
-#set the default path for built executables to the "bin" directory
-set(EXECUTABLE_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/bin)
-#set the default path for built libraries to the "lib" directory
-set(LIBRARY_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/lib)
+#target_link_libraries(${PROJECT_NAME} ${CHOLMOD_LIBRARIES} ${EXTRA_LIBS}  ${CSPARSE_LIBRARY})
+#rosbuild_link_boost(${PROJECT_NAME} thread system)
 
-
-
-#uncomment if you have defined messages
-#rosbuild_genmsg()
-#uncomment if you have defined services
-#rosbuild_gensrv()
-
-#common commands for building c++ executables and libraries
-#rosbuild_add_library(${PROJECT_NAME} src/example.cpp)
-#target_link_libraries(${PROJECT_NAME} another_library)
-#rosbuild_add_boost_directories()
-#rosbuild_link_boost(${PROJECT_NAME} thread)
-#rosbuild_add_executable(example examples/example.cpp)
-#target_link_libraries(example ${PROJECT_NAME})
-
-IF(${CMAKE_SYSTEM} MATCHES "Darwin-*")
-  message("You are using OSX")
-  #SET (CMAKE_C_COMPILER         "/usr/bin/gcc")
-  #SET (CMAKE_CXX_COMPILER        "/usr/bin/g++")
-  #SET (CMAKE_CXX_FLAGS ${CMAKE_CXX_FLAGS} -std=c++11)
-  add_definitions( -fPIC -msse2 -mssse3 -march=nocona -Wextra -Winit-self -Woverloaded-virtual -Wnon-virtual-dtor -Wsign-promo -Wno-long-long)
-ELSE()
-  add_definitions( -fPIC -msse2 -mssse3 -march=nocona -Wextra -Winit-self -Woverloaded-virtual -Wnon-virtual-dtor -Wsign-promo -Wno-long-long -std=c++0x -O3)
-ENDIF(${CMAKE_SYSTEM} MATCHES "Darwin-*")
-
-SET(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${PROJECT_SOURCE_DIR}/../cmake)
-FIND_PACKAGE(TBB)
-SET(EXTRA_LIBS)
-IF(TBB_FOUND)
-  SET(EXTRA_LIBS ${TBB_LIBRARY})
-ENDIF(TBB_FOUND)
-
-rosbuild_add_library(${PROJECT_NAME} 
+cs_add_library(${PROJECT_NAME}
   src/MEstimatorPolicies.cpp
   src/JacobianContainer.cpp
   src/DesignVariable.cpp
@@ -62,10 +19,8 @@ rosbuild_add_library(${PROJECT_NAME}
   src/sparse_matrix_functions.cpp
   src/OptimizationProblem.cpp
   src/JacobianBuilder.cpp
-  # src/CompressedColumnJacobianTransposeBuilder.cpp
   src/LinearSystemSolver.cpp
   src/BlockCholeskyLinearSystemSolver.cpp
- # src/Cholmod.cpp
   src/SparseCholeskyLinearSystemSolver.cpp
   src/SparseQrLinearSystemSolver.cpp
   src/Matrix.cpp
@@ -84,15 +39,11 @@ rosbuild_add_library(${PROJECT_NAME}
   src/MarginalizationPriorErrorTerm.cpp
   src/DogLegTrustRegionPolicy.cpp
   src/Optimizer2.cpp
-  )
-
-target_link_libraries(${PROJECT_NAME} ${CHOLMOD_LIBRARIES} ${EXTRA_LIBS}  ${CSPARSE_LIBRARY})
-rosbuild_link_boost(${PROJECT_NAME} thread system)
+)
 
 # Avoid clash with tr1::tuple: https://code.google.com/p/googletest/source/browse/trunk/README?r=589#257
 add_definitions(-DGTEST_USE_OWN_TR1_TUPLE=0)
-
-rosbuild_add_gtest(${PROJECT_NAME}_test
+catkin_add_gtest(${PROJECT_NAME}_test
   test/test_main.cpp
   test/JacobianContainer.cpp
   test/test_sparse_matrix_functions.cpp
@@ -104,7 +55,9 @@ rosbuild_add_gtest(${PROJECT_NAME}_test
   test/SparseMatrixTest.cpp
   test/LinearSolverTests.cpp
   test/ErrorTermTests.cpp
-  )
+)
+target_link_libraries(${PROJECT_NAME}_tests ${PROJECT_NAME})
 
-target_link_libraries(${PROJECT_NAME}_test ${PROJECT_NAME})
+cs_install()
+cs_export()
 
