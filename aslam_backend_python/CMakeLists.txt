@@ -29,3 +29,5 @@ add_python_export_library(${PROJECT_NAME} python/aslam_backend
   src/SparseBlockMatrix.cpp
 )
 
+cs_install()
+cs_export()
