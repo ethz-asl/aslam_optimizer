@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<package>
+  <name>aslam_python</name>
+  <description>aslam_python</description>
+  <version>0.0.1</version>
+  <maintainer email="paulfurgale@mavt.ethz.ch">Paul Furgale</maintainer>
+  <author>Paul Furgale</author>
+  <license>BSD</license>
+
+  <build_depend>sm_common</build_depend>
+  <build_depend>sm_eigen</build_depend>
+  <build_depend>sm_kinematics</build_depend>
+  <build_depend>roscpp</build_depend>
+
+
+  <build_depend>numpy_eigen</build_depend>
+  <build_depend>aslam_backend</build_depend>
+  <build_depend>sm_python</build_depend>
+  <build_depend>aslam_backend_expressions</build_depend>
+</package>
