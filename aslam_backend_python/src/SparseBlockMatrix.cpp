@@ -61,13 +61,12 @@ double at(SBM * sbm, int r, int c)
 }
 
 
-template<typename MatrixType>
-void exportSBM(const std::string & className)
+void exportSBM()
 {
-  typedef SparseBlockMatrix<MatrixType> mat_t;
+  typedef SparseBlockMatrix<Eigen::MatrixXd> mat_t;
 
-  boost::python::class_< mat_t > (className.c_str(), init<>())
-    .def(init<const Eigen::VectorXi &, const Eigen::VectorXi &, bool>( (className + "(rbi, cbi, hasStorage)\n\nrbi:  a vector of ints containing the row layout of the blocks. The component i of the array should contain the index of the first row of the block i+1\ncbi:  a vector of ints containing the column layout of the blocks. The component i of the array should contain the index of the first column of the block i+1").c_str()) )
+  boost::python::class_< mat_t > ("SparseBlockMatrixXd", init<>())
+    .def(init<const Eigen::VectorXi &, const Eigen::VectorXi &, bool>( ("SparseBlockMatrixXd(rbi, cbi, hasStorage)\n\nrbi:  a vector of ints containing the row layout of the blocks. The component i of the array should contain the index of the first row of the block i+1\ncbi:  a vector of ints containing the column layout of the blocks. The component i of the array should contain the index of the first column of the block i+1")) )
     .def("rows",&mat_t::rows)
     .def("cols",&mat_t::cols)
     .def("bRows",&mat_t::bRows)
@@ -93,11 +92,3 @@ void exportSBM(const std::string & className)
 
 }
 
-
-// The title of this library must match exactly
-BOOST_PYTHON_MODULE(libsparse_block_matrix_python)
-{
-  exportSBM<Eigen::MatrixXd>("SparseBlockMatrixXd");
-
-
-}
