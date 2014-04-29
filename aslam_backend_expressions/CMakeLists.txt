@@ -1,44 +1,17 @@
-cmake_minimum_required(VERSION 2.4.6)
-include($ENV{ROS_ROOT}/core/rosbuild/rosbuild.cmake)
+cmake_minimum_required(VERSION 2.8.3)
+project(aslam_backend_expressions)
 
-# Set the build type.  Options are:
-#  Coverage       : w/ debug symbols, w/o optimization, w/ code-coverage
-#  Debug          : w/ debug symbols, w/o optimization
-#  Release        : w/o debug symbols, w/ optimization
-#  RelWithDebInfo : w/ debug symbols, w/ optimization
-#  MinSizeRel     : w/o debug symbols, w/ optimization, stripped binaries
-set(ROS_BUILD_TYPE Debug)
-#set(ROS_BUILD_TYPE Release)
-# just write the upper line into LocalBuildType.cmake to have a ROS_BUILD_TYPE not under version control.
-include(LocalBuildType.cmake OPTIONAL)
-message("ROS_BUILD_TYPE=" ${ROS_BUILD_TYPE})
+include_directories(include ${catkin_INCLUDE_DIRS})
 
-rosbuild_init()
+SET(CMAKE_CXX_FLAGS "-std=c++0x")
 
-#add_definitions (-Wall -std=c++0x -O3 -march=native)
+find_package(catkin_simple REQUIRED)
 
-set(CMAKE_CXX_FLAGS "-std=c++0x")
+catkin_simple()
 
-#set the default path for built executables to the "bin" directory
-set(EXECUTABLE_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/bin)
-#set the default path for built libraries to the "lib" directory
-set(LIBRARY_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/lib)
+include_directories(${EIGEN_INCLUDE_DIRS})
 
-#uncomment if you have defined messages
-#rosbuild_genmsg()
-#uncomment if you have defined services
-#rosbuild_gensrv()
-
-#common commands for building c++ executables and libraries
-#rosbuild_add_library(${PROJECT_NAME} src/example.cpp)
-#target_link_libraries(${PROJECT_NAME} another_library)
-#rosbuild_add_boost_directories()
-#rosbuild_link_boost(${PROJECT_NAME} thread)
-#rosbuild_add_executable(example examples/example.cpp)
-#target_link_libraries(example ${PROJECT_NAME})
-
-
-rosbuild_add_library(${PROJECT_NAME}
+cs_add_library(${PROJECT_NAME}
   src/RotationExpression.cpp 
   src/RotationExpressionNode.cpp
   src/RotationQuaternion.cpp
@@ -75,10 +48,7 @@ rosbuild_add_library(${PROJECT_NAME}
   src/MapTransformation.cpp
   )
 
-# Avoid clash with tr1::tuple: https://code.google.com/p/googletest/source/browse/trunk/README?r=589#257
-add_definitions(-DGTEST_USE_OWN_TR1_TUPLE=0)
-
-rosbuild_add_gtest(${PROJECT_NAME}_test
+catkin_add_gtest(${PROJECT_NAME}_test
   test/test_main.cpp
   test/RotationExpression.cpp
   test/HomogeneousExpression.cpp
@@ -94,3 +64,8 @@ rosbuild_add_gtest(${PROJECT_NAME}_test
   )
 
 target_link_libraries(${PROJECT_NAME}_test ${PROJECT_NAME})
+
+cs_install()
+
+cs_export()
+
