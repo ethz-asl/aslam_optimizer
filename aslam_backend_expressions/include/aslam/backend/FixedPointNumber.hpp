@@ -35,11 +35,14 @@ struct BiggerType<std::int64_t> {
   typedef long double type;
 };
 
+#ifndef __APPLE__
+// On apple long long and std::int64_t are the same
+// and this causes a compiler error
 template <>
 struct BiggerType<long long> {
   typedef long double type;
 };
-
+#endif
 
 template <typename Integer_, std::uintmax_t Divider>
 class FixedPointNumber{
