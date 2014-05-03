@@ -23,11 +23,7 @@
 #include <cassert>
 #include <vector>
 
-#ifdef _MSC_VER
 #include <unordered_map>
-#else
-#include <tr1/unordered_map>
-#endif
 
 namespace sparse_block_matrix {
 
@@ -39,7 +35,7 @@ namespace sparse_block_matrix {
       /**
        * hash struct for storing the matrix elements needed to compute the covariance
        */
-      typedef std::tr1::unordered_map<int, double>     LookupMap;
+      typedef std::unordered_map<int, double>     LookupMap;
     
     public:
       MarginalCovarianceCholesky();
