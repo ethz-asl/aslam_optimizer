@@ -7,7 +7,7 @@ catkin_simple()
 include_directories(${Eigen_INCLUDE_DIRS})
 
 
-add_definitions( -fPIC -msse2 -mssse3 -march=nocona -Wextra -Winit-self -Woverloaded-virtual -Wnon-virtual-dtor -Wsign-promo -Wno-long-long -std=c++0x)
+add_definitions( -fPIC -msse2 -mssse3 -march=native -Wextra -Winit-self -Woverloaded-virtual -Wnon-virtual-dtor -Wsign-promo -Wno-long-long -std=c++0x)
 
 
 # This functions take TARGET_NAME PYTHON_MODULE_DIRECTORY sourceFile1 [sourceFile2 ...]
