@@ -25,8 +25,11 @@ cs_add_executable( example
   src/example.cpp
 )
 
+find_package(Boost REQUIRED COMPONENTS system) 
+
+
 # Tell CMake to link against the project.
-target_link_libraries(example ${PROJECT_NAME})
+target_link_libraries(example ${PROJECT_NAME} ${Boost_LIBRARIES})
 
 
 # Avoid clash with tr1::tuple: https://code.google.com/p/googletest/source/browse/trunk/README?r=589#257
