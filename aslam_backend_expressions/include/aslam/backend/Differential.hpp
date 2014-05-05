@@ -100,7 +100,7 @@ struct DifferentialCalculator {
   typedef typename TDiff::matrix_t matrix_t;
   typedef NullDifferential<typename TDiff::dyn_matrix_t, typename TDiff::scalar_t> compose_result_t;
 
-  inline static void addToJacobianByApplication(const TDiff & diff, JacobianContainer& /* jc */, const DesignVariable* /* dv */) {
+  inline static void addToJacobianByApplication(const TDiff & /* diff */, JacobianContainer& /* jc */, const DesignVariable* /* dv */) {
     throw std::runtime_error("this number of columns is not supported here!");
   }
 
