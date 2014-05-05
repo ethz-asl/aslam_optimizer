@@ -116,7 +116,7 @@ class GenericMatrixExpression {
     virtual ~UnaryOperationResult() {
     }
 
-    inline apply_diff_return_t applyDiff(const typename operand_t::tangent_vector_t & tangent_vector) const {
+    inline apply_diff_return_t applyDiff(const typename operand_t::tangent_vector_t & /* tangent_vector */) const {
       throw std::runtime_error("This method must be shadowed or not used!");
     }
 

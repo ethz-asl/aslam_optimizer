@@ -29,7 +29,7 @@ namespace aslam {
         
       
     DenseQRLinearSolverOptions::DenseQRLinearSolverOptions(
-        const DenseQRLinearSolverOptions& other) {
+        const DenseQRLinearSolverOptions& /* other */) {
     }
 
     DenseQRLinearSolverOptions& DenseQRLinearSolverOptions::operator =

@@ -8,7 +8,7 @@ namespace aslam {
         
         
         /// \brief called by the optimizer when an optimization is starting
-        void DogLegTrustRegionPolicy::optimizationStartingImplementation(double J)
+        void DogLegTrustRegionPolicy::optimizationStartingImplementation(double /* J */)
         {
             _dx_sd_norm = 0;
             _dx_gn_norm = 0;

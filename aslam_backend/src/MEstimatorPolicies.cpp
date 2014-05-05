@@ -14,7 +14,7 @@ MEstimator::~MEstimator() {
 
 NoMEstimator::~NoMEstimator() {
 }
-double NoMEstimator::getWeight(double squaredError) const {
+double NoMEstimator::getWeight(double /* squaredError */) const {
   return 1.0;
 }
 std::string NoMEstimator::name() const {

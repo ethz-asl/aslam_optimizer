@@ -101,9 +101,9 @@ class ConstantGenericMatrixExpressionNode : public GenericMatrixExpressionNode<I
   }
   virtual void evaluateImplementation() const {
   }
-  virtual void evaluateJacobiansImplementation(JacobianContainer & outJacobians, const typename base_t::differential_t & chainRuleDifferentail) const {
+  virtual void evaluateJacobiansImplementation(JacobianContainer & /* outJacobians */, const typename base_t::differential_t & /* chainRuleDifferentail */) const {
   }
-  virtual void getDesignVariablesImplementation(DesignVariable::set_t & designVariables) const {
+  virtual void getDesignVariablesImplementation(DesignVariable::set_t & /* designVariables */) const {
   }
 };
 

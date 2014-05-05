@@ -35,7 +35,7 @@ namespace aslam {
         
         
         /// \brief called by the optimizer when an optimization is starting
-        void LevenbergMarquardtTrustRegionPolicy::optimizationStartingImplementation(double J)
+        void LevenbergMarquardtTrustRegionPolicy::optimizationStartingImplementation(double /* J */)
         {
             // initialise lambda:
           _lambda = _lambdaInit;
@@ -47,7 +47,7 @@ namespace aslam {
         }
         
         // Returns true if the solution was successful
-    bool LevenbergMarquardtTrustRegionPolicy::solveSystemImplementation(double J, bool previousIterationFailed, int nThreads, Eigen::VectorXd& outDx)
+    bool LevenbergMarquardtTrustRegionPolicy::solveSystemImplementation(double /* J */, bool previousIterationFailed, int nThreads, Eigen::VectorXd& outDx)
         {
             SM_ASSERT_TRUE(Exception, _solver.get() != NULL, "The solver is null");
             
