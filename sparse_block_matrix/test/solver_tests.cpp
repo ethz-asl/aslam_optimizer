@@ -68,7 +68,6 @@ void testSolver(const std::string & solver_name)
   // 5x3 5x3 5x5
   int rows[] = {3,6,11};
   int cols[] = {3,6,11};
-  typedef typename SOLVER_T::matrix_t SparseMatrixBlock;
   sparse_block_matrix::SparseBlockMatrix<typename SOLVER_T::matrix_t> A(rows,cols,3,3);
 
   Eigen::MatrixXd Adense(11,11);
