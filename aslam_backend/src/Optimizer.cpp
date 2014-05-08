@@ -605,20 +605,15 @@ namespace aslam {
       return _designVariables.size() - _marginalizedStartingBlock;
     }
 
-#define COUTP(X) std::cout << #X << ": " << X << std::endl;
+
     double Optimizer::applyStateUpdate()
     {
       // Apply the update to the dense state.
       int startIdx = 0;
       for (size_t i = 0; i < numDenseDesignVariables(); i++) {
-        //COUTP(i);
         const int dbd = denseVariable(i)->minimalDimensions();
-        //COUTP(dbd);
         Eigen::VectorXd dxS = _dx.segment(startIdx, dbd);
-        //COUTP(dxS.transpose());
         dxS *= denseVariable(i)->scaling();
-        //COUTP(denseVariable(i)->scaling());
-        //denseVariable(i)->update(&_dx[startIdx], dbd);
         if(dbd > 0) {
           denseVariable(i)->update(&dxS[0], dbd);
         }
