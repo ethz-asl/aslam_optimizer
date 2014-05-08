@@ -42,18 +42,18 @@ class NullDifferential : public Differential<TDomain, TScalar> {
   virtual ~NullDifferential() {
   }
 
-  virtual void applyBasisVectorInto(int index, typename base_t::result_vector_t & result) const {
+  virtual void applyBasisVectorInto(int /* index */, typename base_t::result_vector_t & result) const {
     result.setZero();
   }
 
-  virtual void applyInto(const typename base_t::domain_t & tangent_vector, typename base_t::result_vector_t & result) const {
+  virtual void applyInto(const typename base_t::domain_t & /* tangent_vector */, typename base_t::result_vector_t & result) const {
     result.setZero();
   }
 
-  virtual void addToJacobianContainer(JacobianContainer & jc, const DesignVariable * dv) const {
+  virtual void addToJacobianContainer(JacobianContainer & /* jc */, const DesignVariable * /* dv */) const {
   }
 
-  virtual void addToJacobianContainer(JacobianContainer & jc, const DesignVariable * dv, const typename base_t::dyn_matrix_t & jacobian) const {
+  virtual void addToJacobianContainer(JacobianContainer & /* jc */, const DesignVariable * /* dv */, const typename base_t::dyn_matrix_t & /* jacobian */) const {
   }
 
   virtual void convertIntoMatrix(int rows, int cols, typename base_t::dyn_matrix_t & result) const {
@@ -100,15 +100,15 @@ struct DifferentialCalculator {
   typedef typename TDiff::matrix_t matrix_t;
   typedef NullDifferential<typename TDiff::dyn_matrix_t, typename TDiff::scalar_t> compose_result_t;
 
-  inline static void addToJacobianByApplication(const TDiff & diff, JacobianContainer& jc, const DesignVariable* dv) {
+  inline static void addToJacobianByApplication(const TDiff & /* diff */, JacobianContainer& /* jc */, const DesignVariable* /* dv */) {
     throw std::runtime_error("this number of columns is not supported here!");
   }
 
-  inline static matrix_t calcJacobianByApplication(int rows, int cols, const TDiff& diff) {
+  inline static matrix_t calcJacobianByApplication(int /* rows */, int /* cols */, const TDiff& /* diff */) {
     throw std::runtime_error("this number of columns is not supported here!");
   }
 
-  inline static compose_result_t compose(const TDiff & diff, const matrix_t & jacobian) {
+  inline static compose_result_t compose(const TDiff & /* diff */, const matrix_t & /* jacobian */) {
     throw std::runtime_error("this number of columns is not supported here!");
   }
 };
@@ -258,7 +258,7 @@ class MatrixDifferential : public Differential<Eigen::Matrix<TScalar, ICols, 1>,
     jc.add(const_cast<DesignVariable *>(dv), (_mat * jacobian).template cast<double>());
   }
 
-  virtual void convertIntoMatrix(int rows, int cols, typename base_t::dyn_matrix_t & result) const {
+  virtual void convertIntoMatrix(int /* rows */, int /* cols */, typename base_t::dyn_matrix_t & result) const {
     //TODO assertions
     result = _mat;
   }
@@ -299,7 +299,7 @@ class ComposedMatrixDifferential : public ComposedDifferential<Eigen::Matrix<TSc
     return _mat.col(index);
   }
 
-  virtual void convertIntoMatrix(int rows, int cols, dyn_matrix_t & result) const {
+  virtual void convertIntoMatrix(int /* rows */, int /* cols */, dyn_matrix_t & result) const {
     //TODO assertions
     result = _mat;
   }

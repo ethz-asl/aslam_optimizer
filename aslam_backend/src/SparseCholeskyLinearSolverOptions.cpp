@@ -28,7 +28,7 @@ namespace aslam {
       SparseCholeskyLinearSolverOptions::SparseCholeskyLinearSolverOptions() {}
       
     SparseCholeskyLinearSolverOptions::SparseCholeskyLinearSolverOptions(
-        const SparseCholeskyLinearSolverOptions& other) {
+        const SparseCholeskyLinearSolverOptions& /* other */) {
     }
 
     SparseCholeskyLinearSolverOptions&

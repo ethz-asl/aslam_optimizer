@@ -28,7 +28,7 @@ namespace aslam {
       BlockCholeskyLinearSolverOptions::BlockCholeskyLinearSolverOptions() {}
       
     BlockCholeskyLinearSolverOptions::BlockCholeskyLinearSolverOptions(
-        const BlockCholeskyLinearSolverOptions& other) {
+        const BlockCholeskyLinearSolverOptions& /* other */) {
     }
 
     BlockCholeskyLinearSolverOptions&
