@@ -11,6 +11,8 @@ catkin_simple()
 
 include_directories(${EIGEN_INCLUDE_DIRS})
 
+find_package(Boost REQUIRED COMPONENTS system)
+
 cs_add_library(${PROJECT_NAME}
   src/RotationExpression.cpp 
   src/RotationExpressionNode.cpp
@@ -47,6 +49,8 @@ cs_add_library(${PROJECT_NAME}
 
   src/MapTransformation.cpp
   )
+
+target_link_libraries(${PROJECT_NAME} ${Boost_LIBRARIES})
 
 # Avoid clash with tr1::tuple: https://code.google.com/p/googletest/source/browse/trunk/README?r=589#257
 add_definitions(-DGTEST_USE_OWN_TR1_TUPLE=0)

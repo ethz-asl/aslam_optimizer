@@ -4,6 +4,8 @@ project(aslam_backend)
 find_package(catkin_simple REQUIRED)
 catkin_simple()
 
+find_package(Boost REQUIRED COMPONENTS system thread)
+
 include_directories(${Eigen_INCLUDE_DIRS})
 
 #add_definitions( -fPIC -msse2 -mssse3 -march=nocona -Wextra -Winit-self -Woverloaded-virtual -Wnon-virtual-dtor -Wsign-promo -Wno-long-long -std=c++0x -O3)
@@ -42,6 +44,8 @@ cs_add_library(${PROJECT_NAME}
   src/DogLegTrustRegionPolicy.cpp
   src/Optimizer2.cpp
 )
+
+target_link_libraries(${PROJECT_NAME} ${Boost_LIBRARIES} ${TBB_LIBRARIES})
 
 # Avoid clash with tr1::tuple: https://code.google.com/p/googletest/source/browse/trunk/README?r=589#257
 add_definitions(-DGTEST_USE_OWN_TR1_TUPLE=0)

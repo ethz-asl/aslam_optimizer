@@ -614,8 +614,9 @@ namespace aslam {
         const int dbd = denseVariable(i)->minimalDimensions();
         Eigen::VectorXd dxS = _dx.segment(startIdx, dbd);
         dxS *= denseVariable(i)->scaling();
-        //denseVariable(i)->update(&_dx[startIdx], dbd);
-        denseVariable(i)->update(&dxS[0], dbd);
+        if(dbd > 0) {
+          denseVariable(i)->update(&dxS[0], dbd);
+        }
         startIdx += dbd;
       }
       // Track the maximum delta
