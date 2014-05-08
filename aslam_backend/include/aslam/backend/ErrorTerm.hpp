@@ -223,7 +223,7 @@ namespace aslam {
       virtual void buildHessianImplementation(SparseBlockMatrix& outHessian, Eigen::VectorXd& outRhs, bool useMEstimator);
 
       /// \brief get the current value of the error.
-      Eigen::VectorXd vsErrorImplementation() const;
+      virtual Eigen::VectorXd vsErrorImplementation() const;
 
       virtual size_t getDimensionImplementation() const {
         return Dimension;
