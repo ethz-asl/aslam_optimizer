@@ -22,7 +22,7 @@ catkin_add_gtest( ${PROJECT_NAME}_tests
   test/sparse_block_matrix_tests.cpp
 )
 
-target_link_libraries(${PROJECT_NAME}_tests ${PROJECT_NAME})
+target_link_libraries(${PROJECT_NAME}_tests ${PROJECT_NAME} ${TBB_LIBRARIES})
 
 cs_install()
 cs_export()
