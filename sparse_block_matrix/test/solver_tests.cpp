@@ -7,7 +7,6 @@
 
 #include <sparse_block_matrix/linear_solver_cholmod.h>
 #include <sparse_block_matrix/linear_solver_dense.h>
-#include <sparse_block_matrix/linear_solver_csparse.h>
 #include <sparse_block_matrix/linear_solver_spqr.h>
 
 template<typename SOLVER_T>
@@ -122,11 +121,6 @@ TEST(g2oTestSuite, testCholmod)
 //
    testSolver< sparse_block_matrix::LinearSolverQr<Eigen::MatrixXd> >("sparseQR");
   
-  // CSparse doesn't work...who can say why?
-  // Anyhow...good enough. I will stick with Cholmod for now.
-  // And I can always test the solution against the dense solver.
-//  testSolver< sparse_block_matrix::LinearSolverCSparse<Eigen::MatrixXd> >("csparse");
-
   testSolver< sparse_block_matrix::LinearSolverCholmod<Eigen::MatrixXd> >("cholmod");
 
   testSolver< sparse_block_matrix::LinearSolverDense<Eigen::MatrixXd> >("dense");

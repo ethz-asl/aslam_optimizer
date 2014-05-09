@@ -40,13 +40,13 @@ namespace aslam {
       }
     }
 
+  std::ostream& operator<<(std::ostream& os, const aslam::backend::Matrix& ccm)
+  {
+    ccm.write(os);
+    return os;
+  }
 
   } // namespace backend
 } // namespace aslam
 
 
-std::ostream& operator<<(std::ostream& os, const aslam::backend::Matrix& ccm)
-{
-  ccm.write(os);
-  return os;
-}

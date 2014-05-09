@@ -55,9 +55,11 @@ namespace aslam {
 
     };
 
+  std::ostream& operator<<(std::ostream& os, const aslam::backend::Matrix& m);
+
   } // namespace backend
 } // namespace aslam
 
-std::ostream& operator<<(std::ostream& os, const aslam::backend::Matrix& m);
+
 
 #endif /* ASLAM_BACKEND_MATRIX_HPP */
