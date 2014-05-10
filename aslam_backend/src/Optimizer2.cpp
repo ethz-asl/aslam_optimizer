@@ -387,17 +387,17 @@ namespace aslam {
 
         void Optimizer2::computeHessian(SparseBlockMatrix& outH, double lambda)
             {
- 
-                BlockCholeskyLinearSystemSolver* solver = dynamic_cast<BlockCholeskyLinearSystemSolver*>(_solver.get());
-                boost::shared_ptr<BlockCholeskyLinearSystemSolver> solver_sp;
-                solver_sp.reset(new BlockCholeskyLinearSystemSolver());
-                // True here for creating the diagonal conditioning.
-                solver->initMatrixStructure(_designVariables, _errorTerms, true);
+              
+              boost::shared_ptr<BlockCholeskyLinearSystemSolver> solver_sp;
+              solver_sp.reset(new BlockCholeskyLinearSystemSolver());
+              // True here for creating the diagonal conditioning.
+              solver_sp->initMatrixStructure(_designVariables, _errorTerms, true);
                 
-                _options.verbose && std::cout << "Setting the diagonal conditioner to: " << lambda << ".\n";
-                solver->setConstantConditioner(lambda);
-                solver->buildSystem(_options.nThreads, false);
-                solver->copyHessian(outH);
+              _options.verbose && std::cout << "Setting the diagonal conditioner to: " << lambda << ".\n";
+              evaluateError(false);
+              solver_sp->setConstantConditioner(lambda);
+              solver_sp->buildSystem(_options.nThreads, false);
+              solver_sp->copyHessian(outH);
             }
 
       const LinearSystemSolver * Optimizer2::getBaseSolver() const {
