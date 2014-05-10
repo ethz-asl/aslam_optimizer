@@ -56,7 +56,7 @@ namespace aslam {
 
 
     /// \brief Add an error term to the problem
-    void OptimizationProblem::addErrorTerm(boost::shared_ptr<ErrorTerm> et)
+    void OptimizationProblem::addErrorTerm(const boost::shared_ptr<ErrorTerm> & et)
     {
       _errorTerms.push_back(et);
       // add this error term to the multi-map

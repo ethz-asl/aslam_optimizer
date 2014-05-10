@@ -13,7 +13,7 @@ ErrorTerm * (OptimizationProblemBase::*etptr)(size_t i) = &OptimizationProblemBa
 
 void (OptimizationProblem::*adv)( boost::shared_ptr<DesignVariable>) = &OptimizationProblem::addDesignVariable;
 
-void (OptimizationProblem::*aet)( boost::shared_ptr<ErrorTerm>) = &OptimizationProblem::addErrorTerm;
+void (OptimizationProblem::*aet)( const boost::shared_ptr<ErrorTerm> &) = &OptimizationProblem::addErrorTerm;
 
 
 

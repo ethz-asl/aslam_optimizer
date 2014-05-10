@@ -3,6 +3,7 @@
 
 #include <aslam/Exceptions.hpp>
 #include <set>
+#include <boost/shared_ptr.hpp>
 
 namespace aslam {
   namespace backend {
@@ -36,6 +37,12 @@ namespace aslam {
 
       /// \brief Get the error terms associated with a specific design variable
       void getErrors(const DesignVariable* dv, std::set<ErrorTerm*>& outErrorSet);
+
+      /// \brief This is ugly but it is just enough abstract interface
+      ///        to allow error term factories to work
+      virtual void addErrorTerm(const boost::shared_ptr<ErrorTerm> & /* et */) {
+        SM_THROW(std::runtime_error, "Not Implemented");
+      }
     protected:
 
       /// \brief the number of design variables used in this optimization problem
