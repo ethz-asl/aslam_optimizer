@@ -57,6 +57,7 @@ void exportOptimizer()
         .def("optimize", &Optimizer::optimize)
         .def("optimizeDogLeg", &Optimizer::optimizeDogLeg)
 
+        .def("buildGnMatrices", &Optimizer::buildGnMatrices)
         /// \brief Get the optimizer options.
         .add_property("options", make_function(&Optimizer::options,return_internal_reference<>()))
 
@@ -169,7 +170,7 @@ void exportOptimizer()
 
         .def("printTiming", &Optimizer2::printTiming)
         .def("computeHessian", &Optimizer2::computeHessian)
-    
+   
         ;
 }
 
