@@ -40,7 +40,7 @@ namespace aslam {
       void addErrorTerm(ErrorTerm* dv, bool problemOwnsVariable);
 
       /// \brief Add an error term to the problem
-      void addErrorTerm(boost::shared_ptr<ErrorTerm> et);
+      virtual void addErrorTerm(const boost::shared_ptr<ErrorTerm> & et);
 
       /// \brief Remove the error term
       void removeErrorTerm(const ErrorTerm* dv);
