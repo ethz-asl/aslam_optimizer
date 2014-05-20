@@ -1,5 +1,6 @@
 #include <numpy_eigen/boost_python_headers.hpp>
 #include <aslam/backend/OptimizationProblem.hpp>
+#include <aslam/backend/SimpleOptimizationProblem.hpp>
 #include <aslam/backend/ErrorTerm.hpp>
 #include <aslam/backend/DesignVariable.hpp>
 #include <boost/shared_ptr.hpp>
@@ -14,6 +15,10 @@ ErrorTerm * (OptimizationProblemBase::*etptr)(size_t i) = &OptimizationProblemBa
 void (OptimizationProblem::*adv)( boost::shared_ptr<DesignVariable>) = &OptimizationProblem::addDesignVariable;
 
 void (OptimizationProblem::*aet)( const boost::shared_ptr<ErrorTerm> &) = &OptimizationProblem::addErrorTerm;
+
+void (SimpleOptimizationProblem::*sadv)( boost::shared_ptr<DesignVariable>) = &SimpleOptimizationProblem::addDesignVariable;
+
+void (SimpleOptimizationProblem::*saet)( const boost::shared_ptr<ErrorTerm> &) = &SimpleOptimizationProblem::addErrorTerm;
 
 
 
@@ -40,6 +45,16 @@ void exportOptimizationProblem()
 .def("clear", &OptimizationProblem::clear)
 	/// \brief remove an error term:
 .def("removeErrorTerm", &OptimizationProblem::removeErrorTerm)
+    ;
+
+
+  class_<SimpleOptimizationProblem, boost::shared_ptr<SimpleOptimizationProblem>, bases<OptimizationProblemBase> >("SimpleOptimizationProblem", init<>())
+      /// \brief Add a design variable to the problem.
+      .def("addDesignVariable", sadv)
+      /// \brief Add an error term to the problem
+      .def("addErrorTerm", saet)      
+      /// \brief clear the design variables and error terms.
+      .def("clear", &SimpleOptimizationProblem::clear)
     ;
 
 }

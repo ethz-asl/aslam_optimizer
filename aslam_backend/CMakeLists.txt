@@ -22,6 +22,7 @@ cs_add_library(${PROJECT_NAME}
   src/Optimizer.cpp
   src/sparse_matrix_functions.cpp
   src/OptimizationProblem.cpp
+  src/SimpleOptimizationProblem.cpp
   src/JacobianBuilder.cpp
   src/LinearSystemSolver.cpp
   src/BlockCholeskyLinearSystemSolver.cpp
