@@ -32,7 +32,11 @@ void marginalize(
 			std::vector<aslam::backend::ErrorTerm*>& inErrorTerms,
 			int numberOfInputDesignVariablesToRemove,
 			bool useMEstimator,
-			boost::shared_ptr<aslam::backend::MarginalizationPriorErrorTerm>& outPriorErrorTermPtr
+			boost::shared_ptr<aslam::backend::MarginalizationPriorErrorTerm>& outPriorErrorTermPtr,
+			Eigen::MatrixXd& outRtop,
+			std::vector<aslam::backend::DesignVariable*>& designVariablesInvolvedInRtop,
+			size_t numTopRowsInRtop = 0,
+			size_t numThreads = 1
 		);
 } /* namespace backend */
 } /* namespace aslam */
