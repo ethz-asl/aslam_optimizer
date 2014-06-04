@@ -34,13 +34,13 @@ void marginalize(
 		  SM_WARN_STREAM_COND(inDesignVariables.size() == 0, "Zero input design variables in the marginalizer!");
 
 		  // check for duplicates!
-		  std::tr1::unordered_set<aslam::backend::DesignVariable*> inDvSetHT;
+		  std::unordered_set<aslam::backend::DesignVariable*> inDvSetHT;
 		  for(auto it = inDesignVariables.begin(); it != inDesignVariables.end(); ++it)
 		  {
 			  auto ret = inDvSetHT.insert(*it);
 			  SM_ASSERT_TRUE(aslam::Exception, ret.second, "Error! Duplicate design variables in input list!");
 		  }
-		  std::tr1::unordered_set<aslam::backend::ErrorTerm*> inEtSetHT;
+		  std::unordered_set<aslam::backend::ErrorTerm*> inEtSetHT;
 		  for(auto it = inErrorTerms.begin(); it != inErrorTerms.end(); ++it)
 		  {
 			  auto ret = inEtSetHT.insert(*it);
