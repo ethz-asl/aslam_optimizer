@@ -311,8 +311,6 @@ typename _CLASS::tangent_vector_expression_t _CLASS::log(const UnitQuaternionExp
 
   class ResultNode : public result_t::template UnaryOperationResult<ResultNode, other_t> {
   public:
-    typedef typename result_t::template UnaryOperationResult<ResultNode, other_t> base_t;
-
     virtual ~ResultNode() {}
     virtual void evaluateJacobiansImplementation(JacobianContainer & outJacobians, const typename result_t::differential_t & diff) const {
       Eigen::Matrix<TScalar, 3, 4> M = calc_t::dlog(this->getOperandNode().evaluate());
@@ -336,8 +334,6 @@ typename _CLASS::self_with_default_node_t _CLASS::exp(const GenericMatrixExpress
 
   class ResultNode : public result_t::template UnaryOperationResult<ResultNode, other_t> {
   public:
-    typedef typename result_t::template UnaryOperationResult<ResultNode, other_t> base_t;
-
     virtual ~ResultNode() {}
     virtual void evaluateJacobiansImplementation(JacobianContainer & outJacobians, const typename result_t::differential_t & diff) const {
       Eigen::Matrix<TScalar, 4, 3> M = calc_t::dexp(this->getOperandNode().evaluate());
