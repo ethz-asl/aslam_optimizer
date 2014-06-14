@@ -22,7 +22,8 @@ namespace aslam {
     /// \brief Update the design variable.
     void EuclideanPoint::updateImplementation(const double * dp, int size)
     {
-        SM_ASSERT_EQ_DBG(std::runtime_error, size, 3, "Incorrect size");
+      static_cast<void>(size); // used depending on NDEBUG
+      SM_ASSERT_EQ_DBG(std::runtime_error, size, 3, "Incorrect size");
       _p_p = _p;
       
       Eigen::Map< const Eigen::Vector3d > dpv(dp);
