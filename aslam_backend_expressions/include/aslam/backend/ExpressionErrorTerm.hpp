@@ -84,7 +84,7 @@ class ExpressionErrorTerm : public aslam::backend::ErrorTermFs<IDimension> {
       : _expression(expression) {
     DesignVariable::set_t vSet;
     _expression.getDesignVariables(vSet);
-    vector<DesignVariable *> vs;
+    std::vector<DesignVariable *> vs;
     vs.reserve(vSet.size());
     std::copy(vSet.begin(), vSet.end(), back_inserter(vs));
     parent_t::setDesignVariables(vs);
