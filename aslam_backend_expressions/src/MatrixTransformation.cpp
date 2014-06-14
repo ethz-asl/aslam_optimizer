@@ -35,6 +35,7 @@ namespace aslam {
     /// \brief Update the design variable.
     void MatrixTransformation::updateImplementation(const double * dp, int size)
     {
+      static_cast<void>(size); // used depending on NDEBUG
       SM_ASSERT_EQ_DBG(aslam::Exception, size, _UpdateDimension , "Incorrect update size");
       _A_a = _A;
       Eigen::Matrix3d dA;

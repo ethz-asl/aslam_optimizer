@@ -14,7 +14,6 @@
 // You should have received a copy of the GNU Lesser General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-using namespace std;
 
 namespace sparse_block_matrix {
 
@@ -24,6 +23,7 @@ namespace sparse_block_matrix {
     template<typename T>
     bool writeCCSMatrix(const char* filename, int rows, int cols, const T* Ap, const T* Ai, const double* Ax, bool upperTriangleSymmetric)
     {
+	using namespace std;
         vector<TripletEntry> entries;
         entries.reserve(Ap[cols]);
         for (int i=0; i < cols; i++) {

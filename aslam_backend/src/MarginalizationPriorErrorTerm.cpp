@@ -9,6 +9,8 @@
 #include <Eigen/Dense>
 #include <sm/assert_macros.hpp>
 
+using namespace std;
+
 namespace aslam {
 namespace backend {
 

@@ -10,6 +10,7 @@
 #include <aslam/backend/test/ExpressionTests.hpp>
 
 using namespace aslam::backend;
+using namespace std;
 
 TEST(GenericMatrixExpressionNodeTestSuites, testGenericMatrixBasicOperations) {
   try {
