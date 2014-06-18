@@ -602,7 +602,7 @@ Please edit aslam_backend_tutorial/manifest.xml and mainpage.dox to finish creat
 > mkdir aslam_backend_tutorial/test
 \end{lstlisting}
 Now open the file \txt{aslam\_backend\_tutorial/manifest.xml} for editing. The ROS \rospack{Manifest} stores dependencies and some other good things for this package. Here we add a dependency on the backend:
-\listxmlrange{manifest.xml}{../../aslam_backend_tutorial/manifest.xml}{12}{13}
+\listxmlrange{package.xml}{../../aslam_backend_tutorial/package.xml}{12}{13}
 The ROS build system now pulls in all dependencies of the backend.
 \subsection{Create Design Variables}
 Here we have two types of variable that we are estimating: cart positions and wall positions. However, in this example, they are both simple unconstrained scalar variables so it should suffice to implement a single design variable type. The header is simple:
@@ -676,7 +676,7 @@ then type the following at a terminal:
 \end{lstlisting}
 \subsection{Create a Python Wrapper}
 Here we show how to export the error terms and design variables to Python. First, add a dependency on the \txt{numpy\_eigen} package from the Schweizer Messer library and the \txt{aslam\_python} library:
-\listxmlrange{manifest.xml}{../../aslam_backend_tutorial/manifest.xml}{14}{16}
+\listxmlrange{package.xml}{../../aslam_backend_tutorial/package.xml}{14}{16}
 Create a python directory in the tutorial package
 \begin{lstlisting}
 > roscd aslam_backend_tutorial
@@ -686,7 +686,7 @@ Now add a file called \txt{python/aslam\_backend\_tutorial/\_\_init\_\_.py} and 
 \listcpp{python/aslam\_backend\_tutorial/\_\_init\_\_.py}{../../aslam_backend_tutorial/python/aslam_backend_tutorial/__init__.py}
 This is the file that tells python what to do when this module is imported. For more information of python modules, read \href{http://docs.python.org/tutorial/modules.html}{the manual}.
 Adding an ``export'' tag for python in the manifest file will let us use \rospack{roslib} to find and import the python library.
-\listxmlrange{manifest.xml}{../../aslam_backend_tutorial/manifest.xml}{17}{21}
+\listxmlrange{package.xml}{../../aslam_backend_tutorial/package.xml}{17}{21}
 Add some lines to the \txt{CMakeLists.txt} file to compile the python module. The \txt{numpy\_eigen} library has a nice cmake macro to make this easy:
 \listcpprange{CMakeLists.txt}{../../aslam_backend_tutorial/CMakeLists.txt}{40}{49}
 And finally, we can edit the \txt{src/python\_module.cpp} file to build the export module:
