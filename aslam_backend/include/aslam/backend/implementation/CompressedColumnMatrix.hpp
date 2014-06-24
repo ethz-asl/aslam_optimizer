@@ -281,13 +281,14 @@ namespace aslam {
       // Good. We have updated the three elements of this matrix and it should be fine.
       _cols = _cols + Jrows;
       checkMatrixDbg();
-      return JacobianColumnPointer(startValueIndex, elementsPerColumn);
+      return JacobianColumnPointer(startValueIndex, elementsPerColumn, activeDvs.size());
     }
 
     template<typename I>
     void CompressedColumnMatrix<I>::writeJacobians(const JacobianContainer& jc, const JacobianColumnPointer& cp)
     {
       JacobianContainer::map_t::const_iterator it = jc.begin();
+      SM_ASSERT_EQ(Exception, jc.numDesignVariables(), cp.numActiveDesignVariables, "The number of design variables in the Jacobian container should match the number of active design variables found at initialization!");
       int rowOffset = 0;
       for (; it != jc.end(); ++it) {
         for (int c = 0; c < it->second.rows(); ++c) {

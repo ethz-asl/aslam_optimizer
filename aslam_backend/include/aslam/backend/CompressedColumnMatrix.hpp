@@ -21,9 +21,10 @@ namespace aslam {
 
 
     struct JacobianColumnPointer {
-      JacobianColumnPointer(size_t sc = 0, size_t epc = 0) : startValueIndex(sc), elementsPerColumn(epc) {}
+      JacobianColumnPointer(size_t sc = 0, size_t epc = 0, size_t numADvs = 0) : startValueIndex(sc), elementsPerColumn(epc), numActiveDesignVariables(numADvs) {}
       size_t startValueIndex;
       size_t elementsPerColumn;
+      size_t numActiveDesignVariables;
     };
 
 
