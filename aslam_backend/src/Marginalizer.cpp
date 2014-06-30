@@ -100,8 +100,8 @@ void marginalize(
 		  SM_INFO_STREAM("Marginalization optimization problem initialized with " << inDesignVariables.size() << " design variables and " << inErrorTerms.size() << " error terrms");
 		  SM_INFO_STREAM("The Jacobian matrix is " << dim << " x " << columnBase);
 
-		  qrSolver.evaluateError(1, useMEstimator);
-		  qrSolver.buildSystem(1, useMEstimator);
+		  qrSolver.evaluateError(numThreads, useMEstimator);
+		  qrSolver.buildSystem(numThreads, useMEstimator);
 
 
 		  const Eigen::MatrixXd& jacobian = qrSolver.getJacobian();

@@ -11,9 +11,12 @@
 #include <aslam/backend/ErrorTermDs.hpp>
 #include <aslam/backend/DesignVariable.hpp>
 
+#include <Eigen/Core>
+
 #include <boost/shared_ptr.hpp>
 
 #include <list>
+#include <vector>
 
 namespace aslam {
 namespace backend {
@@ -26,8 +29,10 @@ public:
 
   // creates the marginalization error term of the form e(x) = d - R*x
   // designVariables: 	the design variables of this marginalization prior error term
-  MarginalizationPriorErrorTerm(const std::vector<aslam::backend::DesignVariable*>& designVariables,
-     const Eigen::VectorXd& d, const Eigen::MatrixXd& R);
+  MarginalizationPriorErrorTerm(const std::vector<DesignVariable*>& designVariables,
+                                const Eigen::VectorXd& d,
+                                const Eigen::MatrixXd& R);
+
   virtual ~MarginalizationPriorErrorTerm();
 
   int numDesignVariables() { return _designVariables.size(); }
@@ -42,7 +47,7 @@ private:
   // computes the minimal difference of all design variables between the linearization point at marginalization and the current guess (i.e. log(x_bar - x))
   Eigen::VectorXd getDifferenceSinceMarginalization();
 
-  std::vector<aslam::backend::DesignVariable*> _designVariables;
+  std::vector<DesignVariable*> _designVariables;
   Eigen::VectorXd _d;
   Eigen::MatrixXd _R; // R from the QR decomposition!!!
   int _dimensionDesignVariables;

@@ -52,9 +52,10 @@ void exportErrorTerm()
     .def("designVariable", err_dvptr, return_internal_reference<>())
 
     .def("error", &ErrorTerm::vsError)
-	.def("getRawSquaredError", &ErrorTerm::getRawSquaredError)
-	.def("getWeightedSquaredError", &ErrorTerm::getWeightedSquaredError)
-      .def("dimension", &ErrorTerm::dimension)
+	  .def("getRawSquaredError", &ErrorTerm::getRawSquaredError)
+	  .def("getWeightedSquaredError", &ErrorTerm::getWeightedSquaredError)
+    .def("dimension", &ErrorTerm::dimension)
+    .def("getTime", &ErrorTerm::getTime)
 ;
 
   
