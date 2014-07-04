@@ -29,7 +29,7 @@ void marginalize(
 			Eigen::MatrixXd& outCov,
 			std::vector<aslam::backend::DesignVariable*>& outDesignVariablesInRTop,
 			size_t numTopRowsInCov,
-			size_t /* numThreads */)
+			size_t numThreads)
 {
       sm::timing::Timer t0("aslam::backend::marginalize");
 		  SM_WARN_STREAM_COND(inDesignVariables.size() == 0, "Zero input design variables in the marginalizer!");
@@ -146,7 +146,7 @@ void marginalize(
 
               // do QR decomposition
 			  sm::timing::Timer myTimer("QR Decomposition");
-              Eigen::HouseholderQR<Eigen::MatrixXd> qr(jacobian);
+        Eigen::HouseholderQR<Eigen::MatrixXd> qr(jacobian);
 			  Eigen::MatrixXd Q = qr.householderQ();
 			  Eigen::MatrixXd R = qr.matrixQR().triangularView<Eigen::Upper>();
 			  Eigen::VectorXd d = Q.transpose()*b;
@@ -170,13 +170,13 @@ void marginalize(
 			  SM_ASSERT_GE(aslam::Exception, R.cols(), numTopRowsInCov, "Cannot extract " << numTopRowsInCov << " cols of R because it only has " << R.cols() << " cols.");
 			  //outRtop = R.block(0, 0, numTopRowsInRtop, numTopRowsInRtop);
 
-              // cut off the zero rows at the bottom
-              R_reduced = R.block(dimOfDesignVariablesToRemove, dimOfDesignVariablesToRemove, dimOfRemainingDesignVariables, dimOfRemainingDesignVariables);
-			  //R_reduced = R.block(dimOfDesignVariablesToRemove, dimOfDesignVariablesToRemove, numRowsToKeep, dimOfRemainingDesignVariables);
+        // cut off the zero rows at the bottom
+        R_reduced = R.block(dimOfDesignVariablesToRemove, dimOfDesignVariablesToRemove, dimOfRemainingDesignVariables, dimOfRemainingDesignVariables);
+        //R_reduced = R.block(dimOfDesignVariablesToRemove, dimOfDesignVariablesToRemove, numRowsToKeep, dimOfRemainingDesignVariables);
 
-              d_reduced = d.segment(dimOfDesignVariablesToRemove, dimOfRemainingDesignVariables);
-              //d_reduced = d.segment(dimOfDesignVariablesToRemove, numRowsToKeep);
-              //dimOfPriorErrorTerm = dimOfRemainingDesignVariables;
+        d_reduced = d.segment(dimOfDesignVariablesToRemove, dimOfRemainingDesignVariables);
+        //d_reduced = d.segment(dimOfDesignVariablesToRemove, numRowsToKeep);
+        //dimOfPriorErrorTerm = dimOfRemainingDesignVariables;
 		  }
 
 		  // now create the new error term
