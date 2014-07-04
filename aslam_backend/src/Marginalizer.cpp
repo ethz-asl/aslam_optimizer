@@ -31,6 +31,7 @@ void marginalize(
 			size_t numTopRowsInCov,
 			size_t numThreads)
 {
+      sm::timing::Timer t0("aslam::backend::marginalize");
 		  SM_WARN_STREAM_COND(inDesignVariables.size() == 0, "Zero input design variables in the marginalizer!");
 
 		  // check for duplicates!
@@ -95,7 +96,7 @@ void marginalize(
 			}
 
 		  aslam::backend::DenseQrLinearSystemSolver qrSolver;
-          qrSolver.initMatrixStructure(inDesignVariables, inErrorTerms, false);
+      qrSolver.initMatrixStructure(inDesignVariables, inErrorTerms, false);
 
 		  SM_INFO_STREAM("Marginalization optimization problem initialized with " << inDesignVariables.size() << " design variables and " << inErrorTerms.size() << " error terrms");
 		  SM_INFO_STREAM("The Jacobian matrix is " << dim << " x " << columnBase);
@@ -114,6 +115,7 @@ void marginalize(
 		  int dimOfRemainingDesignVariables = jcols - dimOfDesignVariablesToRemove;
 		  //int dimOfPriorErrorTerm = jrows;
 
+		  sm::timing::Timer t1("Rank Computation");
 		  // check the rank
 		  Eigen::FullPivLU<Eigen::MatrixXd> lu_decomp(jacobian);
 		  //lu_decomp.setThreshold(1e-20);
@@ -126,6 +128,7 @@ void marginalize(
 		  {
 			  SM_WARN("Marginalization jacobian is rank deficient!");
 		  }
+		  t1.stop();
 		  //SM_ASSERT_FALSE(aslam::Exception, rankDeficient, "Right now, we don't want the jacobian to be rank deficient - ever...");
 
 		  Eigen::MatrixXd R_reduced;
@@ -151,12 +154,12 @@ void marginalize(
 
 			  if(numTopRowsInCov > 0)
 			  {
-				sm::timing::Timer myTimer("Covariance computation");
-				Eigen::FullPivLU<Eigen::MatrixXd> lu_decomp(R);
-				Eigen::MatrixXd Rinv = lu_decomp.inverse();
-				Eigen::MatrixXd covariance = Rinv * Rinv.transpose();
-				outCov = covariance.block(0, 0, numTopRowsInCov, numTopRowsInCov);
-				myTimer.stop();
+          sm::timing::Timer myTimer("Covariance computation");
+          Eigen::FullPivLU<Eigen::MatrixXd> lu_decomp(R);
+          Eigen::MatrixXd Rinv = lu_decomp.inverse();
+          Eigen::MatrixXd covariance = Rinv * Rinv.transpose();
+          outCov = covariance.block(0, 0, numTopRowsInCov, numTopRowsInCov);
+          myTimer.stop();
 			  }
 
 //			  size_t numRowsToKeep = rank - dimOfDesignVariablesToRemove;
@@ -182,15 +185,17 @@ void marginalize(
 		  outPriorErrorTermPtr.swap(err);
 
 		  // restore initial block indices to prevent side effects
-          for (size_t i = 0; i < inDesignVariables.size(); ++i) {
-              inDesignVariables[i]->setBlockIndex(originalBlockIndices[i]);
-              inDesignVariables[i]->setColumnBase(originalColumnBase[i]);
-          }
-          int index = 0;
-          for(std::vector<aslam::backend::ErrorTerm*>::iterator it = inErrorTerms.begin(); it != inErrorTerms.end(); ++it)
-          {
-              (*it)->setRowBase(originalRowBase[index++]);
-          }
+      for (size_t i = 0; i < inDesignVariables.size(); ++i) {
+          inDesignVariables[i]->setBlockIndex(originalBlockIndices[i]);
+          inDesignVariables[i]->setColumnBase(originalColumnBase[i]);
+      }
+      int index = 0;
+      for(std::vector<aslam::backend::ErrorTerm*>::iterator it = inErrorTerms.begin(); it != inErrorTerms.end(); ++it)
+      {
+          (*it)->setRowBase(originalRowBase[index++]);
+      }
+
+      t0.stop();
 }
 
 
