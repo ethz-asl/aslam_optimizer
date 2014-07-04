@@ -12,6 +12,7 @@
 
 namespace aslam {
   namespace backend {
+    class DesignVariable;
 
     class JacobianContainer;
 

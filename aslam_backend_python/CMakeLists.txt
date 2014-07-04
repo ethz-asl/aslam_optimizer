@@ -16,6 +16,7 @@ add_python_export_library(${PROJECT_NAME} python/aslam_backend
   src/OptimizationProblem.cpp
   src/DesignVariable.cpp
   src/ErrorTerm.cpp
+  src/ErrorTermDs.cpp
   src/MEstimators.cpp
   src/JacobianContainer.cpp
   src/BackendExpressions.cpp
@@ -24,6 +25,7 @@ add_python_export_library(${PROJECT_NAME} python/aslam_backend
   src/ErrorTermTransformation.cpp
   src/TrustRegionPolicies.cpp
   src/SparseBlockMatrix.cpp
+  src/DesignVariableTimePair.cpp
 )
 
 find_package(Boost REQUIRED COMPONENTS thread) 
