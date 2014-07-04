@@ -29,7 +29,7 @@ void marginalize(
 			Eigen::MatrixXd& outCov,
 			std::vector<aslam::backend::DesignVariable*>& outDesignVariablesInRTop,
 			size_t numTopRowsInCov,
-			size_t numThreads)
+			size_t /* numThreads */)
 {
       sm::timing::Timer t0("aslam::backend::marginalize");
 		  SM_WARN_STREAM_COND(inDesignVariables.size() == 0, "Zero input design variables in the marginalizer!");

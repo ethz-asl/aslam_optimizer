@@ -5,6 +5,7 @@
 .pydevproject
 */.settings/org.eclipse.cdt.core.prefs
 */.settings/org.eclipse.cdt.ui.prefs
+*/.settings/language.settings.xml
 *.pyc
 *.so
 aslam_backend/bin/

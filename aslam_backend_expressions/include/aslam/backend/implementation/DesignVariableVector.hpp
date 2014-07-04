@@ -38,6 +38,7 @@ namespace aslam {
     template<int D>
     void DesignVariableVector<D>::updateImplementation(const double * dp, int size)
     {
+      static_cast<void>(size); // unused in non debug build
       SM_ASSERT_EQ_DBG(aslam::InvalidArgumentException, size, D, "Update dimension doesn't match the state dimension");
       Eigen::Map< const vector_t > dv(dp);
       _p_v = _v;

@@ -306,13 +306,13 @@ GenericMatrixExpression<3, (ICols == 1 ? IColsOther : ICols), TScalar> _CLASS::c
 
     inline typename base_t::apply_diff_return_t applyLhsDiff(const typename base_t::lhs_t::tangent_vector_t & tangent_vector) const {
       auto rhs = this->getRhsNode().evaluate();
-      typename base_t::apply_diff_return_t result(3, max(tangent_vector.cols(), rhs.cols()));
+      typename base_t::apply_diff_return_t result(3, std::max(tangent_vector.cols(), rhs.cols()));
       calculator_t::calcCrossInto(tangent_vector, rhs, result);
       return result;
     }
     inline typename base_t::apply_diff_return_t applyRhsDiff(const typename base_t::rhs_t::tangent_vector_t & tangent_vector) const {
       auto lhs = this->getLhsNode().evaluate();
-      typename base_t::apply_diff_return_t result(3, max(lhs.cols(), tangent_vector.cols()));
+      typename base_t::apply_diff_return_t result(3, std::max(lhs.cols(), tangent_vector.cols()));
       calculator_t::calcCrossInto(lhs, tangent_vector, result);
       return result;
     }

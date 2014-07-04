@@ -186,13 +186,15 @@ class ExpressionJacobianTestTraits {
     int jacobianCols = JcM.cols();
     Eigen::MatrixXd Jest = ExpressionNumDiffTraits<TExpression>::numericallyCalcJacobian(expression, jacobianCols, expressionTester.getDesignVariables(), expressionTester.getEps());
 
+    auto JccrM = expressionTester.getJacobian(Jccr);
+    
     sm::eigen::assertNear(Jest, JcM, expressionTester.getTolerance(), SM_SOURCE_FILE_POS, "Testing the Jacobian with finite differences");
-    sm::eigen::assertEqual(JcM, expressionTester.getJacobian(Jccr), SM_SOURCE_FILE_POS, "Testing whether chaining identity changes nothing.");
+    sm::eigen::assertEqual(JcM, JccrM, SM_SOURCE_FILE_POS, "Testing whether chaining identity changes nothing.");
 
     if(expressionTester.getPrintResult()){
       std::cout << "Jest=\n" << Jest << std::endl;
       std::cout << "Jc=\n" << JcM << std::endl;
-      std::cout << "Jccr=\n" << expressionTester.getJacobian(Jccr) << std::endl;
+      std::cout << "Jccr=\n" << JccrM << std::endl;
     }
   }
 };

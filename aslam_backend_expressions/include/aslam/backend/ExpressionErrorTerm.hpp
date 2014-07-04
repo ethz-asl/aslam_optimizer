@@ -17,6 +17,9 @@
 namespace aslam {
 namespace backend {
 
+template <typename TScalar>
+class GenericScalarExpression;
+
 namespace internal {
 template<typename TExpression>
 struct ExpressionDimensionTraits {
@@ -51,6 +54,23 @@ struct ExpressionDimensionTraits<GenericScalarExpression<TScalar> > {
     Dimension = 1
   };
 };
+
+template <typename TExpression>
+struct ExpressionToEigenVectorTraits{
+	template <typename TValue>
+	static const TValue & toEigenErrorVector(const TValue & error){
+		return error;
+	}
+};
+
+template <typename TScalar>
+struct ExpressionToEigenVectorTraits<GenericScalarExpression<TScalar>>{
+	static Eigen::Matrix<double, 1, 1> toEigenErrorVector(const TScalar & error){
+		Eigen::Matrix<double, 1, 1> ret;
+		ret << (double)error;
+		return ret;
+	}
+};
 }
 
 template<typename TExpression, int IDimension = internal::ExpressionDimensionTraits<TExpression>::Dimension>
@@ -64,7 +84,7 @@ class ExpressionErrorTerm : public aslam::backend::ErrorTermFs<IDimension> {
       : _expression(expression) {
     DesignVariable::set_t vSet;
     _expression.getDesignVariables(vSet);
-    vector<DesignVariable *> vs;
+    std::vector<DesignVariable *> vs;
     vs.reserve(vSet.size());
     std::copy(vSet.begin(), vSet.end(), back_inserter(vs));
     parent_t::setDesignVariables(vs);
@@ -74,7 +94,7 @@ class ExpressionErrorTerm : public aslam::backend::ErrorTermFs<IDimension> {
 
   /// \brief evaluate the error term
   virtual double evaluateErrorImplementation() {
-    auto error = _expression.evaluate();
+    auto error = internal::ExpressionToEigenVectorTraits<TExpression>::toEigenErrorVector(_expression.evaluate());
     this->setError(error);
     auto tmp = (this->sqrtInvR() * error).eval();
     return tmp.dot(tmp);

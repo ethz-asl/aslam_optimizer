@@ -26,8 +26,6 @@
 
 #include <cholmod.h>
 
-using namespace std;
-
 namespace sparse_block_matrix {
 
 
