@@ -28,6 +28,7 @@ namespace aslam {
     /// \brief Update the design variable.
     void RotationQuaternion::updateImplementation(const double * dp, int size) 
     {
+      static_cast<void>(size); // used only in debug build
       SM_ASSERT_EQ_DBG(Exception, size, 3, "Incorrect update size");
       _p_q = _q;
       Eigen::Map<const Eigen::Vector3d> dpv(dp);
