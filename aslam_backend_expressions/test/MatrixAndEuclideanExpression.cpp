@@ -523,6 +523,40 @@ TEST(EuclideanExpressionNodeTestSuites, testTransformationTransformedPoint)
     }
 }
 
+// Test that the jacobian matches the finite difference jacobian
+TEST(EuclideanExpressionNodeTestSuites, testTransformationTransformedEuclideanPoint)
+{
+  try
+    {
+      Transformation T;
+      boost::shared_ptr<MappedRotationQuaternion> outQ;
+      boost::shared_ptr<MappedEuclideanPoint> outT;
+      T.setRandom();
+      TransformationExpression A(transformationToExpression(T,outQ,outT));
+      outQ->setActive(true);
+      outQ->setBlockIndex(0);
+      outT->setActive(true);
+      outT->setBlockIndex(1);
+
+      
+      EuclideanPoint p(Eigen::Vector3d::Random());
+      p.setActive(true);
+      p.setBlockIndex(2);
+
+      EuclideanExpression TTimesP = A*p.toExpression();
+
+      SCOPED_TRACE("");
+      testJacobian(TTimesP);
+      SCOPED_TRACE("");
+      
+      sm::eigen::assertNear(T * p.toEuclidean(), TTimesP.toEuclidean(), 1e-13, SM_SOURCE_FILE_POS, "Testing the result is correct");
+    }
+  catch(std::exception const & e)
+    {
+      FAIL() << e.what();
+    }
+}
+
 
 // Test that the jacobian matches the finite difference jacobian
 TEST(EuclideanExpressionNodeTestSuites, testRotationParameters)

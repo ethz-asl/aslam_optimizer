@@ -75,7 +75,9 @@ namespace aslam {
     }
 
 
-    // EuclideanExpression operator*(const EuclideanExpression & rhs) const;
+    EuclideanExpression TransformationExpression::operator*(const EuclideanExpression & rhs) const{
+      return (*this * rhs.toHomogeneousExpression()).toEuclideanExpression();
+    }
 
     HomogeneousExpression TransformationExpression::operator*(const HomogeneousExpression & rhs) const
     {
