@@ -2,12 +2,14 @@
 #define ASLAM_MESTIMATOR_POLICIES_HPP
 
 #include <string>
+#include <boost/shared_ptr.hpp>
 
 namespace aslam {
   namespace backend {
 
     class MEstimator {
     public:
+      typedef boost::shared_ptr<MEstimator> Ptr;
       virtual ~MEstimator();
       virtual double getWeight(double squaredError) const = 0;
       virtual std::string name() const = 0;
