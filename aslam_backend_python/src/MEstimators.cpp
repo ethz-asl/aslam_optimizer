@@ -24,6 +24,9 @@ void exportMEstimators()
     class_< CauchyMEstimator, boost::shared_ptr<CauchyMEstimator>, bases<MEstimator> >("CauchyMEstimator", init<double>())
   ;
 
+    class_< FixedWeightMEstimator, boost::shared_ptr<FixedWeightMEstimator>, bases<MEstimator> >("CauchyMEstimator", init<double>())
+        .def("setWeight", &FixedWeightMEstimator::setWeight)
+  ;
   
   
   class_< HuberMEstimator, boost::shared_ptr<HuberMEstimator>, bases<MEstimator> >("HuberMEstimator", init<double>())

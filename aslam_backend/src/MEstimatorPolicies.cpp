@@ -115,5 +115,25 @@ double BlakeZissermanMEstimator::computeEpsilon(size_t df, double pCut,
   return (1 - wCut) / wCut * exp(-chi2InvCDF(pCut, df));
 }
 
+FixedWeightMEstimator::FixedWeightMEstimator(double weight) : _weight(weight) {
+
+}
+FixedWeightMEstimator::~FixedWeightMEstimator() {
+
+}
+double FixedWeightMEstimator::getWeight(double /* error */) const {
+  return _weight;
+}
+
+void FixedWeightMEstimator::setWeight(double weight) {
+  _weight = weight;
+}
+
+std::string FixedWeightMEstimator::name() const {
+  std::stringstream ss;
+  ss << "Fixed-Weight(" << _weight << ")";
+  return ss.str();
+}
+
 } // namespace backend
 } // namespace aslam
