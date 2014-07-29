@@ -1,10 +1,11 @@
 #include <aslam/backend/MEstimatorPolicies.hpp>
+#include <boost/math/distributions/chi_squared.hpp>
 
+#include <iomanip>
 #include <cmath>
-
 #include <sstream>
 
-#include <boost/math/distributions/chi_squared.hpp>
+
 
 namespace aslam {
 namespace backend {
@@ -131,7 +132,7 @@ void FixedWeightMEstimator::setWeight(double weight) {
 
 std::string FixedWeightMEstimator::name() const {
   std::stringstream ss;
-  ss << "Fixed-Weight(" << _weight << ")";
+  ss << "Fixed-Weight(" << std::setprecision(11) << std::scientific << _weight << ")";
   return ss.str();
 }
 
