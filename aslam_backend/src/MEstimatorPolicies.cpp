@@ -1,10 +1,11 @@
 #include <aslam/backend/MEstimatorPolicies.hpp>
+#include <boost/math/distributions/chi_squared.hpp>
 
+#include <iomanip>
 #include <cmath>
-
 #include <sstream>
 
-#include <boost/math/distributions/chi_squared.hpp>
+
 
 namespace aslam {
 namespace backend {
@@ -113,6 +114,26 @@ double BlakeZissermanMEstimator::chi2InvCDF(double p, size_t df) const {
 double BlakeZissermanMEstimator::computeEpsilon(size_t df, double pCut,
                                                 double wCut) const {
   return (1 - wCut) / wCut * exp(-chi2InvCDF(pCut, df));
+}
+
+FixedWeightMEstimator::FixedWeightMEstimator(double weight) : _weight(weight) {
+
+}
+FixedWeightMEstimator::~FixedWeightMEstimator() {
+
+}
+double FixedWeightMEstimator::getWeight(double /* error */) const {
+  return _weight;
+}
+
+void FixedWeightMEstimator::setWeight(double weight) {
+  _weight = weight;
+}
+
+std::string FixedWeightMEstimator::name() const {
+  std::stringstream ss;
+  ss << "Fixed-Weight(" << std::setprecision(11) << std::scientific << _weight << ")";
+  return ss.str();
 }
 
 } // namespace backend

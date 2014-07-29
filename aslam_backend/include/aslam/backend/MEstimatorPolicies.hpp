@@ -42,6 +42,20 @@ namespace aslam {
       double _sigma2;
     };
 
+
+  /// \class FixedWeightMEstimator
+  /// weights errors by a fixed, user supplied weight
+    class FixedWeightMEstimator : public MEstimator {
+    public:
+      FixedWeightMEstimator(double weight);
+      virtual ~FixedWeightMEstimator();
+      virtual double getWeight(double error) const;
+      virtual void setWeight(double weight);
+      virtual std::string name() const;
+
+      double _weight;
+    };
+
   
     class HuberMEstimator : public MEstimator {
     public:
