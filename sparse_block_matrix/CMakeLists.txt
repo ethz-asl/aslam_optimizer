@@ -7,6 +7,8 @@ project(sparse_block_matrix)
 find_package(catkin_simple REQUIRED)
 catkin_simple()
 
+add_definitions(-std=c++0x)
+
 cs_add_library(${PROJECT_NAME} 
   src/matrix_structure.cpp
   src/sparse_helper.cpp

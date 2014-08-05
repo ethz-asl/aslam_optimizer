@@ -15,6 +15,7 @@
   <build_depend>sm_random</build_depend>
   <build_depend>sm_timing</build_depend>
   <build_depend>sm_logging</build_depend>
+  <build_depend>sm_eigen</build_depend>
   <build_depend>sm_property_tree</build_depend>
   <build_depend>suitesparse</build_depend>
   <build_depend>TBB</build_depend>
@@ -26,6 +27,7 @@
   <run_depend>sm_timing</run_depend>
   <run_depend>sm_logging</run_depend>
   <run_depend>sm_property_tree</run_depend>
+  <run_depend>eigen_catkin</run_depend>
   <run_depend>TBB</run_depend>
   <run_depend>asl_cmake_modules</run_depend>
 
