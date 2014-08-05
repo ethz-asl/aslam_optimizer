@@ -4,6 +4,8 @@ project(aslam_backend_tutorial)
 find_package(catkin_simple REQUIRED)
 catkin_simple()
 
+add_definitions(-std=c++0x)
+
 cs_add_library(${PROJECT_NAME}
   src/ScalarDesignVariable.cpp
   src/ErrorTermObservation.cpp
