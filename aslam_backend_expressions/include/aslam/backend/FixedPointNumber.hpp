@@ -3,6 +3,7 @@
 
 #include <cstdint>
 #include <limits>
+#include <type_traits>
 
 namespace aslam {
 namespace backend {
@@ -35,14 +36,11 @@ struct BiggerType<std::int64_t> {
   typedef long double type;
 };
 
-#ifndef __APPLE__
-// On apple long long and std::int64_t are the same
-// and this causes a compiler error
+// have a explicit specialization for long long if it is something else than int64 (even though having the same size on some compilers!)
 template <>
-struct BiggerType<long long> {
+struct BiggerType<typename std::enable_if<!std::is_same<std::int64_t, long long>::value, long long>::type> {
   typedef long double type;
 };
-#endif
 
 template <typename Integer_, std::uintmax_t Divider>
 class FixedPointNumber{
