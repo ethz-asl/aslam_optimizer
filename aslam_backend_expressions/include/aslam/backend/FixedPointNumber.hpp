@@ -8,45 +8,50 @@
 namespace aslam {
 namespace backend {
 
-template <typename Integer_>
-struct BiggerType;
+namespace internal {
+template <bool Cond, typename IfTrue, typename IfFalse>
+struct SwitchType;
 
+template <typename IfTrue, typename IfFalse>
+struct SwitchType<true, IfTrue, IfFalse>{
+  typedef IfTrue type;
+};
+
+template <typename IfTrue, typename IfFalse>
+struct SwitchType<false, IfTrue, IfFalse>{
+  typedef IfFalse type;
+};
+
+template <unsigned char SizeInBytes>
+struct NextBiggerNumberTypeBySize;
 
 template <>
-struct BiggerType<char> {
+struct NextBiggerNumberTypeBySize<1> {
   typedef std::int16_t type;
 };
 
 template <>
-struct BiggerType<std::int8_t> {
-  typedef std::int16_t type;
-};
-
-template <>
-struct BiggerType<std::int16_t> {
+struct NextBiggerNumberTypeBySize<2> {
   typedef std::int32_t type;
 };
 
 template <>
-struct BiggerType<std::int32_t> {
+struct NextBiggerNumberTypeBySize<4> {
   typedef std::int64_t type;
 };
+
 template <>
-struct BiggerType<std::int64_t> {
-  typedef long double type;
+struct NextBiggerNumberTypeBySize<8> {
+  typedef SwitchType<(sizeof(long long) > 8), long long, long double>::type type;
 };
 
-// have a explicit specialization for long long if it is something else than int64 (even though having the same size on some compilers!)
-template <>
-struct BiggerType<typename std::enable_if<!std::is_same<std::int64_t, long long>::value, long long>::type> {
-  typedef long double type;
-};
+} // namespace internal
 
 template <typename Integer_, std::uintmax_t Divider>
 class FixedPointNumber{
  public:
   typedef Integer_ Integer;
-  typedef typename BiggerType<Integer>::type NextBiggerType;
+  typedef typename internal::NextBiggerNumberTypeBySize<sizeof(Integer)>::type NextBiggerType;
 
   inline constexpr static std::uintmax_t getDivider(){ return Divider; }
 
