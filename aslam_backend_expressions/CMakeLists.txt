@@ -7,7 +7,7 @@ SET(CMAKE_CXX_FLAGS "-std=c++0x")
 
 find_package(catkin_simple REQUIRED)
 
-catkin_simple()
+catkin_simple(ALL_DEPS_REQUIRED)
 
 include_directories(${EIGEN_INCLUDE_DIRS})
 
