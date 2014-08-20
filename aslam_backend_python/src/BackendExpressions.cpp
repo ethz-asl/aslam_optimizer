@@ -56,7 +56,10 @@ void exportVectorExpression()
     std::stringstream str;
     str << "VectorExpression" << D;
 
-    class_<VectorExpression<D>, boost::shared_ptr<VectorExpression<D> > >(str.str().c_str(), init<boost::shared_ptr<VectorExpressionNode<D> > >() )
+    class_<
+      VectorExpression<D>, 
+      boost::shared_ptr< VectorExpression<D> > 
+      >(str.str().c_str(), init<boost::shared_ptr<VectorExpressionNode<D> > >() )
     .def("toValue", &VectorExpression<D>::toValue)
     .def("evaluateJacobians", &evaluateJacobians1<VectorExpression<D> >)
     .def("evaluateJacobians", &evaluateJacobians2<VectorExpression<D> >)
