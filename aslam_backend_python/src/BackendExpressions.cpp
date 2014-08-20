@@ -183,7 +183,12 @@ void exportBackendExpressions()
   exportDesignVariableVector<7>();
   exportDesignVariableVector<8>();
     
-    exportVectorExpression<1>();
+  exportVectorExpression<1>();
+  exportVectorExpression<2>();
+  exportVectorExpression<3>();
+  exportVectorExpression<4>();
+  exportVectorExpression<5>();
+  exportVectorExpression<6>();
 
 
   class_<ScalarExpression, boost::shared_ptr<ScalarExpression> >("ScalarExpression", init<boost::shared_ptr<ScalarExpressionNode> > () )
