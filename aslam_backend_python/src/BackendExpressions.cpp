@@ -162,8 +162,6 @@ void exportBackendExpressions()
   .def("getDesignVariables", &getDesignVariables<TransformationBasic>)
      ;
 
-
-
   exportDesignVariableMappedVector<1>();
   exportDesignVariableMappedVector<2>();
   exportDesignVariableMappedVector<3>();
@@ -188,7 +186,6 @@ void exportBackendExpressions()
   exportVectorExpression<4>();
   exportVectorExpression<5>();
   exportVectorExpression<6>();
-
 
   class_<ScalarExpression, boost::shared_ptr<ScalarExpression> >("ScalarExpression", init<boost::shared_ptr<ScalarExpressionNode> > () )
       .def(init<double>())
