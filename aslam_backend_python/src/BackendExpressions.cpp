@@ -55,12 +55,11 @@ void exportVectorExpression()
 {
     std::stringstream str;
     str << "VectorExpression" << D;
-   // class_< VectorExpression<D>, boost::shared_ptr<VectorExpression<D> >("VectorExpression", init<boost::shared_ptr<VectorExpressionNode<D> > >() )
-   // .def("value", &DesignVariableVector<D>::value, return_value_policy<copy_const_reference>())
-   // .def("toExpression", &DesignVariableVector<D>::toExpression)
-   // ;
-    
-    class_<VectorExpression<D>, boost::shared_ptr<VectorExpression<D> > >("VectorExpression", init<boost::shared_ptr<VectorExpressionNode<D> > >() )
+
+    class_<
+      VectorExpression<D>, 
+      boost::shared_ptr< VectorExpression<D> > 
+      >(str.str().c_str(), init<boost::shared_ptr<VectorExpressionNode<D> > >() )
     .def("toValue", &VectorExpression<D>::toValue)
     .def("evaluateJacobians", &evaluateJacobians1<VectorExpression<D> >)
     .def("evaluateJacobians", &evaluateJacobians2<VectorExpression<D> >)
@@ -163,8 +162,6 @@ void exportBackendExpressions()
   .def("getDesignVariables", &getDesignVariables<TransformationBasic>)
      ;
 
-
-
   exportDesignVariableMappedVector<1>();
   exportDesignVariableMappedVector<2>();
   exportDesignVariableMappedVector<3>();
@@ -183,8 +180,12 @@ void exportBackendExpressions()
   exportDesignVariableVector<7>();
   exportDesignVariableVector<8>();
     
-    exportVectorExpression<1>();
-
+  exportVectorExpression<1>();
+  exportVectorExpression<2>();
+  exportVectorExpression<3>();
+  exportVectorExpression<4>();
+  exportVectorExpression<5>();
+  exportVectorExpression<6>();
 
   class_<ScalarExpression, boost::shared_ptr<ScalarExpression> >("ScalarExpression", init<boost::shared_ptr<ScalarExpressionNode> > () )
       .def(init<double>())

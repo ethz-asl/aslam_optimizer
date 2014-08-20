@@ -195,7 +195,7 @@ class ComposedDifferential : public Differential<TDomain, TScalar> {
     return internal::DifferentialCalculator<DERIVED>::compose(getDerived(), jacobian);
   }
 
-  inline next_domain_t apply(const domain_t & tangent_vector) const {
+  inline next_domain_t apply(const domain_t & /* tangent_vector */) const {
     throw std::runtime_error("this method has to be statically overridden!");
   }
 
