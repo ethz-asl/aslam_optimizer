@@ -165,45 +165,12 @@ namespace aslam {
           
         ScalarExpressionNodeConstant::ScalarExpressionNodeConstant(double s) : _s(s)
         {
-            
         }
 
         ScalarExpressionNodeConstant::~ScalarExpressionNodeConstant()
         {
-
         }
 
-        ScalarExpressionNodeFromVectorExpression::ScalarExpressionNodeFromVectorExpression(boost::shared_ptr<VectorExpressionNode<1> > lhs) :
-            _lhs(lhs)
-        {
-
-        }
-
-        ScalarExpressionNodeFromVectorExpression::~ScalarExpressionNodeFromVectorExpression()
-        {
-
-        }
-
-        double ScalarExpressionNodeFromVectorExpression::toScalarImplementation() const
-        {
-            return _lhs->evaluate()(0);
-        }
-
-        void ScalarExpressionNodeFromVectorExpression::evaluateJacobiansImplementation(JacobianContainer & outJacobians) const
-        {
-            _lhs->evaluateJacobians(outJacobians);
-        }
-
-        void ScalarExpressionNodeFromVectorExpression::evaluateJacobiansImplementation(JacobianContainer & outJacobians, const Eigen::MatrixXd & applyChainRule) const
-        {
-            _lhs->evaluateJacobians(outJacobians, applyChainRule);
-        }
-
-        void ScalarExpressionNodeFromVectorExpression::getDesignVariablesImplementation(DesignVariable::set_t & designVariables) const
-        {
-            _lhs->getDesignVariables(designVariables);
-        }
-        
         ScalarExpressionNodeNegated::ScalarExpressionNodeNegated(boost::shared_ptr<ScalarExpressionNode> rhs) :
             _rhs(rhs)
         {
