@@ -21,6 +21,7 @@ namespace aslam {
       typedef Eigen::Vector3d value_t;
       typedef Eigen::Vector3d vector_t;
 
+      EuclideanExpression();
       EuclideanExpression(EuclideanExpressionNode * designVariable);
       EuclideanExpression(boost::shared_ptr<EuclideanExpressionNode> designVariable);
       EuclideanExpression(const VectorExpression<3> & vectorExpression);
@@ -43,14 +44,15 @@ namespace aslam {
       EuclideanExpression operator-(const Eigen::Vector3d & p) const;
       EuclideanExpression operator-() const;
       EuclideanExpression operator*(const ScalarExpression& s) const;
+//      EuclideanExpression operator*(double s) const;
 
       void getDesignVariables(DesignVariable::set_t & designVariables) const;
 
       boost::shared_ptr<EuclideanExpressionNode> root() { return _root; }
 
-    private:
-      EuclideanExpression();
+      bool isEmpty() const { return !_root; }
 
+    private:
       friend class RotationExpression;
       friend class MatrixExpression;
       

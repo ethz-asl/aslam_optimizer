@@ -23,6 +23,9 @@ namespace aslam {
     public:
         SM_DEFINE_EXCEPTION(Exception, std::runtime_error);
 
+      /// \breif initialize an empty expression.
+      RotationExpression() {}
+
       /// \breif initialize from an existing node.
       RotationExpression(boost::shared_ptr<RotationExpressionNode> root);
 
@@ -54,9 +57,9 @@ namespace aslam {
       void getDesignVariables(DesignVariable::set_t & designVariables) const;
 
       boost::shared_ptr<RotationExpressionNode> root() const { return _root; }
+      bool isEmpty() const { return !(bool) _root; }
 
     private:
-      RotationExpression();
       boost::shared_ptr<RotationExpressionNode> _root;
     };
 
