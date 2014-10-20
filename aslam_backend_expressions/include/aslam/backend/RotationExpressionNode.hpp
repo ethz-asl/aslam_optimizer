@@ -30,13 +30,13 @@ namespace aslam {
       void evaluateJacobians(JacobianContainer & outJacobians) const;
     
       /// \brief Evaluate the Jacobians and apply the chain rule.
-      /** The the chain rule matrix is assumed to be calculated in the left exponential chart centered at the current value (Phi(w)=Phi_R(w):= exp(w) R)),
+      /** The chain rule matrix is assumed to be calculated in the left exponential chart centered at the current value (Phi(w)=Phi_R(w):= exp(w) R)),
        * where exp(w) applied to 3x1 vectors is the matrix exponential of the skew symmetric matrix w^x,
-       * such that, assuming that this RotataionExpressin, R:
+       * such that, assuming that this RotataionExpression, R, is the argument of a function g:
        * J g\circ R = J (g \circ Phi \circ Phi^{-1} \circ R) = J( g \circ Phi) J( Phi^{-1} \circ R)
-       * applyChainRule := J( g \circ Phi);
+       * applyChainRule := J(g \circ Phi);
        *
-       * This implies e.g. for the product A * B of two rotation expression that :
+       * This implies e.g. for the product A * B of two rotation expression that:
        * evaluateJacobiansImplementation assumes that
        * applyChainRule = J ( g * Phi_{A * B} } and does return
        * J_v,w ( Phi_{A*B}^{-1} \circ (Phi_A(v) * Phi_B(w))) = J_v,w ( log( (exp(v) A * exp(w)B B^{-1}A^{-1}) ))

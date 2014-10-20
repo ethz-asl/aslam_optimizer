@@ -23,16 +23,16 @@ namespace aslam {
     public:
         SM_DEFINE_EXCEPTION(Exception, std::runtime_error);
 
-      /// \breif initialize an empty expression.
+      /// \brief initialize an empty expression.
       RotationExpression() {}
 
-      /// \breif initialize from an existing node.
+      /// \brief initialize from an existing node.
       RotationExpression(boost::shared_ptr<RotationExpressionNode> root);
 
       /// \brief Initialize from an existing node. The node will not be deleted.
       RotationExpression(RotationExpressionNode * root);
       
-      /// \breif initialize from an constant rotation matrix.
+      /// \brief initialize from an constant rotation matrix.
       RotationExpression(const Eigen::Matrix3d & C);
 
       virtual ~RotationExpression();
