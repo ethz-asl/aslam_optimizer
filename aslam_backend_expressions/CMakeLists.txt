@@ -79,6 +79,7 @@ catkin_add_gtest(${PROJECT_NAME}_test
   test/ErrorTest_Euclidean.cpp
   test/ErrorTest_L1Regularizer.cpp
   test/VectorExpressionTest.cpp 
+  test/KinematicChain.cpp 
   )
 
 target_link_libraries(${PROJECT_NAME}_test ${PROJECT_NAME})
