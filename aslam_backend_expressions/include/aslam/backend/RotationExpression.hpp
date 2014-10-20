@@ -35,27 +35,27 @@ namespace aslam {
       virtual ~RotationExpression();
 
       /// \brief Evaluate the rotation matrix.
-      Eigen::Matrix3d toRotationMatrix();
+      Eigen::Matrix3d toRotationMatrix() const;
 
-      EuclideanExpression toParameters(sm::kinematics::RotationalKinematics::Ptr rk);
+      EuclideanExpression toParameters(sm::kinematics::RotationalKinematics::Ptr rk) const;
       
       /// \brief return the expression that inverts the rotation.
-      RotationExpression inverse();
+      RotationExpression inverse() const;
       
       /// \brief Evaluate the Jacobians in the form (1 - (S \delta v)^\times) \bar C
       void evaluateJacobians(JacobianContainer & outJacobians) const;
 
-      RotationExpression operator*(const RotationExpression & p);
-      EuclideanExpression operator*(const EuclideanExpression & p);
-      HomogeneousExpression operator*(const HomogeneousExpression & p);
+      RotationExpression operator*(const RotationExpression & p) const;
+      EuclideanExpression operator*(const EuclideanExpression & p) const;
+      HomogeneousExpression operator*(const HomogeneousExpression & p) const;
 
-      TransformationExpression toTransformationExpression();
+      TransformationExpression toTransformationExpression() const;
 
       void getDesignVariables(DesignVariable::set_t & designVariables) const;
 
-      boost::shared_ptr<RotationExpressionNode> root() { return _root; }
-    private:
+      boost::shared_ptr<RotationExpressionNode> root() const { return _root; }
 
+    private:
       RotationExpression();
       boost::shared_ptr<RotationExpressionNode> _root;
     };
