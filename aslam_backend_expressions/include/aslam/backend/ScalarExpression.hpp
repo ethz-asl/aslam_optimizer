@@ -30,6 +30,7 @@ namespace aslam {
       void getDesignVariables(DesignVariable::set_t & designVariables) const;
 
       boost::shared_ptr<ScalarExpressionNode> root() const { return _root; }
+      bool isEmpty() const { return false; }  //TODO feature: support empty scalar expression
 
       ScalarExpression operator+(const ScalarExpression & s) const;
       ScalarExpression operator-(const ScalarExpression & s) const;

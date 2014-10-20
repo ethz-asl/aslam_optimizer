@@ -113,7 +113,7 @@ namespace aslam {
 
     EuclideanExpression EuclideanExpression::operator*(const ScalarExpression& s) const
     {
-      if(this->isEmpty()) // TODO s->isEmpty()
+      if(this->isEmpty() || s.isEmpty())
         return EuclideanExpression();
       boost::shared_ptr<EuclideanExpressionNode> newRoot(new EuclideanExpressionNodeScalarMultiply(_root, s._root));
       return EuclideanExpression(newRoot);
