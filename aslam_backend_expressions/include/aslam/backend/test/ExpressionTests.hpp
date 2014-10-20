@@ -150,6 +150,18 @@ class ExpressionTester {
     ExpressionJacobianTestTraits<TExpression>::testJacobian(*this);
   }
 
+  Eigen::MatrixXd evaluateJacobian(){
+//    if(_expectedNumberOfDesignVariables > 0)
+//      ASSERT_EQ(_expectedNumberOfDesignVariables, _dvs.size());
+    const TExpression & expression = getExp();
+    auto val = ExpressionEvaluationTraits<TExpression>::evaluate(expression);
+    const size_t rows = val.rows();
+    JacobianContainer Jc(rows);
+    Jc.clear();
+    expression.evaluateJacobians(Jc);
+    return getJacobian(Jc);
+  }
+
   const TExpression & getExp() const { return _exp; }
   bool getPrintResult() const { return _printResult; }
   double getEps() const { return _eps; }
@@ -220,6 +232,10 @@ inline void testExpression(TExpression expression, int expectedNumberOfDesignVar
   test::ExpressionTester<TExpression>(expression, expectedNumberOfDesignVariables, true, true, printResult, tolerance, eps).test();
 }
 
+template<typename TExpression>
+Eigen::MatrixXd evaluateJacobian(TExpression expression, int expectedNumberOfDesignVariables, bool setBlockIndices = true){
+  return test::ExpressionTester<TExpression>(expression, expectedNumberOfDesignVariables, setBlockIndices, true, false).evaluateJacobian();
+}
 
 }
 }
