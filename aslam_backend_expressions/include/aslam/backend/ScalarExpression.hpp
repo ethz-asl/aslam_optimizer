@@ -29,17 +29,17 @@ namespace aslam {
       void evaluateJacobians(JacobianContainer & outJacobians, const Eigen::MatrixXd & applyChainRule) const;
       void getDesignVariables(DesignVariable::set_t & designVariables) const;
 
-      boost::shared_ptr<ScalarExpressionNode> root() { return _root; }
+      boost::shared_ptr<ScalarExpressionNode> root() const { return _root; }
 
-      ScalarExpression operator+(const ScalarExpression & s);
-      ScalarExpression operator-(const ScalarExpression & s);
-      ScalarExpression operator*(const ScalarExpression & s);
-      ScalarExpression operator/(const ScalarExpression & s);
-      ScalarExpression operator+(double s);
-      ScalarExpression operator-(double s);
-      ScalarExpression operator-();
-      ScalarExpression operator*(double s);
-      ScalarExpression operator/(double s);
+      ScalarExpression operator+(const ScalarExpression & s) const;
+      ScalarExpression operator-(const ScalarExpression & s) const;
+      ScalarExpression operator*(const ScalarExpression & s) const;
+      ScalarExpression operator/(const ScalarExpression & s) const;
+      ScalarExpression operator+(double s) const;
+      ScalarExpression operator-(double s) const;
+      ScalarExpression operator-() const;
+      ScalarExpression operator*(double s) const;
+      ScalarExpression operator/(double s) const;
 
 
     private:
