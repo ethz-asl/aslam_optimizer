@@ -12,10 +12,8 @@ namespace aslam {
     RotationExpression::RotationExpression(RotationExpressionNode * rotationDesignVariable) 
     {
       _root.reset(rotationDesignVariable,sm::null_deleter());
-      SM_ASSERT_TRUE(Exception, _root.get() != NULL, "It is illegal to initialized a rotation expression with a null node");
+      SM_ASSERT_TRUE(Exception, _root.get() != NULL, "It is illegal to initialized a rotation expression with a null pointer");
     }
-
-    
 
     RotationExpression::~RotationExpression()
     {
@@ -38,7 +36,6 @@ namespace aslam {
       return _root->toRotationMatrix();
     }
 
-    
     /// \brief return the expression that inverts the rotation.
     RotationExpression RotationExpression::inverse() const
     {
@@ -46,7 +43,6 @@ namespace aslam {
       return RotationExpression(newRoot);
     }
 
-    
     /// \brief Evaluate the Jacobians
     void RotationExpression::evaluateJacobians(JacobianContainer & outJacobians) const
     {

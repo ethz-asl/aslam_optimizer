@@ -47,8 +47,8 @@ namespace aslam {
       void getDesignVariables(DesignVariable::set_t & designVariables) const;
 
       boost::shared_ptr<EuclideanExpressionNode> root() { return _root; }
+
     private:
-      /// \todo make the default constructor private.
       EuclideanExpression();
 
       friend class RotationExpression;
