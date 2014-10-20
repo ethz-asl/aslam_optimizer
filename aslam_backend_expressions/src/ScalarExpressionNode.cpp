@@ -203,11 +203,36 @@ namespace aslam {
         {
             _lhs->getDesignVariables(designVariables);
         }
+        
+        ScalarExpressionNodeNegated::ScalarExpressionNodeNegated(boost::shared_ptr<ScalarExpressionNode> rhs) :
+            _rhs(rhs)
+        {
+        }
 
-          
+        ScalarExpressionNodeNegated::~ScalarExpressionNodeNegated()
+        {
+        }
 
+        double ScalarExpressionNodeNegated::toScalarImplementation() const
+        {
+            return -_rhs->toScalar();
+        }
 
+        void ScalarExpressionNodeNegated::evaluateJacobiansImplementation(JacobianContainer & outJacobians) const
+        {
+            Eigen::MatrixXd R(1,1);
+            R(0,0) = -1;
+            _rhs->evaluateJacobians(outJacobians, R);
+        }
 
+        void ScalarExpressionNodeNegated::evaluateJacobiansImplementation(JacobianContainer & outJacobians, const Eigen::MatrixXd & applyChainRule) const
+        {
+            _rhs->evaluateJacobians(outJacobians, -applyChainRule);
+        }
 
+        void ScalarExpressionNodeNegated::getDesignVariablesImplementation(DesignVariable::set_t & designVariables) const
+        {
+            _rhs->getDesignVariables(designVariables);
+        }
     } // namespace backend
 } // namespace aslam

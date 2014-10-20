@@ -187,6 +187,29 @@ TEST(ScalarExpressionNodeTestSuites, testScalarProduct2)
 
 
 
+// Test that the jacobian matches the finite difference jacobian
+TEST(ScalarExpressionNodeTestSuites, testScalarNegation)
+{
+    try
+    {
+        using namespace sm::kinematics;
+        Scalar point1(sm::random::rand());
+        point1.setActive(true);
+        point1.setBlockIndex(1);
+        ScalarExpression p1 = point1.toExpression();
+
+        ScalarExpression p_neg = -p1;
+
+        ASSERT_EQ(p_neg.toValue(), -point1.toScalar());
+
+        SCOPED_TRACE("");
+        testJacobian(p_neg);
+    }
+    catch(std::exception const & e)
+    {
+        FAIL() << e.what();
+    }
+}
 
 
 

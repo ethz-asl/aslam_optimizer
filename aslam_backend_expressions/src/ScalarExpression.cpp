@@ -60,6 +60,12 @@ ScalarExpression ScalarExpression::operator-(double s) {
 
 }
 
+ScalarExpression ScalarExpression::operator-() {
+  boost::shared_ptr<ScalarExpressionNode> newRoot(new ScalarExpressionNodeNegated(_root));
+  return ScalarExpression(newRoot);
+
+}
+
 ScalarExpression ScalarExpression::operator/(const ScalarExpression & s) {
   boost::shared_ptr<ScalarExpressionNode> newRoot(new ScalarExpressionNodeDivide(_root, s._root));
   return ScalarExpression(newRoot);
