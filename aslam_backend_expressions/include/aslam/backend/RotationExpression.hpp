@@ -29,6 +29,9 @@ namespace aslam {
       /// \brief Initialize from an existing node. The node will not be deleted.
       RotationExpression(RotationExpressionNode * root);
       
+      /// \breif initialize from an constant rotation matrix.
+      RotationExpression(const Eigen::Matrix3d & C);
+
       virtual ~RotationExpression();
 
       /// \brief Evaluate the rotation matrix.

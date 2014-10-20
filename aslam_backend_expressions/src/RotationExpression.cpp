@@ -1,3 +1,4 @@
+#include <boost/make_shared.hpp>
 #include <aslam/backend/RotationExpression.hpp>
 #include <aslam/backend/RotationExpressionNode.hpp>
 #include <aslam/backend/EuclideanExpressionNode.hpp>
@@ -6,7 +7,6 @@
 namespace aslam {
   namespace backend {
 
-    
 
     /// \brief the base case is to initialize an expression from a design variable.
     RotationExpression::RotationExpression(RotationExpressionNode * rotationDesignVariable) 
@@ -19,13 +19,17 @@ namespace aslam {
 
     RotationExpression::~RotationExpression()
     {
-      // 0
     }
 
     RotationExpression::RotationExpression(boost::shared_ptr<RotationExpressionNode> node) :
       _root(node)
     {
       SM_ASSERT_TRUE(Exception, _root.get() != NULL, "It is illegal to initialized a rotation expression with a null node");
+    }
+
+    RotationExpression::RotationExpression(const Eigen::Matrix3d & C) :
+      _root(boost::make_shared<ConstantRotationExpressionNode>(C))
+    {
     }
 
     /// \brief Evaluate the rotation matrix.
