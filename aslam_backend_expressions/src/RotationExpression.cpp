@@ -12,7 +12,7 @@ namespace aslam {
     RotationExpression::RotationExpression(RotationExpressionNode * rotationDesignVariable) 
     {
       _root.reset(rotationDesignVariable,sm::null_deleter());
-      SM_ASSERT_TRUE(Exception, _root.get() != NULL, "It is illegal to initialized a rotation expression with a null pointer");
+      SM_ASSERT_TRUE(Exception, _root.get() != NULL, "It is illegal to initialize a rotation expression with a null pointer");
     }
 
     RotationExpression::~RotationExpression()
