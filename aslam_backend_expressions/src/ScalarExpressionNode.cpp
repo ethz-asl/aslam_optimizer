@@ -165,49 +165,41 @@ namespace aslam {
           
         ScalarExpressionNodeConstant::ScalarExpressionNodeConstant(double s) : _s(s)
         {
-            
         }
 
         ScalarExpressionNodeConstant::~ScalarExpressionNodeConstant()
         {
-
         }
 
-        ScalarExpressionNodeFromVectorExpression::ScalarExpressionNodeFromVectorExpression(boost::shared_ptr<VectorExpressionNode<1> > lhs) :
-            _lhs(lhs)
+        ScalarExpressionNodeNegated::ScalarExpressionNodeNegated(boost::shared_ptr<ScalarExpressionNode> rhs) :
+            _rhs(rhs)
         {
-
         }
 
-        ScalarExpressionNodeFromVectorExpression::~ScalarExpressionNodeFromVectorExpression()
+        ScalarExpressionNodeNegated::~ScalarExpressionNodeNegated()
         {
-
         }
 
-        double ScalarExpressionNodeFromVectorExpression::toScalarImplementation() const
+        double ScalarExpressionNodeNegated::toScalarImplementation() const
         {
-            return _lhs->evaluate()(0);
+            return -_rhs->toScalar();
         }
 
-        void ScalarExpressionNodeFromVectorExpression::evaluateJacobiansImplementation(JacobianContainer & outJacobians) const
+        void ScalarExpressionNodeNegated::evaluateJacobiansImplementation(JacobianContainer & outJacobians) const
         {
-            _lhs->evaluateJacobians(outJacobians);
+            Eigen::MatrixXd R(1,1);
+            R(0,0) = -1;
+            _rhs->evaluateJacobians(outJacobians, R);
         }
 
-        void ScalarExpressionNodeFromVectorExpression::evaluateJacobiansImplementation(JacobianContainer & outJacobians, const Eigen::MatrixXd & applyChainRule) const
+        void ScalarExpressionNodeNegated::evaluateJacobiansImplementation(JacobianContainer & outJacobians, const Eigen::MatrixXd & applyChainRule) const
         {
-            _lhs->evaluateJacobians(outJacobians, applyChainRule);
+            _rhs->evaluateJacobians(outJacobians, -applyChainRule);
         }
 
-        void ScalarExpressionNodeFromVectorExpression::getDesignVariablesImplementation(DesignVariable::set_t & designVariables) const
+        void ScalarExpressionNodeNegated::getDesignVariablesImplementation(DesignVariable::set_t & designVariables) const
         {
-            _lhs->getDesignVariables(designVariables);
+            _rhs->getDesignVariables(designVariables);
         }
-
-          
-
-
-
-
     } // namespace backend
 } // namespace aslam

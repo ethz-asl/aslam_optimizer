@@ -20,8 +20,5 @@
   <build_depend>suitesparse</build_depend>
   <build_depend>sm_timing</build_depend>
 
+  <run_depend>aslam_backend</run_depend>
 </package>
-
-
-
-

@@ -13,7 +13,9 @@ namespace aslam {
     class ScalarExpression
     {
     public:
+      enum { Dimension = 1 };
       typedef double Value;
+      typedef double value_t;
       ScalarExpression( double value );
       ScalarExpression(ScalarExpressionNode * designVariable);
       ScalarExpression(boost::shared_ptr<ScalarExpressionNode> designVariable);
@@ -21,21 +23,23 @@ namespace aslam {
       
       double toScalar() const;
       double toValue() const { return toScalar(); }
+      double evaluate() const { return toScalar(); }
 
       void evaluateJacobians(JacobianContainer & outJacobians) const;
       void evaluateJacobians(JacobianContainer & outJacobians, const Eigen::MatrixXd & applyChainRule) const;
       void getDesignVariables(DesignVariable::set_t & designVariables) const;
 
-      boost::shared_ptr<ScalarExpressionNode> root() { return _root; }
+      boost::shared_ptr<ScalarExpressionNode> root() const { return _root; }
 
-      ScalarExpression operator+(const ScalarExpression & s);
-      ScalarExpression operator-(const ScalarExpression & s);
-      ScalarExpression operator*(const ScalarExpression & s);
-      ScalarExpression operator/(const ScalarExpression & s);
-      ScalarExpression operator+(double s);
-      ScalarExpression operator-(double s);
-      ScalarExpression operator*(double s);
-      ScalarExpression operator/(double s);
+      ScalarExpression operator+(const ScalarExpression & s) const;
+      ScalarExpression operator-(const ScalarExpression & s) const;
+      ScalarExpression operator*(const ScalarExpression & s) const;
+      ScalarExpression operator/(const ScalarExpression & s) const;
+      ScalarExpression operator+(double s) const;
+      ScalarExpression operator-(double s) const;
+      ScalarExpression operator-() const;
+      ScalarExpression operator*(double s) const;
+      ScalarExpression operator/(double s) const;
 
 
     private:

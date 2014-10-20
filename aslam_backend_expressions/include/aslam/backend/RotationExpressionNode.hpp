@@ -38,9 +38,30 @@ namespace aslam {
       virtual void evaluateJacobiansImplementation(JacobianContainer & outJacobians) const = 0;
       virtual void evaluateJacobiansImplementation(JacobianContainer & outJacobians, const Eigen::MatrixXd & applyChainRule) const = 0;
       virtual void getDesignVariablesImplementation(DesignVariable::set_t & designVariables) const = 0;
-
     };
 
+    /**
+     * \class ConstantRotationExpression
+     *
+     * \brief A class representing a constant rotation matrix.
+     *
+     */
+    class ConstantRotationExpressionNode : public RotationExpressionNode
+    {
+    public:
+      EIGEN_MAKE_ALIGNED_OPERATOR_NEW
+
+      ConstantRotationExpressionNode(const Eigen::Matrix3d & C);
+      virtual ~ConstantRotationExpressionNode();
+
+    private:
+      virtual Eigen::Matrix3d toRotationMatrixImplementation() const;
+      virtual void evaluateJacobiansImplementation(JacobianContainer & outJacobians) const;
+      virtual void evaluateJacobiansImplementation(JacobianContainer & outJacobians, const Eigen::MatrixXd & applyChainRule) const;
+      virtual void getDesignVariablesImplementation(DesignVariable::set_t & designVariables) const;
+
+      const Eigen::Matrix3d _C;
+    };
 
     /**
      * \class RotationExpressionNodeMultiply

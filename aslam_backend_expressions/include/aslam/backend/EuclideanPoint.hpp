@@ -13,7 +13,7 @@ namespace aslam {
     class EuclideanPoint : public EuclideanExpressionNode, public DesignVariable
     {
     public:
-        EIGEN_MAKE_ALIGNED_OPERATOR_NEW
+      EIGEN_MAKE_ALIGNED_OPERATOR_NEW
       EuclideanPoint(const Eigen::Vector3d & p);
       virtual ~EuclideanPoint();
 
@@ -29,7 +29,7 @@ namespace aslam {
       EuclideanExpression toExpression();
       HomogeneousExpression toHomogeneousExpression();
 
-        void set(const Eigen::Vector3d & p){ _p = p; _p_p = _p; }
+      void set(const Eigen::Vector3d & p){ _p = p; _p_p = _p; }
     private:
       virtual Eigen::Vector3d toEuclideanImplementation() const;
 

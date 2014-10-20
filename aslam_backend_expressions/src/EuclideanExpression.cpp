@@ -12,7 +12,6 @@ namespace aslam {
   namespace backend {
     EuclideanExpression::EuclideanExpression()
     {
-      
     }
 
     EuclideanExpression::EuclideanExpression(EuclideanExpressionNode * designVariable) :
@@ -41,10 +40,8 @@ namespace aslam {
 
     EuclideanExpression::~EuclideanExpression()
     {
-      
     }
   
-      
     Eigen::Vector3d EuclideanExpression::toEuclidean() const
     {
       return _root->toEuclidean();

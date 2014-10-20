@@ -55,6 +55,14 @@ struct ExpressionDimensionTraits<GenericScalarExpression<TScalar> > {
   };
 };
 
+template <>
+struct ExpressionDimensionTraits<ScalarExpression> {
+  enum {
+    Dimension = 1
+  };
+};
+
+
 template <typename TExpression>
 struct ExpressionToEigenVectorTraits{
 	template <typename TValue>
@@ -70,6 +78,13 @@ struct ExpressionToEigenVectorTraits<GenericScalarExpression<TScalar>>{
 		ret << (double)error;
 		return ret;
 	}
+};
+
+template <>
+struct ExpressionToEigenVectorTraits<ScalarExpression>{
+  static Eigen::Matrix<double, 1, 1> toEigenErrorVector(double error){
+    return (Eigen::Matrix<double, 1, 1>() << error).finished();
+  }
 };
 }
 

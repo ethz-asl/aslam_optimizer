@@ -14,7 +14,7 @@ namespace aslam {
 
     void RotationExpressionNode::evaluateJacobians(JacobianContainer & outJacobians) const{
       evaluateJacobiansImplementation(outJacobians);
-    }      
+    }
 
     void RotationExpressionNode::evaluateJacobians(JacobianContainer & outJacobians, const Eigen::MatrixXd & applyChainRule) const{
       evaluateJacobiansImplementation(outJacobians, applyChainRule);
@@ -26,39 +26,63 @@ namespace aslam {
     }
 
     /////////////////////////////////////////////////
+    // ConstantRotationExpression: A container for a contant matrix
+    /////////////////////////////////////////////////
+
+    ConstantRotationExpressionNode::ConstantRotationExpressionNode(const Eigen::Matrix3d & C)
+        : _C(C)
+    {
+    }
+
+    ConstantRotationExpressionNode::~ConstantRotationExpressionNode() {
+    }
+
+    Eigen::Matrix3d ConstantRotationExpressionNode::toRotationMatrixImplementation() const {
+      return _C;
+    }
+
+    void ConstantRotationExpressionNode::evaluateJacobiansImplementation(JacobianContainer & /*outJacobians*/) const {
+    }
+
+    void ConstantRotationExpressionNode::evaluateJacobiansImplementation(JacobianContainer & /*outJacobians*/, const Eigen::MatrixXd & /* applyChainRule */) const {
+    }
+
+    void ConstantRotationExpressionNode::getDesignVariablesImplementation(DesignVariable::set_t & /* designVariables */) const {
+    }
+
+
+
+    /////////////////////////////////////////////////
     // RotationExpressionNodeMultiply: A container for C1 * C2
     /////////////////////////////////////////////////
 
-    RotationExpressionNodeMultiply::RotationExpressionNodeMultiply(boost::shared_ptr<RotationExpressionNode> lhs, boost::shared_ptr<RotationExpressionNode> rhs):
-      _lhs(lhs), _rhs(rhs)
-    {
+    RotationExpressionNodeMultiply::RotationExpressionNodeMultiply(boost::shared_ptr<RotationExpressionNode> lhs, boost::shared_ptr<RotationExpressionNode> rhs)
+        : _lhs(lhs),
+          _rhs(rhs) {
       _C_lhs = _lhs->toRotationMatrix();
       _C_rhs = _rhs->toRotationMatrix();
     }
 
-    RotationExpressionNodeMultiply::~RotationExpressionNodeMultiply(){}
+    RotationExpressionNodeMultiply::~RotationExpressionNodeMultiply(){
+    }
 
-    Eigen::Matrix3d RotationExpressionNodeMultiply::toRotationMatrixImplementation() const
-    {
+    Eigen::Matrix3d RotationExpressionNodeMultiply::toRotationMatrixImplementation() const {
       _C_lhs = _lhs->toRotationMatrix();
-	_C_rhs = _rhs->toRotationMatrix();
-	return  _C_lhs * _C_rhs;
-      }
+      _C_rhs = _rhs->toRotationMatrix();
+      return _C_lhs * _C_rhs;
+    }
 
-      void RotationExpressionNodeMultiply::evaluateJacobiansImplementation(JacobianContainer & outJacobians) const
-      {
-	_rhs->evaluateJacobians(outJacobians,_C_lhs);
-	_lhs->evaluateJacobians(outJacobians);
-      }
+    void RotationExpressionNodeMultiply::evaluateJacobiansImplementation(JacobianContainer & outJacobians) const {
+      _rhs->evaluateJacobians(outJacobians, _C_lhs);
+      _lhs->evaluateJacobians(outJacobians);
+    }
 
-      void RotationExpressionNodeMultiply::evaluateJacobiansImplementation(JacobianContainer & outJacobians, const Eigen::MatrixXd & applyChainRule) const
-      {	
-	_rhs->evaluateJacobians(outJacobians, applyChainRule * _C_lhs);
-	_lhs->evaluateJacobians(outJacobians, applyChainRule);
-      }
+    void RotationExpressionNodeMultiply::evaluateJacobiansImplementation(JacobianContainer & outJacobians, const Eigen::MatrixXd & applyChainRule) const {
+      _rhs->evaluateJacobians(outJacobians, applyChainRule * _C_lhs);
+      _lhs->evaluateJacobians(outJacobians, applyChainRule);
+    }
 
-    void RotationExpressionNodeMultiply::getDesignVariablesImplementation(DesignVariable::set_t & designVariables) const
-    {
+    void RotationExpressionNodeMultiply::getDesignVariablesImplementation(DesignVariable::set_t & designVariables) const {
       _lhs->getDesignVariables(designVariables);
       _rhs->getDesignVariables(designVariables);
     }

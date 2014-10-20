@@ -43,47 +43,54 @@ void ScalarExpression::getDesignVariables(DesignVariable::set_t & designVariable
   _root->getDesignVariables(designVariables);
 }
 
-ScalarExpression ScalarExpression::operator+(const ScalarExpression & s) {
+ScalarExpression ScalarExpression::operator+(const ScalarExpression & s) const {
   boost::shared_ptr<ScalarExpressionNode> newRoot(new ScalarExpressionNodeAdd(_root, s._root));
   return ScalarExpression(newRoot);
 }
 
-ScalarExpression ScalarExpression::operator-(const ScalarExpression & s) {
+ScalarExpression ScalarExpression::operator-(const ScalarExpression & s) const {
   boost::shared_ptr<ScalarExpressionNode> newRoot(new ScalarExpressionNodeAdd(_root, s._root, -1.0));
   return ScalarExpression(newRoot);
 }
 
-ScalarExpression ScalarExpression::operator-(double s) {
+ScalarExpression ScalarExpression::operator-(double s) const {
   boost::shared_ptr<ScalarExpressionNode> constant(new ScalarExpressionNodeConstant(-s));
   boost::shared_ptr<ScalarExpressionNode> newRoot(new ScalarExpressionNodeAdd(_root, constant));
   return ScalarExpression(newRoot);
 
 }
 
-ScalarExpression ScalarExpression::operator/(const ScalarExpression & s) {
+ScalarExpression ScalarExpression::operator-() const {
+  boost::shared_ptr<ScalarExpressionNode> newRoot(new ScalarExpressionNodeNegated(_root));
+  return ScalarExpression(newRoot);
+
+}
+
+
+ScalarExpression ScalarExpression::operator/(const ScalarExpression & s) const {
   boost::shared_ptr<ScalarExpressionNode> newRoot(new ScalarExpressionNodeDivide(_root, s._root));
   return ScalarExpression(newRoot);
 }
 
-ScalarExpression ScalarExpression::operator/(double s) {
+ScalarExpression ScalarExpression::operator/(double s) const {
   boost::shared_ptr<ScalarExpressionNode> constant(new ScalarExpressionNodeConstant(s));
   boost::shared_ptr<ScalarExpressionNode> newRoot(new ScalarExpressionNodeDivide(_root, constant));
   return ScalarExpression(newRoot);
 }
 
-ScalarExpression ScalarExpression::operator+(double s) {
+ScalarExpression ScalarExpression::operator+(double s) const {
   boost::shared_ptr<ScalarExpressionNode> constant(new ScalarExpressionNodeConstant(s));
   boost::shared_ptr<ScalarExpressionNode> newRoot(new ScalarExpressionNodeAdd(_root, constant));
   return ScalarExpression(newRoot);
 }
 
-ScalarExpression ScalarExpression::operator*(double s) {
+ScalarExpression ScalarExpression::operator*(double s) const {
   boost::shared_ptr<ScalarExpressionNode> constant(new ScalarExpressionNodeConstant(s));
   boost::shared_ptr<ScalarExpressionNode> newRoot(new ScalarExpressionNodeMultiply(_root, constant));
   return ScalarExpression(newRoot);
 }
 
-ScalarExpression ScalarExpression::operator*(const ScalarExpression & s) {
+ScalarExpression ScalarExpression::operator*(const ScalarExpression & s) const {
   boost::shared_ptr<ScalarExpressionNode> newRoot(new ScalarExpressionNodeMultiply(_root, s._root));
   return ScalarExpression(newRoot);
 }

@@ -32,6 +32,8 @@ namespace aslam {
       void getDesignVariables(DesignVariable::set_t & designVariables) const;
 
       ScalarExpression toScalarExpression() const;
+      template <int ColumnIndex>
+      ScalarExpression toScalarExpression() const;
 
       boost::shared_ptr< VectorExpressionNode<D> > root() const { return _root; }
 

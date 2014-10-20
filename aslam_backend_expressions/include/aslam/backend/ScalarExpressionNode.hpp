@@ -81,6 +81,24 @@ namespace aslam {
 
     };
 
+    class ScalarExpressionNodeNegated : public ScalarExpressionNode
+      {
+      public:
+          EIGEN_MAKE_ALIGNED_OPERATOR_NEW
+
+          ScalarExpressionNodeNegated(boost::shared_ptr<ScalarExpressionNode> rhs);
+          virtual ~ScalarExpressionNodeNegated();
+
+       protected:
+          // These functions must be implemented by child classes.
+          virtual double toScalarImplementation() const;
+          virtual void evaluateJacobiansImplementation(JacobianContainer & outJacobians) const;
+          virtual void evaluateJacobiansImplementation(JacobianContainer & outJacobians, const Eigen::MatrixXd & applyChainRule) const;
+          virtual void getDesignVariablesImplementation(DesignVariable::set_t & designVariables) const;
+
+          boost::shared_ptr<ScalarExpressionNode> _rhs;
+    };
+
       class ScalarExpressionNodeAdd : public ScalarExpressionNode
       {
       public:
@@ -122,13 +140,16 @@ namespace aslam {
           double _s;
       };
 
+      template <int VectorSize, int ComponentIndex = 0>
       class ScalarExpressionNodeFromVectorExpression : public ScalarExpressionNode
       {
       public:
           EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
-          ScalarExpressionNodeFromVectorExpression(boost::shared_ptr<VectorExpressionNode<1> > lhs);
-          virtual ~ScalarExpressionNodeFromVectorExpression();
+          ScalarExpressionNodeFromVectorExpression(boost::shared_ptr<VectorExpressionNode<VectorSize> > lhs) : _lhs(lhs){
+            static_assert (ComponentIndex < VectorSize, "component index must be smaller than the vectors size");
+          }
+          virtual ~ScalarExpressionNodeFromVectorExpression(){}
 
        protected:
           // These functions must be implemented by child classes.
@@ -137,10 +158,32 @@ namespace aslam {
           virtual void evaluateJacobiansImplementation(JacobianContainer & outJacobians, const Eigen::MatrixXd & applyChainRule) const;
           virtual void getDesignVariablesImplementation(DesignVariable::set_t & designVariables) const;
 
-          boost::shared_ptr<VectorExpressionNode<1> > _lhs;
+          boost::shared_ptr<VectorExpressionNode<VectorSize> > _lhs;
     };
 
+    template <int VectorDim, int ComponentIndex>
+    double ScalarExpressionNodeFromVectorExpression<VectorDim, ComponentIndex>::toScalarImplementation() const
+    {
+        return _lhs->evaluate()(ComponentIndex);
+    }
 
+    template <int VectorDim, int ComponentIndex>
+    void ScalarExpressionNodeFromVectorExpression<VectorDim, ComponentIndex>::evaluateJacobiansImplementation(JacobianContainer & outJacobians) const
+    {
+        _lhs->evaluateJacobians(outJacobians, Eigen::Matrix<double, 1, VectorDim>::Unit(ComponentIndex));
+    }
+
+    template <int VectorDim, int ComponentIndex>
+    void ScalarExpressionNodeFromVectorExpression<VectorDim, ComponentIndex>::evaluateJacobiansImplementation(JacobianContainer & outJacobians, const Eigen::MatrixXd & applyChainRule) const
+    {
+        _lhs->evaluateJacobians(outJacobians, applyChainRule * Eigen::Matrix<double, 1, VectorDim>::Unit(ComponentIndex));
+    }
+
+    template <int VectorDim, int ComponentIndex>
+    void ScalarExpressionNodeFromVectorExpression<VectorDim, ComponentIndex>::getDesignVariablesImplementation(DesignVariable::set_t & designVariables) const
+    {
+        _lhs->getDesignVariables(designVariables);
+    }
   } // namespace backend
 } // namespace aslam
 
