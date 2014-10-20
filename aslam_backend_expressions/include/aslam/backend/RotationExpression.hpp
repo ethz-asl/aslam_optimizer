@@ -57,7 +57,7 @@ namespace aslam {
       void getDesignVariables(DesignVariable::set_t & designVariables) const;
 
       boost::shared_ptr<RotationExpressionNode> root() const { return _root; }
-      bool isEmpty() const { return !(bool) _root; }
+      bool isEmpty() const { return !static_cast<bool>(_root); }
 
     private:
       boost::shared_ptr<RotationExpressionNode> _root;
