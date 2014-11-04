@@ -12,7 +12,7 @@ namespace aslam {
     RotationExpression::RotationExpression(RotationExpressionNode * rotationDesignVariable) 
     {
       _root.reset(rotationDesignVariable,sm::null_deleter());
-      SM_ASSERT_TRUE(Exception, _root.get() != NULL, "It is illegal to initialized a rotation expression with a null pointer");
+      SM_ASSERT_TRUE(Exception, _root.get() != NULL, "It is illegal to initialize a rotation expression with a null pointer");
     }
 
     RotationExpression::~RotationExpression()
@@ -22,7 +22,6 @@ namespace aslam {
     RotationExpression::RotationExpression(boost::shared_ptr<RotationExpressionNode> node) :
       _root(node)
     {
-      SM_ASSERT_TRUE(Exception, _root.get() != NULL, "It is illegal to initialized a rotation expression with a null node");
     }
 
     RotationExpression::RotationExpression(const Eigen::Matrix3d & C) :
@@ -33,12 +32,14 @@ namespace aslam {
     /// \brief Evaluate the rotation matrix.
     Eigen::Matrix3d RotationExpression::toRotationMatrix() const
     {
+      if(isEmpty()) return Eigen::Matrix3d::Identity();
       return _root->toRotationMatrix();
     }
 
     /// \brief return the expression that inverts the rotation.
     RotationExpression RotationExpression::inverse() const
     {
+      if(isEmpty()) return *this;
       boost::shared_ptr<RotationExpressionNode> newRoot( new RotationExpressionNodeInverse(_root) );
       return RotationExpression(newRoot);
     }
@@ -46,17 +47,26 @@ namespace aslam {
     /// \brief Evaluate the Jacobians
     void RotationExpression::evaluateJacobians(JacobianContainer & outJacobians) const
     {
-      _root->evaluateJacobians(outJacobians);
+      if(!isEmpty())
+        _root->evaluateJacobians(outJacobians);
     }
 
     RotationExpression RotationExpression::operator*(const RotationExpression & p) const
     {
+      if(p.isEmpty())
+        return *this;
+      if(this->isEmpty())
+        return p;
       boost::shared_ptr<RotationExpressionNode> newRoot( new RotationExpressionNodeMultiply(_root, p._root));
       return RotationExpression(newRoot);
     }
 
     EuclideanExpression RotationExpression::operator*(const EuclideanExpression & p) const
     {
+      if(p.isEmpty())
+        return EuclideanExpression();
+      if(this->isEmpty())
+        return EuclideanExpression();
       boost::shared_ptr<EuclideanExpressionNode> newRoot( new EuclideanExpressionNodeMultiply(_root, p._root));
       return EuclideanExpression(newRoot);
       
@@ -78,10 +88,12 @@ namespace aslam {
 
     void RotationExpression::getDesignVariables(DesignVariable::set_t & designVariables) const
     {
-      return _root->getDesignVariables(designVariables);
+      if(!isEmpty())
+        _root->getDesignVariables(designVariables);
     }
     
     EuclideanExpression RotationExpression::toParameters(sm::kinematics::RotationalKinematics::Ptr rk) const {
+      assert(!isEmpty());
       boost::shared_ptr<EuclideanExpressionNode> een( new EuclideanExpressionNodeRotationParameters(_root, rk));
       return EuclideanExpression(een);
     }

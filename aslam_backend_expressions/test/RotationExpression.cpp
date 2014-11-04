@@ -9,6 +9,8 @@
 #include <aslam/backend/DesignVariableVector.hpp>
 #include <aslam/backend/Vector2RotationQuaternionExpressionAdapter.hpp>
 #include <aslam/backend/MapTransformation.hpp>
+#include <aslam/backend/RotationScalarExpressionNode.hpp>
+#include <aslam/backend/Scalar.hpp>
 
 
 using namespace aslam::backend;
@@ -476,6 +478,42 @@ TEST(RotationExpressionNodeTestSuites, testVector2RotationQuaternionExpressionAd
     {
       SCOPED_TRACE("");
       testJacobian(dvMultiply);
+    }
+  }
+  catch(const std::exception & e)
+  {
+    FAIL() << e.what();
+  }
+}
+
+
+// Test that the binary multiplication produces the correct result.
+TEST(RotationExpressionNodeTestSuites, testRotationScalarExpressionNode)
+{
+  try {
+    using namespace sm::kinematics;
+    for(int axis = 0; axis < 3; axis ++){
+      Eigen::PermutationMatrix<3> permZtoAxis(Eigen::Vector3i((axis + 1) %3, (axis + 2) % 3, axis));
+      for(int it = 0; it < 10; it++){
+        const double angle = acos(0) * 4.0 * (double)rand() / RAND_MAX; // between 0 and 2 pi..
+        const double ss = sin(angle), cs = cos(angle);
+        Eigen::Matrix3d R;
+        R << cs, -ss, 0, ss, cs, 0, 0, 0, 1; // this is the angle rotation about the z-axis!
+        R = (permZtoAxis * R * permZtoAxis.inverse()).eval(); // now it is about the axis-axis
+
+        Scalar s(angle);
+        s.setActive(true);
+        s.setBlockIndex(0);
+        ScalarExpression se = s.toExpression();
+        RotationScalarExpressionNode rsen(axis, se);
+        RotationExpression re(&rsen);
+
+        sm::eigen::assertNear(re.toRotationMatrix(), R, 1e-15, SM_SOURCE_FILE_POS, "Test rotation scalar expression");
+        {
+          SCOPED_TRACE("");
+          testJacobian(re, 1, false);
+        }
+      }
     }
   }
   catch(const std::exception & e)
