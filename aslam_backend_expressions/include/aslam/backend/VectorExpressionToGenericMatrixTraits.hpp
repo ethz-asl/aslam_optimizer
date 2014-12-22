@@ -33,6 +33,7 @@ struct GenericMatrixNodeTraits<VectorExpressionNode<D> > {
 
   class Constant : VectorExpressionNode<D> {
    public:
+    EIGEN_MAKE_ALIGNED_OPERATOR_NEW
     typedef typename VectorExpressionNode<D>::vector_t vector_t;
 
     Constant(int rows = D, int cols = 1) {
@@ -41,6 +42,7 @@ struct GenericMatrixNodeTraits<VectorExpressionNode<D> > {
       }
       SM_ASSERT_EQ_DBG(std::runtime_error, cols, 1, "there is only one column supported as vector expression.");
     }
+    Constant(const value_t & value) : value(value) {}
    private:
     virtual vector_t evaluateImplementation() const {
       return value;
