@@ -8,6 +8,7 @@
 #include <aslam/backend/SparseCholeskyLinearSystemSolver.hpp>
 #include <aslam/backend/BlockCholeskyLinearSystemSolver.hpp>
 #include <aslam/backend/DenseQrLinearSystemSolver.hpp>
+#include <aslam/backend/LineSearchTrustRegionPolicy.hpp>
 #include <aslam/backend/SparseQrLinearSystemSolver.hpp>
 #include <boost/ptr_container/ptr_vector.hpp>
 #include <aslam/backend/test/ErrorTermTester.hpp>
@@ -32,6 +33,7 @@ TEST(Optimizer2TestSuite, compareAllCombinationsOfSolversAndTrustRegionPolicies)
     std::vector<boost::shared_ptr<TrustRegionPolicy>> policies;
     policies.emplace_back(new DogLegTrustRegionPolicy());
     policies.emplace_back(new GaussNewtonTrustRegionPolicy());
+    policies.emplace_back(new LineSearchTrustRegionPolicy());
 
     boost::shared_ptr<OptimizationProblem> pb = buildProblem(seed, D, E);
     std::vector< boost::shared_ptr<OptimizationProblem> > problems;

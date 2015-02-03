@@ -4,6 +4,7 @@
 #include <aslam/backend/GaussNewtonTrustRegionPolicy.hpp>
 #include <aslam/backend/LevenbergMarquardtTrustRegionPolicy.hpp>
 #include <aslam/backend/DogLegTrustRegionPolicy.hpp>
+#include <aslam/backend/LineSearchTrustRegionPolicy.hpp>
 
 
 using namespace boost::python;
@@ -29,4 +30,11 @@ void exportTrustRegionPolicies() {
   class_<DogLegTrustRegionPolicy, boost::shared_ptr<DogLegTrustRegionPolicy>, bases< TrustRegionPolicy >, boost::noncopyable >("DogLegTrustRegionPolicy", init<>() )
       ;
   
+  // LS
+  class_<LineSearchTrustRegionPolicy, boost::shared_ptr<LineSearchTrustRegionPolicy>, bases< TrustRegionPolicy >, boost::noncopyable >("LineSearchTrustRegionPolicy", init<>())
+      .def(init<double>("LineSearchTrustRegionPolicy( double scaleDxOnFailure )"))
+      .def("setScaleStep", &LineSearchTrustRegionPolicy::setScaleStep)
+      .def("getScaleStep", &LineSearchTrustRegionPolicy::getScaleStep)
+          ;
+
 }
