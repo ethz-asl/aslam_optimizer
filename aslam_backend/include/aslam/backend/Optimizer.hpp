@@ -11,6 +11,7 @@
 #include "backend.hpp"
 #include "OptimizationProblemBase.hpp"
 #include <aslam/Exceptions.hpp>
+#include <aslam/backend/WeightUpdater.hpp>
 #include <sm/timing/Timer.hpp>
 #include <sm/boost/null_deleter.hpp>
 #include <boost/thread.hpp>
@@ -140,6 +141,11 @@ namespace aslam {
       /// \brief Build the Gauss-Newton matrices.
       void buildGnMatrices();
 
+      /// \brief Set a WeightUpdater
+      inline void setWeightUpdater(boost::shared_ptr<WeightUpdater> weight_updater){
+        _weightUpdater = weight_updater;
+      }
+
       double applyNormalizedStateUpdate();
       void normalizeGnMatrices();
       void initialiseDesignVariableScales();
@@ -214,6 +220,9 @@ namespace aslam {
 
       /// \brief the current set of options
       OptimizerOptions _options;
+
+      /// \brief A class that updates the weights before evaluating the error terms, optional 
+      boost::shared_ptr<WeightUpdater> _weightUpdater;
     };
 
   } // namespace backend
