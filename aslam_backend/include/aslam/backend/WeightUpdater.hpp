@@ -26,6 +26,8 @@ namespace aslam{
 			double scaling_factor_;
 		public:
 			EMWeightUpdater(MatrixOfErrorTerms_Ptr error_terms, double lambda);
+
+			// The optimizer will call this function before evaluating the error terms
 			void updateWeights();
 		};
 	}
