@@ -12,7 +12,7 @@ namespace aslam{
 
 		class WeightUpdater{
 		public:
-			virtual void updateWeight()= 0;
+			virtual void updateWeights()= 0;
 		};
 
 		// Update the weights of the error terms using a gaussian of the squared error, i.e: exp(-lambda/2*(y -f(x))^2)
