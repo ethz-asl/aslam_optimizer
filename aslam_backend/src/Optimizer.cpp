@@ -479,9 +479,6 @@ namespace aslam {
       double beta = _options.levenbergMarquardtLambdaBeta;
       int p = _options.levenbergMarquardtLambdaP;
       double mu = _options.levenbergMarquardtLambdaMuInit;
-      if (_callback) {
-        _callback->callback();
-      }
       // This sets _J
       timeErr.start();
       evaluateError();
@@ -536,10 +533,6 @@ namespace aslam {
           timeBackSub.start();
           deltaX = applyStateUpdate();
           timeBackSub.stop();
-          
-          if (_callback) {
-            _callback->callback();
-          }
           // This sets _J
           timeErr.start();
           evaluateError();
@@ -665,12 +658,15 @@ namespace aslam {
     double Optimizer::evaluateError()
     {
       // \todo Make multi-threaded
+      for (auto e : _errorTerms) {
+        e->updateRawSquaredError();
+      }
+      if (_callback) {
+        _callback->callback();
+      }
       _J = 0.0;
-      std::set<ErrorTerm*>::iterator it, it_end;
-      it = _errorTerms.begin();
-      it_end = _errorTerms.end();
-      for (; it != it_end; ++it) {
-        _J += (*it)->evaluateError();
+      for (auto e : _errorTerms) {
+        _J += e->getSquaredError();
       }
       return _J;
     }

@@ -38,9 +38,20 @@ namespace aslam {
       ErrorTerm();
       virtual ~ErrorTerm();
 
-      /// \brief evaluate the error term.
+      /// \brief evaluate the error term and returne the effective squared error.
+      ///        This is equivalent to first call updateRawSquaredError() and then taking the result of getSquaredError();
       ///        After this is called, the _squaredError is filled in with \f$ \mathbf e^T \mathbf R^{-1} \mathbf e \f$
-      double evaluateError();
+      double evaluateError(){
+        updateRawSquaredError();
+        return getSquaredError();
+      }
+
+      /// \brief update (compute and store) the raw squared error
+      ///        After this is called, the _squaredError is filled in with \f$ \mathbf e^T \mathbf R^{-1} \mathbf e \f$
+      double updateRawSquaredError();
+
+      /// \brief get the current effective squared error value (m-estimator applied on the raw squared error as stored in _squaredError).
+      double getSquaredError();
 
       /// \brief evaluate the Jacobians.
       void evaluateJacobians(JacobianContainer & outJacobians);
