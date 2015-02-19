@@ -61,6 +61,11 @@ namespace aslam {
       virtual Eigen::MatrixXd vsInvR() const = 0;
       virtual void vsSetInvR(const Eigen::MatrixXd& invR) = 0;
 
+      /// \brief returns a pointer to the MEstimator used. Return Null if the
+      /// MEstimator used is not a MEstimatorType
+      template <typename MEstimatorType>
+      boost::shared_ptr<MEstimatorType> getMEstimatorPolicy();
+
       /// \brief set the M-Estimator policy. This function takes a squared error
       ///        and returns a weight to apply to that error term.
       void setMEstimatorPolicy(const boost::shared_ptr<MEstimator> & mEstimator);

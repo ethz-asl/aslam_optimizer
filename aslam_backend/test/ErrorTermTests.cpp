@@ -1,6 +1,23 @@
 #include <sm/eigen/gtest.hpp>
 #include "SampleDvAndError.hpp"
 
+TEST(ErrorTermTestSuite, testMEstimatorGetter) {
+  using aslam::backend::FixedWeightMEstimator;
+  using aslam::backend::GemanMcClureMEstimator;
+
+  Eigen::Vector2d v;
+  Point2d p(v);
+  LinearErr error_term(&p);
+  boost::shared_ptr<FixedWeightMEstimator> mestimator(
+      new FixedWeightMEstimator(4));
+  error_term.setMEstimatorPolicy(mestimator);
+  ASSERT_EQ(error_term.getCurrentMEstimatorWeight(), 4);
+  error_term.getMEstimatorPolicy<FixedWeightMEstimator>()->setWeight(5);
+  ASSERT_EQ(error_term.getCurrentMEstimatorWeight(), 5);
+  boost::shared_ptr<GemanMcClureMEstimator> null_ptr =
+      error_term.getMEstimatorPolicy<GemanMcClureMEstimator>();
+  ASSERT_FALSE(null_ptr);
+}
 
 TEST(ErrorTermTestSuite, testInvR)
 {
