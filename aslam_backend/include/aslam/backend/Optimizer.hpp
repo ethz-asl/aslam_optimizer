@@ -11,7 +11,7 @@
 #include "backend.hpp"
 #include "OptimizationProblemBase.hpp"
 #include <aslam/Exceptions.hpp>
-#include <aslam/backend/WeightUpdater.hpp>
+#include <aslam/backend/PerIterationCallback.hpp>
 #include <sm/timing/Timer.hpp>
 #include <sm/boost/null_deleter.hpp>
 #include <boost/thread.hpp>
@@ -141,9 +141,10 @@ namespace aslam {
       /// \brief Build the Gauss-Newton matrices.
       void buildGnMatrices();
 
-      /// \brief Set a WeightUpdater
-      inline void setWeightUpdater(boost::shared_ptr<WeightUpdater> weight_updater){
-        _weightUpdater = weight_updater;
+      /// \brief Set a PerIterationCallback
+      inline void setPerIterationCallback(
+          boost::shared_ptr<PerIterationCallback> callback) {
+        _callback = callback;
       }
 
       double applyNormalizedStateUpdate();
@@ -221,8 +222,10 @@ namespace aslam {
       /// \brief the current set of options
       OptimizerOptions _options;
 
-      /// \brief A class that updates the weights before evaluating the error terms, optional 
-      boost::shared_ptr<WeightUpdater> _weightUpdater;
+      /// \brief A class that contains a callback to be called before evaluating
+      /// the
+      /// error terms
+      boost::shared_ptr<PerIterationCallback> _callback;
     };
 
   } // namespace backend

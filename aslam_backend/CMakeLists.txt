@@ -41,7 +41,7 @@ cs_add_library(${PROJECT_NAME}
   src/MarginalizationPriorErrorTerm.cpp
   src/DogLegTrustRegionPolicy.cpp
   src/Optimizer2.cpp
-  src/WeightUpdater.cpp
+  src/ProbDataAssocPolicy.cpp
 )
 
 target_link_libraries(${PROJECT_NAME} ${Boost_LIBRARIES} ${TBB_LIBRARIES})

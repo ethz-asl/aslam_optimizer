@@ -479,8 +479,9 @@ namespace aslam {
       double beta = _options.levenbergMarquardtLambdaBeta;
       int p = _options.levenbergMarquardtLambdaP;
       double mu = _options.levenbergMarquardtLambdaMuInit;
-      if(_weightUpdater)
-        _weightUpdater->updateWeights();
+      if (_callback) {
+        _callback->callback();
+      }
       // This sets _J
       timeErr.start();
       evaluateError();
@@ -535,8 +536,10 @@ namespace aslam {
           timeBackSub.start();
           deltaX = applyStateUpdate();
           timeBackSub.stop();
-          if(_weightUpdater)
-            _weightUpdater->updateWeights();
+          
+          if (_callback) {
+            _callback->callback();
+          }
           // This sets _J
           timeErr.start();
           evaluateError();
