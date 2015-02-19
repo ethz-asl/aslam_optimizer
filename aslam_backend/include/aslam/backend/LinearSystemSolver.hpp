@@ -13,6 +13,10 @@ namespace aslam {
     class ErrorTerm;
     class Matrix;
 
+    namespace callback {
+      class Manager;
+    }
+
     class LinearSystemSolver {
     public:
       SM_DEFINE_EXCEPTION(Exception, std::runtime_error);
@@ -22,7 +26,7 @@ namespace aslam {
       virtual ~LinearSystemSolver();
 
       /// \brief Evaluate the error using nThreads.
-      double evaluateError(size_t nThreads, bool useMEstimator);
+      double evaluateError(size_t nThreads, bool useMEstimator, callback::Manager * callback = nullptr);
 
       /// \brief initialized the matrix structure for the problem with these error terms and errors.
       void initMatrixStructure(const std::vector<DesignVariable*>& dvs, const std::vector<ErrorTerm*>& errors, bool useDiagonalConditioner);

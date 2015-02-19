@@ -62,6 +62,7 @@ cs_add_library(${PROJECT_NAME}
   src/SamplerHybridMcmc.cpp
   src/util/ThreadedRangeProcessor.cpp
   src/util/ProblemManager.cpp
+  src/OptimizerCallbackManager.cpp
 )
 
 target_link_libraries(${PROJECT_NAME} ${Boost_LIBRARIES} ${TBB_LIBRARIES})
@@ -79,6 +80,7 @@ catkin_add_gtest(${PROJECT_NAME}_test
   test/TestOptimizerRprop.cpp
   test/TestOptimizerBFGS.cpp
   test/TestSamplerMcmc.cpp
+  test/CallbackTest.cpp
   test/TestOptimizationProblem.cpp
   test/CompressedColumnMatrixTest.cpp
   test/MatrixTestHarness.cpp
