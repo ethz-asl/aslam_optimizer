@@ -4,7 +4,6 @@
 
 #include <sparse_block_matrix/linear_solver.h>
 #include <boost/shared_ptr.hpp>
-//#include <boost/function.hpp>
 #include <sm/assert_macros.hpp>
 #include <Eigen/Core>
 #include "OptimizerOptions.hpp"
