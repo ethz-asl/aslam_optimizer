@@ -19,18 +19,18 @@ namespace backend {
 // weights must be normalized together
 class ProbDataAssocPolicy : public PerIterationCallback {
  private:
-  typedef boost::shared_ptr<ErrorTerm> ErrorTerm_Ptr;
-  typedef boost::shared_ptr<std::vector<ErrorTerm_Ptr>>
-      ErrorTermNormalizationGroup_Ptr;
-  typedef boost::shared_ptr<std::vector<ErrorTermNormalizationGroup_Ptr>>
-      ErrorTermGroups_Ptr;
-  ErrorTermGroups_Ptr error_terms_;
+  typedef boost::shared_ptr<ErrorTerm> ErrorTermPtr;
+  typedef boost::shared_ptr<std::vector<ErrorTermPtr>>
+      ErrorTermGroup;
+  typedef boost::shared_ptr<std::vector<ErrorTermGroup>>
+      ErrorTermGroups;
+  ErrorTermGroups error_terms_;
   double scaling_factor_;
 
  public:
-  ProbDataAssocPolicy(ErrorTermGroups_Ptr error_terms, double lambda);
+  ProbDataAssocPolicy(ErrorTermGroups error_terms, double lambda);
 
-  // The optimizer will call this function before evaluating the error terms
+  // The optimizer will call this function before each iteration.
   void callback();
 };
 }  // namespace backend
