@@ -15,13 +15,11 @@ namespace aslam {
     {
     }
 
-    /// \brief update (compute and store) the raw squared error.
     double ErrorTerm::updateRawSquaredError()
     {
       return _squaredError = evaluateErrorImplementation();
     }
 
-    /// \brief get the current effective squared error value (with m-estimator applied already).
     double ErrorTerm::getSquaredError()
     {
       return _mEstimatorPolicy->getWeight(_squaredError) * _squaredError;
