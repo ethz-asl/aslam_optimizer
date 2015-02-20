@@ -12,13 +12,17 @@ ProbDataAssocPolicy::ProbDataAssocPolicy(ErrorTermGroups error_terms,
 
 void ProbDataAssocPolicy::callback() {
   for (ErrorTermGroup vect : *error_terms_) {
+    bool init_max = false;
     double max_weight = 0;
     std::vector<double> log_weights;
     log_weights.reserve(vect->size());
     for (ErrorTermPtr error_term : *vect) {
       // Update log_weights
       double log_weight = scaling_factor_ * (error_term->getRawSquaredError());
-      if (log_weight > max_weight) {
+      if (!init_max) {
+        max_weight = log_weight;
+        init_max = true;
+      } else if (log_weight > max_weight) {
         max_weight = log_weight;
       }
       log_weights.push_back(log_weight);
