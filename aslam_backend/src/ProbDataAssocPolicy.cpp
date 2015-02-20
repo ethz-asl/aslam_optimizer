@@ -12,22 +12,29 @@ ProbDataAssocPolicy::ProbDataAssocPolicy(ErrorTermGroups error_terms,
 
 void ProbDataAssocPolicy::callback() {
   for (ErrorTermGroup vect : *error_terms_) {
-    double norm_factor = 0;
-    std::vector<double> weights;
-    weights.reserve(vect->size());
+    double max_weight = 0;
+    std::vector<double> log_weights;
+    log_weights.reserve(vect->size());
     for (ErrorTermPtr error_term : *vect) {
-      // Update weights
-      double new_weight =
-          exp(scaling_factor_ * (error_term->getRawSquaredError()));
-      norm_factor += new_weight;
-      weights.push_back(new_weight);
+      // Update log_weights
+      double log_weight = scaling_factor_ * (error_term->getRawSquaredError());
+      if (log_weight > max_weight) {
+        max_weight = log_weight;
+      }
+      log_weights.push_back(log_weight);
     }
+
+    double log_norm_constant = 0;
+    for (double log_w : log_weights) {
+      log_norm_constant += exp(log_w - max_weight);
+    }
+    log_norm_constant = log(log_norm_constant) + max_weight;
 
     for (std::size_t i = 0; i < vect->size(); i++) {
       boost::shared_ptr<FixedWeightMEstimator> m_estimator(
           (*vect)[i]->getMEstimatorPolicy<FixedWeightMEstimator>());
       assert(m_estimator);
-      m_estimator->setWeight(weights[i] / norm_factor);
+      m_estimator->setWeight(log_weights[i] - log_norm_constant);
     }
   }
 }
