@@ -10,14 +10,11 @@ TEST(ErrorTermTestSuite, testInvR)
   std::vector<DesignVariable*> dvs;
   std::vector<ErrorTerm*> errs;
   try {
-    std::vector<int> blocks;
-    int block = 0;
-    for (size_t i = 0; i < errs.size(); ++i) {
-      block += errs[i]->dimension();
-      blocks.push_back(block);
-      boost::shared_ptr<GemanMcClureMEstimator> me(new GemanMcClureMEstimator(errs[i]->getRawSquaredError()));
-    }
     buildSystem(D, E, dvs, errs);
+    for (size_t i = 0; i < errs.size(); ++i) {
+      boost::shared_ptr<GemanMcClureMEstimator> me(new GemanMcClureMEstimator(errs[i]->getRawSquaredError()));
+      errs[i]->setMEstimatorPolicy(me);
+    }
     for (size_t i = 0; i < errs.size(); ++i) {
       JacobianContainer jc(errs[i]->dimension());
       ErrorTerm* e = errs[i];
@@ -66,6 +63,7 @@ TEST(ErrorTermTestSuite, testInvR)
         e->getWeightedJacobians(jc, true);
         e->getWeightedError(we, true);
         w = e->getMEstimatorWeight(trueRse);
+        ASSERT_NE(1.0, w);
         Eigen::MatrixXd J = jcRaw.asDenseMatrix();
         Eigen::MatrixXd wJ = jc.asDenseMatrix();
         Eigen::MatrixXd JtInvRJ =  J.transpose() * invR * J * w;
