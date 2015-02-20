@@ -60,6 +60,7 @@ catkin_add_gtest(${PROJECT_NAME}_test
   test/SparseMatrixTest.cpp
   test/LinearSolverTests.cpp
   test/ErrorTermTests.cpp
+  test/ProbDataAssocPolicyTest.cpp
 )
 target_link_libraries(${PROJECT_NAME}_test ${PROJECT_NAME})
 
