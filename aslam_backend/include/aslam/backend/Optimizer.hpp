@@ -221,9 +221,9 @@ namespace aslam {
       /// \brief the current set of options
       OptimizerOptions _options;
 
-      /// \brief A class that contains a callback to be called before evaluating
-      /// the
-      /// error terms
+      /// \brief A class that contains a callback function to be called 
+      /// immediately after computing the raw squared errors, but before 
+      /// evaluating the cost function, i.e. the sum of weighted square errors.
       boost::shared_ptr<PerIterationCallback> _callback;
     };
 
