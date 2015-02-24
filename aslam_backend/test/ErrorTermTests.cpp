@@ -11,12 +11,12 @@ TEST(ErrorTermTestSuite, testMEstimatorGetter) {
   boost::shared_ptr<FixedWeightMEstimator> mestimator(
       new FixedWeightMEstimator(4));
   error_term.setMEstimatorPolicy(mestimator);
-  ASSERT_EQ(error_term.getCurrentMEstimatorWeight(), 4);
+  EXPECT_EQ(error_term.getCurrentMEstimatorWeight(), 4);
   error_term.getMEstimatorPolicy<FixedWeightMEstimator>()->setWeight(5);
-  ASSERT_EQ(error_term.getCurrentMEstimatorWeight(), 5);
+  EXPECT_EQ(error_term.getCurrentMEstimatorWeight(), 5);
   boost::shared_ptr<GemanMcClureMEstimator> null_ptr =
       error_term.getMEstimatorPolicy<GemanMcClureMEstimator>();
-  ASSERT_FALSE(null_ptr);
+  EXPECT_FALSE(null_ptr);
 }
 
 TEST(ErrorTermTestSuite, testInvR)
@@ -30,6 +30,7 @@ TEST(ErrorTermTestSuite, testInvR)
     std::vector<int> blocks;
     int block = 0;
     for (size_t i = 0; i < errs.size(); ++i) {
+      ASSERT_EQ(1,0);
       block += errs[i]->dimension();
       blocks.push_back(block);
       boost::shared_ptr<GemanMcClureMEstimator> me(new GemanMcClureMEstimator(errs[i]->getRawSquaredError()));

@@ -57,7 +57,7 @@ TEST(ProbDataAssocPolicyTestSuite, callbackTest) {
   for (ProbDataAssocPolicy::ErrorTermGroup group : *error_groups) {
     for (ProbDataAssocPolicy::ErrorTermPtr error_term : *group) {
       // Initially all the weights should be 1
-      ASSERT_EQ(error_term->getCurrentMEstimatorWeight(), 1);
+      EXPECT_EQ(error_term->getCurrentMEstimatorWeight(), 1);
     }
   }
   policy.callback();
@@ -75,7 +75,7 @@ TEST(ProbDataAssocPolicyTestSuite, callbackTest) {
     ProbDataAssocPolicy::ErrorTermGroup group = error_groups->at(i);
     for (std::size_t j = 0; j < group->size(); j++) {
       ProbDataAssocPolicy::ErrorTermPtr error_term = group->at(j);
-      ASSERT_NEAR(expected_weights[i][j],
+      EXPECT_NEAR(expected_weights[i][j],
                   error_term->getCurrentMEstimatorWeight(), 1e-6);
     }
   }
