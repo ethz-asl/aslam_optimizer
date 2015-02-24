@@ -1,10 +1,10 @@
+#include <vector>
+
 #include <boost/make_shared.hpp>
+#include <sm/eigen/gtest.hpp>
 
 #include <aslam/backend/ErrorTerm.hpp>
 #include <aslam/backend/ProbDataAssocPolicy.hpp>
-#include <sm/eigen/gtest.hpp>
-
-#include <vector>
 
 using aslam::backend::ErrorTermFs;
 using aslam::backend::JacobianContainer;
