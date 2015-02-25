@@ -3,6 +3,11 @@
 namespace aslam {
   namespace backend {
 
+    template <typename MEstimatorType>
+    boost::shared_ptr<MEstimatorType> ErrorTerm::getMEstimatorPolicy() {
+      return boost::dynamic_pointer_cast<MEstimatorType>(_mEstimatorPolicy);
+    }
+
     template<typename ITERATOR_T>
     void ErrorTerm::setDesignVariablesIterator(ITERATOR_T start, ITERATOR_T end)
     {

@@ -41,6 +41,7 @@ cs_add_library(${PROJECT_NAME}
   src/MarginalizationPriorErrorTerm.cpp
   src/DogLegTrustRegionPolicy.cpp
   src/Optimizer2.cpp
+  src/ProbDataAssocPolicy.cpp
 )
 
 target_link_libraries(${PROJECT_NAME} ${Boost_LIBRARIES} ${TBB_LIBRARIES})
@@ -59,6 +60,7 @@ catkin_add_gtest(${PROJECT_NAME}_test
   test/SparseMatrixTest.cpp
   test/LinearSolverTests.cpp
   test/ErrorTermTests.cpp
+  test/ProbDataAssocPolicyTest.cpp
 )
 target_link_libraries(${PROJECT_NAME}_test ${PROJECT_NAME})
 

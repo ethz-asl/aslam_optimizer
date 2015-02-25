@@ -15,14 +15,15 @@ namespace aslam {
     {
     }
 
-
-    /// \brief evaluate the error term.
-    double ErrorTerm::evaluateError()
+    double ErrorTerm::updateRawSquaredError()
     {
-      _squaredError = evaluateErrorImplementation();
-      return _mEstimatorPolicy->getWeight(_squaredError) * _squaredError;
+      return _squaredError = evaluateErrorImplementation();
     }
 
+    double ErrorTerm::getSquaredError()
+    {
+      return _mEstimatorPolicy->getWeight(_squaredError) * _squaredError;
+    }
 
     /// \brief evaluate the Jacobians.
     void ErrorTerm::evaluateJacobians(JacobianContainer & outJ)

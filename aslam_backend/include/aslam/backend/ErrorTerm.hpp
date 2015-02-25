@@ -38,9 +38,20 @@ namespace aslam {
       ErrorTerm();
       virtual ~ErrorTerm();
 
-      /// \brief evaluate the error term.
+      /// \brief evaluate the error term and return the effective squared error.
+      ///        This is equivalent to first call updateRawSquaredError() and then taking the result of getSquaredError();
       ///        After this is called, the _squaredError is filled in with \f$ \mathbf e^T \mathbf R^{-1} \mathbf e \f$
-      double evaluateError();
+      double evaluateError(){
+        updateRawSquaredError();
+        return getSquaredError();
+      }
+
+      /// \brief update (compute and store) the raw squared error
+      ///        After this is called, the _squaredError is filled in with \f$ \mathbf e^T \mathbf R^{-1} \mathbf e \f$
+      double updateRawSquaredError();
+
+      /// \brief Get the current, weighted squared error, i.e. with the M-estimator weight already applied.
+      double getSquaredError();
 
       /// \brief evaluate the Jacobians.
       void evaluateJacobians(JacobianContainer & outJacobians);
@@ -60,6 +71,11 @@ namespace aslam {
       virtual void getInvR(Eigen::MatrixXd& invR) const = 0;
       virtual Eigen::MatrixXd vsInvR() const = 0;
       virtual void vsSetInvR(const Eigen::MatrixXd& invR) = 0;
+
+      /// \brief returns a pointer to the MEstimator used. Return Null if the
+      /// MEstimator used is not a MEstimatorType
+      template <typename MEstimatorType>
+      boost::shared_ptr<MEstimatorType> getMEstimatorPolicy();
 
       /// \brief set the M-Estimator policy. This function takes a squared error
       ///        and returns a weight to apply to that error term.

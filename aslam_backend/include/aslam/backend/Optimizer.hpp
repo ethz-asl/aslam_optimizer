@@ -4,13 +4,13 @@
 
 #include <sparse_block_matrix/linear_solver.h>
 #include <boost/shared_ptr.hpp>
-//#include <boost/function.hpp>
 #include <sm/assert_macros.hpp>
 #include <Eigen/Core>
 #include "OptimizerOptions.hpp"
 #include "backend.hpp"
 #include "OptimizationProblemBase.hpp"
 #include <aslam/Exceptions.hpp>
+#include <aslam/backend/PerIterationCallback.hpp>
 #include <sm/timing/Timer.hpp>
 #include <sm/boost/null_deleter.hpp>
 #include <boost/thread.hpp>
@@ -140,6 +140,12 @@ namespace aslam {
       /// \brief Build the Gauss-Newton matrices.
       void buildGnMatrices();
 
+      /// \brief Set a PerIterationCallback
+      inline void setPerIterationCallback(
+          boost::shared_ptr<PerIterationCallback> callback) {
+        _callback = callback;
+      }
+
       double applyNormalizedStateUpdate();
       void normalizeGnMatrices();
       void initialiseDesignVariableScales();
@@ -214,6 +220,11 @@ namespace aslam {
 
       /// \brief the current set of options
       OptimizerOptions _options;
+
+      /// \brief A class that contains a callback function to be called 
+      /// immediately after computing the raw squared errors, but before 
+      /// evaluating the cost function, i.e. the sum of weighted square errors.
+      boost::shared_ptr<PerIterationCallback> _callback;
     };
 
   } // namespace backend
