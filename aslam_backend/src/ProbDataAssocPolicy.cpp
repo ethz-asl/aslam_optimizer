@@ -1,15 +1,21 @@
 #include <aslam/backend/ProbDataAssocPolicy.hpp>
 
+#include <limits>
 #include <vector>
 
 namespace aslam {
 namespace backend {
-ProbDataAssocPolicy::ProbDataAssocPolicy(ErrorTermGroups error_terms,
-                                         double v, int dimension) {
+ProbDataAssocPolicy::ProbDataAssocPolicy(ErrorTermGroups error_terms, double v,
+                                         int dimension) {
   error_terms_ = error_terms;
-  v_ = v;
   dimension_ = dimension;
-  t_exponent_ = -(v + dimension_) / 2.0;
+  if (v < std::numeric_limits<double>::infinity()) {
+    v_ = v;
+    t_exponent_ = -(v + dimension_) / 2.0;
+    use_gaussian = false;
+  } else {
+    use_gaussian = true;
+  }
 }
 
 void ProbDataAssocPolicy::callback() {
@@ -23,9 +29,14 @@ void ProbDataAssocPolicy::callback() {
     for (ErrorTermPtr error_term : *vect) {
       // Update log_probs
       double squared_error = error_term->getRawSquaredError();
-      double log_prob = (t_exponent_) * std::log1p(squared_error / v_);
-      double expected_prob = (v_ + dimension_) / (v_ + squared_error);
-      expected_probs.push_back(expected_prob);
+      double log_prob;
+      if (use_gaussian) {
+        log_prob = -squared_error / 2;
+      } else {
+        log_prob = (t_exponent_) * std::log1p(squared_error / v_);
+        double expected_prob = (v_ + dimension_) / (v_ + squared_error);
+        expected_probs.push_back(expected_prob);
+      }
       if (!init_max) {
         max_log_prob = log_prob;
         init_max = true;
@@ -44,8 +55,12 @@ void ProbDataAssocPolicy::callback() {
       boost::shared_ptr<FixedWeightMEstimator> m_estimator(
           (*vect)[i]->getMEstimatorPolicy<FixedWeightMEstimator>());
       assert(m_estimator);
-      m_estimator->setWeight(std::exp(log_probs[i] - log_norm_constant) *
-                             expected_probs[i]);
+      if (use_gaussian) {
+        m_estimator->setWeight(std::exp(log_probs[i] - log_norm_constant));
+      } else {
+        m_estimator->setWeight(std::exp(log_probs[i] - log_norm_constant) *
+                               expected_probs[i]);
+      }
     }
   }
 }
