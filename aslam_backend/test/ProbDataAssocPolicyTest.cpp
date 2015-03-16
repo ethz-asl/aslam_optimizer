@@ -53,7 +53,7 @@ TEST(ProbDataAssocPolicyTestSuite, callbackTest) {
   error_groups->push_back(
       boost::make_shared<std::vector<ProbDataAssocPolicy::ErrorTermPtr>>(
           error_group_2));
-  ProbDataAssocPolicy policy(error_groups, 1);
+  ProbDataAssocPolicy policy(error_groups,5,1);
   for (ProbDataAssocPolicy::ErrorTermGroup group : *error_groups) {
     for (ProbDataAssocPolicy::ErrorTermPtr error_term : *group) {
       // Initially all the weights should be 1
@@ -62,11 +62,10 @@ TEST(ProbDataAssocPolicyTestSuite, callbackTest) {
   }
   policy.callback();
 
-  std::vector<double> group1_expected_w = {-1.09861228866811, -1.09861228866811,
-                                           -1.09861228866811};
+  std::vector<double> group1_expected_w = {1.0/3, 1.0/3, 1.0/3};
   std::vector<double> group2_expected_w = {
-      -0.216722084482954, -1.716722084482954,
-      -4.216722084482954, -7.716722084482954};
+       0.7151351, 0.1412613,
+       0.0241258, 0.0047656};
   std::vector<std::vector<double>> expected_weights;
   expected_weights.push_back(group1_expected_w);
   expected_weights.push_back(group2_expected_w);
