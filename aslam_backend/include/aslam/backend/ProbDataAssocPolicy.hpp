@@ -36,7 +36,7 @@ class ProbDataAssocPolicy : public PerIterationCallback {
   double log_factor_;
   double v_;
   int dimension_;
-  bool use_gaussian;
+  bool is_normal_;
 };
 }  // namespace backend
 }  // namespace aslam
