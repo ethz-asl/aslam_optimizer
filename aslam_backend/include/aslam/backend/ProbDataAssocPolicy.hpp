@@ -11,9 +11,13 @@
 namespace aslam {
 namespace backend {
 
-// Update the weights of the error terms using a gaussian of the squared error,
-// i.e: exp(-1/2*(y -f(x))^2)
-// The matrix of error terms contains, in each row, the error terms whose
+// Update the weights of the error terms using a t-distribution of the squared
+// error,
+// i.e: p_i,j= (1+squared_error/v)^(-(v+d)/2) where v is the degree of freedom
+// of the distribution and d the dimension of the error term
+// Use of gaussian distribution is still possible setting v to
+// std::numeric_limits<double>::infinity()
+// The vector of error terms contains, in each row, the error terms whose
 // weights must be normalized together
 class ProbDataAssocPolicy : public PerIterationCallback {
  public:
