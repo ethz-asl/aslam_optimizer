@@ -56,7 +56,8 @@ void ProbDataAssocPolicy::callback() {
     for (std::size_t i = 0; i < vect->size(); i++) {
       boost::shared_ptr<FixedWeightMEstimator> m_estimator(
           (*vect)[i]->getMEstimatorPolicy<FixedWeightMEstimator>());
-      assert(m_estimator);
+      SM_ASSERT_TRUE(Exception, m_estimator,
+                     "The error term does not have a FixedWeightMEstimator");
       if (is_normal_) {
         m_estimator->setWeight(std::exp(log_probs[i] - log_norm_constant));
       } else {
