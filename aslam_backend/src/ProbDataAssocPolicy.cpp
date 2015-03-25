@@ -8,9 +8,12 @@
 namespace aslam {
 namespace backend {
 ProbDataAssocPolicy::ProbDataAssocPolicy(ErrorTermGroups error_terms, double v,
-                                         int dimension) {
-  error_terms_ = error_terms;
-  dimension_ = dimension;
+                                         int dimension)
+    : error_terms_(error_terms), dimension_(dimension) {
+  SM_ASSERT_TRUE(Exception, dimension > 0,
+                 "The dimension of the error terms must be greater than zero");
+  SM_ASSERT_TRUE(Exception, v > 0.0,
+                 "The dof of the t-distribution must be greater than zero");
   if (v < std::numeric_limits<double>::infinity()) {
     v_ = v;
     t_exponent_ = -(v + dimension_) / 2.0;
