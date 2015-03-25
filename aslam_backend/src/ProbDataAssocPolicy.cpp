@@ -1,5 +1,7 @@
 #include <aslam/backend/ProbDataAssocPolicy.hpp>
 
+#include <math.h>
+
 #include <limits>
 #include <vector>
 

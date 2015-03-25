@@ -1,14 +1,12 @@
 #ifndef ASLAM_PROB_DATA_ASSOC_POLICY_HPP
 #define ASLAM_PROB_DATA_ASSOC_POLICY_HPP
 
-#include <math.h>
+#include <vector>
 
 #include <boost/shared_ptr.hpp>
 
 #include <aslam/backend/ErrorTerm.hpp>
 #include <aslam/backend/PerIterationCallback.hpp>
-
-#include <vector>
 
 namespace aslam {
 namespace backend {
@@ -23,7 +21,8 @@ class ProbDataAssocPolicy : public PerIterationCallback {
   typedef boost::shared_ptr<std::vector<ErrorTermPtr>> ErrorTermGroup;
   typedef boost::shared_ptr<std::vector<ErrorTermGroup>> ErrorTermGroups;
 
-  explicit ProbDataAssocPolicy(ErrorTermGroups error_terms, double v, int dimension);
+  explicit ProbDataAssocPolicy(ErrorTermGroups error_terms, double v,
+                               int dimension);
   // The optimizer will call this function before each iteration.
   void callback();
 
