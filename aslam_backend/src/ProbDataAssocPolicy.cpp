@@ -26,7 +26,8 @@ ProbDataAssocPolicy::ProbDataAssocPolicy(ErrorTermGroups error_terms, double v,
                          (v_ / 2) * std::log(pi() * v_);
   } else {
     is_normal_ = true;
-    log_norm_constant_ = std::log(1 / std::sqrt(std::pow(2 * pi(), dimension_)));
+    log_norm_constant_ =
+        std::log(1 / std::sqrt(std::pow(2 * pi(), dimension_)));
   }
 }
 
