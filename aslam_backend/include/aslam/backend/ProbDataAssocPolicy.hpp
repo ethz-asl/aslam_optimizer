@@ -25,8 +25,7 @@ class ProbDataAssocPolicy : public PerIterationCallback {
   typedef boost::shared_ptr<std::vector<ErrorTermPtr>> ErrorTermGroup;
   typedef boost::shared_ptr<std::vector<ErrorTermGroup>> ErrorTermGroups;
 
-  ProbDataAssocPolicy(ErrorTermGroups error_terms, double v,
-                               int dimension);
+  ProbDataAssocPolicy(ErrorTermGroups error_terms, double v, int dimension);
   // The optimizer will call this function before each iteration.
   void callback();
 
@@ -35,6 +34,7 @@ class ProbDataAssocPolicy : public PerIterationCallback {
   double t_exponent_;
   double log_factor_;
   double v_;
+  double log_norm_constant_;
   int dimension_;
   bool is_normal_;
 };
