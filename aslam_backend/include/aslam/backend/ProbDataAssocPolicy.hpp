@@ -13,7 +13,8 @@ namespace backend {
 
 // Update the weights of the error terms using a t-distribution of the squared
 // error,
-// i.e: p_i,j= (1+squared_error/v)^(-(v+d)/2) where v is the degree of freedom
+// i.e: p_{i,j} = c^{- 1}(1+squared_error/v)^{-(v+d)/2} where v is the degree of
+// freedom
 // of the distribution and d the dimension of the error term
 // Use of gaussian distribution is still possible setting v to
 // std::numeric_limits<double>::infinity()

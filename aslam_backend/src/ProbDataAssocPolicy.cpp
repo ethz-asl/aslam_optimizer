@@ -26,8 +26,7 @@ ProbDataAssocPolicy::ProbDataAssocPolicy(ErrorTermGroups error_terms, double v,
                          (v_ / 2) * std::log(pi() * v_);
   } else {
     is_normal_ = true;
-    log_norm_constant_ =
-        std::log(1 / std::sqrt(std::pow(2 * pi(), dimension_)));
+    log_norm_constant_ = (dimension_ / 2.0) * std::log(2 * pi());
   }
 }
 
@@ -38,7 +37,7 @@ void ProbDataAssocPolicy::callback() {
     std::vector<double> expected_weights;
     log_probs.reserve(vect->size());
     expected_weights.reserve(vect->size());
-    double marginal_likelihood = 0;
+    double marginal_log_likelihood = 0;
     for (ErrorTermPtr error_term : *vect) {
       // Update log_probs
       const double squared_error = error_term->getRawSquaredError();
@@ -47,9 +46,9 @@ void ProbDataAssocPolicy::callback() {
         log_prob = -squared_error / 2 + log_norm_constant_;
       } else {
         log_prob =
-            (t_exponent_) * std::log1p(squared_error / v_) + log_norm_constant_;
-        const double expected_prob = (v_ + dimension_) / (v_ + squared_error);
-        expected_weights.push_back(expected_prob);
+            (t_exponent_) * std::log1p(squared_error / v_) - log_norm_constant_;
+        const double expected_weight = (v_ + dimension_) / (v_ + squared_error);
+        expected_weights.push_back(expected_weight);
       }
 
       if (log_prob > max_log_prob) {
@@ -58,9 +57,9 @@ void ProbDataAssocPolicy::callback() {
       log_probs.push_back(log_prob);
     }
     for (double log_p : log_probs) {
-      marginal_likelihood += std::exp(log_p - max_log_prob);
+      marginal_log_likelihood += std::exp(log_p - max_log_prob);
     }
-    marginal_likelihood = std::log(marginal_likelihood) + max_log_prob;
+    marginal_log_likelihood = std::log(marginal_log_likelihood) + max_log_prob;
 
     for (std::size_t i = 0; i < vect->size(); i++) {
       boost::shared_ptr<FixedWeightMEstimator> m_estimator(
@@ -68,10 +67,12 @@ void ProbDataAssocPolicy::callback() {
       SM_ASSERT_TRUE(Exception, m_estimator,
                      "The error term does not have a FixedWeightMEstimator");
       if (is_normal_) {
-        m_estimator->setWeight(std::exp(log_probs[i] - marginal_likelihood));
+        m_estimator->setWeight(
+            std::exp(log_probs[i] - marginal_log_likelihood));
       } else {
-        m_estimator->setWeight(std::exp(log_probs[i] - marginal_likelihood) *
-                               expected_weights[i]);
+        m_estimator->setWeight(
+            std::exp(log_probs[i] - marginal_log_likelihood) *
+            expected_weights[i]);
       }
     }
   }
