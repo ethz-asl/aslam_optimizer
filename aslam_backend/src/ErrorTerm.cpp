@@ -148,7 +148,7 @@ namespace aslam {
     /// \brief Get the squared error (weighted by the M-estimator policy)
     double ErrorTerm::getWeightedSquaredError() const
     {
-      return _mEstimatorPolicy->getWeight(_squaredError) * _squaredError;;
+      return _mEstimatorPolicy->getWeight(_squaredError) * _squaredError;
     }
 
     /// \brief Get the squared error (before weighting by the M-estimator policy)
