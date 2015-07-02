@@ -101,5 +101,31 @@ TEST(ErrorTermTestSuite, testInvR)
   }
 }
 
+TEST(ErrorTermTestSuite, testNonSquaredErrorTerm) {
+  using namespace aslam::backend;
+  try {
+
+    Eigen::Vector2d v(1.0, 2.0);
+    Point2d p(v);
+    p.setBlockIndex(0);
+    TestNonSquaredError::grad_t g(1.0, 2.0);
+    TestNonSquaredError e(&p, g);
+    e.setWeight(1.0);
+    e._p = 3.0;
+    EXPECT_DOUBLE_EQ( 4.0, e.updateRawError());
+
+    JacobianContainer jc(1);
+    e.getWeightedJacobians(jc, false);
+    Eigen::MatrixXd J = jc.asDenseMatrix();
+    Eigen::MatrixXd grad;
+    grad.resize(1,2); grad << 4., 8.;
+    EXPECT_TRUE((J.array() == grad.array()).all()) << "J: " << J << std::endl <<
+        "Grad: " << grad << std::endl;
+
+  } catch (const std::exception& e) {
+    FAIL() << e.what();
+  }
+}
+
 
 

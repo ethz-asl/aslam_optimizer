@@ -131,7 +131,7 @@ namespace aslam {
       /// \brief Get the column base of this error term in the Jacobian matrix.
       size_t rowBase() const;
 
-      /// \brief Set the column base of this error term in the Jacobian matrix.
+      /// \brief Set the row base of this error term in the Jacobian matrix.
       void setRowBase(size_t);
 
       void setTime(const sm::timing::NsecTime& t);
@@ -151,7 +151,7 @@ namespace aslam {
       /// \brief build this error term's part of the Hessian matrix.
       ///
       /// the i/o variables outHessian and outRhs are the full Hessian and rhs in the Gauss-Newton
-      /// problem. The correct blocks for each design varible are available from the design
+      /// problem. The correct blocks for each design variable are available from the design
       /// variable as dv.blockIndex()
       virtual void buildHessianImplementation(SparseBlockMatrix& outHessian, Eigen::VectorXd& outRhs, bool useMEstimator) = 0;
 

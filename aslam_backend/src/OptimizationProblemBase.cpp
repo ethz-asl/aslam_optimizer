@@ -36,6 +36,11 @@ namespace aslam {
     {
       return numErrorTermsImplementation();
     }
+    /// \brief the number of non-squared error terms stored in this optimization problem
+    size_t OptimizationProblemBase::numNonSquaredErrorTerms() const
+    {
+      return numNonSquaredErrorTermsImplementation();
+    }
     /// \brief get error term i.
     ErrorTerm* OptimizationProblemBase::errorTerm(size_t i)
     {
@@ -43,15 +48,30 @@ namespace aslam {
       return errorTermImplementation(i);
     }
     /// \brief get error term i.
+    NonSquaredErrorTerm* OptimizationProblemBase::nonSquaredErrorTerm(size_t i)
+    {
+      SM_ASSERT_LT_DBG(Exception, i, numNonSquaredErrorTerms(), "index out of bounds");
+      return nonSquaredErrorTermImplementation(i);
+    }
+    /// \brief get error term i.
     const ErrorTerm* OptimizationProblemBase::errorTerm(size_t i) const
     {
       SM_ASSERT_LT_DBG(Exception, i,  numErrorTerms(), "index out of bounds");
       return errorTermImplementation(i);
     }
+    /// \brief get error term i.
+    const NonSquaredErrorTerm* OptimizationProblemBase::nonSquaredErrorTerm(size_t i) const
+    {
+      return nonSquaredErrorTermImplementation(i);
+    }
 
     void OptimizationProblemBase::getErrors(const DesignVariable* dv, std::set<ErrorTerm*>& outErrorSet)
     {
       return getErrorsImplementation(dv, outErrorSet);
+    }
+    void OptimizationProblemBase::getNonSquaredErrors(const DesignVariable* dv, std::set<NonSquaredErrorTerm*>& outErrorSet)
+    {
+      return getNonSquaredErrorsImplementation(dv, outErrorSet);
     }
 
   } // namespace backend
