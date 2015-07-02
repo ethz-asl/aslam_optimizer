@@ -1,6 +1,7 @@
 #include <aslam/backend/SimpleOptimizationProblem.hpp>
 #include <aslam/backend/DesignVariable.hpp>
 #include <aslam/backend/ErrorTerm.hpp>
+#include <aslam/backend/NonSquaredErrorTerm.hpp>
 #include <sm/boost/null_deleter.hpp>
 
 namespace aslam {
@@ -53,12 +54,24 @@ namespace aslam {
         addErrorTerm(boost::shared_ptr<ErrorTerm>(ev, sm::null_deleter()))
         ;
     }
+    void SimpleOptimizationProblem::addErrorTerm(NonSquaredErrorTerm* ev, bool problemOwnsVariable)
+    {
+      if (problemOwnsVariable)
+        addErrorTerm(boost::shared_ptr<NonSquaredErrorTerm>(ev));
+      else
+        addErrorTerm(boost::shared_ptr<NonSquaredErrorTerm>(ev, sm::null_deleter()))
+        ;
+    }
 
 
     /// \brief Add an error term to the problem
     void SimpleOptimizationProblem::addErrorTerm(const boost::shared_ptr<ErrorTerm> & et)
     {
       _errorTerms.push_back(et);
+    }
+    void SimpleOptimizationProblem::addErrorTerm(const boost::shared_ptr<NonSquaredErrorTerm> & et)
+    {
+      _snsErrorTerms.push_back(et);
     }
 
 
@@ -99,18 +112,34 @@ namespace aslam {
     {
       return _errorTerms.size();
     }
+    size_t SimpleOptimizationProblem::numNonSquaredErrorTermsImplementation() const
+    {
+      return _snsErrorTerms.size();
+    }
 
     ErrorTerm* SimpleOptimizationProblem::errorTermImplementation(size_t i)
     {
       return _errorTerms[i].get();
+    }
+    NonSquaredErrorTerm* SimpleOptimizationProblem::nonSquaredErrorTermImplementation(size_t i)
+    {
+      return _snsErrorTerms[i].get();
     }
 
     const ErrorTerm* SimpleOptimizationProblem::errorTermImplementation(size_t i) const
     {
       return _errorTerms[i].get();
     }
+    const NonSquaredErrorTerm* SimpleOptimizationProblem::nonSquaredErrorTermImplementation(size_t i) const
+    {
+      return _snsErrorTerms[i].get();
+    }
 
-  void SimpleOptimizationProblem::getErrorsImplementation(const DesignVariable* /*dv*/, std::set<ErrorTerm*>& /*outErrorSet*/)
+    void SimpleOptimizationProblem::getErrorsImplementation(const DesignVariable* /*dv*/, std::set<ErrorTerm*>& /*outErrorSet*/)
+    {
+      SM_THROW(std::runtime_error, "Not implemented");
+    }
+    void SimpleOptimizationProblem::getNonSquaredErrorsImplementation(const DesignVariable* /*dv*/, std::set<NonSquaredErrorTerm*>& /*outErrorSet*/)
     {
       SM_THROW(std::runtime_error, "Not implemented");
     }

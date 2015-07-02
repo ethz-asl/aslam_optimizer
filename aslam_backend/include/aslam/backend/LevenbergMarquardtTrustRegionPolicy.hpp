@@ -15,22 +15,22 @@ namespace aslam {
         class LevenbergMarquardtTrustRegionPolicy : public TrustRegionPolicy
         {
         public:
-            LevenbergMarquardtTrustRegionPolicy();
+          LevenbergMarquardtTrustRegionPolicy();
           LevenbergMarquardtTrustRegionPolicy(const sm::PropertyTree & config);
-            LevenbergMarquardtTrustRegionPolicy(double lambdaInit);
-            virtual ~LevenbergMarquardtTrustRegionPolicy();
-            
-            /// \brief called by the optimizer when an optimization is starting
-            virtual void optimizationStartingImplementation(double J);
-            
-            // Returns true if the solution was successful
+          LevenbergMarquardtTrustRegionPolicy(double lambdaInit);
+          virtual ~LevenbergMarquardtTrustRegionPolicy();
+
+          /// \brief called by the optimizer when an optimization is starting
+          virtual void optimizationStartingImplementation(double J);
+
+          // Returns true if the solution was successful
           virtual bool solveSystemImplementation(double J, bool previousIterationFailed, int nThreads, Eigen::VectorXd& outDx);
-            
-            /// \brief should the optimizer revert on failure? You should probably return true
-            virtual bool revertOnFailure();
-            
-            /// \brief print the current state to a stream (no newlines).
-            virtual std::ostream & printState(std::ostream & out) const;
+
+          /// \brief should the optimizer revert on failure? You should probably return true
+          virtual bool revertOnFailure();
+
+          /// \brief print the current state to a stream (no newlines).
+          virtual std::ostream & printState(std::ostream & out) const;
           virtual bool requiresAugmentedDiagonal() const;
           virtual std::string name() const { return "levenberg_marquardt"; }
         private:

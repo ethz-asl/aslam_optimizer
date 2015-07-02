@@ -116,7 +116,13 @@ namespace aslam {
 
       /// Returns the linear solver
       template <class L>
-      L* getSolver();
+      L* getSolver(bool assertNonNull = true){
+        L* solver = dynamic_cast<L*>(_solver.get());
+        if(assertNonNull) {
+          SM_ASSERT_TRUE(Exception, solver != NULL, "The solver is null");
+        }
+        return solver;
+      }
 
 
         const Matrix * getJacobian() const;
@@ -163,7 +169,5 @@ namespace aslam {
 
   } // namespace backend
 } // namespace aslam
-
-#include "aslam/backend/Optimizer2.tpp"
 
 #endif /* ASLAM_BACKEND_OPTIMIZER_HPP */
