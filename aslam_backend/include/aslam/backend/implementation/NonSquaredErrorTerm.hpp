@@ -62,43 +62,5 @@ namespace aslam {
       return _error * mEstWeight;
     }
 
-    void NonSquaredErrorTerm::checkJacobiansFinite() const {
-//      JacobianContainer J(C);
-//      evaluateJacobians(J);
-//      for (JacobianContainer::map_t::iterator it = J.begin(); it != J.end(); ++it) {
-//        SM_ASSERT_MAT_IS_FINITE(Exception, it->second,
-//                                "Jacobian is not finite!");
-//      }
-    }
-
-    void NonSquaredErrorTerm::checkJacobiansNumerical(double tolerance) {
-//
-//      JacobianContainer J(C);
-//      evaluateJacobians(J);
-//
-//
-//      detail::ErrorTermFsFunctor<C> functor(*this);
-//      sm::eigen::NumericalDiff<detail::ErrorTermFsFunctor<C> >
-//        numdiff(functor, tolerance);
-//      int inputSize = 0;
-//      for (size_t i = 0; i < numDesignVariables(); i++) {
-//        inputSize += designVariable(i)->minimalDimensions();
-//      }
-//      const Eigen::MatrixXd JNumComp =
-//        numdiff.estimateJacobian(Eigen::VectorXd::Zero(inputSize));
-//      int offset = 0;
-//      for (size_t i = 0; i < numDesignVariables(); i++) {
-//        DesignVariable* d = designVariable(i);
-//        const Eigen::MatrixXd JAna = J.Jacobian(d);
-//        const Eigen::MatrixXd JNum =
-//          JNumComp.block(0, offset, C, d->minimalDimensions());
-//        for (int r = 0; r < JAna.rows(); ++r)
-//          for (int c = 0; c < JAna.cols(); ++c)
-//            SM_ASSERT_NEAR(Exception, JAna(r, c), JNum(r, c), tolerance,
-//            "Analytical and numerical Jacobians differ!");
-//        offset += d->minimalDimensions();
-//      }
-    }
-
   } // namespace backend
 } // namespace aslam

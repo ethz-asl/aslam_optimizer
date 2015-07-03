@@ -121,17 +121,6 @@ namespace aslam {
       /// \brief Get the design variables
       const std::vector<DesignVariable*> & designVariables() const;
 
-//      /// \brief Get the column base of this error term in the Jacobian matrix.
-//      size_t rowBase() const;
-//
-//      /// \brief Set the column base of this error term in the Jacobian matrix.
-//      void setRowBase(size_t);
-
-      /// Check if Jacobians are finite
-      inline void checkJacobiansFinite() const;
-      /// Check if analytical and numerical Jacobians match
-      inline void checkJacobiansNumerical(double tolerance = 1e-6);
-
       void setTime(const sm::timing::NsecTime& t);
       sm::timing::NsecTime getTime() { return _timestamp; }
 

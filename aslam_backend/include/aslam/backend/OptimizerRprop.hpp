@@ -127,13 +127,17 @@ namespace aslam {
       std::vector<DesignVariable*> _designVariables;
 
       /// \brief all of the error terms involved in this problem
-      std::vector<NonSquaredErrorTerm*> _errorTerms;
+      std::vector<ErrorTerm*> _errorTermsS;
+      std::vector<NonSquaredErrorTerm*> _errorTermsNS;
 
       /// \brief the current set of options
       OptimizerRpropOptions _options;
 
       /// \brief the total number of parameters of this problem, given by number of design variables and their dimensionality
       std::size_t _numOptParameters;
+
+      /// \brief the total number of error terms as the sum of squared and non-squared error terms
+      std::size_t _numErrorTerms;
 
       /// \brief Whether the optimizer is correctly initialized
       bool _isInitialized;
