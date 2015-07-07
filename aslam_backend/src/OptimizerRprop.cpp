@@ -91,7 +91,7 @@ void OptimizerRprop::setProblem(boost::shared_ptr<OptimizationProblemBase> probl
 void OptimizerRprop::initialize()
 {
   SM_ASSERT_FALSE(Exception, _problem == nullptr, "No optimization problem has been set");
-  _options.verbose && std::cout << "Initializing problem..." << std::endl;
+  _options.verbose && std::cout << "RPROP: Initializing problem..." << std::endl;
   Timer init("OptimizerRprop: Initialize Total");
   _designVariables.clear();
   _designVariables.reserve(_problem->numDesignVariables());
@@ -106,6 +106,8 @@ void OptimizerRprop::initialize()
     if (dv->isActive())
       _designVariables.push_back(dv);
   }
+  SM_ASSERT_FALSE(Exception, _problem->numDesignVariables() > 0 && _designVariables.empty(),
+                  "It is illegal to run the optimizer with all marginalized design variables. Did you forget to set the design variables as active?");
   SM_ASSERT_FALSE(Exception, _designVariables.empty(), "It is illegal to run the optimizer with all marginalized design variables.");
   // Assign block indices to the design variables.
   // "blocks" will hold the structure of the left-hand-side of Gauss-Newton
@@ -138,7 +140,7 @@ void OptimizerRprop::initialize()
   SM_ASSERT_FALSE(Exception, _errorTermsNS.empty() && _errorTermsS.empty(), "It is illegal to run the optimizer with no error terms.");
   _isInitialized = true;
 
-  _options.verbose && std::cout <<  "Initialized problem with " << _problem->numDesignVariables() << " design variable(s) (" <<
+  _options.verbose && std::cout <<  "RPROP: Initialized problem with " << _problem->numDesignVariables() << " design variable(s) (" <<
       _numOptParameters << " optimization parameter(s)), " << _errorTermsNS.size() << " non-squared error term(s) and " <<
       _errorTermsS.size() << " squared error term(s)" << std::endl;
 
@@ -171,7 +173,7 @@ void OptimizerRprop::optimize()
 
     if (_curr_gradient_norm < _options.convergenceGradientNorm) {
       isConverged = true;
-      _options.verbose && std::cout << "Current gradient norm " << _curr_gradient_norm <<
+      _options.verbose && std::cout << "RPROP: Current gradient norm " << _curr_gradient_norm <<
           " is smaller than convergenceGradientNorm option -> terminating" << std::endl;
     }
 
@@ -217,7 +219,7 @@ void OptimizerRprop::optimize()
 
   if (_options.verbose) {
     std::string convergence = isConverged ? "SUCCESS" : "FAILURE";
-    std::cout << "Convergence: " << convergence << std::endl;
+    std::cout << "RPROP: Convergence " << convergence << std::endl;
   }
 
 }
@@ -309,9 +311,9 @@ void OptimizerRprop::setupThreadedJob(boost::function<void(size_t, size_t, size_
     boost::thread_group threads;
     std::vector<SafeJob> jobs(nThreads);
     for (size_t i = 0; i < nThreads; ++i) {
-      _options.verbose && std::cout << "Creating thread " << i << " to compute error terms [" <<
+      _options.verbose && std::cout << "RPROP: Creating thread no " << i << " to compute error terms [" <<
           indices[i] << "," << indices[i + 1] << ")" << std::endl;
-      jobs[i] = SafeJob(boost::bind(job, i, indices[i], indices[i + 1], useMEstimator, out[i]));
+      jobs[i] = SafeJob(boost::bind(job, i, indices[i], indices[i + 1], useMEstimator, boost::ref(out[i])));
       threads.create_thread(boost::ref(jobs[i]));
     }
     threads.join_all();
