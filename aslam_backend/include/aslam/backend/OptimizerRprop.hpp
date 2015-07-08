@@ -10,13 +10,13 @@
 #include "backend.hpp"
 #include "OptimizationProblemBase.hpp"
 #include <aslam/Exceptions.hpp>
-#include <aslam/backend/NonSquaredErrorTerm.hpp>
 #include <aslam/backend/Matrix.hpp>
 #include <aslam/backend/LevenbergMarquardtTrustRegionPolicy.hpp>
 #include <aslam/backend/DogLegTrustRegionPolicy.hpp>
 #include <sm/timing/Timer.hpp>
 #include <boost/thread.hpp>
 #include <sparse_block_matrix/linear_solver.h>
+#include "ScalarNonSquaredErrorTerm.hpp"
 
 namespace sm {
   class PropertyTree;
@@ -128,7 +128,7 @@ namespace aslam {
 
       /// \brief all of the error terms involved in this problem
       std::vector<ErrorTerm*> _errorTermsS;
-      std::vector<NonSquaredErrorTerm*> _errorTermsNS;
+      std::vector<ScalarNonSquaredErrorTerm*> _errorTermsNS;
 
       /// \brief the current set of options
       OptimizerRpropOptions _options;

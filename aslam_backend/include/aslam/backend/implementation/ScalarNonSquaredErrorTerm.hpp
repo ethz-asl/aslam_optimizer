@@ -4,12 +4,12 @@ namespace aslam {
   namespace backend {
 
     template <typename MEstimatorType>
-    boost::shared_ptr<MEstimatorType> NonSquaredErrorTerm::getMEstimatorPolicy() {
+    boost::shared_ptr<MEstimatorType> ScalarNonSquaredErrorTerm::getMEstimatorPolicy() {
       return boost::dynamic_pointer_cast<MEstimatorType>(_mEstimatorPolicy);
     }
 
     template<typename ITERATOR_T>
-    void NonSquaredErrorTerm::setDesignVariablesIterator(ITERATOR_T start, ITERATOR_T end)
+    void ScalarNonSquaredErrorTerm::setDesignVariablesIterator(ITERATOR_T start, ITERATOR_T end)
     {
       /// \todo Set the back link to the error term in the design variable.
       SM_ASSERT_EQ(aslam::UnsupportedOperationException, _designVariables.size(), 0, "The design variable container already has objects. The design variables may only be set once");
@@ -21,22 +21,22 @@ namespace aslam {
       _designVariables.insert(_designVariables.begin(), start, end);
     }
 
-    double NonSquaredErrorTerm::getWeight() const
+    double ScalarNonSquaredErrorTerm::getWeight() const
     {
       return _w;
     }
 
-    void NonSquaredErrorTerm::setWeight(const double w)
+    void ScalarNonSquaredErrorTerm::setWeight(const double w)
     {
       _w = w;
     }
 
-    void NonSquaredErrorTerm::setError(const double e)
+    void ScalarNonSquaredErrorTerm::setError(const double e)
     {
       _error = e;
     }
 
-    void NonSquaredErrorTerm::getWeightedJacobians(JacobianContainer& outJc, bool useMEstimator)
+    void ScalarNonSquaredErrorTerm::getWeightedJacobians(JacobianContainer& outJc, bool useMEstimator)
     {
       // take a copy. \todo Don't take a copy.
       evaluateJacobians(outJc);
@@ -52,7 +52,7 @@ namespace aslam {
       }
     }
 
-    double NonSquaredErrorTerm::getWeightedError(bool useMEstimator) const
+    double ScalarNonSquaredErrorTerm::getWeightedError(bool useMEstimator) const
     {
       double mEstWeight = 1.0;
       if (useMEstimator) {

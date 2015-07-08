@@ -15,7 +15,7 @@ cs_add_library(${PROJECT_NAME}
   src/JacobianContainer.cpp
   src/DesignVariable.cpp
   src/ErrorTerm.cpp
-  src/NonSquaredErrorTerm.cpp
+  src/ScalarNonSquaredErrorTerm.cpp
   src/OptimizationProblemBase.cpp
   src/Optimizer.cpp
   src/sparse_matrix_functions.cpp

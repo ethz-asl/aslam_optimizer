@@ -3,9 +3,9 @@
 
 #include <sm/random.hpp>
 #include <aslam/backend/ErrorTerm.hpp>
-#include <aslam/backend/NonSquaredErrorTerm.hpp>
 #include <sm/eigen/gtest.hpp>
 #include <aslam/backend/OptimizationProblem.hpp>
+#include "../include/aslam/backend/ScalarNonSquaredErrorTerm.hpp"
 
 class Point2d : public aslam::backend::DesignVariable {
 public:
@@ -171,11 +171,11 @@ public:
 
 
 /// \brief Encodes the error \f$ (\mathbf p - \mathbf g \mathbf v^T)^2\f$
-class TestNonSquaredError : public aslam::backend::NonSquaredErrorTerm {
+class TestNonSquaredError : public aslam::backend::ScalarNonSquaredErrorTerm {
 public:
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW;
 
-  typedef aslam::backend::NonSquaredErrorTerm parent_t;
+  typedef aslam::backend::ScalarNonSquaredErrorTerm parent_t;
   typedef Eigen::Matrix<double, 1, 2> grad_t;
 
   double _p;                          /// \brief The desired scalar value

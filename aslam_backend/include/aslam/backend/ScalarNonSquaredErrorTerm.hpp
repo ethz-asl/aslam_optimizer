@@ -22,14 +22,14 @@ namespace aslam {
      * \brief a class representing a single scalar error term in a general
      * optimization problem of the form \f$ \sum_{i=0}^N w_i \cdot e_i \f$.
      */
-    class NonSquaredErrorTerm {
+    class ScalarNonSquaredErrorTerm {
     public:
       EIGEN_MAKE_ALIGNED_OPERATOR_NEW;
 
-      typedef boost::shared_ptr<aslam::backend::NonSquaredErrorTerm> Ptr;
+      typedef boost::shared_ptr<aslam::backend::ScalarNonSquaredErrorTerm> Ptr;
 
-      NonSquaredErrorTerm();
-      virtual ~NonSquaredErrorTerm();
+      ScalarNonSquaredErrorTerm();
+      virtual ~ScalarNonSquaredErrorTerm();
 
       /// \brief evaluate the error term and return the effective error.
       ///        This is equivalent to first call updateRawError() and then taking the result of getError();
@@ -179,6 +179,6 @@ namespace aslam {
   } // namespace backend
 } // namespace aslam
 
-#include "implementation/NonSquaredErrorTerm.hpp"
+#include "implementation/ScalarNonSquaredErrorTerm.hpp"
 
 #endif /* ASLAM_NON_SQUARED_ERROR_TERM_HPP */

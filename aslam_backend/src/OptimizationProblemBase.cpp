@@ -48,7 +48,7 @@ namespace aslam {
       return errorTermImplementation(i);
     }
     /// \brief get error term i.
-    NonSquaredErrorTerm* OptimizationProblemBase::nonSquaredErrorTerm(size_t i)
+    ScalarNonSquaredErrorTerm* OptimizationProblemBase::nonSquaredErrorTerm(size_t i)
     {
       SM_ASSERT_LT_DBG(Exception, i, numNonSquaredErrorTerms(), "index out of bounds");
       return nonSquaredErrorTermImplementation(i);
@@ -60,7 +60,7 @@ namespace aslam {
       return errorTermImplementation(i);
     }
     /// \brief get error term i.
-    const NonSquaredErrorTerm* OptimizationProblemBase::nonSquaredErrorTerm(size_t i) const
+    const ScalarNonSquaredErrorTerm* OptimizationProblemBase::nonSquaredErrorTerm(size_t i) const
     {
       return nonSquaredErrorTermImplementation(i);
     }
@@ -69,7 +69,7 @@ namespace aslam {
     {
       return getErrorsImplementation(dv, outErrorSet);
     }
-    void OptimizationProblemBase::getNonSquaredErrors(const DesignVariable* dv, std::set<NonSquaredErrorTerm*>& outErrorSet)
+    void OptimizationProblemBase::getNonSquaredErrors(const DesignVariable* dv, std::set<ScalarNonSquaredErrorTerm*>& outErrorSet)
     {
       return getNonSquaredErrorsImplementation(dv, outErrorSet);
     }

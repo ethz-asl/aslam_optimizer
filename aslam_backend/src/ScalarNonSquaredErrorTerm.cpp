@@ -1,32 +1,32 @@
-#include <aslam/backend/NonSquaredErrorTerm.hpp>
 #include <aslam/backend/MEstimatorPolicies.hpp>
 #include <boost/make_shared.hpp>
 #include <sm/logging.hpp>
+#include "../include/aslam/backend/ScalarNonSquaredErrorTerm.hpp"
 
 namespace aslam {
   namespace backend {
-  NonSquaredErrorTerm::NonSquaredErrorTerm() :
+  ScalarNonSquaredErrorTerm::ScalarNonSquaredErrorTerm() :
       _error(0.0), _timestamp(0), _w(0.0)
     {
       _mEstimatorPolicy = boost::make_shared<NoMEstimator>();
     }
 
-    NonSquaredErrorTerm::~NonSquaredErrorTerm()
+    ScalarNonSquaredErrorTerm::~ScalarNonSquaredErrorTerm()
     {
     }
 
-    double NonSquaredErrorTerm::updateRawError()
+    double ScalarNonSquaredErrorTerm::updateRawError()
     {
       return _error = evaluateErrorImplementation();
     }
 
-    double NonSquaredErrorTerm::getError()
+    double ScalarNonSquaredErrorTerm::getError()
     {
       return _mEstimatorPolicy->getWeight(_error) * _error;
     }
 
     /// \brief evaluate the Jacobians.
-    void NonSquaredErrorTerm::evaluateJacobians(JacobianContainer & outJ)
+    void ScalarNonSquaredErrorTerm::evaluateJacobians(JacobianContainer & outJ)
     {
       outJ.clear();
       evaluateJacobiansImplementation(outJ);
@@ -44,27 +44,27 @@ namespace aslam {
 
     /// \brief set the M-Estimator policy. This function takes a squared error
     ///        and returns a weight to apply to that error term.
-    void NonSquaredErrorTerm::setMEstimatorPolicy(const boost::shared_ptr<MEstimator>& mEstimator)
+    void ScalarNonSquaredErrorTerm::setMEstimatorPolicy(const boost::shared_ptr<MEstimator>& mEstimator)
     {
       _mEstimatorPolicy = mEstimator;
     }
 
 
     /// \brief clear the m-estimator policy.
-    void NonSquaredErrorTerm::clearMEstimatorPolicy()
+    void ScalarNonSquaredErrorTerm::clearMEstimatorPolicy()
     {
       _mEstimatorPolicy = boost::make_shared<NoMEstimator>();
     }
 
 
     /// \brief compute the M-estimator weight from a squared error.
-    double NonSquaredErrorTerm::getMEstimatorWeight(double error) const
+    double ScalarNonSquaredErrorTerm::getMEstimatorWeight(double error) const
     {
       return _mEstimatorPolicy->getWeight(error);
     }
 
     /// \brief compute the M-estimator weight from a squared error.
-    double NonSquaredErrorTerm::getCurrentMEstimatorWeight() const
+    double ScalarNonSquaredErrorTerm::getCurrentMEstimatorWeight() const
     {
       return _mEstimatorPolicy->getWeight(_error);
     }
@@ -72,26 +72,26 @@ namespace aslam {
   
 
     /// \brief How many design variables is this error term connected to?
-    size_t NonSquaredErrorTerm::numDesignVariables() const
+    size_t ScalarNonSquaredErrorTerm::numDesignVariables() const
     {
       return _designVariables.size();
     }
 
     /// \brief Get design variable i.
-    DesignVariable* NonSquaredErrorTerm::designVariable(size_t i)
+    DesignVariable* ScalarNonSquaredErrorTerm::designVariable(size_t i)
     {
       SM_ASSERT_LT_DBG(aslam::IndexOutOfBoundsException, i, _designVariables.size(), "index out of bounds");
       return _designVariables[i];
     }
 
     /// \brief Get design variable i.
-    const DesignVariable* NonSquaredErrorTerm::designVariable(size_t i) const
+    const DesignVariable* ScalarNonSquaredErrorTerm::designVariable(size_t i) const
     {
       SM_ASSERT_LT_DBG(aslam::IndexOutOfBoundsException, i, _designVariables.size(), "index out of bounds");
       return _designVariables[i];
     }
 
-    void NonSquaredErrorTerm::setDesignVariables(const std::vector<DesignVariable*>& designVariables)
+    void ScalarNonSquaredErrorTerm::setDesignVariables(const std::vector<DesignVariable*>& designVariables)
     {
       /// \todo Set the back link to the error term in the design variable.
       SM_ASSERT_EQ(aslam::UnsupportedOperationException, _designVariables.size(), 0, "The design variable container already has objects. The design variables may only be set once");
@@ -102,21 +102,21 @@ namespace aslam {
       _designVariables = designVariables;
     }
 
-    void NonSquaredErrorTerm::setDesignVariables(DesignVariable* dv1)
+    void ScalarNonSquaredErrorTerm::setDesignVariables(DesignVariable* dv1)
     {
       std::vector<DesignVariable*> v;
       v.push_back(dv1);
       setDesignVariables(v);
     }
 
-    void NonSquaredErrorTerm::setDesignVariables(DesignVariable* dv1, DesignVariable* dv2)
+    void ScalarNonSquaredErrorTerm::setDesignVariables(DesignVariable* dv1, DesignVariable* dv2)
     {
       std::vector<DesignVariable*> v;
       v.push_back(dv1);
       v.push_back(dv2);
       setDesignVariables(v);
     }
-    void NonSquaredErrorTerm::setDesignVariables(DesignVariable* dv1, DesignVariable* dv2, DesignVariable* dv3)
+    void ScalarNonSquaredErrorTerm::setDesignVariables(DesignVariable* dv1, DesignVariable* dv2, DesignVariable* dv3)
     {
       std::vector<DesignVariable*> v;
       v.push_back(dv1);
@@ -124,7 +124,7 @@ namespace aslam {
       v.push_back(dv3);
       setDesignVariables(v);
     }
-    void NonSquaredErrorTerm::setDesignVariables(DesignVariable* dv1, DesignVariable* dv2, DesignVariable* dv3, DesignVariable* dv4)
+    void ScalarNonSquaredErrorTerm::setDesignVariables(DesignVariable* dv1, DesignVariable* dv2, DesignVariable* dv3, DesignVariable* dv4)
     {
       std::vector<DesignVariable*> v;
       v.push_back(dv1);
@@ -140,30 +140,30 @@ namespace aslam {
 //      return vsErrorImplementation();
 //    }
 
-    std::string NonSquaredErrorTerm::getMEstimatorName()
+    std::string ScalarNonSquaredErrorTerm::getMEstimatorName()
     {
       return _mEstimatorPolicy->name();
     }
 
     /// \brief Get the squared error (weighted by the M-estimator policy)
-    double NonSquaredErrorTerm::getWeightedError() const
+    double ScalarNonSquaredErrorTerm::getWeightedError() const
     {
       return _mEstimatorPolicy->getWeight(_error) * _error;
     }
 
     /// \brief Get the squared error (before weighting by the M-estimator policy)
-    double NonSquaredErrorTerm::getRawError() const
+    double ScalarNonSquaredErrorTerm::getRawError() const
     {
       return _error;
     }
 
 
-    void NonSquaredErrorTerm::getDesignVariables(DesignVariable::set_t& dvs)
+    void ScalarNonSquaredErrorTerm::getDesignVariables(DesignVariable::set_t& dvs)
     {
       dvs.insert(_designVariables.begin(), _designVariables.end());
     }
 
-    const std::vector<DesignVariable*>& NonSquaredErrorTerm::designVariables() const
+    const std::vector<DesignVariable*>& ScalarNonSquaredErrorTerm::designVariables() const
     {
       return _designVariables;
     }
@@ -228,7 +228,7 @@ namespace aslam {
   
     // This is sub-optimal in terms of efficiency but it is mostly used for
     // unit testing and prototyping in any case.
-    void NonSquaredErrorTerm::evaluateJacobiansFiniteDifference(JacobianContainer & outJacobians)
+    void ScalarNonSquaredErrorTerm::evaluateJacobiansFiniteDifference(JacobianContainer & outJacobians)
     {
 //      outJacobians.clear();
 //      detail::ErrorTermFunctor functor(*this);

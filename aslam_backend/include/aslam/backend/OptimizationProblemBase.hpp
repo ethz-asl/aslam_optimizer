@@ -9,7 +9,7 @@ namespace aslam {
   namespace backend {
     class DesignVariable;
     class ErrorTerm;
-    class NonSquaredErrorTerm;
+    class ScalarNonSquaredErrorTerm;
 
     class OptimizationProblemBase {
     public:
@@ -37,19 +37,19 @@ namespace aslam {
       ErrorTerm* errorTerm(size_t i);
 
       /// \brief get error term i.
-      NonSquaredErrorTerm* nonSquaredErrorTerm(size_t i);
+      ScalarNonSquaredErrorTerm* nonSquaredErrorTerm(size_t i);
 
       /// \brief get error term i.
       const ErrorTerm* errorTerm(size_t i) const;
 
       /// \brief get non-squared error term i.
-      const NonSquaredErrorTerm* nonSquaredErrorTerm(size_t i) const;
+      const ScalarNonSquaredErrorTerm* nonSquaredErrorTerm(size_t i) const;
 
       /// \brief Get the error terms associated with a specific design variable
       void getErrors(const DesignVariable* dv, std::set<ErrorTerm*>& outErrorSet);
 
       /// \brief Get the non-squared error terms associated with a specific design variable
-      void getNonSquaredErrors(const DesignVariable* dv, std::set<NonSquaredErrorTerm*>& outErrorSet);
+      void getNonSquaredErrors(const DesignVariable* dv, std::set<ScalarNonSquaredErrorTerm*>& outErrorSet);
 
       /// \brief This is ugly but it is just enough abstract interface
       ///        to allow error term factories to work
@@ -72,16 +72,16 @@ namespace aslam {
       /// \brief get error term n
       virtual ErrorTerm* errorTermImplementation(size_t n) = 0;
       /// \brief get non-squared error term n
-      virtual NonSquaredErrorTerm* nonSquaredErrorTermImplementation(size_t n) = 0;
+      virtual ScalarNonSquaredErrorTerm* nonSquaredErrorTermImplementation(size_t n) = 0;
       /// \brief get error term n
       virtual const ErrorTerm* errorTermImplementation(size_t n) const = 0;
       /// \brief get non-squared error term n
-      virtual const NonSquaredErrorTerm* nonSquaredErrorTermImplementation(size_t n) const = 0;
+      virtual const ScalarNonSquaredErrorTerm* nonSquaredErrorTermImplementation(size_t n) const = 0;
 
       /// \brief get all of the error terms associated with design variable dv.
       virtual void getErrorsImplementation(const DesignVariable* dv, std::set<ErrorTerm*>& outErrorSet) = 0;
       /// \brief get all of the non-squared error terms associated with design variable dv.
-      virtual void getNonSquaredErrorsImplementation(const DesignVariable* dv, std::set<NonSquaredErrorTerm*>& outErrorSet) = 0;
+      virtual void getNonSquaredErrorsImplementation(const DesignVariable* dv, std::set<ScalarNonSquaredErrorTerm*>& outErrorSet) = 0;
 
     };
 

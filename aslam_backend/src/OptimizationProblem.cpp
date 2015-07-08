@@ -1,8 +1,8 @@
 #include <aslam/backend/OptimizationProblem.hpp>
 #include <aslam/backend/DesignVariable.hpp>
 #include <aslam/backend/ErrorTerm.hpp>
-#include <aslam/backend/NonSquaredErrorTerm.hpp>
 #include <sm/boost/null_deleter.hpp>
+#include "../include/aslam/backend/ScalarNonSquaredErrorTerm.hpp"
 
 namespace aslam {
   namespace backend {
@@ -58,12 +58,12 @@ namespace aslam {
     /// \brief Add a scalar non-squared error term to the problem. If the second
     /// argument is true, the error term will be deleted when the
     /// problem is cleared or goes out of scope.
-    void OptimizationProblem::addErrorTerm(NonSquaredErrorTerm* ev, bool problemOwnsVariable)
+    void OptimizationProblem::addErrorTerm(ScalarNonSquaredErrorTerm* ev, bool problemOwnsVariable)
     {
       if (problemOwnsVariable)
-        addErrorTerm(boost::shared_ptr<NonSquaredErrorTerm>(ev));
+        addErrorTerm(boost::shared_ptr<ScalarNonSquaredErrorTerm>(ev));
       else
-        addErrorTerm(boost::shared_ptr<NonSquaredErrorTerm>(ev, sm::null_deleter()));
+        addErrorTerm(boost::shared_ptr<ScalarNonSquaredErrorTerm>(ev, sm::null_deleter()));
     }
 
 
@@ -80,9 +80,9 @@ namespace aslam {
     }
 
     /// \brief Add a scalar non-squared error term to the problem
-    void OptimizationProblem::addErrorTerm(const boost::shared_ptr<NonSquaredErrorTerm> & et)
+    void OptimizationProblem::addErrorTerm(const boost::shared_ptr<ScalarNonSquaredErrorTerm> & et)
     {
-      _snsErrorTerms.push_back(et);
+      _sNSErrorTerms.push_back(et);
       // add this error term to the multi-map
       for (size_t i = 0; i < et->numDesignVariables(); ++i) {
         DesignVariable* dv = et->designVariable(i);
@@ -105,7 +105,7 @@ namespace aslam {
     void OptimizationProblem::clear()
     {
       _errorTerms.clear();
-      _snsErrorTerms.clear();
+      _sNSErrorTerms.clear();
       _designVariables.clear();
       _errorTermMap.clear();
       _errorTermMapSns.clear();
@@ -134,7 +134,7 @@ namespace aslam {
     }
     size_t OptimizationProblem::numNonSquaredErrorTermsImplementation() const
     {
-      return _snsErrorTerms.size();
+      return _sNSErrorTerms.size();
     }
 
     ErrorTerm* OptimizationProblem::errorTermImplementation(size_t i)
@@ -142,18 +142,18 @@ namespace aslam {
       return _errorTerms[i].get();
     }
 
-    NonSquaredErrorTerm* OptimizationProblem::nonSquaredErrorTermImplementation(size_t i)
+    ScalarNonSquaredErrorTerm* OptimizationProblem::nonSquaredErrorTermImplementation(size_t i)
     {
-      return _snsErrorTerms[i].get();
+      return _sNSErrorTerms[i].get();
     }
 
     const ErrorTerm* OptimizationProblem::errorTermImplementation(size_t i) const
     {
       return _errorTerms[i].get();
     }
-    const NonSquaredErrorTerm* OptimizationProblem::nonSquaredErrorTermImplementation(size_t i) const
+    const ScalarNonSquaredErrorTerm* OptimizationProblem::nonSquaredErrorTermImplementation(size_t i) const
     {
-      return _snsErrorTerms[i].get();
+      return _sNSErrorTerms[i].get();
     }
 
     void OptimizationProblem::getErrorsImplementation(const DesignVariable* dv, std::set<ErrorTerm*>& outErrorSet)
@@ -167,7 +167,7 @@ namespace aslam {
       }
     }
 
-    void OptimizationProblem::getNonSquaredErrorsImplementation(const DesignVariable* dv, std::set<NonSquaredErrorTerm*>& outErrorSet)
+    void OptimizationProblem::getNonSquaredErrorsImplementation(const DesignVariable* dv, std::set<ScalarNonSquaredErrorTerm*>& outErrorSet)
     {
       error_map_sns_t::iterator it, it_end;
       // I'm not sure why this const cast is necessary but I get a failure on OSX if it isn't here.

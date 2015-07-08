@@ -35,11 +35,11 @@ namespace aslam {
       /// argument is true, the error term will be deleted when the
       /// problem is cleared or goes out of scope.
       void addErrorTerm(ErrorTerm* dv, bool problemOwnsVariable);
-      void addErrorTerm(NonSquaredErrorTerm* dv, bool problemOwnsVariable);
+      void addErrorTerm(ScalarNonSquaredErrorTerm* dv, bool problemOwnsVariable);
 
       /// \brief Add an error term to the problem
       virtual void addErrorTerm(const boost::shared_ptr<ErrorTerm> & et);
-      virtual void addErrorTerm(const boost::shared_ptr<NonSquaredErrorTerm> & et);
+      virtual void addErrorTerm(const boost::shared_ptr<ScalarNonSquaredErrorTerm> & et);
 
       /// \brief clear the design variables and error terms.
       void clear();
@@ -54,19 +54,19 @@ namespace aslam {
       virtual size_t numErrorTermsImplementation() const;
       virtual size_t numNonSquaredErrorTermsImplementation() const;
       virtual ErrorTerm* errorTermImplementation(size_t i);
-      virtual NonSquaredErrorTerm* nonSquaredErrorTermImplementation(size_t i);
+      virtual ScalarNonSquaredErrorTerm* nonSquaredErrorTermImplementation(size_t i);
       virtual const ErrorTerm* errorTermImplementation(size_t i) const;
-      virtual const NonSquaredErrorTerm* nonSquaredErrorTermImplementation(size_t i) const;
+      virtual const ScalarNonSquaredErrorTerm* nonSquaredErrorTermImplementation(size_t i) const;
 
       virtual void getErrorsImplementation(const DesignVariable* dv, std::set<ErrorTerm*>& outErrorSet);
-      virtual void getNonSquaredErrorsImplementation(const DesignVariable* dv, std::set<NonSquaredErrorTerm*>& outErrorSet);
+      virtual void getNonSquaredErrorsImplementation(const DesignVariable* dv, std::set<ScalarNonSquaredErrorTerm*>& outErrorSet);
 
       // \todo Replace these std::vectors by something better. The underlying algorithms that this object
       //       supports suck with these containers. Blerg. See "removeDesignVariable()" for an example of
       //       just how bad this is.
       std::vector< boost::shared_ptr<DesignVariable> > _designVariables;
       std::vector< boost::shared_ptr<ErrorTerm> > _errorTerms;
-      std::vector< boost::shared_ptr<NonSquaredErrorTerm> > _snsErrorTerms;
+      std::vector< boost::shared_ptr<ScalarNonSquaredErrorTerm> > _sNSErrorTerms;
     };
 
 
