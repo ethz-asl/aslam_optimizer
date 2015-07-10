@@ -7,11 +7,10 @@
 namespace aslam {
   namespace backend {
 
-  // \todo remove this template argument.
-    template<int D>
+    template<typename E = ErrorTerm>
     class ErrorTermTestHarness {
     public:
-      typedef ErrorTerm error_t;
+      typedef E error_t;
 
       ErrorTermTestHarness(error_t* error) : _error(error) {       }
 

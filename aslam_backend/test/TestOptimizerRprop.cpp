@@ -36,6 +36,10 @@ TEST(OptimizerRpropTestSuite, testRpropNonSquaredErrorTerms)
         err->_p = 1.0;
         e1.push_back(err);
         problem.addErrorTerm(err);
+        SCOPED_TRACE("");
+        ErrorTermTestHarness<ScalarNonSquaredErrorTerm> eh(err.get());
+        SCOPED_TRACE("");
+        eh.testAll();
       }
     }
     // Now let's optimize.
@@ -83,6 +87,10 @@ TEST(OptimizerRpropTestSuite, testRpropSquaredErrorTerms)
         boost::shared_ptr<LinearErr> err(new LinearErr(p2d[p].get()));
         e1.push_back(err);
         problem.addErrorTerm(err);
+        SCOPED_TRACE("");
+        ErrorTermTestHarness<ErrorTerm> eh(err.get());
+        SCOPED_TRACE("");
+        eh.testAll();
       }
     }
     // Now let's optimize.
@@ -98,7 +106,6 @@ TEST(OptimizerRpropTestSuite, testRpropSquaredErrorTerms)
     optimizer.optimize();
 
     EXPECT_LT(optimizer.getGradientNorm(), 1e-3);
-//    EXPECT_NEAR(p2d[0]->_v[0], 1.0, 1e-3);
 
   } catch (const std::exception& e) {
     FAIL() << e.what();

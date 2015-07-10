@@ -65,19 +65,11 @@ namespace aslam {
         return useMEstimator ? getWeightedError() : getRawError();
       }
 
+      /// \brief Getter for the weight
       inline double getWeight() const;
 
       /// \brief returns the weight
       inline void setWeight(const double w);
-
-      /// \brief get the current value of the error.
-      /// This was put here to make the python interface easier to generate. It doesn't
-      /// fit for quadratic integral terms so it may go away in future versions.
-//      Eigen::VectorXd vsError() const;
-//
-//      virtual void getWeight(double& invR) const = 0;
-//      virtual Eigen::MatrixXd vsInvR() const = 0;
-//      virtual void vsSetInvR(const Eigen::MatrixXd& invR) = 0;
 
       /// \brief returns a pointer to the MEstimator used. Return Null if the
       /// MEstimator used is not a MEstimatorType
@@ -99,13 +91,6 @@ namespace aslam {
       /// \brief get the name of the M-Estimator.
       std::string getMEstimatorName();
 
-      /// \brief build this error term's part of the Hessian matrix.
-      ///
-      /// the i/o variables outHessian and outRhs are the full Hessian and rhs in the Gauss-Newton
-      /// problem. The correct blocks for each design varible are available from the design
-      /// variable as dv.blockIndex()
-//      void buildHessian(SparseBlockMatrix& outHessian, Eigen::VectorXd& outRhs, bool useMEstimator) ;
-
       /// \brief How many design variables is this error term connected to?
       size_t numDesignVariables() const;
 
@@ -123,6 +108,9 @@ namespace aslam {
 
       void setTime(const sm::timing::NsecTime& t);
       sm::timing::NsecTime getTime() { return _timestamp; }
+
+      /// \brief Get the error term dimension. For compatibility with squared error term interface.
+      inline size_t dimension() const { return 1UL; }
 
     protected:
 
@@ -169,8 +157,6 @@ namespace aslam {
 
       /// \brief The list of design variables.
       std::vector<DesignVariable*> _designVariables;
-
-//      size_t _rowBase;
 
       sm::timing::NsecTime _timestamp;
     };

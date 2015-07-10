@@ -33,7 +33,7 @@ TEST(OptimizerTestSuite, testOptimizerMatrices)
         e1.push_back(err);
         problem.addErrorTerm(err);
         SCOPED_TRACE("");
-        ErrorTermTestHarness<2> eh(err.get());
+        ErrorTermTestHarness<ErrorTerm> eh(err.get());
         SCOPED_TRACE("");
         eh.testAll();
       }
@@ -46,7 +46,7 @@ TEST(OptimizerTestSuite, testOptimizerMatrices)
     //  boost::shared_ptr<LinearErr2> err(new LinearErr2(p2d[p].get(), ps) )
     //  e2.push_back( err );
     //  problem.addErrorTerm(err);
-    //  ErrorTermTestHarness<2> eh(err.get());
+    //  ErrorTermTestHarness<ErrorTerm> eh(err.get());
     //  eh.testAll();
     //   }
     // Now let's optimize.
@@ -159,7 +159,7 @@ TEST(OptimizerTestSuite, testOptimizerNormalized)
         e1.push_back(err);
         problem.addErrorTerm(err);
         // SCOPED_TRACE("");
-        //  ErrorTermTestHarness<2> eh(err.get());
+        //  ErrorTermTestHarness<ErrorTerm> eh(err.get());
         // SCOPED_TRACE("");
         // eh.testAll();
       }
@@ -224,7 +224,7 @@ TEST(OptimizerTestSuite, testOptimizerNormalized)
 //          e1.push_back( err );
 //          problem2.addErrorTerm( err );
 //          SCOPED_TRACE("");
-//          ErrorTermTestHarness<2> eh(err.get());
+//          ErrorTermTestHarness<ErrorTerm> eh(err.get());
 //          SCOPED_TRACE("");
 //          eh.testAll();
 //        }
