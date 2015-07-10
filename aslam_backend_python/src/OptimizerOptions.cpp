@@ -1,6 +1,7 @@
 #include <numpy_eigen/boost_python_headers.hpp>
 #include <aslam/backend/OptimizerOptions.hpp>
 #include <aslam/backend/Optimizer2Options.hpp>
+#include <aslam/backend/OptimizerRpropOptions.hpp>
 #include <boost/shared_ptr.hpp>
 #include <aslam/backend/LinearSystemSolver.hpp>
 #include <aslam/backend/TrustRegionPolicy.hpp>
@@ -38,6 +39,19 @@ void exportOptimizerOptions()
     .def_readwrite("nThreads", &Optimizer2Options::nThreads)
       .def_readwrite("trustRegionPolicy", &Optimizer2Options::trustRegionPolicy)
     ;
+
+  class_<OptimizerRpropOptions>("OptimizerRpropOptions", init<>())
+      .def_readwrite("etaMinus",&OptimizerRpropOptions::etaMinus)
+      .def_readwrite("etaPlus",&OptimizerRpropOptions::etaPlus)
+      .def_readwrite("initialDelta",&OptimizerRpropOptions::initialDelta)
+      .def_readwrite("minDelta",&OptimizerRpropOptions::minDelta)
+      .def_readwrite("maxDelta",&OptimizerRpropOptions::maxDelta)
+      .def_readwrite("maxIterations",&OptimizerRpropOptions::maxIterations)
+      .def_readwrite("verbose",&OptimizerRpropOptions::verbose)
+      .def_readwrite("linearSolver",&OptimizerRpropOptions::linearSystemSolver)
+      .def_readwrite("nThreads", &OptimizerRpropOptions::nThreads)
+      .def_readwrite("trustRegionPolicy", &OptimizerRpropOptions::trustRegionPolicy)
+      ;
 
 
 }
