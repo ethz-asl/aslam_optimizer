@@ -1,22 +1,9 @@
 #include <aslam/backend/OptimizerRprop.hpp>
-// std::partial_sum
-#include <numeric>
 #include <aslam/backend/ErrorTerm.hpp>
-// M.inverse()
 #include <Eigen/Dense>
 #include <sm/eigen/assert_macros.hpp>
-//#include <sparse_block_matrix/linear_solver_dense.h>
-//#include <sparse_block_matrix/linear_solver_cholmod.h>
-#ifndef QRSOLVER_DISABLED
-#include <sparse_block_matrix/linear_solver_spqr.h>
-#include <aslam/backend/SparseQrLinearSystemSolver.hpp>
-#endif
 #include <aslam/backend/sparse_matrix_functions.hpp>
-//#include <aslam/backend/BlockCholeskyLinearSystemSolver.hpp>
-//#include <aslam/backend/SparseCholeskyLinearSystemSolver.hpp>
-//#include <aslam/backend/DenseQrLinearSystemSolver.hpp>
 #include <sm/PropertyTree.hpp>
-
 
 namespace aslam {
 namespace backend {

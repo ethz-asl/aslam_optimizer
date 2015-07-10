@@ -51,7 +51,6 @@ TEST(OptimizerRpropTestSuite, testRpropNonSquaredErrorTerms)
     optimizer.optimize();
 
     EXPECT_LT(optimizer.getGradientNorm(), 1e-3);
-//    EXPECT_NEAR(p2d[0]->_v[0], 1.0, 1e-3);
 
   } catch (const std::exception& e) {
     FAIL() << e.what();

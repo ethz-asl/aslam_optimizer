@@ -3,7 +3,7 @@
 
 
 #include <boost/shared_ptr.hpp>
-//#include <boost/function.hpp>
+#include <boost/function.hpp>
 #include <sm/assert_macros.hpp>
 #include <Eigen/Core>
 #include "OptimizerRpropOptions.hpp"
@@ -58,20 +58,11 @@ namespace aslam {
       /// \brief Get the optimizer options.
       OptimizerRpropOptions& options();
 
-      /// \brief return the reduced system dx
-//      const Eigen::VectorXd& dx() const;
-
-      /// The value of the objective function.
-//      double J() const;
-
       /// \brief compute the current gradient of the objective function
       void computeGradient(RowVectorType& outGrad, size_t nThreads, bool useMEstimator);
 
       /// \brief Return the current gradient norm
       double getGradientNorm() { return _curr_gradient_norm; }
-
-      /// \brief Evaluate the error at the current state.
-//      double evaluateError(bool useMEstimator);
 
       /// \brief Get dense design variable i.
       DesignVariable* designVariable(size_t i);
@@ -101,12 +92,6 @@ namespace aslam {
       /// \brief The dense update vector.
       ColumnVectorType _dx;
 
-      /// \brief The current value of the gradient.
-//      double _grad;
-
-      /// \brief The previous value of the gradient.
-//      double _p_grad;
-
       /// \brief current step-length to be performed into the negative direction of the gradient
       ColumnVectorType _delta;
 
@@ -115,10 +100,6 @@ namespace aslam {
 
       /// \brief Current norm of the gradient
       double _curr_gradient_norm;
-
-//      boost::shared_ptr<LinearSystemSolver> _solver;
-
-//      boost::shared_ptr<TrustRegionPolicy> _trustRegionPolicy;
 
       /// \brief The current optimization problem.
       boost::shared_ptr<OptimizationProblemBase> _problem;
