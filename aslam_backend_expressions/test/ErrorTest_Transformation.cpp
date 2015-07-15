@@ -46,7 +46,7 @@ TEST(AslamVChargeBackendTestSuite, testTransformation)
     // Create the ErrorTerm
     ErrorTermTransformation ett(T, T_random, N);
     // Create the test harness
-    aslam::backend::ErrorTermTestHarness<6> harness(&ett);
+    aslam::backend::ErrorTermTestHarness<> harness(&ett);
 
     // Run the unit tests.
     harness.testAll(1e-5);
@@ -91,7 +91,7 @@ TEST(AslamVChargeBackendTestSuite, testTransformationWithAdapter)
     // Create the ErrorTerm
     ErrorTermTransformation ett(T, T_random, N);
     // Create the test harness
-    aslam::backend::ErrorTermTestHarness<6> harness(&ett);
+    aslam::backend::ErrorTermTestHarness<> harness(&ett);
 
     // Run the unit tests.
     harness.testAll(1e-5);

@@ -25,7 +25,7 @@ TEST(AslamVChargeBackendTestSuite, testEuclidean)
 
     ErrorTermEuclidean ete(ep.toExpression(), Eigen::Vector3d::Random(), N);
     // Create the test harness
-    aslam::backend::ErrorTermTestHarness<3> harness(&ete);
+    aslam::backend::ErrorTermTestHarness<> harness(&ete);
 
     // Run the unit tests.
     harness.testAll(1e-5);
