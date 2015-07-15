@@ -24,7 +24,7 @@ TEST(AslamTutorialTestSuite, testObservation)
     ErrorTermObservation obs(&x, &w, y, 1.0);
 
     // Create the test harness of dimension 1.
-    ErrorTermTestHarness<1> harness(&obs);
+    ErrorTermTestHarness<> harness(&obs);
 
     // Gives you a good error message.
     SCOPED_TRACE("");
@@ -52,7 +52,7 @@ TEST(AslamTutorialTestSuite, testMotion)
     ErrorTermMotion motion(&x_k, &x_kp1, u, 1.0);
 
     // Create the test harness of dimension 1.
-    ErrorTermTestHarness<1> harness(&motion);
+    ErrorTermTestHarness<> harness(&motion);
 
     // Gives you a good error message.
     SCOPED_TRACE("");
@@ -78,7 +78,7 @@ TEST(AslamTutorialTestSuite, testPrior)
     ErrorTermPrior prior(&x, x_prior, 1.0);
 
     // Create the test harness of dimension 1.
-    ErrorTermTestHarness<1> harness(&prior);
+    ErrorTermTestHarness<> harness(&prior);
 
     // Gives you a good error message.
     SCOPED_TRACE("");
