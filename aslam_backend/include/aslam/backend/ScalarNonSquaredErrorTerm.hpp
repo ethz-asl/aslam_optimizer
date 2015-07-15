@@ -67,7 +67,7 @@ namespace aslam {
       /// \brief Getter for the weight
       inline double getWeight() const;
 
-      /// \brief returns the weight
+      /// \brief set the weight
       inline void setWeight(const double w);
 
       /// \brief returns a pointer to the MEstimator used. Return Null if the
