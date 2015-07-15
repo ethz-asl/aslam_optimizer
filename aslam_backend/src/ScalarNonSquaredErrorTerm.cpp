@@ -20,11 +20,6 @@ double ScalarNonSquaredErrorTerm::updateRawError()
   return _error = _w * evaluateErrorImplementation();
 }
 
-double ScalarNonSquaredErrorTerm::getError()
-{
-  return _mEstimatorPolicy->getWeight(_error) * _error;
-}
-
 /// \brief evaluate the Jacobians.
 void ScalarNonSquaredErrorTerm::evaluateJacobians(JacobianContainer & outJ)
 {
@@ -44,18 +39,6 @@ void ScalarNonSquaredErrorTerm::setMEstimatorPolicy(const boost::shared_ptr<MEst
 void ScalarNonSquaredErrorTerm::clearMEstimatorPolicy()
 {
   _mEstimatorPolicy = boost::make_shared<NoMEstimator>();
-}
-
-/// \brief compute the M-estimator weight from a squared error.
-double ScalarNonSquaredErrorTerm::getMEstimatorWeight(double error) const
-{
-  return _mEstimatorPolicy->getWeight(error);
-}
-
-/// \brief compute the M-estimator weight from a squared error.
-double ScalarNonSquaredErrorTerm::getCurrentMEstimatorWeight() const
-{
-  return _mEstimatorPolicy->getWeight(_error);
 }
 
 /// \brief How many design variables is this error term connected to?
@@ -124,18 +107,6 @@ void ScalarNonSquaredErrorTerm::setDesignVariables(DesignVariable* dv1, DesignVa
 std::string ScalarNonSquaredErrorTerm::getMEstimatorName()
 {
   return _mEstimatorPolicy->name();
-}
-
-/// \brief Get the error (weighted by the M-estimator policy)
-double ScalarNonSquaredErrorTerm::getWeightedError() const
-{
-  return _mEstimatorPolicy->getWeight(_error) * _error;
-}
-
-/// \brief Get the error (before weighting by the M-estimator policy)
-double ScalarNonSquaredErrorTerm::getRawError() const
-{
-  return _error;
 }
 
 void ScalarNonSquaredErrorTerm::getDesignVariables(DesignVariable::set_t& dvs)

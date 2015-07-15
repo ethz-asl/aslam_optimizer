@@ -32,19 +32,17 @@ namespace aslam {
       virtual ~ScalarNonSquaredErrorTerm();
 
       /// \brief evaluate the error term and return the effective error.
-      ///        This is equivalent to first call updateRawError() and then taking the result of getError();
+      ///        This is equivalent to first call updateRawError() and then taking the result of getWeightedError();
       ///        After this is called, the _error is filled in with \f$ w \cdot e \f$
       double evaluateError() {
         updateRawError();
-        return getError();
+        return getWeightedError();
       }
 
       /// \brief update (compute and store) the raw error
       ///        After this is called, the _error is filled in with \f$ w \cdot e \f$
+      ///        The raw error is returned.
       double updateRawError();
-
-      /// \brief Get the current, weighted error, i.e. with the M-estimator weight already applied.
-      double getError();
 
       /// \brief evaluate the Jacobians.
       void evaluateJacobians(JacobianContainer & outJacobians);
@@ -56,9 +54,9 @@ namespace aslam {
       inline void getWeightedJacobians(JacobianContainer& outJc, bool useMEstimator);
 
       /// \brief Get the error (before weighting by the M-estimator policy)
-      double getRawError() const;
-      /// \brief Get the error (weighted by the M-estimator policy)
-      double getWeightedError() const;
+      double getRawError() const { return _error; }
+      /// \brief Get the current, weighted error, i.e. with the M-estimator weight already applied.
+      double getWeightedError() const { return getCurrentMEstimatorWeight() * getRawError(); }
       /// \brief Get the error with or without M-estimator policy
       inline double getError(bool useMEstimator) const {
         return useMEstimator ? getWeightedError() : getRawError();
@@ -83,9 +81,9 @@ namespace aslam {
       void clearMEstimatorPolicy();
 
       /// \brief compute the M-estimator weight from a squared error.
-      double getMEstimatorWeight(double error) const;
+      double getMEstimatorWeight(double error) const { return _mEstimatorPolicy->getWeight(fabs(error)); }
 
-      double getCurrentMEstimatorWeight() const;
+      double getCurrentMEstimatorWeight() const { return getMEstimatorWeight(getRawError()); }
 
       /// \brief get the name of the M-Estimator.
       std::string getMEstimatorName();
