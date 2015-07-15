@@ -17,7 +17,7 @@ ScalarNonSquaredErrorTerm::~ScalarNonSquaredErrorTerm()
 
 double ScalarNonSquaredErrorTerm::updateRawError()
 {
-  return _error = evaluateErrorImplementation();
+  return _error = _w * evaluateErrorImplementation();
 }
 
 double ScalarNonSquaredErrorTerm::getError()
@@ -36,6 +36,7 @@ void ScalarNonSquaredErrorTerm::evaluateJacobians(JacobianContainer & outJ)
 ///        and returns a weight to apply to that error term.
 void ScalarNonSquaredErrorTerm::setMEstimatorPolicy(const boost::shared_ptr<MEstimator>& mEstimator)
 {
+  SM_ASSERT_TRUE(Exception, mEstimator, "Only non null mEstimators are allowed. Use clearMEstimatorPolicy() to deactivate the mEstimator.");
   _mEstimatorPolicy = mEstimator;
 }
 
@@ -125,13 +126,13 @@ std::string ScalarNonSquaredErrorTerm::getMEstimatorName()
   return _mEstimatorPolicy->name();
 }
 
-/// \brief Get the squared error (weighted by the M-estimator policy)
+/// \brief Get the error (weighted by the M-estimator policy)
 double ScalarNonSquaredErrorTerm::getWeightedError() const
 {
   return _mEstimatorPolicy->getWeight(_error) * _error;
 }
 
-/// \brief Get the squared error (before weighting by the M-estimator policy)
+/// \brief Get the error (before weighting by the M-estimator policy)
 double ScalarNonSquaredErrorTerm::getRawError() const
 {
   return _error;

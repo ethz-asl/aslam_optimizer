@@ -31,11 +31,6 @@ namespace aslam {
       _w = w;
     }
 
-    void ScalarNonSquaredErrorTerm::setError(const double e)
-    {
-      _error = e;
-    }
-
     void ScalarNonSquaredErrorTerm::getWeightedJacobians(JacobianContainer& outJc, bool useMEstimator)
     {
       // take a copy. \todo Don't take a copy.
@@ -44,23 +39,13 @@ namespace aslam {
       w << _w;
       outJc.applyChainRule(w);
       JacobianContainer::map_t::iterator it = outJc.begin();
-      double sqrtWeight = 1.0;
-      if (useMEstimator)
-        sqrtWeight = sqrt(_mEstimatorPolicy->getWeight(getRawError()));
-      for (; it != outJc.end(); ++it) {
-        it->second *=  sqrtWeight * it->first->scaling();
-      }
-    }
-
-    double ScalarNonSquaredErrorTerm::getWeightedError(bool useMEstimator) const
-    {
       double mEstWeight = 1.0;
-      if (useMEstimator) {
-        SM_ASSERT_TRUE(Exception, _mEstimatorPolicy != nullptr, "");
-        mEstWeight = sqrt(_mEstimatorPolicy->getWeight(getRawError()));
+      if (useMEstimator)
+        mEstWeight = _mEstimatorPolicy->getWeight(getRawError());
+      for (; it != outJc.end(); ++it) {
+        it->second *=  mEstWeight * it->first->scaling();
       }
-      return _error * mEstWeight;
     }
 
-  } // namespace backend
+   } // namespace backend
 } // namespace aslam

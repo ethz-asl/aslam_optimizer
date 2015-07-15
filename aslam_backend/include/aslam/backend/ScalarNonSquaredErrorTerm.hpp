@@ -52,10 +52,9 @@ namespace aslam {
       /// \brief evaluate the Jacobians using finite differences.
       void evaluateJacobiansFiniteDifference(JacobianContainer & outJacobians);
       
-      inline virtual void getWeightedJacobians(JacobianContainer& outJc, bool useMEstimator);
+      /// \brief Get the error with or without M-estimator policy
+      inline void getWeightedJacobians(JacobianContainer& outJc, bool useMEstimator);
 
-      /// \brief Get the error (before weighting by the M-estimator policy)
-      inline virtual double getWeightedError(bool useMEstimator) const;
       /// \brief Get the error (before weighting by the M-estimator policy)
       double getRawError() const;
       /// \brief Get the error (weighted by the M-estimator policy)
@@ -114,23 +113,11 @@ namespace aslam {
 
     protected:
 
-      /// \brief evaluate the error term and return the weighted squared error e^T invR e
+      /// \brief evaluate the error term and return the scalar error \f$ e \f$
       virtual double evaluateErrorImplementation() = 0;
 
-      /// \brief evaluate the Jacobians
+      /// \brief evaluate the Jacobians for \f$ e \f$
       virtual void evaluateJacobiansImplementation(JacobianContainer & outJacobians) = 0;
-
-      /// \brief set the error vector.
-      inline void setError(const double e);
-
-      /// \brief build this error term's part of the Hessian matrix.
-      ///
-      /// the i/o variables outHessian and outRhs are the full Hessian and rhs in the Gauss-Newton
-      /// problem. The correct blocks for each design variable are available from the design
-      /// variable as dv.blockIndex()
-//      virtual void buildHessianImplementation(SparseBlockMatrix& outHessian, Eigen::VectorXd& outRhs, bool useMEstimator) = 0;
-
-//      virtual double vsErrorImplementation() const = 0;
 
       /// \brief child classes should set the set of design variables using this function.
       void setDesignVariables(const std::vector<DesignVariable*> & designVariables);

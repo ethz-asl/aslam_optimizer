@@ -194,8 +194,7 @@ public:
   /// \brief evaluate the error term
   virtual double evaluateErrorImplementation() {
     double v = _p - _grad * _p2d->_v;
-    setError(v*v);
-    return getError();
+    return v*v;
   }
 
   /// \brief evaluate the jacobian
