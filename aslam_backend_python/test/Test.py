@@ -5,7 +5,7 @@ import numpy as np
 import unittest
 
 class TestRprop(unittest.TestCase):
-    def test_construction(self):
+    def test_simple_optimization(self):
         options = ab.OptimizerRpropOptions()
         options.verbose = False;
         options.maxIterations = 500;
