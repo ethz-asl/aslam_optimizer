@@ -3,7 +3,7 @@
 #include <aslam/backend/ErrorTermTransformation.hpp>
 #include <aslam/backend/test/RotationQuaternionAsVectorExpressionNode.hpp>
 // This test harness makes it easy to test error terms.
-#include <aslam/backend/test/ErrorTermTestHarness.hpp>
+#include <aslam/backend/test/ErrorTermTester.hpp>
 #include <sm/kinematics/RotationVector.hpp>
 #include <sm/kinematics/Transformation.hpp>
 
@@ -45,11 +45,10 @@ TEST(AslamVChargeBackendTestSuite, testTransformation)
 
     // Create the ErrorTerm
     ErrorTermTransformation ett(T, T_random, N);
-    // Create the test harness
-    aslam::backend::ErrorTermTestHarness<> harness(&ett);
 
-    // Run the unit tests.
-    harness.testAll(1e-5);
+    SCOPED_TRACE("");
+    aslam::backend::testErrorTerm(ett, 1e-5);
+
   }
   catch(const std::exception & e)
     {
@@ -90,11 +89,9 @@ TEST(AslamVChargeBackendTestSuite, testTransformationWithAdapter)
 
     // Create the ErrorTerm
     ErrorTermTransformation ett(T, T_random, N);
-    // Create the test harness
-    aslam::backend::ErrorTermTestHarness<> harness(&ett);
 
-    // Run the unit tests.
-    harness.testAll(1e-5);
+    SCOPED_TRACE("");
+    aslam::backend::testErrorTerm(ett, 1e-5);
   }
   catch(const std::exception & e)
     {

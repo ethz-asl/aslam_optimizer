@@ -2,7 +2,7 @@
 
 #include <aslam/backend/ErrorTermEuclidean.hpp>
 // This test harness makes it easy to test error terms.
-#include <aslam/backend/test/ErrorTermTestHarness.hpp>
+#include <aslam/backend/test/ErrorTermTester.hpp>
 #include <sm/kinematics/Transformation.hpp>
 
 #include <aslam/backend/EuclideanPoint.hpp>
@@ -24,11 +24,9 @@ TEST(AslamVChargeBackendTestSuite, testEuclidean)
     Eigen::MatrixXd N = 2 * Eigen::MatrixXd::Identity(3,3);
 
     ErrorTermEuclidean ete(ep.toExpression(), Eigen::Vector3d::Random(), N);
-    // Create the test harness
-    aslam::backend::ErrorTermTestHarness<> harness(&ete);
 
-    // Run the unit tests.
-    harness.testAll(1e-5);
+    SCOPED_TRACE("");
+    aslam::backend::testErrorTerm(ete, 1e-5);
   }
   catch(const std::exception & e)
     {
