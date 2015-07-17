@@ -4,7 +4,7 @@
 #include <aslam/backend/ErrorTerm.hpp>
 #include <boost/ptr_container/ptr_vector.hpp>
 #include <sm/random.hpp>
-#include <aslam/backend/test/ErrorTermTestHarness.hpp>
+#include <aslam/backend/test/ErrorTermTester.hpp>
 #include "SampleDvAndError.hpp"
 
 
@@ -33,9 +33,7 @@ TEST(OptimizerTestSuite, testOptimizerMatrices)
         e1.push_back(err);
         problem.addErrorTerm(err);
         SCOPED_TRACE("");
-        ErrorTermTestHarness<ErrorTerm> eh(err.get());
-        SCOPED_TRACE("");
-        eh.testAll();
+        testErrorTerm(err);
       }
     }
     // std::vector< boost::shared_ptr<LinearErr2> > e2;
@@ -46,7 +44,8 @@ TEST(OptimizerTestSuite, testOptimizerMatrices)
     //  boost::shared_ptr<LinearErr2> err(new LinearErr2(p2d[p].get(), ps) )
     //  e2.push_back( err );
     //  problem.addErrorTerm(err);
-    //  ErrorTermTestHarness<ErrorTerm> eh(err.get());
+    //  SCOPED_TRACE("");
+    //  testErrorTerm(err);
     //  eh.testAll();
     //   }
     // Now let's optimize.
@@ -159,9 +158,7 @@ TEST(OptimizerTestSuite, testOptimizerNormalized)
         e1.push_back(err);
         problem.addErrorTerm(err);
         // SCOPED_TRACE("");
-        //  ErrorTermTestHarness<ErrorTerm> eh(err.get());
-        // SCOPED_TRACE("");
-        // eh.testAll();
+        // testErrorTerm(err);
       }
     }
     // Now let's optimize.
@@ -224,9 +221,7 @@ TEST(OptimizerTestSuite, testOptimizerNormalized)
 //          e1.push_back( err );
 //          problem2.addErrorTerm( err );
 //          SCOPED_TRACE("");
-//          ErrorTermTestHarness<ErrorTerm> eh(err.get());
-//          SCOPED_TRACE("");
-//          eh.testAll();
+//          testErrorTerm(err);
 //        }
 //          }
 //

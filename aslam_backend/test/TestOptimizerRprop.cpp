@@ -4,7 +4,7 @@
 #include <aslam/backend/ErrorTerm.hpp>
 #include <boost/ptr_container/ptr_vector.hpp>
 #include <sm/random.hpp>
-#include <aslam/backend/test/ErrorTermTestHarness.hpp>
+#include <aslam/backend/test/ErrorTermTester.hpp>
 #include "SampleDvAndError.hpp"
 
 
@@ -37,9 +37,7 @@ TEST(OptimizerRpropTestSuite, testRpropNonSquaredErrorTerms)
         e1.push_back(err);
         problem.addErrorTerm(err);
         SCOPED_TRACE("");
-        ErrorTermTestHarness<ScalarNonSquaredErrorTerm> eh(err.get());
-        SCOPED_TRACE("");
-        eh.testAll();
+        testErrorTerm(err);
       }
     }
     // Now let's optimize.
@@ -88,9 +86,7 @@ TEST(OptimizerRpropTestSuite, testRpropSquaredErrorTerms)
         e1.push_back(err);
         problem.addErrorTerm(err);
         SCOPED_TRACE("");
-        ErrorTermTestHarness<ErrorTerm> eh(err.get());
-        SCOPED_TRACE("");
-        eh.testAll();
+        testErrorTerm(err);
       }
     }
     // Now let's optimize.
