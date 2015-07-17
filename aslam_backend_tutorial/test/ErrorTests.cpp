@@ -23,14 +23,8 @@ TEST(AslamTutorialTestSuite, testObservation)
     // Creat the observation
     ErrorTermObservation obs(&x, &w, y, 1.0);
 
-    // Create the test harness of dimension 1.
-    ErrorTermTestHarness<> harness(&obs);
-
-    // Gives you a good error message.
     SCOPED_TRACE("");
-
-    // Run the unit tests.
-    harness.testAll();
+    testErrorTerm(obs);
   }
   catch(const std::exception & e)
     {
@@ -51,14 +45,8 @@ TEST(AslamTutorialTestSuite, testMotion)
     // Creat the motion error term
     ErrorTermMotion motion(&x_k, &x_kp1, u, 1.0);
 
-    // Create the test harness of dimension 1.
-    ErrorTermTestHarness<> harness(&motion);
-
-    // Gives you a good error message.
     SCOPED_TRACE("");
-
-    // Run the unit tests.
-    harness.testAll();
+    testErrorTerm(motion);
   }
   catch(const std::exception & e)
     {
@@ -77,14 +65,8 @@ TEST(AslamTutorialTestSuite, testPrior)
     // Create the prior
     ErrorTermPrior prior(&x, x_prior, 1.0);
 
-    // Create the test harness of dimension 1.
-    ErrorTermTestHarness<> harness(&prior);
-
-    // Gives you a good error message.
     SCOPED_TRACE("");
-
-    // Run the unit tests.
-    harness.testAll();
+    testErrorTerm(prior);
   }
   catch(const std::exception & e)
     {
