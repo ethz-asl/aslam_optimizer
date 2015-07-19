@@ -1,3 +1,5 @@
+#include <boost/make_shared.hpp>
+
 #include <sm/eigen/gtest.hpp>
 #include "SampleDvAndError.hpp"
 
@@ -97,6 +99,54 @@ TEST(ErrorTermTestSuite, testInvR)
     deleteSystem(dvs, errs);
   } catch (const std::exception& e) {
     deleteSystem(dvs, errs);
+    FAIL() << e.what();
+  }
+}
+
+TEST(ErrorTermTestSuite, testNonSquaredErrorTerm) {
+  using namespace aslam::backend;
+  try {
+
+    Eigen::Vector2d v(1.0, 2.0);
+    Point2d p(v);
+    p.setBlockIndex(0);
+    TestNonSquaredError::grad_t g(1.0, 2.0);
+    TestNonSquaredError e(&p, g);
+
+    e._p = 3.0;
+    for (double w : {0.1, 1.0, 10.}){
+      e.setWeight(w);
+      for (double mEstWeight : {0.1, 1.0, 10.}){
+        if(mEstWeight != 1.0){
+          e.setMEstimatorPolicy(boost::make_shared<FixedWeightMEstimator>(mEstWeight));
+        }
+        else {
+          e.clearMEstimatorPolicy();
+        }
+
+        EXPECT_DOUBLE_EQ(w * 4.0, e.updateRawError());
+        EXPECT_DOUBLE_EQ(w * mEstWeight * 4.0, e.getWeightedError());
+        EXPECT_DOUBLE_EQ(e.getRawError(), e.getError(false));
+        EXPECT_DOUBLE_EQ(e.getWeightedError(), e.getError(true));
+
+        JacobianContainer jc(1);
+        e.getWeightedJacobians(jc, false);
+        Eigen::MatrixXd J = jc.asDenseMatrix();
+        Eigen::MatrixXd grad;
+        grad.resize(1,2); grad << 4., 8.;
+        grad *= w;
+        EXPECT_TRUE((J.array() == grad.array()).all()) << "J: " << J << std::endl <<
+            "Grad: " << grad << std::endl;
+
+        jc.clear();
+        e.getWeightedJacobians(jc, true);
+        J = jc.asDenseMatrix();
+        grad *= mEstWeight;
+        EXPECT_TRUE((J.array() == grad.array()).all()) << "J: " << J << std::endl <<
+            "Grad: " << grad << std::endl;
+      }
+    }
+  } catch (const std::exception& e) {
     FAIL() << e.what();
   }
 }

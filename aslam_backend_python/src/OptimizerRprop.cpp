@@ -1,7 +1,6 @@
 #include <numpy_eigen/boost_python_headers.hpp>
 #include <aslam/backend/Optimizer.hpp>
 #include <aslam/backend/Optimizer2.hpp>
-#include <aslam/backend/OptimizerRprop.hpp>
 #include <boost/shared_ptr.hpp>
 
 
@@ -173,36 +172,5 @@ void exportOptimizer()
         .def("computeHessian", &Optimizer2::computeHessian)
    
         ;
-
-
-    class_<OptimizerRprop, boost::shared_ptr<OptimizerRprop> >("OptimizerRprop", no_init)
-        .def(init<OptimizerRpropOptions>())
-        .def("setProblem", &OptimizerRprop::setProblem)
-
-        /// \brief initialize the optimizer to run on an optimization problem.
-        ///        This should be called before calling optimize()
-        .def("initialize", &OptimizerRprop::initialize)
-
-        /// \brief Run the optimization
-        .def("optimize", &OptimizerRprop::optimize)
-
-        /// \brief Get the optimizer options.
-        .add_property("options", make_function(&OptimizerRprop::options, return_internal_reference<>()))
-
-        /// The norm of the gradient of the objective function.
-        .add_property("gradientNorm", &OptimizerRprop::getGradientNorm)
-
-        /// \brief Get dense design variable i.
-        .def("densignVariable", &OptimizerRprop::designVariable, return_internal_reference<>())
-
-        /// \brief how many dense design variables are involved in the problem
-        .add_property("numDesignVariables", &OptimizerRprop::numDesignVariables)
-
-        .def("printTiming", &OptimizerRprop::printTiming)
-
-        .def("checkProblemSetup", &OptimizerRprop::checkProblemSetup)
-
-        ;
-
 }
 

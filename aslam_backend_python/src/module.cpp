@@ -10,6 +10,9 @@ void exportTrustRegionPolicies();
 void exportSBM();
 void exportErrorTermDs();
 void exportDesignVariableTimePair();
+void exportSampleDvAndError();
+void exportScalarNonSquaredErrorTerm();
+
 // The title of this library must match exactly
 BOOST_PYTHON_MODULE(libaslam_backend_python)
 {
@@ -21,5 +24,7 @@ BOOST_PYTHON_MODULE(libaslam_backend_python)
   exportTrustRegionPolicies();
   exportSBM();
   exportErrorTermDs();
+  exportScalarNonSquaredErrorTerm();
   exportDesignVariableTimePair();
+  exportSampleDvAndError();
 }

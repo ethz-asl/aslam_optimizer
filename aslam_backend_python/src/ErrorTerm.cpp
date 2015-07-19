@@ -7,6 +7,17 @@ using namespace aslam::backend;
 
 DesignVariable * (ErrorTerm::*err_dvptr)(size_t) = &ErrorTerm::designVariable;
 
+template <int N>
+void exportErrorTermFs() {
+
+  typedef ErrorTermFs<N> Error;
+  std::ostringstream os;
+  os << "ErrorTermFs" << N;
+
+  class_<Error, boost::shared_ptr<Error>, boost::noncopyable>(os.str().c_str(), no_init)
+  ;
+
+}
 
 void exportErrorTerm()
 {
@@ -58,7 +69,8 @@ void exportErrorTerm()
     .def("getTime", &ErrorTerm::getTime)
 ;
 
+  exportErrorTermFs<2>();
+  exportErrorTermFs<3>();
+  exportErrorTermFs<4>();
   
-  ;
-
 }

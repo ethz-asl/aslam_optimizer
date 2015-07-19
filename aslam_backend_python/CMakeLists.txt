@@ -17,6 +17,7 @@ add_python_export_library(${PROJECT_NAME} python/aslam_backend
   src/DesignVariable.cpp
   src/ErrorTerm.cpp
   src/ErrorTermDs.cpp
+  src/ScalarNonSquaredErrorTerm.cpp
   src/MEstimators.cpp
   src/JacobianContainer.cpp
   src/BackendExpressions.cpp
@@ -26,6 +27,7 @@ add_python_export_library(${PROJECT_NAME} python/aslam_backend
   src/TrustRegionPolicies.cpp
   src/SparseBlockMatrix.cpp
   src/DesignVariableTimePair.cpp
+  src/SampleDvAndError.cpp
 )
 
 find_package(Boost REQUIRED COMPONENTS thread) 
@@ -33,3 +35,7 @@ target_link_libraries(${PROJECT_NAME} ${Boost_LIBRARIES})
 
 cs_install()
 cs_export()
+
+catkin_add_nosetests( 
+  test/Test.py
+)
