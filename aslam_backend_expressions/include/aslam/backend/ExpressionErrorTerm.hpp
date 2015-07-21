@@ -161,8 +161,6 @@ class ScalarNonSquaredExpressionErrorTerm : public aslam::backend::ScalarNonSqua
     return _expression;
   }
 
-  using parent_t::setWeight;
-  using parent_t::setDesignVariablesIterator;
  private:
   const ScalarExpression _expression;
 };
