@@ -7,6 +7,7 @@
 #include <Eigen/Core>
 #include <aslam/backend/JacobianContainer.hpp>
 #include "ScalarExpression.hpp"
+#include "ScalarExpressionNode.hpp"
 #include "GenericMatrixExpressionNode.hpp"
 #include "Differential.hpp"
 
@@ -91,6 +92,10 @@ class GenericMatrixExpression {
   void evaluateJacobians(JacobianContainer & outJacobians, const differential_t & diff) const;
 
   void getDesignVariables(DesignVariable::set_t & designVariables) const;
+
+  ScalarExpression toScalarExpression() const;
+  template <int RowIndex, int ColIndex>
+  ScalarExpression toScalarExpression() const;
 
   inline node_ptr_t root() const {
     return _root;
