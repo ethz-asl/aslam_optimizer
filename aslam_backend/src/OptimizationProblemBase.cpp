@@ -41,6 +41,13 @@ namespace aslam {
     {
       return numNonSquaredErrorTermsImplementation();
     }
+
+    /// \brief the total number of error terms (squared and non-squared) stored in this optimization problem
+    size_t OptimizationProblemBase::numTotalErrorTerms() const
+    {
+      return numErrorTermsImplementation() + numNonSquaredErrorTermsImplementation();
+    }
+
     /// \brief get error term i.
     ErrorTerm* OptimizationProblemBase::errorTerm(size_t i)
     {

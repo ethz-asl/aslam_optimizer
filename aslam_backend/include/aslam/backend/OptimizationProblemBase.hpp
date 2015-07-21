@@ -33,6 +33,9 @@ namespace aslam {
       /// \brief the number of non-squared error terms stored in this optimization problem
       size_t numNonSquaredErrorTerms() const;
 
+      /// \brief the total number of error terms (squared and non-squared) stored in this optimization problem
+      size_t numTotalErrorTerms() const;
+
       /// \brief get error term i.
       ErrorTerm* errorTerm(size_t i);
 
