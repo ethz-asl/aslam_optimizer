@@ -55,6 +55,19 @@ void _CLASS::getDesignVariables(DesignVariable::set_t & designVariables) const
 }
 
 _TEMPLATE
+template<int RowIndex, int ColIndex>
+ScalarExpression _CLASS::toScalarExpression() const
+{
+  boost::shared_ptr<ScalarExpressionNode> newRoot( new ScalarExpressionNodeFromMatrixExpression<IRows, ICols, RowIndex, ColIndex>(_root));
+  return ScalarExpression(newRoot);
+}
+
+_TEMPLATE
+ScalarExpression _CLASS::toScalarExpression() const{
+  return toScalarExpression<0, 0>();
+}
+
+_TEMPLATE
 inline _CLASS::operator GenericMatrixExpression<IRows, ICols,TScalar>()const{typedef default_self_t result_t;
 
 class ResultNode : public result_t::template UnaryOperationResult<ResultNode, self_t> {

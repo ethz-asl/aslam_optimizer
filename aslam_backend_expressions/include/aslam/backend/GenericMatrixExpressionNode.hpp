@@ -58,7 +58,6 @@ class GenericMatrixExpressionNode {
   const matrix_t toMatrix() const {
     return evaluate();
   }
-  ;
 
   void getDesignVariables(DesignVariable::set_t & designVariables) const {
     return getDesignVariablesImplementation(designVariables);
@@ -70,7 +69,7 @@ class GenericMatrixExpressionNode {
   void inline invalidate() {
     _valueDirty = true;
   }
-  ;
+
  protected:
   virtual void evaluateImplementation() const = 0;
   virtual void getDesignVariablesImplementation(DesignVariable::set_t & designVariables) const = 0;
