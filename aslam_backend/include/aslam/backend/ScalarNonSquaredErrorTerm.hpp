@@ -44,14 +44,25 @@ namespace aslam {
       ///        The raw error is returned.
       double updateRawError();
 
-      /// \brief evaluate the Jacobians.
-      void evaluateJacobians(JacobianContainer & outJacobians);
+      /// \brief evaluate the Jacobians. Equivalent to evaluateWeightedJacobians.
+      void evaluateJacobians(JacobianContainer & outJacobians){
+        evaluateWeightedJacobians(outJacobians);
+      }
 
       /// \brief evaluate the Jacobians using finite differences.
       void evaluateJacobiansFiniteDifference(JacobianContainer & outJacobians);
       
-      /// \brief Get the error with or without M-estimator policy
-      inline void getWeightedJacobians(JacobianContainer& outJc, bool useMEstimator);
+      /// \brief evaluate the raw Jacobians of \f$ w \cdot e \f$, not applying M-estimator policy and design variable scaling
+      void evaluateRawJacobians(JacobianContainer & outJacobians);
+
+      /// \brief evaluate the Jacobians of \f$ w \cdot e \f$ applying M-estimator policy and design variable scaling
+      void evaluateWeightedJacobians(JacobianContainer& outJc);
+
+      /// \brief Get the jacobians with or without M-estimator policy
+      void evaluateJacobians(JacobianContainer& outJc, bool useMEstimator){
+        if(useMEstimator) evaluateWeightedJacobians(outJc);
+        else evaluateRawJacobians(outJc);
+      }
 
       /// \brief Get the error (before weighting by the M-estimator policy)
       double getRawError() const { return _error; }

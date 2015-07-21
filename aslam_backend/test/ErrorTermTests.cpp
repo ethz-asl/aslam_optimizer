@@ -129,21 +129,40 @@ TEST(ErrorTermTestSuite, testNonSquaredErrorTerm) {
         EXPECT_DOUBLE_EQ(e.getRawError(), e.getError(false));
         EXPECT_DOUBLE_EQ(e.getWeightedError(), e.getError(true));
 
-        JacobianContainer jc(1);
-        e.getWeightedJacobians(jc, false);
-        Eigen::MatrixXd J = jc.asDenseMatrix();
         Eigen::MatrixXd grad;
         grad.resize(1,2); grad << 4., 8.;
         grad *= w;
+
+        JacobianContainer jc(1);
+
+        // raw Jacobian
+        jc.clear();
+        e.evaluateJacobians(jc, false);
+        Eigen::MatrixXd J = jc.asDenseMatrix();
         EXPECT_TRUE((J.array() == grad.array()).all()) << "J: " << J << std::endl <<
             "Grad: " << grad << std::endl;
 
         jc.clear();
-        e.getWeightedJacobians(jc, true);
+        e.evaluateRawJacobians(jc);
+        J = jc.asDenseMatrix();
+        EXPECT_TRUE((J.array() == grad.array()).all()) << "J: " << J << std::endl <<
+            "Grad: " << grad << std::endl;
+
+
+        // weighted Jacobian
+        jc.clear();
+        e.evaluateJacobians(jc, true);
         J = jc.asDenseMatrix();
         grad *= mEstWeight;
         EXPECT_TRUE((J.array() == grad.array()).all()) << "J: " << J << std::endl <<
             "Grad: " << grad << std::endl;
+
+        jc.clear();
+        e.evaluateWeightedJacobians(jc);
+        J = jc.asDenseMatrix();
+        EXPECT_TRUE((J.array() == grad.array()).all()) << "J: " << J << std::endl <<
+            "Grad: " << grad << std::endl;
+
       }
     }
   } catch (const std::exception& e) {

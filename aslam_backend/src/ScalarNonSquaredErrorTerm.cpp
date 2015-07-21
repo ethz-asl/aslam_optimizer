@@ -20,11 +20,24 @@ double ScalarNonSquaredErrorTerm::updateRawError()
   return _error = _w * evaluateErrorImplementation();
 }
 
-/// \brief evaluate the Jacobians.
-void ScalarNonSquaredErrorTerm::evaluateJacobians(JacobianContainer & outJ)
+void ScalarNonSquaredErrorTerm::evaluateRawJacobians(JacobianContainer& outJ) {
+  outJ.clear();
+  evaluateJacobiansImplementation(outJ);
+  Eigen::Matrix<double, 1, 1> w;
+  w << _w;
+  outJ.applyChainRule(w);
+}
+
+void ScalarNonSquaredErrorTerm::evaluateWeightedJacobians(JacobianContainer& outJ)
 {
   outJ.clear();
   evaluateJacobiansImplementation(outJ);
+  double w = _w * _mEstimatorPolicy->getWeight(getRawError());
+
+  JacobianContainer::map_t::iterator it = outJ.begin();
+  for (; it != outJ.end(); ++it) {
+    it->second *=  w * it->first->scaling();
+  }
 }
 
 /// \brief set the M-Estimator policy. This function takes a squared error

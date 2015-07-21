@@ -319,7 +319,7 @@ void OptimizerRprop::evaluateGradients(size_t /* threadId */, size_t startIdx, s
     if (i < _errorTermsNS.size()) {
       JacobianContainer jc(1 /* dimension */);
       ScalarNonSquaredErrorTerm* e = _errorTermsNS[i];
-      e->getWeightedJacobians(jc, useMEstimator);
+      e->evaluateJacobians(jc, useMEstimator);
       for (JacobianContainer::map_t::iterator it = jc.begin(); it != jc.end(); ++it) // iterate over design variables of this error term
         J.block(0 /*e->rowBase()*/, it->first->columnBase(), it->second.rows(), it->second.cols()) += it->second;
     } else {

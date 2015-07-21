@@ -31,21 +31,5 @@ namespace aslam {
       _w = w;
     }
 
-    void ScalarNonSquaredErrorTerm::getWeightedJacobians(JacobianContainer& outJc, bool useMEstimator)
-    {
-      // take a copy. \todo Don't take a copy.
-      evaluateJacobians(outJc);
-      Eigen::Matrix<double, 1, 1> w;
-      w << _w;
-      outJc.applyChainRule(w);
-      JacobianContainer::map_t::iterator it = outJc.begin();
-      double mEstWeight = 1.0;
-      if (useMEstimator)
-        mEstWeight = _mEstimatorPolicy->getWeight(getRawError());
-      for (; it != outJc.end(); ++it) {
-        it->second *=  mEstWeight * it->first->scaling();
-      }
-    }
-
-   } // namespace backend
+  } // namespace backend
 } // namespace aslam
