@@ -140,8 +140,8 @@ class ScalarNonSquaredExpressionErrorTerm : public aslam::backend::ScalarNonSqua
       : _expression(expression) {
     DesignVariable::set_t vSet;
     _expression.getDesignVariables(vSet);
-    parent_t::setDesignVariablesIterator(vSet.begin(), vSet.end());
-    parent_t::setWeight(w);
+    setDesignVariablesIterator(vSet.begin(), vSet.end());
+    setWeight(w);
   }
   virtual ~ScalarNonSquaredExpressionErrorTerm() {
   }

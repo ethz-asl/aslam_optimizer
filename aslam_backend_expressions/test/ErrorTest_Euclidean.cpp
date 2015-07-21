@@ -1,7 +1,6 @@
 #include <gtest/gtest.h>
 
 #include <aslam/backend/ErrorTermEuclidean.hpp>
-// This test harness makes it easy to test error terms.
 #include <aslam/backend/test/ErrorTermTester.hpp>
 #include <sm/kinematics/Transformation.hpp>
 
