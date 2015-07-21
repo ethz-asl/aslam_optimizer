@@ -6,7 +6,7 @@
 namespace aslam {
   namespace backend {
     ErrorTerm::ErrorTerm() :
-      _squaredError(0.0), _timestamp(0)
+      _squaredError(0.0), _rowBase(-1), _timestamp(0)
     {
       _mEstimatorPolicy = boost::make_shared<NoMEstimator>();
     }
