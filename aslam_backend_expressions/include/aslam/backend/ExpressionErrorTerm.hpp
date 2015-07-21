@@ -183,7 +183,7 @@ inline ::boost::shared_ptr<ErrorTerm> toErrorTermSqrt(TExpression expression, co
   return errorTerm;
 }
 
-inline ::boost::shared_ptr<ScalarNonSquaredExpressionErrorTerm> toScalarNonSquaredErrorTerm(ScalarExpression expression, const double w) {
+inline ::boost::shared_ptr<ScalarNonSquaredExpressionErrorTerm> toScalarNonSquaredErrorTerm(ScalarExpression expression, const double w = 1) {
   return ::boost::shared_ptr<ScalarNonSquaredExpressionErrorTerm>(new ScalarNonSquaredExpressionErrorTerm(expression, w));
 }
 

@@ -61,7 +61,7 @@ catkin_add_gtest(${PROJECT_NAME}_test
   test/RotationExpression.cpp
   test/HomogeneousExpression.cpp
   test/MatrixAndEuclideanExpression.cpp
-  # \todo reenable after I can talk to Hannes.
+  test/ExpressionErrorTermTest.cpp
   test/FixedPointNumberTest.cpp
   test/GenericScalarExpressionTest.cpp
   test/GenericMatrixExpression.cpp
