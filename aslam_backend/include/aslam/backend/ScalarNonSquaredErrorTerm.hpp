@@ -129,6 +129,8 @@ namespace aslam {
       template<typename ITERATOR_T>
       void setDesignVariablesIterator(ITERATOR_T start, ITERATOR_T end);
 
+      /// \brief set the scalar error.
+      inline void setError(const double e) { _error = e; }
 
       /// \brief the MEstimator policy for this error term
       boost::shared_ptr<MEstimator> _mEstimatorPolicy;

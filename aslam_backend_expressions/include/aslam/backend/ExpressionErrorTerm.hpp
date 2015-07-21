@@ -9,6 +9,7 @@
 #define EXPRESSIONERRORTERM_HPP_
 
 #include <aslam/backend/ErrorTerm.hpp>
+#include <aslam/backend/ScalarNonSquaredErrorTerm.hpp>
 #include <aslam/backend/VectorExpression.hpp>
 #include <aslam/backend/EuclideanExpression.hpp>
 #include <aslam/backend/GenericMatrixExpression.hpp>
@@ -130,6 +131,42 @@ class ExpressionErrorTerm : public aslam::backend::ErrorTermFs<IDimension> {
   const TExpression _expression;
 };
 
+class ScalarNonSquaredExpressionErrorTerm : public aslam::backend::ScalarNonSquaredErrorTerm {
+ public:
+  typedef ScalarNonSquaredExpressionErrorTerm self_t;
+  typedef aslam::backend::ScalarNonSquaredErrorTerm parent_t;
+
+  ScalarNonSquaredExpressionErrorTerm(const ScalarExpression & expression, const double w)
+      : _expression(expression) {
+    DesignVariable::set_t vSet;
+    _expression.getDesignVariables(vSet);
+    parent_t::setDesignVariablesIterator(vSet.begin(), vSet.end());
+    parent_t::setWeight(w);
+  }
+  virtual ~ScalarNonSquaredExpressionErrorTerm() {
+  }
+
+  /// \brief evaluate the error term
+  virtual double evaluateErrorImplementation() override {
+    auto error = internal::ExpressionToEigenVectorTraits<ScalarExpression>::toEigenErrorVector(_expression.evaluate());
+    return error[0];
+  }
+
+  /// \brief evaluate the jacobian
+  virtual void evaluateJacobiansImplementation(JacobianContainer & jacobians) override {
+    _expression.evaluateJacobians(jacobians);
+  }
+
+  inline const ScalarExpression& getExpression() const {
+    return _expression;
+  }
+
+  using parent_t::setWeight;
+  using parent_t::setDesignVariablesIterator;
+ private:
+  const ScalarExpression _expression;
+};
+
 template<typename TExpression, int IDimension = internal::ExpressionDimensionTraits<TExpression>::Dimension>
 inline ::boost::shared_ptr<ExpressionErrorTerm<TExpression, IDimension>> toErrorTerm(TExpression expression) {
   return ::boost::shared_ptr<ExpressionErrorTerm<TExpression, IDimension>>(new ExpressionErrorTerm<TExpression, IDimension>(expression));
@@ -148,6 +185,9 @@ inline ::boost::shared_ptr<ErrorTerm> toErrorTermSqrt(TExpression expression, co
   return errorTerm;
 }
 
+inline ::boost::shared_ptr<ScalarNonSquaredExpressionErrorTerm> toScalarNonSquaredErrorTerm(ScalarExpression expression, const double w) {
+  return ::boost::shared_ptr<ScalarNonSquaredExpressionErrorTerm>(new ScalarNonSquaredExpressionErrorTerm(expression, w));
+}
 
 }
 }
