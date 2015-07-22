@@ -51,8 +51,8 @@ class GenericMatrixExpressionNode {
     return _currentValue;
   }
 
-  void evaluateJacobians(JacobianContainer & outJacobians, const differential_t & chainRuleDifferentail) const {
-    evaluateJacobiansImplementation(outJacobians, chainRuleDifferentail);
+  void evaluateJacobians(JacobianContainer & outJacobians, const differential_t & chainRuleDifferential) const {
+    evaluateJacobiansImplementation(outJacobians, chainRuleDifferential);
   }
 
   const matrix_t toMatrix() const {
