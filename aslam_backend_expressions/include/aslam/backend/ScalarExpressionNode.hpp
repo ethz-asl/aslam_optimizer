@@ -26,12 +26,21 @@ namespace aslam {
 
       /// \brief Evaluate the scalar matrix.
       double toScalar() const;
+      double evaluate() const { return toScalar(); }
 
       /// \brief Evaluate the Jacobians
       void evaluateJacobians(JacobianContainer & outJacobians) const;
 
       /// \brief Evaluate the Jacobians and apply the chain rule.
       void evaluateJacobians(JacobianContainer & outJacobians, const Eigen::MatrixXd & applyChainRule) const;
+
+      /// \brief Evaluate the Jacobians and apply the chain rule.
+      void evaluateJacobians(JacobianContainer & outJacobians, const Differential<Eigen::Matrix<double, 1, 1>, double> & applyChainRule) const {
+        Eigen::VectorXd m;
+        applyChainRule.applyInto(Eigen::Matrix<double, 1,1>::Ones(), m);
+        evaluateJacobians(outJacobians, m);
+      }
+
       void getDesignVariables(DesignVariable::set_t & designVariables) const;
     protected:
       // These functions must be implemented by child classes.

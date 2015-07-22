@@ -4,6 +4,7 @@
 #include <Eigen/Core>
 #include <boost/shared_ptr.hpp>
 #include <aslam/backend/JacobianContainer.hpp>
+#include <aslam/backend/Differential.hpp>
 #include <set>
 
 namespace aslam {
@@ -16,6 +17,8 @@ namespace aslam {
       enum { Dimension = 1 };
       typedef double Value;
       typedef double value_t;
+      typedef ScalarExpressionNode node_t;
+
       ScalarExpression( double value );
       ScalarExpression(ScalarExpressionNode * designVariable);
       ScalarExpression(boost::shared_ptr<ScalarExpressionNode> designVariable);
