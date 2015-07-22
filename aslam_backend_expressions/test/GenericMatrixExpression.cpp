@@ -3,11 +3,13 @@
 #include <sm/kinematics/rotations.hpp>
 #include <Eigen/Geometry>
 #include <aslam/backend/DesignVariableGenericVector.hpp>
+#include <aslam/backend/Scalar.hpp>
 #include <aslam/backend/GenericMatrixExpression.hpp>
 #include <aslam/backend/VectorExpression.hpp>
 #include <aslam/backend/DesignVariableVector.hpp>
 #include <aslam/backend/VectorExpressionToGenericMatrixTraits.hpp>
 #include <aslam/backend/test/ExpressionTests.hpp>
+#include <aslam/backend/test/GenericScalarExpressionTests.hpp>
 
 using namespace aslam::backend;
 using namespace std;
@@ -326,6 +328,45 @@ TEST(GenericMatrixExpressionNodeTestSuites, testCrossProduct) {
       Eigen::Matrix<double, VEC_ROWS, VEC_ROWS> result;
       result = sm::kinematics::crossMx(-mat.col(0)) + sm::kinematics::crossMx(-mat.col(1));
       sm::eigen::assertNear(jc.asDenseMatrix(), result, 1e-14, SM_SOURCE_FILE_POS, "Testing evaluationJacobian fits theoretical value.");
+    }
+  }
+  catch(std::exception const & e)
+  {
+    FAIL() << e.what();
+  }
+}
+
+
+
+TEST(GenericMatrixExpressionNodeTestSuites, testEntryAsScalarExpression) {
+  try {
+    const int VEC_ROWS = 3;
+
+    double sValue = 10.0;
+    Scalar s(sValue);
+    ScalarExpression se(&s);
+
+    typedef GenericMatrixExpression<VEC_ROWS, 2, double> GMAT;
+    typename GMAT::matrix_t mat = GMAT::matrix_t::Random();
+    GMAT gMat(mat);
+
+    gMat = gMat * se;
+
+    EXPECT_DOUBLE_EQ(sValue * (double) mat(0, 0), gMat.toScalarExpression().toScalar());
+    EXPECT_DOUBLE_EQ(sValue * (double) mat(0, 1), (gMat.template toScalarExpression<0, 1>()).toScalar());
+    EXPECT_DOUBLE_EQ(sValue * (double) mat(1, 0), (gMat.template toScalarExpression<1, 0>()).toScalar());
+
+    {
+      SCOPED_TRACE("");
+      testExpression(gMat.template toScalarExpression(), 1);
+    }
+    {
+      SCOPED_TRACE("");
+      testExpression(gMat.template toScalarExpression<0, 1>(), 1);
+    }
+    {
+      SCOPED_TRACE("");
+      testExpression(gMat.template toScalarExpression<1, 0>(), 1);
     }
   }
   catch(std::exception const & e)
