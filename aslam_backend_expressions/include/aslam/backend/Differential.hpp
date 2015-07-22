@@ -233,7 +233,7 @@ class MatrixDifferential : public Differential<Eigen::Matrix<TScalar, ICols, 1>,
   TMatrix _mat;
  public:
   typedef Differential<Eigen::Matrix<TScalar, ICols, 1>, TScalar> base_t;
-  typedef MatrixDifferential<TScalar, TMatrix> self_t;
+  typedef MatrixDifferential self_t;
 
   inline MatrixDifferential(TMatrix mat)
       : _mat(mat) {
