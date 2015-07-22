@@ -1,5 +1,6 @@
 #include <sm/boost/null_deleter.hpp>
 #include <Eigen/Geometry>
+#include "../OperationResultNodes.hpp"
 
 namespace aslam {
 namespace backend {
@@ -231,6 +232,32 @@ typename _CLASS::default_self_t _CLASS::operator-() const {
   };
 
   return ResultNode::create(*this);
+}
+
+
+_TEMPLATE
+typename _CLASS::default_self_t _CLASS::operator*(const ScalarExpression & scalar) const {
+  typedef default_self_t result_t;
+  typedef ScalarExpression other_t;
+
+  class ResultNode : public BinaryOperationResultNode<ResultNode, self_t, other_t, result_t, typename result_t::tangent_vector_t, typename result_t::scalar_t> {
+  public:
+    typedef BinaryOperationResultNode<ResultNode, self_t, other_t, result_t, typename result_t::tangent_vector_t, typename result_t::scalar_t> base_t;
+    virtual ~ResultNode() {}
+
+    virtual void evaluateImplementation() const {
+      this->_currentValue = this->getLhsNode().evaluate() * this->getRhsNode().evaluate();
+    }
+
+    inline typename base_t::apply_diff_return_t applyLhsDiff(const typename base_t::lhs_t::tangent_vector_t & tangent_vector) const {
+      return tangent_vector * this->getRhsNode().evaluate();
+    }
+    inline typename base_t::apply_diff_return_t applyRhsDiff(const Eigen::Matrix<double, 1, 1> & tangent_vector) const {
+      return this->getLhsNode().evaluate() * tangent_vector(0, 0);
+    }
+  };
+
+  return ResultNode::create(*this, scalar);
 }
 
 _TEMPLATE
