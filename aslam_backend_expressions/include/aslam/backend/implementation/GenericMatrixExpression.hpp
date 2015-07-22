@@ -57,10 +57,29 @@ void _CLASS::getDesignVariables(DesignVariable::set_t & designVariables) const
 
 _TEMPLATE
 template<int RowIndex, int ColIndex>
-ScalarExpression _CLASS::toScalarExpression() const
-{
-  boost::shared_ptr<ScalarExpressionNode> newRoot( new ScalarExpressionNodeFromMatrixExpression<IRows, ICols, RowIndex, ColIndex>(_root));
-  return ScalarExpression(newRoot);
+ScalarExpression _CLASS::toScalarExpression() const {
+
+  class ResultNode : public UnaryOperationResultNode<ResultNode, self_t, ScalarExpression, Eigen::Matrix<double, 1, 1>, double> {
+  public:
+    typedef UnaryOperationResultNode<ResultNode, self_t, ScalarExpression, Eigen::Matrix<double, 1, 1>, double> base_t;
+
+    virtual ~ResultNode() {}
+
+    double toScalarImplementation() const override {
+      return this->getOperandNode().evaluate()(RowIndex, ColIndex);
+    }
+
+    inline typename base_t::apply_diff_return_t applyDiff(const typename base_t::operand_t::tangent_vector_t & tangent_vector) const {
+      return tangent_vector.template block<1,1>(RowIndex, ColIndex);
+    }
+    virtual void evaluateJacobiansImplementation(JacobianContainer & outJacobians) const { base_t::evaluateJacobiansImplementation(outJacobians, IdentityDifferential<Eigen::Matrix<double, 1,1>, double>()); };
+    virtual void evaluateJacobiansImplementation(JacobianContainer & outJacobians, const Eigen::MatrixXd & applyChainRule) const {
+      assert(applyChainRule.cols() == 1);
+      base_t::evaluateJacobiansImplementation(outJacobians, MatrixDifferential<double, Eigen::MatrixXd, 1>(applyChainRule));
+    };
+  };
+
+  return ResultNode::create(*this);
 }
 
 _TEMPLATE
