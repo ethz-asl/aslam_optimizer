@@ -51,14 +51,13 @@ class GenericMatrixExpressionNode {
     return _currentValue;
   }
 
-  void evaluateJacobians(JacobianContainer & outJacobians, const differential_t & chainRuleDifferentail) const {
-    evaluateJacobiansImplementation(outJacobians, chainRuleDifferentail);
+  void evaluateJacobians(JacobianContainer & outJacobians, const differential_t & chainRuleDifferential) const {
+    evaluateJacobiansImplementation(outJacobians, chainRuleDifferential);
   }
 
   const matrix_t toMatrix() const {
     return evaluate();
   }
-  ;
 
   void getDesignVariables(DesignVariable::set_t & designVariables) const {
     return getDesignVariablesImplementation(designVariables);
@@ -70,7 +69,7 @@ class GenericMatrixExpressionNode {
   void inline invalidate() {
     _valueDirty = true;
   }
-  ;
+
  protected:
   virtual void evaluateImplementation() const = 0;
   virtual void getDesignVariablesImplementation(DesignVariable::set_t & designVariables) const = 0;

@@ -2,12 +2,29 @@
 #define GENERIC_SCALAR_EXPRESSIONTESTS_HPP_
 
 #include <aslam/backend/test/ExpressionTests.hpp>
+#include <aslam/backend/ScalarExpression.hpp>
 #include <aslam/backend/GenericScalarExpression.hpp>
 #include <aslam/backend/FixedPointNumber.hpp>
 
 namespace aslam {
 namespace backend {
 namespace test {
+
+
+template <>
+struct ExpressionValueTraits<ScalarExpression> {
+  typedef Eigen::Matrix<double, 1, 1> value_t;
+};
+
+template <>
+struct ExpressionEvaluationTraits<ScalarExpression> {
+  typedef typename ExpressionValueTraits<ScalarExpression>::value_t value_t;
+  static value_t evaluate(const ScalarExpression & expr) {
+    value_t v;
+    v<<expr.evaluate();
+    return v;
+  }
+};
 
 template<typename Scalar_>
 struct ExpressionValueTraits<GenericScalarExpression<Scalar_> > {
