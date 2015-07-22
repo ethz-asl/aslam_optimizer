@@ -16,6 +16,7 @@ namespace backend {
 class PerIterationCallback {
  public:
   virtual void callback() = 0;
+  virtual ~PerIterationCallback() {};
 };
 
 }  // namespace backend
