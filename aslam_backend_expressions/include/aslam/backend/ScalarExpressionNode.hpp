@@ -5,8 +5,6 @@
 #include <boost/shared_ptr.hpp>
 #include <Eigen/Core>
 #include <aslam/backend/VectorExpressionNode.hpp>
-#include <aslam/backend/MatrixExpressionNode.hpp>
-#include <aslam/backend/GenericMatrixExpressionNode.hpp>
 
 namespace aslam {
   namespace backend {
@@ -194,67 +192,6 @@ namespace aslam {
     {
         _lhs->getDesignVariables(designVariables);
     }
-
-
-    template <int Rows, int Cols, int RowIndex = 0, int ColIndex = 0>
-    class ScalarExpressionNodeFromMatrixExpression : public ScalarExpressionNode
-    {
-    public:
-        EIGEN_MAKE_ALIGNED_OPERATOR_NEW
-
-        ScalarExpressionNodeFromMatrixExpression(boost::shared_ptr< GenericMatrixExpressionNode<Rows,Cols,double> > lhs) : _lhs(lhs){
-          static_assert (RowIndex < Rows, "Row index index must be smaller than the number of rows");
-          static_assert (ColIndex < Cols, "Column index index must be smaller than the number of columns");
-        }
-        virtual ~ScalarExpressionNodeFromMatrixExpression(){}
-
-     protected:
-        // These functions must be implemented by child classes.
-        virtual double toScalarImplementation() const;
-        virtual void evaluateJacobiansImplementation(JacobianContainer & outJacobians) const;
-        virtual void evaluateJacobiansImplementation(JacobianContainer & outJacobians, const Eigen::MatrixXd & applyChainRule) const;
-        virtual void getDesignVariablesImplementation(DesignVariable::set_t & designVariables) const;
-
-        boost::shared_ptr< GenericMatrixExpressionNode<Rows,Cols,double> > _lhs;
-  };
-
-  template <int Rows, int Cols, int RowIndex, int ColIndex>
-  double ScalarExpressionNodeFromMatrixExpression<Rows, Cols, RowIndex, ColIndex>::toScalarImplementation() const
-  {
-      return _lhs->evaluate()(RowIndex, ColIndex);
-  }
-
-  template <int Rows, int Cols, int RowIndex, int ColIndex>
-  void ScalarExpressionNodeFromMatrixExpression<Rows, Cols, RowIndex, ColIndex>::evaluateJacobiansImplementation(JacobianContainer & outJacobians) const
-  {
-
-      typedef GenericMatrixExpressionNode<Rows,Cols,double> GME;
-
-      Eigen::Matrix<double, Rows, Cols> J = Eigen::Matrix<double, Rows, Cols>::Zero();
-      J(RowIndex, ColIndex) = 1.;
-      MatrixDifferential<typename GME::matrix_t::Scalar, typename GME::matrix_t> D(J);
-
-      _lhs->evaluateJacobians(outJacobians, D);
-  }
-
-  template <int Rows, int Cols, int RowIndex, int ColIndex>
-  void ScalarExpressionNodeFromMatrixExpression<Rows, Cols, RowIndex, ColIndex>::evaluateJacobiansImplementation(JacobianContainer & outJacobians, const Eigen::MatrixXd & applyChainRule) const
-  {
-    typedef GenericMatrixExpressionNode<Rows,Cols,double> GME;
-
-    Eigen::Matrix<double, Rows, Cols> J = Eigen::Matrix<double, Rows, Cols>::Zero();
-    J(RowIndex, ColIndex) = 1.;
-    J = applyChainRule*J;
-    MatrixDifferential<typename GME::matrix_t::Scalar, typename GME::matrix_t> D(J);
-
-    _lhs->evaluateJacobians(outJacobians, D);
-  }
-
-  template <int Rows, int Cols, int RowIndex, int ColIndex>
-  void ScalarExpressionNodeFromMatrixExpression<Rows, Cols, RowIndex, ColIndex>::getDesignVariablesImplementation(DesignVariable::set_t & designVariables) const
-  {
-      _lhs->getDesignVariables(designVariables);
-  }
 
   } // namespace backend
 } // namespace aslam
