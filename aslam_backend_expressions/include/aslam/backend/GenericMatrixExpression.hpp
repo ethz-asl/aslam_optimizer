@@ -35,6 +35,7 @@ class GenericMatrixExpression {
   typedef TNode node_t;
   typedef GenericMatrixExpression<IRows, ICols, TScalar, default_node_t> default_self_t;
 
+  typedef TScalar scalar_t;
   typedef internal::GenericMatrixNodeTraits<node_t> node_traits_t;
   typedef typename node_traits_t::node_ptr_t node_ptr_t;
   typedef typename node_traits_t::matrix_t matrix_t;
