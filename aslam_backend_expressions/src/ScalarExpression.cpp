@@ -95,5 +95,15 @@ ScalarExpression ScalarExpression::operator*(const ScalarExpression & s) const {
   return ScalarExpression(newRoot);
 }
 
+ScalarExpression ScalarExpression::sqrt() const {
+  boost::shared_ptr<ScalarExpressionNode> newRoot(new ScalarExpressionNodeSqrt(_root));
+  return ScalarExpression(newRoot);
+}
+
+ScalarExpression ScalarExpression::log() const {
+  boost::shared_ptr<ScalarExpressionNode> newRoot(new ScalarExpressionNodeLog(_root));
+  return ScalarExpression(newRoot);
+}
+
 }  // namespace backend
 }  // namespace aslam

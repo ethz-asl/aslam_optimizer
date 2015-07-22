@@ -45,6 +45,8 @@ namespace aslam {
       ScalarExpression operator*(double s) const;
       ScalarExpression operator/(double s) const;
 
+      ScalarExpression sqrt() const;
+      ScalarExpression log() const;
 
     private:
       /// \todo make the default constructor private.
