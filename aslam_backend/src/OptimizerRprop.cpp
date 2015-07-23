@@ -36,7 +36,8 @@ OptimizerRprop::OptimizerRprop(const OptimizerRpropOptions& options) :
             _options(options),
             _numOptParameters(0),
             _numErrorTerms(0),
-            _isInitialized(false)
+            _isInitialized(false),
+            _nIterations(0)
 {
 
 }
@@ -45,7 +46,8 @@ OptimizerRprop::OptimizerRprop(const sm::PropertyTree& config) :
             _curr_gradient_norm(std::numeric_limits<double>::signaling_NaN()),
             _numOptParameters(0),
             _numErrorTerms(0),
-            _isInitialized(false)
+            _isInitialized(false),
+            _nIterations(0)
 {
   OptimizerRpropOptions options;
   options.etaMinus = config.getDouble("etaMinus", options.etaMinus);
@@ -77,7 +79,7 @@ void OptimizerRprop::initialize()
 {
   SM_ASSERT_FALSE(Exception, _problem == nullptr, "No optimization problem has been set");
   _options.verbose && std::cout << "RPROP: Initializing problem..." << std::endl;
-  Timer init("OptimizerRprop: Initialize Total");
+  Timer init("OptimizerRprop: Initialize---Total");
   _designVariables.clear();
   _designVariables.reserve(_problem->numDesignVariables());
   _errorTermsNS.clear();
@@ -107,6 +109,7 @@ void OptimizerRprop::initialize()
   _dx.resize(_numOptParameters, 1);
   _prev_gradient.resize(1, _numOptParameters);
   _delta = ColumnVectorType::Constant(_numOptParameters, _options.initialDelta);
+  _nIterations = 0;
 
   Timer initEt("OptimizerRprop: Initialize---Error Terms");
   // Get all of the error terms that work on these design variables.
@@ -133,9 +136,9 @@ void OptimizerRprop::initialize()
 
 void OptimizerRprop::optimize()
 {
-  Timer timeGrad("OptimizerRprop: evaluate gradient", true);
-  Timer timeStep("OptimizerRprop: compute step size", true);
-  Timer timeUpdate("OptimizerRprop: state update", true);
+  Timer timeGrad("OptimizerRprop: Compute---Gradient", true);
+  Timer timeStep("OptimizerRprop: Compute---Step size", true);
+  Timer timeUpdate("OptimizerRprop: Compute---State update", true);
 
   if (!_isInitialized)
     initialize();
@@ -143,8 +146,7 @@ void OptimizerRprop::optimize()
   using namespace Eigen;
 
   bool isConverged = false;
-  int cnt = 0;
-  for (; _options.maxIterations == 0 || cnt < _options.maxIterations; ++cnt) {
+  for (_nIterations = 0; _options.maxIterations == 0 || _nIterations < static_cast<size_t>(_options.maxIterations); ++_nIterations) {
 
     RowVectorType gradient;
     timeGrad.start();
@@ -188,7 +190,7 @@ void OptimizerRprop::optimize()
     }
 
     if (_options.verbose) {
-      std::cout << "Number of iterations: " << cnt << std::endl;
+      std::cout << "Number of iterations: " << _nIterations << std::endl;
       std::cout << "\t gradient: " << gradient.format(IOFormat(StreamPrecision, DontAlignCols, ", ", ", ", "", "", "[", "]")) << std::endl;
       std::cout << "\t dx:    " << _dx.format(IOFormat(StreamPrecision, DontAlignCols, ", ", ", ", "", "", "[", "]"))  << std::endl;
       std::cout << "\t delta:    " << _delta.format(IOFormat(StreamPrecision, DontAlignCols, ", ", ", ", "", "", "[", "]"))  << std::endl;

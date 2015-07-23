@@ -62,7 +62,11 @@ namespace aslam {
       void computeGradient(RowVectorType& outGrad, size_t nThreads, bool useMEstimator);
 
       /// \brief Return the current gradient norm
-      double getGradientNorm() { return _curr_gradient_norm; }
+      inline double getGradientNorm() { return _curr_gradient_norm; }
+
+      /// \brief Get the number of iterations the solver has run.
+      ///        If it has never been started, the value will be zero.
+      inline std::size_t getNumberOfIterations() const { return _nIterations; }
 
       /// \brief Get dense design variable i.
       DesignVariable* designVariable(size_t i);
@@ -122,6 +126,9 @@ namespace aslam {
 
       /// \brief Whether the optimizer is correctly initialized
       bool _isInitialized;
+
+      /// \brief How many iterations the solver has run
+      std::size_t _nIterations;
 
     };
 
