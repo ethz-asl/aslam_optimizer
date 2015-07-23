@@ -3,9 +3,7 @@
 
 namespace aslam {
   namespace backend {
-  class LinearSystemSolver;
-  class TrustRegionPolicy;
-  
+
     struct OptimizerRpropOptions {
     OptimizerRpropOptions() :
         etaMinus(0.5),
@@ -16,37 +14,25 @@ namespace aslam {
         convergenceGradientNorm(1e-3),
         maxIterations(20),
         verbose(false),
-//        linearSolverMaximumFails(0),
         nThreads(4)
       {
 
       }
 
-      double etaMinus;
-      double etaPlus;
-      double initialDelta;
-      double minDelta;
-      double maxDelta;
-      double convergenceGradientNorm;
-//
-      /// \brief stop if we reach this number of iterations without hitting any of the above stopping criteria.
-      int maxIterations;
+      double etaMinus; /// \brief Decrease factor for step size if gradient direction changes
+      double etaPlus; /// \brief Increase factor for step size if gradient direction is same
+      double initialDelta; /// \brief Initial step size
+      double minDelta; /// \brief Minimum step size
+      double maxDelta; /// \brief Maximum step size
+      double convergenceGradientNorm; /// \brief Stopping criterion on gradient norm
+      int maxIterations; /// \brief stop if we reach this number of iterations without hitting any of the above stopping criteria.
+      bool verbose; /// \brief should we print out some information each iteration?
+      int nThreads; /// \brief The number of threads to use
 
-      /// \brief should we print out some information each iteration?
-      bool verbose;
-
-      /// \brief The number of threads to use
-      int nThreads;
-
-      boost::shared_ptr<LinearSystemSolver> linearSystemSolver;
-      boost::shared_ptr<TrustRegionPolicy> trustRegionPolicy;
     };
-
-
 
     inline std::ostream& operator<<(std::ostream& out, const aslam::backend::OptimizerRpropOptions& options)
     {
-      /// \brief stop when steps cause changes in the objective function below this threshold.
       out << "OptimizerRpropOptions:\n";
       out << "\tetaMinus: " << options.etaMinus << std::endl;
       out << "\tetaPlus: " << options.etaPlus << std::endl;
@@ -61,4 +47,5 @@ namespace aslam {
 
   } // namespace backend
 } // namespace aslam
+
 #endif /* ASLAM_BACKEND_OPTIMIZER_RPROP_OPTIONS_HPP */

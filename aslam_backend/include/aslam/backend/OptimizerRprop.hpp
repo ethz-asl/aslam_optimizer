@@ -43,7 +43,7 @@ namespace aslam {
       SM_DEFINE_EXCEPTION(Exception, aslam::Exception);
 
       OptimizerRprop(const OptimizerRpropOptions& options);
-      OptimizerRprop(const sm::PropertyTree& config, boost::shared_ptr<LinearSystemSolver> linearSystemSolver, boost::shared_ptr<TrustRegionPolicy> trustRegionPolicy);
+      OptimizerRprop(const sm::PropertyTree& config);
       ~OptimizerRprop();
 
       /// \brief Set up to work on the optimization problem.

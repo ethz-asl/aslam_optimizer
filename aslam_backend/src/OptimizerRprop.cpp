@@ -41,7 +41,7 @@ OptimizerRprop::OptimizerRprop(const OptimizerRpropOptions& options) :
 
 }
 
-OptimizerRprop::OptimizerRprop(const sm::PropertyTree& config, boost::shared_ptr<LinearSystemSolver> linearSystemSolver, boost::shared_ptr<TrustRegionPolicy> trustRegionPolicy) :
+OptimizerRprop::OptimizerRprop(const sm::PropertyTree& config) :
             _curr_gradient_norm(std::numeric_limits<double>::signaling_NaN()),
             _numOptParameters(0),
             _numErrorTerms(0),
@@ -57,8 +57,6 @@ OptimizerRprop::OptimizerRprop(const sm::PropertyTree& config, boost::shared_ptr
   options.minDelta = config.getDouble("minDelta", options.minDelta);
   options.convergenceGradientNorm = config.getDouble("convergenceGradientNorm", options.convergenceGradientNorm);
   options.nThreads = config.getInt("nThreads", options.nThreads);
-  options.linearSystemSolver = linearSystemSolver;
-  options.trustRegionPolicy = trustRegionPolicy;
   _options = options;
 }
 
@@ -153,7 +151,7 @@ void OptimizerRprop::optimize()
     this->computeGradient(gradient, _options.nThreads, false /*TODO: useMEstimator*/);
     timeGrad.stop();
 
-    SM_ASSERT_TRUE_DBG(Exception, gradient.allFinite (), "Gradient is not finite");
+    SM_ASSERT_TRUE_DBG(Exception, gradient.allFinite (), "Gradient " << gradient.format(IOFormat(2, DontAlignCols, ", ", ", ", "", "", "[", "]")) << " is not finite");
 
     timeStep.start();
     _curr_gradient_norm = gradient.norm();
@@ -191,9 +189,9 @@ void OptimizerRprop::optimize()
 
     if (_options.verbose) {
       std::cout << "Number of iterations: " << cnt << std::endl;
-      std::cout << "\t gradient: " << gradient.format(IOFormat(StreamPrecision, 0, ", ", ", ", "", "", "[", "]")) << std::endl;
-      std::cout << "\t dx:    " << _dx.format(IOFormat(StreamPrecision, 0, ", ", ", ", "", "", "[", "]"))  << std::endl;
-      std::cout << "\t delta:    " << _delta.format(IOFormat(StreamPrecision, 0, ", ", ", ", "", "", "[", "]"))  << std::endl;
+      std::cout << "\t gradient: " << gradient.format(IOFormat(StreamPrecision, DontAlignCols, ", ", ", ", "", "", "[", "]")) << std::endl;
+      std::cout << "\t dx:    " << _dx.format(IOFormat(StreamPrecision, DontAlignCols, ", ", ", ", "", "", "[", "]"))  << std::endl;
+      std::cout << "\t delta:    " << _delta.format(IOFormat(StreamPrecision, DontAlignCols, ", ", ", ", "", "", "[", "]"))  << std::endl;
       std::cout << "\t norm:     " << _curr_gradient_norm << std::endl;
     }
     timeStep.stop();
