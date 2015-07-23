@@ -33,9 +33,11 @@ namespace aslam {
      */
     class OptimizerRprop {
     public:
-        //  typedef sm::timing::Timer Timer;
-      /// Swapping this to the dummy timer will disable timing
+#ifdef aslam_backend_ENABLE_TIMING
+      typedef sm::timing::Timer Timer;
+#else
       typedef sm::timing::DummyTimer Timer;
+#endif
       typedef sparse_block_matrix::SparseBlockMatrix<Eigen::MatrixXd> SparseBlockMatrix;
       typedef Eigen::Matrix<double, Eigen::Dynamic, 1> ColumnVectorType;
       typedef Eigen::Matrix<double, 1, Eigen::Dynamic> RowVectorType;
