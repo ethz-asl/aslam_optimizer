@@ -176,6 +176,7 @@ namespace aslam {
 
         double ScalarExpressionNodeSqrt::toScalarImplementation() const
         {
+            SM_ASSERT_GT_DBG(std::runtime_error, _lhs->toScalar(), 0.0, "");
             return sqrt(_lhs->toScalar());
         }
 
@@ -211,6 +212,7 @@ namespace aslam {
 
         double ScalarExpressionNodeLog::toScalarImplementation() const
         {
+            SM_ASSERT_GT_DBG(std::runtime_error, _lhs->toScalar(), 0.0, "");
             return log(_lhs->toScalar());
         }
 
