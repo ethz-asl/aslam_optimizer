@@ -9,6 +9,11 @@
 
 namespace aslam {
   namespace backend {
+
+    using std::sqrt;
+    using std::log;
+    using std::exp;
+
     class ScalarExpressionNode;
     
     class ScalarExpression
@@ -45,7 +50,6 @@ namespace aslam {
       ScalarExpression operator*(double s) const;
       ScalarExpression operator/(double s) const;
 
-
     private:
       /// \todo make the default constructor private.
       ScalarExpression();
@@ -56,6 +60,10 @@ namespace aslam {
 
     };
     
+    ScalarExpression sqrt(const ScalarExpression& e);
+    ScalarExpression log(const ScalarExpression& e);
+    ScalarExpression exp(const ScalarExpression& e);
+
   } // namespace backend
 } // namespace aslam
 

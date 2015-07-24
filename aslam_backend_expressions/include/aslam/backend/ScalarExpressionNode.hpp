@@ -141,11 +141,65 @@ namespace aslam {
       protected:
           // These functions must be implemented by child classes.
           virtual double toScalarImplementation() const{return _s;}
-        virtual void evaluateJacobiansImplementation(JacobianContainer & /* outJacobians */) const{}
-        virtual void evaluateJacobiansImplementation(JacobianContainer & /* outJacobians */, const Eigen::MatrixXd & /* applyChainRule */) const{}
-        virtual void getDesignVariablesImplementation(DesignVariable::set_t & /* designVariables */) const{}
+          virtual void evaluateJacobiansImplementation(JacobianContainer & /* outJacobians */) const{}
+          virtual void evaluateJacobiansImplementation(JacobianContainer & /* outJacobians */, const Eigen::MatrixXd & /* applyChainRule */) const{}
+          virtual void getDesignVariablesImplementation(DesignVariable::set_t & /* designVariables */) const{}
 
           double _s;
+      };
+
+      class ScalarExpressionNodeSqrt : public ScalarExpressionNode
+      {
+       public:
+          EIGEN_MAKE_ALIGNED_OPERATOR_NEW
+
+          ScalarExpressionNodeSqrt(boost::shared_ptr<ScalarExpressionNode> lhs);
+          virtual ~ScalarExpressionNodeSqrt();
+
+       protected:
+          // These functions must be implemented by child classes.
+          virtual double toScalarImplementation() const override;
+          virtual void evaluateJacobiansImplementation(JacobianContainer & outJacobians) const override;
+          virtual void evaluateJacobiansImplementation(JacobianContainer & outJacobians, const Eigen::MatrixXd & applyChainRule) const override;
+          virtual void getDesignVariablesImplementation(DesignVariable::set_t & designVariables) const override;
+
+          boost::shared_ptr<ScalarExpressionNode> _lhs;
+      };
+
+      class ScalarExpressionNodeLog : public ScalarExpressionNode
+      {
+       public:
+          EIGEN_MAKE_ALIGNED_OPERATOR_NEW
+
+          ScalarExpressionNodeLog(boost::shared_ptr<ScalarExpressionNode> lhs);
+          virtual ~ScalarExpressionNodeLog();
+
+       protected:
+          // These functions must be implemented by child classes.
+          virtual double toScalarImplementation() const override;
+          virtual void evaluateJacobiansImplementation(JacobianContainer & outJacobians) const override;
+          virtual void evaluateJacobiansImplementation(JacobianContainer & outJacobians, const Eigen::MatrixXd & applyChainRule) const override;
+          virtual void getDesignVariablesImplementation(DesignVariable::set_t & designVariables) const override;
+
+          boost::shared_ptr<ScalarExpressionNode> _lhs;
+      };
+
+      class ScalarExpressionNodeExp : public ScalarExpressionNode
+      {
+       public:
+          EIGEN_MAKE_ALIGNED_OPERATOR_NEW
+
+          ScalarExpressionNodeExp(boost::shared_ptr<ScalarExpressionNode> lhs);
+          virtual ~ScalarExpressionNodeExp();
+
+       protected:
+          // These functions must be implemented by child classes.
+          virtual double toScalarImplementation() const override;
+          virtual void evaluateJacobiansImplementation(JacobianContainer & outJacobians) const override;
+          virtual void evaluateJacobiansImplementation(JacobianContainer & outJacobians, const Eigen::MatrixXd & applyChainRule) const override;
+          virtual void getDesignVariablesImplementation(DesignVariable::set_t & designVariables) const override;
+
+          boost::shared_ptr<ScalarExpressionNode> _lhs;
       };
 
       template <int VectorSize, int ComponentIndex = 0>
@@ -167,7 +221,7 @@ namespace aslam {
           virtual void getDesignVariablesImplementation(DesignVariable::set_t & designVariables) const;
 
           boost::shared_ptr<VectorExpressionNode<VectorSize> > _lhs;
-    };
+      };
 
     template <int VectorDim, int ComponentIndex>
     double ScalarExpressionNodeFromVectorExpression<VectorDim, ComponentIndex>::toScalarImplementation() const
