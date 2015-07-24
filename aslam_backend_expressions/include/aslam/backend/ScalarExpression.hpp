@@ -9,6 +9,10 @@
 
 namespace aslam {
   namespace backend {
+
+    using std::sqrt;
+    using std::log;
+
     class ScalarExpressionNode;
     
     class ScalarExpression
@@ -55,10 +59,8 @@ namespace aslam {
 
     };
     
-    namespace math {
-      ScalarExpression sqrt(const ScalarExpression& e);
-      ScalarExpression log(const ScalarExpression& e);
-    }
+    ScalarExpression sqrt(const ScalarExpression& e);
+    ScalarExpression log(const ScalarExpression& e);
 
   } // namespace backend
 } // namespace aslam

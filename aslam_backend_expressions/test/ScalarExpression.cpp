@@ -329,7 +329,7 @@ TEST(ScalarExpressionNodeTestSuites, testSqrt)
         p.setActive(true);
         p.setBlockIndex(1);
         ScalarExpression pExpr = p.toExpression();
-        ScalarExpression pExprSqrt = math::sqrt(pExpr);
+        ScalarExpression pExprSqrt = sqrt(pExpr);
 
         ASSERT_EQ(pExprSqrt.toValue(), sqrt(p.toScalar()));
 
@@ -352,7 +352,7 @@ TEST(ScalarExpressionNodeTestSuites, testLog)
         p.setActive(true);
         p.setBlockIndex(1);
         ScalarExpression pExpr = p.toExpression();
-        ScalarExpression pExprLog = math::log(pExpr);
+        ScalarExpression pExprLog = log(pExpr);
 
         ASSERT_EQ(pExprLog.toValue(), log(p.toScalar()));
 
