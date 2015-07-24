@@ -27,6 +27,11 @@ namespace aslam {
       EIGEN_MAKE_ALIGNED_OPERATOR_NEW;
 
       typedef boost::shared_ptr<aslam::backend::ScalarNonSquaredErrorTerm> Ptr;
+#ifdef aslam_backend_ENABLE_TIMING
+      typedef sm::timing::Timer Timer;
+#else
+      typedef sm::timing::DummyTimer Timer;
+#endif
 
       ScalarNonSquaredErrorTerm();
       virtual ~ScalarNonSquaredErrorTerm();
@@ -45,7 +50,8 @@ namespace aslam {
       double updateRawError();
 
       /// \brief evaluate the Jacobians. Equivalent to evaluateWeightedJacobians.
-      void evaluateJacobians(JacobianContainer & outJacobians){
+      inline void evaluateJacobians(JacobianContainer & outJacobians) {
+        Timer t("ScalarNonSquaredErrorTerm: evaluateJacobians", false);
         evaluateWeightedJacobians(outJacobians);
       }
 
@@ -59,7 +65,7 @@ namespace aslam {
       void evaluateWeightedJacobians(JacobianContainer& outJc);
 
       /// \brief Get the jacobians with or without M-estimator policy
-      void evaluateJacobians(JacobianContainer& outJc, bool useMEstimator){
+      void evaluateJacobians(JacobianContainer& outJc, bool useMEstimator) {
         if(useMEstimator) evaluateWeightedJacobians(outJc);
         else evaluateRawJacobians(outJc);
       }

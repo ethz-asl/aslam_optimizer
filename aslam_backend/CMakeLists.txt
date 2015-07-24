@@ -10,6 +10,13 @@ include_directories(${Eigen_INCLUDE_DIRS})
 
 add_definitions( -std=c++0x )
 
+# enable timing via cmake option -Daslam_backend_ENABLE_TIMING
+# cmake -Daslam_backend_ENABLE_TIMING=1 or catkin build -Daslam_backend_ENABLE_TIMING
+if (${PROJECT_NAME}_ENABLE_TIMING)
+  message(STATUS "${PROJECT_NAME}: Timing enabled")
+  add_definitions(-D${PROJECT_NAME}_ENABLE_TIMING)
+endif()
+
 cs_add_library(${PROJECT_NAME}
   src/MEstimatorPolicies.cpp
   src/JacobianContainer.cpp

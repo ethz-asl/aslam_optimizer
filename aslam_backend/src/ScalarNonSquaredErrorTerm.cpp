@@ -21,6 +21,7 @@ double ScalarNonSquaredErrorTerm::updateRawError()
 }
 
 void ScalarNonSquaredErrorTerm::evaluateRawJacobians(JacobianContainer& outJ) {
+  Timer t("ScalarNonSquaredErrorTerm: evaluateRawJacobians", false);
   outJ.clear();
   evaluateJacobiansImplementation(outJ);
   Eigen::Matrix<double, 1, 1> w;
@@ -30,6 +31,7 @@ void ScalarNonSquaredErrorTerm::evaluateRawJacobians(JacobianContainer& outJ) {
 
 void ScalarNonSquaredErrorTerm::evaluateWeightedJacobians(JacobianContainer& outJ)
 {
+  Timer t("ScalarNonSquaredErrorTerm: evaluateWeightedJacobians", false);
   outJ.clear();
   evaluateJacobiansImplementation(outJ);
   double w = _w * _mEstimatorPolicy->getWeight(getRawError());
