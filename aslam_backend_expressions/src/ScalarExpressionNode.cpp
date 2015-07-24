@@ -225,8 +225,8 @@ namespace aslam {
 
         void ScalarExpressionNodeLog::evaluateJacobiansImplementation(JacobianContainer & outJacobians, const Eigen::MatrixXd & applyChainRule) const
         {
-          Eigen::Matrix<double, 1, 1> R(1,1);
-          R(0,0) = 1./(_lhs->toScalar());
+            Eigen::Matrix<double, 1, 1> R(1,1);
+            R(0,0) = 1./(_lhs->toScalar());
             _lhs->evaluateJacobians(outJacobians, applyChainRule * R);
         }
 
