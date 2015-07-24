@@ -219,7 +219,7 @@ inline void testJacobian(TExpression expression, int expectedNumberOfDesignVaria
 }
 
 /**
- * Tests an expression. So far the number of design variables is checked against expectedNumberOfDesignVariables and the expression's jacobian is compared to a finite difference approach (parameterized by tolerance and eps).
+ * Tests an expression. So far the number of design variables is checked against expectedNumberOfDesignVariables and the expression's Jacobian is compared to a finite difference approach (parameterized by tolerance and eps).
  * This method activates all the expressions design variables and sets their blockIndex().
  * @param expression
  * @param expectedNumberOfDesignVariables
