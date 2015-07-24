@@ -8,6 +8,9 @@
 #include <aslam/backend/RotationExpression.hpp>
 #include <sm/random.hpp>
 
+#include <aslam/backend/test/ExpressionTests.hpp>
+#include <aslam/backend/test/GenericScalarExpressionTests.hpp>
+
 using namespace aslam::backend;
 using namespace sm::kinematics;
 typedef Eigen::Matrix<double,1,1> Vector1d;
@@ -57,25 +60,6 @@ struct ScalarExpressionNodeFunctor
         }
 };
 
-
-void testJacobian(ScalarExpression dv)
-{
-    ScalarExpressionNodeFunctor functor(dv);
-  
-    sm::eigen::NumericalDiff<ScalarExpressionNodeFunctor> numdiff(functor);
-  
-    /// Discern the size of the jacobian container
-    Vector1d p;
-    p(0,0) = (dv.toScalar());
-    JacobianContainer Jc(1);
-    dv.evaluateJacobians(Jc);
-   
-    Eigen::VectorXd dp(Jc.cols());
-    dp.setZero();
-    Eigen::MatrixXd Jest = numdiff.estimateJacobian(dp);
- 
-    sm::eigen::assertNear(Jc.asSparseMatrix(), Jest, 1e-6, SM_SOURCE_FILE_POS, "Testing the quat Jacobian");
-}
 
 TEST(ScalarExpressionNodeTestSuites,testMinimalDifferenceJacobian)
 {
@@ -151,7 +135,7 @@ TEST(ScalarExpressionNodeTestSuites, testScalarProduct)
         ScalarExpression p_cross = p1 * p2;
 
         SCOPED_TRACE("");
-        testJacobian(p_cross);
+        testExpression(p_cross, 2);
 
     }
     catch(std::exception const & e)
@@ -176,7 +160,7 @@ TEST(ScalarExpressionNodeTestSuites, testScalarProduct2)
         ScalarExpression p_cross = p1 * p2;
 
         SCOPED_TRACE("");
-        testJacobian(p_cross);
+        testExpression(p_cross, 1);
 
     }
     catch(std::exception const & e)
@@ -203,7 +187,7 @@ TEST(ScalarExpressionNodeTestSuites, testScalarNegation)
         ASSERT_EQ(p_neg.toValue(), -point1.toScalar());
 
         SCOPED_TRACE("");
-        testJacobian(p_neg);
+        testExpression(p_neg, 1);
     }
     catch(std::exception const & e)
     {
@@ -232,7 +216,7 @@ TEST(ScalarExpressionNodeTestSuites, testScalarAddition)
         ScalarExpression p_add = p1 + p2;
 
         SCOPED_TRACE("");
-        testJacobian(p_add);
+        testExpression(p_add, 2);
 
     }
     catch(std::exception const & e)
@@ -260,7 +244,7 @@ TEST(ScalarExpressionNodeTestSuites, testScalarSubtraction)
         ScalarExpression p_diff = p1 - p2;
 
         SCOPED_TRACE("");
-        testJacobian(p_diff);
+        testExpression(p_diff, 2);
 
     }
     catch(std::exception const & e)
@@ -276,8 +260,6 @@ TEST(ScalarExpressionNodeTestSuites, testVectorSubtraction)
     {
         using namespace sm::kinematics;
         Scalar point1(sm::random::rand());
-        point1.setActive(true);
-        point1.setBlockIndex(1);
         ScalarExpression p1 = point1.toExpression();
 
         double p2 = sm::random::rand();
@@ -285,7 +267,7 @@ TEST(ScalarExpressionNodeTestSuites, testVectorSubtraction)
         ScalarExpression p_diff = p1 - p2;
 
         SCOPED_TRACE("");
-        testJacobian(p_diff);
+        testExpression(p_diff, 1);
 
     }
     catch(std::exception const & e)
@@ -301,8 +283,6 @@ TEST(ScalarExpressionNodeTestSuites, testVectorAddition)
     {
         using namespace sm::kinematics;
         Scalar point1(sm::random::rand());
-        point1.setActive(true);
-        point1.setBlockIndex(1);
         ScalarExpression p1 = point1.toExpression();
 
         double p2 = sm::random::rand();
@@ -310,7 +290,7 @@ TEST(ScalarExpressionNodeTestSuites, testVectorAddition)
         ScalarExpression p_diff = p1 + p2;
 
         SCOPED_TRACE("");
-        testJacobian(p_diff);
+        testExpression(p_diff, 1);
 
     }
     catch(std::exception const & e)
@@ -326,15 +306,13 @@ TEST(ScalarExpressionNodeTestSuites, testSqrt)
     {
         using namespace sm::kinematics;
         Scalar p(sm::random::rand());
-        p.setActive(true);
-        p.setBlockIndex(1);
         ScalarExpression pExpr = p.toExpression();
         ScalarExpression pExprSqrt = sqrt(pExpr);
 
         ASSERT_EQ(pExprSqrt.toValue(), sqrt(p.toScalar()));
 
         SCOPED_TRACE("");
-        testJacobian(pExprSqrt);
+        testExpression(pExprSqrt, 1);
     }
     catch(std::exception const & e)
     {
@@ -349,15 +327,13 @@ TEST(ScalarExpressionNodeTestSuites, testLog)
     {
         using namespace sm::kinematics;
         Scalar p(sm::random::rand());
-        p.setActive(true);
-        p.setBlockIndex(1);
         ScalarExpression pExpr = p.toExpression();
         ScalarExpression pExprLog = log(pExpr);
 
         ASSERT_EQ(pExprLog.toValue(), log(p.toScalar()));
 
         SCOPED_TRACE("");
-        testJacobian(pExprLog);
+        testExpression(pExprLog, 1);
     }
     catch(std::exception const & e)
     {
@@ -372,15 +348,13 @@ TEST(ScalarExpressionNodeTestSuites, testExp)
     {
         using namespace sm::kinematics;
         Scalar p(sm::random::rand());
-        p.setActive(true);
-        p.setBlockIndex(1);
         ScalarExpression pExpr = p.toExpression();
         ScalarExpression pExprExp = exp(pExpr);
 
         ASSERT_EQ(pExprExp.toValue(), exp(p.toScalar()));
 
         SCOPED_TRACE("");
-        testJacobian(pExprExp);
+        testExpression(pExprExp, 1);
     }
     catch(std::exception const & e)
     {
