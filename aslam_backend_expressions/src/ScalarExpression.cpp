@@ -95,14 +95,18 @@ ScalarExpression ScalarExpression::operator*(const ScalarExpression & s) const {
   return ScalarExpression(newRoot);
 }
 
-ScalarExpression ScalarExpression::sqrt() const {
-  boost::shared_ptr<ScalarExpressionNode> newRoot(new ScalarExpressionNodeSqrt(_root));
+namespace math {
+
+ScalarExpression sqrt(const ScalarExpression& e) {
+  boost::shared_ptr<ScalarExpressionNode> newRoot(new ScalarExpressionNodeSqrt(e.root()));
   return ScalarExpression(newRoot);
 }
 
-ScalarExpression ScalarExpression::log() const {
-  boost::shared_ptr<ScalarExpressionNode> newRoot(new ScalarExpressionNodeLog(_root));
+ScalarExpression log(const ScalarExpression& e) {
+  boost::shared_ptr<ScalarExpressionNode> newRoot(new ScalarExpressionNodeLog(e.root()));
   return ScalarExpression(newRoot);
+}
+
 }
 
 }  // namespace backend

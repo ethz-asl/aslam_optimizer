@@ -329,15 +329,9 @@ TEST(ScalarExpressionNodeTestSuites, testSqrt)
         p.setActive(true);
         p.setBlockIndex(1);
         ScalarExpression pExpr = p.toExpression();
-        ScalarExpression pExprSqrt = pExpr.sqrt();
+        ScalarExpression pExprSqrt = math::sqrt(pExpr);
 
         ASSERT_EQ(pExprSqrt.toValue(), sqrt(p.toScalar()));
-
-        // check that design variables are the same
-        DesignVariable::set_t dvExpr, dvExprSqrt;
-        pExpr.getDesignVariables(dvExpr);
-        pExprSqrt.getDesignVariables(dvExprSqrt);
-        ASSERT_EQ(dvExpr, dvExprSqrt);
 
         SCOPED_TRACE("");
         testJacobian(pExprSqrt);
@@ -358,15 +352,9 @@ TEST(ScalarExpressionNodeTestSuites, testLog)
         p.setActive(true);
         p.setBlockIndex(1);
         ScalarExpression pExpr = p.toExpression();
-        ScalarExpression pExprLog = pExpr.log();
+        ScalarExpression pExprLog = math::log(pExpr);
 
         ASSERT_EQ(pExprLog.toValue(), log(p.toScalar()));
-
-        // check that design variables are the same
-        DesignVariable::set_t dvExpr, dvExprLog;
-        pExpr.getDesignVariables(dvExpr);
-        pExprLog.getDesignVariables(dvExprLog);
-        ASSERT_EQ(dvExpr, dvExprLog);
 
         SCOPED_TRACE("");
         testJacobian(pExprLog);
