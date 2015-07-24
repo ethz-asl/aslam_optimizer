@@ -123,13 +123,9 @@ TEST(ScalarExpressionNodeTestSuites, testScalarProduct)
     {
         using namespace sm::kinematics;
         Scalar point1(sm::random::rand());
-        point1.setActive(true);
-        point1.setBlockIndex(1);
         ScalarExpression p1 = point1.toExpression();
 
         Scalar point2(sm::random::rand());
-        point2.setActive(true);
-        point2.setBlockIndex(2);
         ScalarExpression p2 = point2.toExpression();
 
         ScalarExpression p_cross = p1 * p2;
@@ -151,8 +147,6 @@ TEST(ScalarExpressionNodeTestSuites, testScalarProduct2)
     {
         using namespace sm::kinematics;
         Scalar point1(sm::random::rand());
-        point1.setActive(true);
-        point1.setBlockIndex(1);
         ScalarExpression p1 = point1.toExpression();
 
         double p2 = sm::random::rand();
@@ -178,8 +172,6 @@ TEST(ScalarExpressionNodeTestSuites, testScalarNegation)
     {
         using namespace sm::kinematics;
         Scalar point1(sm::random::rand());
-        point1.setActive(true);
-        point1.setBlockIndex(1);
         ScalarExpression p1 = point1.toExpression();
 
         ScalarExpression p_neg = -p1;
@@ -204,13 +196,9 @@ TEST(ScalarExpressionNodeTestSuites, testScalarAddition)
     {
         using namespace sm::kinematics;
         Scalar point1(sm::random::rand());
-        point1.setActive(true);
-        point1.setBlockIndex(1);
         ScalarExpression p1 = point1.toExpression();
 
         Scalar point2(sm::random::rand());
-        point2.setActive(true);
-        point2.setBlockIndex(2);
         ScalarExpression p2 = point2.toExpression();
 
         ScalarExpression p_add = p1 + p2;
@@ -232,13 +220,9 @@ TEST(ScalarExpressionNodeTestSuites, testScalarSubtraction)
     {
         using namespace sm::kinematics;
         Scalar point1(sm::random::rand());
-        point1.setActive(true);
-        point1.setBlockIndex(1);
         ScalarExpression p1 = point1.toExpression();
 
         Scalar point2(sm::random::rand());
-        point2.setActive(true);
-        point2.setBlockIndex(2);
         ScalarExpression p2 = point2.toExpression();
 
         ScalarExpression p_diff = p1 - p2;
