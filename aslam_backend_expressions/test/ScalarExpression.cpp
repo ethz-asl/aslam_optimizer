@@ -365,6 +365,29 @@ TEST(ScalarExpressionNodeTestSuites, testLog)
     }
 }
 
+// Test that the jacobian matches the finite difference jacobian
+TEST(ScalarExpressionNodeTestSuites, testExp)
+{
+    try
+    {
+        using namespace sm::kinematics;
+        Scalar p(sm::random::rand());
+        p.setActive(true);
+        p.setBlockIndex(1);
+        ScalarExpression pExpr = p.toExpression();
+        ScalarExpression pExprExp = exp(pExpr);
+
+        ASSERT_EQ(pExprExp.toValue(), exp(p.toScalar()));
+
+        SCOPED_TRACE("");
+        testJacobian(pExprExp);
+    }
+    catch(std::exception const & e)
+    {
+        FAIL() << e.what();
+    }
+}
+
 TEST(ScalarExpressionNodeTestSuites, testVectorOpsFailure)
 {
     using namespace aslam::backend;

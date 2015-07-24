@@ -106,6 +106,11 @@ ScalarExpression log(const ScalarExpression& e) {
   return ScalarExpression(newRoot);
 }
 
+ScalarExpression exp(const ScalarExpression& e) {
+  boost::shared_ptr<ScalarExpressionNode> newRoot(new ScalarExpressionNodeExp(e.root()));
+  return ScalarExpression(newRoot);
+}
+
 
 }  // namespace backend
 }  // namespace aslam

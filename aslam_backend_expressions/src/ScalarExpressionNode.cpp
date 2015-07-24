@@ -235,6 +235,43 @@ namespace aslam {
             _lhs->getDesignVariables(designVariables);
         }
 
+
+        ScalarExpressionNodeExp::ScalarExpressionNodeExp(boost::shared_ptr<ScalarExpressionNode> lhs) :
+            _lhs(lhs)
+        {
+
+        }
+
+        ScalarExpressionNodeExp::~ScalarExpressionNodeExp()
+        {
+
+        }
+
+        double ScalarExpressionNodeExp::toScalarImplementation() const
+        {
+            return exp(_lhs->toScalar());
+        }
+
+        void ScalarExpressionNodeExp::evaluateJacobiansImplementation(JacobianContainer & outJacobians) const
+        {
+            Eigen::Matrix<double, 1, 1> R(1,1);
+            R(0,0) = exp(_lhs->toScalar());
+            _lhs->evaluateJacobians(outJacobians, R);
+        }
+
+        void ScalarExpressionNodeExp::evaluateJacobiansImplementation(JacobianContainer & outJacobians, const Eigen::MatrixXd & applyChainRule) const
+        {
+          Eigen::Matrix<double, 1, 1> R(1,1);
+          R(0,0) = exp(_lhs->toScalar());
+            _lhs->evaluateJacobians(outJacobians, applyChainRule * R);
+        }
+
+        void ScalarExpressionNodeExp::getDesignVariablesImplementation(DesignVariable::set_t & designVariables) const
+        {
+            _lhs->getDesignVariables(designVariables);
+        }
+
+
         ScalarExpressionNodeConstant::ScalarExpressionNodeConstant(double s) : _s(s)
         {
         }
