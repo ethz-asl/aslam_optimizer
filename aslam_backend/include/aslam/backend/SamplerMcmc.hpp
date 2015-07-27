@@ -79,9 +79,9 @@ class SamplerMcmc {
   void run(const std::size_t nSteps);
 
  private:
-  /// \brief Update the design variables from a vector
+  /// \brief Update the design variables based on the Gaussian transition kernel
   void updateDesignVariables();
-  /// \brief Revert the last update performed by \ref updateDesignVariables
+  /// \brief Revert the last update performed by \ref updateDesignVariables()
   void revertUpdateDesignVariables();
   /// \brief Evaluate the log density
   double computeLogDensity() const;
