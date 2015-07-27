@@ -9,6 +9,7 @@
 #define INCLUDE_ASLAM_BACKEND_SAMPLERMCMC_HPP_
 
 #include <boost/shared_ptr.hpp>
+#include <boost/function.hpp>
 
 #include <sm/timing/Timer.hpp>
 #include <sm/BoostPropertyTree.hpp>
@@ -22,21 +23,14 @@ namespace aslam {
 namespace backend {
 
 struct SamplerMcmcOptions {
-  SamplerMcmcOptions() ;
+  SamplerMcmcOptions();
   SamplerMcmcOptions(const sm::PropertyTree& config);
-
-  std::size_t nSamples; /// \brief How many samples to produce
-  std::size_t nStepsBurnIn; /// \brief Number of Markov steps to perform in convergence phase
-  std::size_t nStepsSkip; /// \brief Number of Markov steps to skip in between samples returned
   double transitionKernelSigma;  /// \brief Standard deviation for the Gaussian Markov transition kernel \f$ \\mathcal{N(\mathbf 0, \text{diag{\sigma^2})} f$
 };
 
 inline std::ostream& operator<<(std::ostream& out, const aslam::backend::SamplerMcmcOptions& options)
 {
   out << "SamplerMcmcOptions:\n";
-  out << "\tnSamples: " << options.nSamples << std::endl;
-  out << "\tnStepsBurnIn: " << options.nStepsBurnIn << std::endl;
-  out << "\tnStepsSkip: " << options.nStepsSkip << std::endl;
   out << "\ttransitionKernelSigma: " << options.transitionKernelSigma << std::endl;
   return out;
 }
@@ -79,24 +73,21 @@ class SamplerMcmc {
   ///        hooked up to design variables and running finite differences on error terms where this is possible.
   void checkLogDensitySetup();
 
-  /// \brief Run the sampler to returns samples from the distribution.
-  Eigen::MatrixXd run();
+  /// \brief Run the sampler for nSteps.
+  ///        If a burn-in phase is desired, call run() with the desired number of burn-in steps before using the state of the design variables.
+  ///        In order to get uncorrelated samples, call run() with nSteps >> 1 and use the state of the design variables after nSteps.
+  void run(const std::size_t nSteps);
 
  private:
-
-  /// \brief Return the design variables of the log density as vector
-  void getDesignVariables(ColumnVectorType& x) const;
   /// \brief Update the design variables from a vector
-  void updateDesignVariables(const ColumnVectorType& dx);
+  void updateDesignVariables();
   /// \brief Revert the last update performed by \ref updateDesignVariables
   void revertUpdateDesignVariables();
-  /// \brief Compute the diagonal entries of the transition kernel represented as an uncorrelated normal distribution
-  void evaluateTransitionKernel(ColumnVectorType& dx);
   /// \brief Evaluate the log density
   double computeLogDensity() const;
 
  private:
-  SamplerMcmcOptions _options;  /// \brief Configuration options
+  SamplerMcmcOptions _options; /// \brief Configuration options
   LogDensityPtr _problem; /// \brief The log probability density
 
   /// \brief all design variables, first the non-marginalized ones (the dense ones), then the marginalized ones.
@@ -109,8 +100,8 @@ class SamplerMcmc {
   /// \brief all of the non-squared error terms involved in the log density
   std::vector<ScalarNonSquaredErrorTerm*> _errorTermsNS;
 
-  bool _isInitialized;          /// \brief Whether the optimizer is correctly initialized
-  std::size_t _nIterations;     /// \brief How many iterations the sampler has run
+  bool _isInitialized; /// \brief Whether the optimizer is correctly initialized
+  std::size_t _nIterations; /// \brief How many iterations the sampler has run
 
 };
 

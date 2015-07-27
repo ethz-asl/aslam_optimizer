@@ -7,12 +7,15 @@
 #include <aslam/backend/test/ErrorTermTester.hpp>
 #include "SampleDvAndError.hpp"
 
+using namespace std;
+using namespace boost;
+using namespace aslam::backend;
 
 /// \brief Encodes the error \f$ -\frac{\left(\mathbf x - \mathbf \mu\right)^2}{2.0 \sigma^2}\f$
-class GaussianLogDensityError : public aslam::backend::ScalarNonSquaredErrorTerm {
+class GaussianLogDensityError : public ScalarNonSquaredErrorTerm {
 public:
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW;
-  typedef aslam::backend::ScalarNonSquaredErrorTerm parent_t;
+  typedef ScalarNonSquaredErrorTerm parent_t;
 
   Scalar* _x; /// \brief The design variable
   Scalar::Vector1d _mu;  /// \brief The mean
@@ -43,10 +46,10 @@ public:
 
 };
 
+
 TEST(OptimizerSamplerMcmcTestSuite, testSamplerMcmc)
 {
   try {
-    using namespace aslam::backend;
     typedef OptimizationProblem LogDensity;
     typedef boost::shared_ptr<LogDensity> LogDensityPtr;
 
@@ -73,14 +76,8 @@ TEST(OptimizerSamplerMcmcTestSuite, testSamplerMcmc)
 
     // Initialize and test options
     sm::BoostPropertyTree pt;
-    pt.setInt("nSamples", 1000);
-    pt.setDouble("nStepsBurnIn", 100);
-    pt.setDouble("nStepsSkip", 50);
     pt.setDouble("transitionKernelSigma", 1.0);
     SamplerMcmcOptions options(pt);
-    EXPECT_EQ(pt.getInt("nSamples"), options.nSamples);
-    EXPECT_EQ(pt.getInt("nStepsBurnIn"), options.nStepsBurnIn);
-    EXPECT_EQ(pt.getInt("nStepsSkip"), options.nStepsSkip);
     EXPECT_DOUBLE_EQ(pt.getDouble("transitionKernelSigma"), options.transitionKernelSigma);
 
     // Set and test log density
@@ -88,23 +85,37 @@ TEST(OptimizerSamplerMcmcTestSuite, testSamplerMcmc)
     sampler.setLogDensity(gaussian1dLogDensityPtr);
     EXPECT_NO_THROW(sampler.checkLogDensitySetup());
 
-    // Now let's sample.
-    Eigen::MatrixXd samples = sampler.run();
-    EXPECT_EQ(options.nSamples, samples.cols());
-    EXPECT_EQ(1, samples.rows());
-    EXPECT_TRUE(samples.allFinite());
+    // Parameters
+    const int nSamples = 1000;
+    const int nStepsBurnIn = 100;
+    const int nStepsSkip = 50;
+
+    // Burn-in
+    sampler.run(nStepsBurnIn);
+
+    // Now let's retrieve samples
+    Eigen::VectorXd dvValues(nSamples);
+    for (size_t i=0; i<nSamples; i++) {
+      sampler.run(nStepsSkip);
+      ASSERT_EQ(1, gaussian1dLogDensity.numDesignVariables());
+      auto dv = gaussian1dLogDensity.designVariable(0);
+      Eigen::MatrixXd p;
+      dv->getParameters(p);
+      ASSERT_EQ(1, p.size());
+      dvValues[i] = p(0,0);
+    }
 
     // check sample mean
-    EXPECT_NEAR(samples.mean(), meanTrue, 4.*sigmaTrue) << "This failure does not necessarily have to be an error. It should just appear "
+    EXPECT_NEAR(dvValues.mean(), meanTrue, 4.*sigmaTrue) << "This failure does not necessarily have to be an error. It should just appear "
         " with a probability of 0.00633 %";
 
     // check sample variance
-    EXPECT_NEAR((samples.array() - samples.mean()).matrix().squaredNorm()/(samples.cols() - 1.0), sigmaTrue*sigmaTrue, 3e-1) << "This failure does "
+    EXPECT_NEAR((dvValues.array() - dvValues.mean()).matrix().squaredNorm()/(dvValues.rows() - 1.0), sigmaTrue*sigmaTrue, 3e-1) << "This failure does "
         "not necessarily have to be an error. It should just appear very rarely";
 
-//    std::ostringstream os;
-//    sm::timing::Timing::print(os);
-//    std::cout << os.str() << std::endl;
+    std::ostringstream os;
+    sm::timing::Timing::print(os);
+    std::cout << os.str() << std::endl;
 
   } catch (const std::exception& e) {
     FAIL() << e.what();

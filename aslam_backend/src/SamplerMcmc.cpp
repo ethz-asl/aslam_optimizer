@@ -18,19 +18,12 @@ namespace aslam {
 namespace backend {
 
 SamplerMcmcOptions::SamplerMcmcOptions() :
-  nSamples(1),
-  nStepsBurnIn(100),
-  nStepsSkip(10),
-  transitionKernelSigma(0.1)
-{
+  transitionKernelSigma(0.1) {
 
 }
 
-SamplerMcmcOptions::SamplerMcmcOptions(const sm::PropertyTree& config) {
-    nStepsBurnIn = config.getDouble("nStepsBurnIn", nStepsBurnIn);
-    nStepsSkip = config.getDouble("nStepsSkip", nStepsSkip);
-    nSamples = config.getDouble("nSamples", nSamples);
-    transitionKernelSigma = config.getDouble("transitionKernelSigma", transitionKernelSigma);
+SamplerMcmcOptions::SamplerMcmcOptions(const sm::PropertyTree& config) :
+    transitionKernelSigma(config.getDouble("transitionKernelSigma", transitionKernelSigma)) {
 
 }
 
@@ -93,24 +86,15 @@ void SamplerMcmc::initialize() {
 
 }
 
-void SamplerMcmc::getDesignVariables(ColumnVectorType& x) const {
-  Timer t("SamplerMcmc: Get design variables", false);
-  Eigen::MatrixXd p;
-  for (size_t i=0; i<_designVariables.size(); i++) {
-    _designVariables.at(i)->getParameters(p);
-    x.block(_designVariables.at(i)->blockIndex(), 0, _designVariables.at(i)->minimalDimensions(), 1) = p;
-  }
-}
-
-void SamplerMcmc::updateDesignVariables(const ColumnVectorType& dx) {
+void SamplerMcmc::updateDesignVariables() {
   Timer t("SamplerMcmc: Update design variables", false);
-  int startIdx = 0;
   for (auto dv : _designVariables) {
-    const int dbd = dv->minimalDimensions();
-    Eigen::VectorXd dvDx = dx.segment(startIdx, dbd);
+    const int dim = dv->minimalDimensions();
+    Eigen::VectorXd dvDx(dim);
+    for (int i=0; i<dvDx.rows(); ++i)
+      dvDx[i] = _options.transitionKernelSigma*sm::random::randn(); // evaluate Gaussian transition kernel
     dvDx *= dv->scaling();
-    dv->update(&dvDx(0), dbd);
-    startIdx += dbd;
+    dv->update(&dvDx(0), dim);
   }
 }
 
@@ -118,13 +102,6 @@ void SamplerMcmc::revertUpdateDesignVariables() {
   Timer t("SamplerMcmc: Revert update design variables", false);
   for (auto dv : _designVariables)
     dv->revertUpdate();
-}
-
-void SamplerMcmc::evaluateTransitionKernel(ColumnVectorType& dx) {
-  Timer t("SamplerMcmc: Evaluate transition kernel", false);
-  SM_ASSERT_EQ_DBG( Exception, static_cast<size_t>(dx.size()), _numParameters, "" );
-  for (size_t i=0; i<_numParameters; i++)
-    dx[i] = _options.transitionKernelSigma*sm::random::randn();
 }
 
 double SamplerMcmc::computeLogDensity() const {
@@ -137,25 +114,18 @@ double SamplerMcmc::computeLogDensity() const {
   return logDensity;
 }
 
-Eigen::MatrixXd SamplerMcmc::run() {
+void SamplerMcmc::run(const std::size_t nSteps) {
 
   if (!_isInitialized)
     initialize();
 
-  Eigen::MatrixXd rval(_numParameters, _options.nSamples);
-  ColumnVectorType dx(_numParameters);
-
-  size_t sampleIdx = 0;
-  const size_t nIterations = _options.nStepsBurnIn + _options.nSamples*_options.nStepsSkip;
-
   double logDensity;
-  if (nIterations > 0)
+  if (nSteps > 0)
     logDensity = computeLogDensity();
 
-  for (_nIterations = 0; _nIterations<nIterations; _nIterations++) {
+  for (std::size_t cnt = 0; cnt < nSteps; cnt++, _nIterations++) {
 
-    evaluateTransitionKernel(dx);
-    updateDesignVariables(dx);
+    updateDesignVariables();
     const double logDensityNew = computeLogDensity();
 
     const double acceptanceProbability = std::exp(std::min(0.0, logDensityNew - logDensity));
@@ -171,17 +141,7 @@ Eigen::MatrixXd SamplerMcmc::run() {
       // sample rejected, we revert the update
     }
 
-    if (_nIterations >= _options.nStepsBurnIn && (_nIterations - _options.nStepsBurnIn) % _options.nStepsSkip == 0) {
-      SM_ASSERT_LT(Exception, sampleIdx, static_cast<size_t>(rval.cols()), "");
-      ColumnVectorType x(_numParameters);
-      getDesignVariables(x);
-      rval.col(sampleIdx) = x;
-      sampleIdx++;
-    }
-
   }
-
-  return rval;
 
 }
 
