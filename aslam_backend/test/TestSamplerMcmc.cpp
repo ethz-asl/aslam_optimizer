@@ -53,6 +53,8 @@ TEST(OptimizerSamplerMcmcTestSuite, testSamplerMcmc)
     typedef OptimizationProblem LogDensity;
     typedef boost::shared_ptr<LogDensity> LogDensityPtr;
 
+    sm::random::seed(std::time(nullptr));
+
     LogDensityPtr gaussian1dLogDensityPtr(new LogDensity);
     OptimizationProblem& gaussian1dLogDensity = *gaussian1dLogDensityPtr;
 
@@ -92,11 +94,15 @@ TEST(OptimizerSamplerMcmcTestSuite, testSamplerMcmc)
 
     // Burn-in
     sampler.run(nStepsBurnIn);
+    EXPECT_GE(sampler.getAcceptanceRate(), 1e-3);
+    EXPECT_LE(sampler.getAcceptanceRate(), 1.0);
 
     // Now let's retrieve samples
     Eigen::VectorXd dvValues(nSamples);
     for (size_t i=0; i<nSamples; i++) {
       sampler.run(nStepsSkip);
+      EXPECT_GE(sampler.getAcceptanceRate(), 0.0);
+      EXPECT_LE(sampler.getAcceptanceRate(), 1.0);
       ASSERT_EQ(1, gaussian1dLogDensity.numDesignVariables());
       auto dv = gaussian1dLogDensity.designVariable(0);
       Eigen::MatrixXd p;
@@ -110,7 +116,7 @@ TEST(OptimizerSamplerMcmcTestSuite, testSamplerMcmc)
         " with a probability of 0.00633 %";
 
     // check sample variance
-    EXPECT_NEAR((dvValues.array() - dvValues.mean()).matrix().squaredNorm()/(dvValues.rows() - 1.0), sigmaTrue*sigmaTrue, 3e-1) << "This failure does "
+    EXPECT_NEAR((dvValues.array() - dvValues.mean()).matrix().squaredNorm()/(dvValues.rows() - 1.0), sigmaTrue*sigmaTrue, 1e0) << "This failure does "
         "not necessarily have to be an error. It should just appear very rarely";
 
     std::ostringstream os;
