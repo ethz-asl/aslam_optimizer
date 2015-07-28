@@ -27,6 +27,18 @@ SamplerMcmcOptions::SamplerMcmcOptions(const sm::PropertyTree& config) :
 
 }
 
+
+
+
+
+SamplerMcmc::SamplerMcmc() :
+  _options(),
+  _numParameters(0),
+  _isInitialized(false),
+  _nIterations(0) {
+
+}
+
 SamplerMcmc::SamplerMcmc(const SamplerMcmcOptions& options) :
   _options(options),
   _numParameters(0),

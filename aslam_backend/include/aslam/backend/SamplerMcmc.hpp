@@ -58,6 +58,8 @@ class SamplerMcmc {
   SM_DEFINE_EXCEPTION(Exception, aslam::Exception);
 
  public:
+  /// \brief Default constructor with default options
+  SamplerMcmc();
   /// \brief Constructor
   SamplerMcmc(const SamplerMcmcOptions& options);
   /// \brief Destructor
@@ -77,6 +79,11 @@ class SamplerMcmc {
   ///        If a burn-in phase is desired, call run() with the desired number of burn-in steps before using the state of the design variables.
   ///        In order to get uncorrelated samples, call run() with nSteps >> 1 and use the state of the design variables after nSteps.
   void run(const std::size_t nSteps);
+
+  /// \brief Mutable getter for options
+  SamplerMcmcOptions& options() { return _options; }
+  /// \brief Mutable getter for the log density formulation
+  LogDensityPtr getLogDensity() { return _problem; }
 
  private:
   /// \brief Update the design variables based on the Gaussian transition kernel
