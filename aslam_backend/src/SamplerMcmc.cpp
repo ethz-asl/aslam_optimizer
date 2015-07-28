@@ -35,7 +35,8 @@ SamplerMcmc::SamplerMcmc() :
   _options(),
   _numParameters(0),
   _isInitialized(false),
-  _nIterations(0) {
+  _nIterations(0),
+  _acceptanceRate(0.0) {
 
 }
 
@@ -43,7 +44,8 @@ SamplerMcmc::SamplerMcmc(const SamplerMcmcOptions& options) :
   _options(options),
   _numParameters(0),
   _isInitialized(false),
-  _nIterations(0) {
+  _nIterations(0),
+  _acceptanceRate(0.0) {
 
 }
 
@@ -135,6 +137,7 @@ void SamplerMcmc::run(const std::size_t nSteps) {
   if (nSteps > 0)
     logDensity = evaluateLogDensity();
 
+  _acceptanceRate *= _nIterations;
   for (std::size_t cnt = 0; cnt < nSteps; cnt++, _nIterations++) {
 
     updateDesignVariables();
@@ -145,6 +148,7 @@ void SamplerMcmc::run(const std::size_t nSteps) {
 
     if (sm::random::randLU(0., 1.0) < acceptanceProbability) {
       logDensity = logDensityNew;
+      _acceptanceRate += 1.;
       SM_VERBOSE_STREAM("Sample accepted");
       // sample accepted, we keep the new design variables
     } else {
@@ -154,6 +158,8 @@ void SamplerMcmc::run(const std::size_t nSteps) {
     }
 
   }
+
+  _acceptanceRate /= _nIterations;
 
 }
 
