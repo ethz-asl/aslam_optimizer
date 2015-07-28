@@ -116,7 +116,7 @@ void SamplerMcmc::revertUpdateDesignVariables() {
     dv->revertUpdate();
 }
 
-double SamplerMcmc::computeLogDensity() const {
+double SamplerMcmc::evaluateLogDensity() const {
   Timer t("SamplerMcmc: Compute---Log density", false);
   double logDensity = 0.0;
   for (auto e : _errorTermsS)
@@ -133,12 +133,12 @@ void SamplerMcmc::run(const std::size_t nSteps) {
 
   double logDensity;
   if (nSteps > 0)
-    logDensity = computeLogDensity();
+    logDensity = evaluateLogDensity();
 
   for (std::size_t cnt = 0; cnt < nSteps; cnt++, _nIterations++) {
 
     updateDesignVariables();
-    const double logDensityNew = computeLogDensity();
+    const double logDensityNew = evaluateLogDensity();
 
     const double acceptanceProbability = std::exp(std::min(0.0, logDensityNew - logDensity));
     SM_VERBOSE_STREAM("LogDensity: " << logDensity << "->" << logDensityNew << ", acceptance probability: " << acceptanceProbability);

@@ -80,6 +80,9 @@ class SamplerMcmc {
   ///        In order to get uncorrelated samples, call run() with nSteps >> 1 and use the state of the design variables after nSteps.
   void run(const std::size_t nSteps);
 
+  /// \brief Evaluate the current log density
+  double evaluateLogDensity() const;
+
   /// \brief Mutable getter for options
   SamplerMcmcOptions& options() { return _options; }
   /// \brief Mutable getter for the log density formulation
@@ -90,8 +93,6 @@ class SamplerMcmc {
   void updateDesignVariables();
   /// \brief Revert the last update performed by \ref updateDesignVariables()
   void revertUpdateDesignVariables();
-  /// \brief Evaluate the log density
-  double computeLogDensity() const;
 
  private:
   SamplerMcmcOptions _options; /// \brief Configuration options
