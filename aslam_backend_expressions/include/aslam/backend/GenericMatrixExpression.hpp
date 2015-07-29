@@ -99,6 +99,15 @@ class GenericMatrixExpression {
   template <int RowIndex, int ColIndex>
   ScalarExpression toScalarExpression() const;
 
+  ScalarExpression toScalarExpression(int row, int col = 0) const;
+
+  ScalarExpression operator () (int row, int col = 0) const {
+    return toScalarExpression(row, col);
+  }
+  ScalarExpression operator [] (int row) const {
+    return toScalarExpression(row);
+  }
+
   inline node_ptr_t root() const {
     return _root;
   }
