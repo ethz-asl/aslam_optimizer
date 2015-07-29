@@ -24,7 +24,6 @@ namespace sm {
 
 namespace aslam {
   namespace backend {
-    class LinearSystemSolver;
 
     /**
      * \class OptimizerRprop
@@ -38,14 +37,21 @@ namespace aslam {
 #else
       typedef sm::timing::DummyTimer Timer;
 #endif
+      typedef boost::shared_ptr<OptimizerRprop> Ptr;
+      typedef boost::shared_ptr<const OptimizerRprop> ConstPtr;
       typedef sparse_block_matrix::SparseBlockMatrix<Eigen::MatrixXd> SparseBlockMatrix;
       typedef Eigen::Matrix<double, Eigen::Dynamic, 1> ColumnVectorType;
       typedef Eigen::Matrix<double, 1, Eigen::Dynamic> RowVectorType;
 
       SM_DEFINE_EXCEPTION(Exception, aslam::Exception);
 
+      /// \brief Constructor with default options
+      OptimizerRprop();
+      /// \brief Constructor with custom options
       OptimizerRprop(const OptimizerRpropOptions& options);
+      /// \brief Constructor from property tree
       OptimizerRprop(const sm::PropertyTree& config);
+      /// \brief Destructor
       ~OptimizerRprop();
 
       /// \brief Set up to work on the optimization problem.
