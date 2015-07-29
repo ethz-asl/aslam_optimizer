@@ -33,11 +33,12 @@ class UnaryOperationResultNode : public TResult::node_t {
   typedef internal::NodeTraits<node_t> node_traits_t;
   typedef typename TOperand::node_t operand_node_t;
   typedef TApplyDiffReturn apply_diff_return_t;
+  typedef internal::NodeTraits<operand_node_t> operand_node_traits_t;
 
   virtual ~UnaryOperationResultNode() {
   }
 
-  inline apply_diff_return_t applyDiff(const typename operand_t::tangent_vector_t & /* tangent_vector */) const {
+  inline apply_diff_return_t applyDiff(const typename operand_node_traits_t::tangent_vector_t & /* tangent_vector */) const {
     throw std::runtime_error("This method must be shadowed or not used!");
   }
 
@@ -66,12 +67,12 @@ class UnaryOperationResultNode : public TResult::node_t {
     this->getOperandNode().evaluateJacobians(outJacobians, Diff(*static_cast<const TDerived *>(this), chainRuleDifferentail));
   }
  private:
-  typename TOperand::node_ptr_t _operand;
+  typename operand_node_traits_t::node_ptr_t _operand;
 
-  class Diff : public ComposedDifferential<typename operand_t::tangent_vector_t, apply_diff_return_t, TScalar, Diff> {
+  class Diff : public ComposedDifferential<typename operand_node_traits_t::tangent_vector_t, apply_diff_return_t, TScalar, Diff> {
     const TDerived & _derivedNode;
    public:
-    typedef ComposedDifferential<typename operand_t::tangent_vector_t, apply_diff_return_t, TScalar, Diff> base_t;
+    typedef ComposedDifferential<typename operand_node_traits_t::tangent_vector_t, apply_diff_return_t, TScalar, Diff> base_t;
     typedef typename base_t::domain_t domain_t;
 
     inline Diff(const TDerived & derivedNode, const typename node_traits_t::differential_t & diff)
@@ -81,7 +82,7 @@ class UnaryOperationResultNode : public TResult::node_t {
     ~Diff() {
     }
 
-    inline apply_diff_return_t apply(const typename operand_t::tangent_vector_t & tangent_vector) const {
+    inline apply_diff_return_t apply(const typename operand_node_traits_t::tangent_vector_t & tangent_vector) const {
       return _derivedNode.applyDiff(tangent_vector);
     }
   };
