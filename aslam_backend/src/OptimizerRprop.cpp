@@ -31,6 +31,17 @@ struct SafeJob {
   }
 };
 
+OptimizerRprop::OptimizerRprop() :
+            _curr_gradient_norm(std::numeric_limits<double>::signaling_NaN()),
+            _options(OptimizerRpropOptions()),
+            _numOptParameters(0),
+            _numErrorTerms(0),
+            _isInitialized(false),
+            _nIterations(0)
+{
+
+}
+
 OptimizerRprop::OptimizerRprop(const OptimizerRpropOptions& options) :
             _curr_gradient_norm(std::numeric_limits<double>::signaling_NaN()),
             _options(options),
