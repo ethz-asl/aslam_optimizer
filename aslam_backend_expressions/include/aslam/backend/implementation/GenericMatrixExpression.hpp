@@ -1,3 +1,4 @@
+#include <utility>
 #include <sm/boost/null_deleter.hpp>
 #include <Eigen/Geometry>
 #include "../OperationResultNodes.hpp"
@@ -81,6 +82,38 @@ ScalarExpression _CLASS::toScalarExpression() const {
 
   return ResultNode::create(*this);
 }
+
+_TEMPLATE
+ScalarExpression _CLASS::toScalarExpression(int rowIndex, int colIndex) const {
+
+  class ResultNode : public UnaryOperationResultNode<ResultNode, self_t, ScalarExpression, Eigen::Matrix<double, 1, 1>, double> {
+  public:
+    typedef UnaryOperationResultNode<ResultNode, self_t, ScalarExpression, Eigen::Matrix<double, 1, 1>, double> base_t;
+
+    ResultNode(std::pair<int, int> coordinates) : rowIndex(coordinates.first), colIndex(coordinates.second) { }
+
+    virtual ~ResultNode() {}
+
+    double toScalarImplementation() const override {
+      return this->getOperandNode().evaluate()(rowIndex, colIndex);
+    }
+
+    inline typename base_t::apply_diff_return_t applyDiff(const typename base_t::operand_t::tangent_vector_t & tangent_vector) const {
+      return tangent_vector.template block<1,1>(rowIndex, colIndex);
+    }
+    virtual void evaluateJacobiansImplementation(JacobianContainer & outJacobians) const { base_t::evaluateJacobiansImplementation(outJacobians, IdentityDifferential<Eigen::Matrix<double, 1,1>, double>()); };
+    virtual void evaluateJacobiansImplementation(JacobianContainer & outJacobians, const Eigen::MatrixXd & applyChainRule) const {
+      assert(applyChainRule.cols() == 1);
+      base_t::evaluateJacobiansImplementation(outJacobians, MatrixDifferential<double, Eigen::MatrixXd, 1>(applyChainRule));
+    };
+  private:
+    int rowIndex;
+    int colIndex;
+  };
+
+  return ResultNode::create(*this, std::make_pair(rowIndex, colIndex));
+}
+
 
 _TEMPLATE
 ScalarExpression _CLASS::toScalarExpression() const{

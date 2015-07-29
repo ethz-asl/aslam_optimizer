@@ -355,6 +355,12 @@ TEST(GenericMatrixExpressionNodeTestSuites, testEntryAsScalarExpression) {
     EXPECT_DOUBLE_EQ(sValue * (double) mat(0, 0), gMat.toScalarExpression().toScalar());
     EXPECT_DOUBLE_EQ(sValue * (double) mat(0, 1), (gMat.template toScalarExpression<0, 1>()).toScalar());
     EXPECT_DOUBLE_EQ(sValue * (double) mat(1, 0), (gMat.template toScalarExpression<1, 0>()).toScalar());
+    EXPECT_DOUBLE_EQ(sValue * (double) mat(0, 1), (gMat.toScalarExpression(0, 1)).toScalar());
+    EXPECT_DOUBLE_EQ(sValue * (double) mat(1, 0), (gMat.toScalarExpression(1, 0)).toScalar());
+    EXPECT_DOUBLE_EQ(sValue * (double) mat(1, 0), (gMat.toScalarExpression(1)).toScalar());
+    EXPECT_DOUBLE_EQ(sValue * (double) mat(0, 1), (gMat(0, 1)).toScalar());
+    EXPECT_DOUBLE_EQ(sValue * (double) mat(1, 0), (gMat(1, 0)).toScalar());
+    EXPECT_DOUBLE_EQ(sValue * (double) mat(1, 0), (gMat[1]).toScalar());
 
     {
       SCOPED_TRACE("");
@@ -367,6 +373,14 @@ TEST(GenericMatrixExpressionNodeTestSuites, testEntryAsScalarExpression) {
     {
       SCOPED_TRACE("");
       testExpression(gMat.template toScalarExpression<1, 0>(), 1);
+    }
+    {
+      SCOPED_TRACE("");
+      testExpression(gMat.template toScalarExpression(0, 1), 1);
+    }
+    {
+      SCOPED_TRACE("");
+      testExpression(gMat.template toScalarExpression(1, 0), 1);
     }
   }
   catch(std::exception const & e)
