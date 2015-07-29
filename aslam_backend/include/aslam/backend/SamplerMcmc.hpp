@@ -89,6 +89,8 @@ class SamplerMcmc {
   LogDensityPtr getLogDensity() { return _problem; }
   /// \brief Getter for the acceptance rate
   double getAcceptanceRate() const { return _acceptanceRate; }
+  /// \brief Getter for the number of iteration
+  double getNumIterations() const { return _nIterations; }
 
  private:
   /// \brief Update the design variables based on the Gaussian transition kernel

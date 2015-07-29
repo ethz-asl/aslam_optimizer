@@ -81,6 +81,7 @@ void SamplerMcmc::initialize() {
   initDv.stop();
 
   _nIterations = 0;
+  _acceptanceRate = 0.0;
 
   Timer initEt("SamplerMcmc: Initialize---Error Terms", false);
   // Get all of the error terms that work on these design variables.
@@ -137,7 +138,8 @@ void SamplerMcmc::run(const std::size_t nSteps) {
   if (nSteps > 0)
     logDensity = evaluateLogDensity();
 
-  _acceptanceRate *= _nIterations;
+  _acceptanceRate *= static_cast<double>(_nIterations);
+
   for (std::size_t cnt = 0; cnt < nSteps; cnt++, _nIterations++) {
 
     updateDesignVariables();
@@ -159,7 +161,8 @@ void SamplerMcmc::run(const std::size_t nSteps) {
 
   }
 
-  _acceptanceRate /= _nIterations;
+  if (_nIterations > 0)
+    _acceptanceRate /= static_cast<double>(_nIterations);
 
 }
 

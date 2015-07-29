@@ -86,6 +86,8 @@ TEST(OptimizerSamplerMcmcTestSuite, testSamplerMcmc)
     SamplerMcmc sampler(options);
     sampler.setLogDensity(gaussian1dLogDensityPtr);
     EXPECT_NO_THROW(sampler.checkLogDensitySetup());
+    EXPECT_DOUBLE_EQ(sampler.getAcceptanceRate(), 0.0);
+    EXPECT_EQ(sampler.getNumIterations(), 0);
 
     // Parameters
     const int nSamples = 1000;
@@ -96,6 +98,7 @@ TEST(OptimizerSamplerMcmcTestSuite, testSamplerMcmc)
     sampler.run(nStepsBurnIn);
     EXPECT_GE(sampler.getAcceptanceRate(), 1e-3);
     EXPECT_LE(sampler.getAcceptanceRate(), 1.0);
+    EXPECT_EQ(sampler.getNumIterations(), nStepsBurnIn);
 
     // Now let's retrieve samples
     Eigen::VectorXd dvValues(nSamples);
@@ -103,6 +106,7 @@ TEST(OptimizerSamplerMcmcTestSuite, testSamplerMcmc)
       sampler.run(nStepsSkip);
       EXPECT_GE(sampler.getAcceptanceRate(), 0.0);
       EXPECT_LE(sampler.getAcceptanceRate(), 1.0);
+      EXPECT_EQ(sampler.getNumIterations(), nStepsBurnIn + (i+1)*nStepsSkip);
       ASSERT_EQ(1, gaussian1dLogDensity.numDesignVariables());
       auto dv = gaussian1dLogDensity.designVariable(0);
       Eigen::MatrixXd p;
@@ -118,6 +122,16 @@ TEST(OptimizerSamplerMcmcTestSuite, testSamplerMcmc)
     // check sample variance
     EXPECT_NEAR((dvValues.array() - dvValues.mean()).matrix().squaredNorm()/(dvValues.rows() - 1.0), sigmaTrue*sigmaTrue, 1e0) << "This failure does "
         "not necessarily have to be an error. It should just appear very rarely";
+
+    // Check that nSteps = 0 is OK
+    const double ar = sampler.getAcceptanceRate();
+    sampler.run(0);
+    EXPECT_DOUBLE_EQ(sampler.getAcceptanceRate(), ar);
+
+    // Check that re-initializing resets values
+    sampler.initialize();
+    EXPECT_DOUBLE_EQ(sampler.getAcceptanceRate(), 0.0);
+    EXPECT_EQ(sampler.getNumIterations(), 0);
 
     std::ostringstream os;
     sm::timing::Timing::print(os);
