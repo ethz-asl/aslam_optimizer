@@ -27,6 +27,34 @@ _CLASS::GenericMatrixExpression(const Eigen::MatrixBase<DERIVED> & mat) : _root(
 }
 
 _TEMPLATE
+template<typename dummy>
+_CLASS::GenericMatrixExpression(TScalar v, dummy) : _root(new typename node_t::constant_t((Eigen::Matrix<TScalar, IRows, ICols>() << v).finished()))
+{
+}
+
+_TEMPLATE
+template<typename dummy>
+_CLASS::GenericMatrixExpression(ScalarExpression v, dummy) : _root()
+{
+  class ResultNode : public UnaryOperationResultNode<ResultNode, ScalarExpression, self_t, Eigen::Matrix<double, 1, 1>, double> {
+  public:
+    typedef UnaryOperationResultNode<ResultNode, ScalarExpression, self_t, Eigen::Matrix<double, 1, 1>, double> base_t;
+
+    virtual ~ResultNode() {}
+
+    void evaluateImplementation() const override {
+      this->_currentValue(0, 0) = this->getOperandNode().evaluate();
+    }
+
+    inline typename base_t::apply_diff_return_t applyDiff(const typename base_t::operand_node_traits_t::tangent_vector_t & tangent_vector) const {
+      return tangent_vector;
+    }
+  };
+  _root = ResultNode::create(v)._root;
+}
+
+
+_TEMPLATE
 typename _CLASS::matrix_t _CLASS::toFullMatrix() const
 {
   return _root->evaluate();
