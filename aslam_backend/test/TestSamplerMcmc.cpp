@@ -133,9 +133,9 @@ TEST(OptimizerSamplerMcmcTestSuite, testSamplerMcmc)
     EXPECT_DOUBLE_EQ(sampler.getAcceptanceRate(), 0.0);
     EXPECT_EQ(sampler.getNumIterations(), 0);
 
-    std::ostringstream os;
-    sm::timing::Timing::print(os);
-    std::cout << os.str() << std::endl;
+#ifdef aslam_backend_ENABLE_TIMING
+    sm::timing::Timing::print(cout, sm::timing::SORT_BY_TOTAL);
+#endif
 
   } catch (const std::exception& e) {
     FAIL() << e.what();

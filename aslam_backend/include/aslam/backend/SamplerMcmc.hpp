@@ -88,9 +88,9 @@ class SamplerMcmc {
   /// \brief Mutable getter for the log density formulation
   LogDensityPtr getLogDensity() { return _problem; }
   /// \brief Getter for the acceptance rate
-  double getAcceptanceRate() const { return _acceptanceRate; }
+  double getAcceptanceRate() const { return _nIterations > 0 ? static_cast<double>(_nSamplesAccepted)/static_cast<double>(_nIterations) : 0.0; }
   /// \brief Getter for the number of iteration
-  double getNumIterations() const { return _nIterations; }
+  std::size_t getNumIterations() const { return _nIterations; }
 
  private:
   /// \brief Update the design variables based on the Gaussian transition kernel
@@ -114,7 +114,7 @@ class SamplerMcmc {
 
   bool _isInitialized; /// \brief Whether the optimizer is correctly initialized
   std::size_t _nIterations; /// \brief How many iterations the sampler has run
-  double _acceptanceRate; /// \brief Ratio of accepted samples since the last initialize() call
+  std::size_t _nSamplesAccepted; /// \brief How many samples were accepted since the last initialize() call
 
 };
 

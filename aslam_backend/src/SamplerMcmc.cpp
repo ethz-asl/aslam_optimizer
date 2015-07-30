@@ -36,7 +36,7 @@ SamplerMcmc::SamplerMcmc() :
   _numParameters(0),
   _isInitialized(false),
   _nIterations(0),
-  _acceptanceRate(0.0) {
+  _nSamplesAccepted(0) {
 
 }
 
@@ -45,7 +45,7 @@ SamplerMcmc::SamplerMcmc(const SamplerMcmcOptions& options) :
   _numParameters(0),
   _isInitialized(false),
   _nIterations(0),
-  _acceptanceRate(0.0) {
+  _nSamplesAccepted(0) {
 
 }
 
@@ -81,14 +81,16 @@ void SamplerMcmc::initialize() {
   initDv.stop();
 
   _nIterations = 0;
-  _acceptanceRate = 0.0;
+  _nSamplesAccepted = 0;
 
   Timer initEt("SamplerMcmc: Initialize---Error Terms", false);
   // Get all of the error terms that work on these design variables.
   _errorTermsNS.clear();
+  _errorTermsNS.reserve(_problem->numNonSquaredErrorTerms());
   for (size_t i = 0; i < _problem->numNonSquaredErrorTerms(); ++i)
     _errorTermsNS.push_back(_problem->nonSquaredErrorTerm(i));
   _errorTermsS.clear();
+  _errorTermsNS.reserve(_problem->numErrorTerms());
   for (size_t i = 0; i < _problem->numErrorTerms(); ++i)
     _errorTermsS.push_back(_problem->errorTerm(i));
   initEt.stop();
@@ -138,8 +140,6 @@ void SamplerMcmc::run(const std::size_t nSteps) {
   if (nSteps > 0)
     logDensity = evaluateLogDensity();
 
-  _acceptanceRate *= static_cast<double>(_nIterations);
-
   for (std::size_t cnt = 0; cnt < nSteps; cnt++, _nIterations++) {
 
     updateDesignVariables();
@@ -150,7 +150,7 @@ void SamplerMcmc::run(const std::size_t nSteps) {
 
     if (sm::random::randLU(0., 1.0) < acceptanceProbability) {
       logDensity = logDensityNew;
-      _acceptanceRate += 1.;
+      _nSamplesAccepted++;
       SM_VERBOSE_STREAM("Sample accepted");
       // sample accepted, we keep the new design variables
     } else {
@@ -160,9 +160,6 @@ void SamplerMcmc::run(const std::size_t nSteps) {
     }
 
   }
-
-  if (_nIterations > 0)
-    _acceptanceRate /= static_cast<double>(_nIterations);
 
 }
 
