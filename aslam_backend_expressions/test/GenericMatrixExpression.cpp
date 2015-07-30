@@ -388,3 +388,54 @@ TEST(GenericMatrixExpressionNodeTestSuites, testEntryAsScalarExpression) {
     FAIL() << e.what();
   }
 }
+
+TEST(GenericMatrixExpressionNodeTestSuites, testUserConversionToAndFromOneByOneMatrix) {
+  try {
+    double sValue = 10.0;
+    Scalar s(sValue);
+    ScalarExpression se(&s);
+
+    typedef GenericMatrixExpression<1, 1, double> GMAT;
+    GMAT gMat(se);
+    GMAT gMat1(sValue);
+    GMAT gMat2(30);
+    gMat2 = se;
+
+    EXPECT_DOUBLE_EQ(sValue, static_cast<double>(gMat.toFullMatrix()(0, 0)));
+    EXPECT_DOUBLE_EQ(sValue, static_cast<double>(gMat1.toFullMatrix()(0, 0)));
+    EXPECT_DOUBLE_EQ(sValue, static_cast<double>(gMat2.toFullMatrix()(0, 0)));
+
+    {
+      SCOPED_TRACE("");
+      testExpression(gMat, 1);
+    }
+    {
+      SCOPED_TRACE("");
+      testExpression(gMat1, 0);
+    }
+    {
+      SCOPED_TRACE("");
+      testExpression(gMat2, 1);
+    }
+
+    se = ScalarExpression(100);
+    EXPECT_DOUBLE_EQ(100, se.toScalar());
+    se = gMat2;
+    EXPECT_DOUBLE_EQ(sValue, se.toScalar());
+    {
+      SCOPED_TRACE("");
+      testExpression(se, 1);
+    }
+
+    ScalarExpression se2(gMat2);
+    EXPECT_DOUBLE_EQ(sValue, se2.toScalar());
+    {
+      SCOPED_TRACE("");
+      testExpression(se2, 1);
+    }
+  }
+  catch(std::exception const & e)
+  {
+    FAIL() << e.what();
+  }
+}

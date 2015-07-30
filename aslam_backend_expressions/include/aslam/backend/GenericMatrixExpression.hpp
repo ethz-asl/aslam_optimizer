@@ -55,6 +55,18 @@ class GenericMatrixExpression {
   template<typename DERIVED>
   GenericMatrixExpression(const Eigen::MatrixBase<DERIVED> & mat);
 
+  /// \brief Initialize with a TScalar in case of 1 x 1 matrix (allows implizit cast from TScalar)
+  template<typename dummy = int>
+  GenericMatrixExpression(TScalar v, dummy = typename std::enable_if<(IRows == 1 && ICols == 1), int>::type(0));
+
+  /// \brief Initialize from a ScalarExpression in case of 1 x 1 matrix
+  template<typename dummy = int>
+  GenericMatrixExpression(ScalarExpression v, dummy = typename std::enable_if<(IRows == 1 && ICols == 1), int>::type(0));
+
+  /// \brief Support cast to ScalarExpression in case of 1 x 1 matrix
+  template<typename dummy = int, typename = typename std::enable_if<(IRows == 1 && ICols == 1), dummy>::type>
+  operator ScalarExpression const (){ return toScalarExpression(); }
+
   virtual ~GenericMatrixExpression() {
   }
 
