@@ -33,7 +33,6 @@ SamplerMcmcOptions::SamplerMcmcOptions(const sm::PropertyTree& config) :
 
 SamplerMcmc::SamplerMcmc() :
   _options(),
-  _numParameters(0),
   _isInitialized(false),
   _nIterations(0),
   _nSamplesAccepted(0) {
@@ -42,41 +41,41 @@ SamplerMcmc::SamplerMcmc() :
 
 SamplerMcmc::SamplerMcmc(const SamplerMcmcOptions& options) :
   _options(options),
-  _numParameters(0),
   _isInitialized(false),
   _nIterations(0),
   _nSamplesAccepted(0) {
 
 }
 
-void SamplerMcmc::setLogDensity(LogDensityPtr problem) {
-  _problem = problem;
+void SamplerMcmc::setNegativeLogDensity(NegativeLogDensityPtr negLogDensity) {
+  _negLogDensity = negLogDensity;
   _isInitialized = false;
 }
 
 void SamplerMcmc::initialize() {
 
-  SM_ASSERT_FALSE(Exception, _problem == nullptr, "No log density has been set");
+  SM_ASSERT_FALSE(Exception, _negLogDensity == nullptr, "No negative log density has been set");
   SM_DEBUG_STREAM("SamplerMcmc: Initializing problem...");
   Timer init("SamplerMcmc: Initialize---Total", false);
 
   _designVariables.clear();
-  _designVariables.reserve(_problem->numDesignVariables());
+  _designVariables.reserve(_negLogDensity->numDesignVariables());
   Timer initDv("SamplerMcmc: Initialize---Design Variables", false);
   // Run through all design variables adding active ones to an active list.
-  for (size_t i = 0; i < _problem->numDesignVariables(); ++i) {
-    DesignVariable* const dv = _problem->designVariable(i);
+  for (size_t i = 0; i < _negLogDensity->numDesignVariables(); ++i) {
+    DesignVariable* const dv = _negLogDensity->designVariable(i);
     if (dv->isActive())
       _designVariables.push_back(dv);
   }
-  SM_ASSERT_FALSE(Exception, _problem->numDesignVariables() > 0 && _designVariables.empty(),
+  SM_ASSERT_FALSE(Exception, _negLogDensity->numDesignVariables() > 0 && _designVariables.empty(),
                   "It is illegal to run the sampler with all marginalized design variables. Did you forget to set the design variables as active?");
   SM_ASSERT_FALSE(Exception, _designVariables.empty(), "It is illegal to run the optimizer with all marginalized design variables.");
   // Assign block indices to the design variables.
+  size_t colBase = 0;
   for (size_t i = 0; i < _designVariables.size(); ++i) {
     _designVariables[i]->setBlockIndex(i);
-    _designVariables[i]->setColumnBase(_numParameters);
-    _numParameters += _designVariables[i]->minimalDimensions();
+    _designVariables[i]->setColumnBase(colBase);
+    colBase += _designVariables[i]->minimalDimensions();
   }
   initDv.stop();
 
@@ -86,19 +85,19 @@ void SamplerMcmc::initialize() {
   Timer initEt("SamplerMcmc: Initialize---Error Terms", false);
   // Get all of the error terms that work on these design variables.
   _errorTermsNS.clear();
-  _errorTermsNS.reserve(_problem->numNonSquaredErrorTerms());
-  for (size_t i = 0; i < _problem->numNonSquaredErrorTerms(); ++i)
-    _errorTermsNS.push_back(_problem->nonSquaredErrorTerm(i));
+  _errorTermsNS.reserve(_negLogDensity->numNonSquaredErrorTerms());
+  for (size_t i = 0; i < _negLogDensity->numNonSquaredErrorTerms(); ++i)
+    _errorTermsNS.push_back(_negLogDensity->nonSquaredErrorTerm(i));
   _errorTermsS.clear();
-  _errorTermsNS.reserve(_problem->numErrorTerms());
-  for (size_t i = 0; i < _problem->numErrorTerms(); ++i)
-    _errorTermsS.push_back(_problem->errorTerm(i));
+  _errorTermsNS.reserve(_negLogDensity->numErrorTerms());
+  for (size_t i = 0; i < _negLogDensity->numErrorTerms(); ++i)
+    _errorTermsS.push_back(_negLogDensity->errorTerm(i));
   initEt.stop();
-  SM_ASSERT_FALSE(Exception, _errorTermsNS.empty() && _errorTermsS.empty(), "It is illegal to run the sampler with no error terms attached to the log density.");
+  SM_ASSERT_FALSE(Exception, _errorTermsNS.empty() && _errorTermsS.empty(), "It is illegal to run the sampler with no error terms attached to the negative log density.");
 
   _isInitialized = true;
 
-  SM_DEBUG_STREAM("SamplerMcmc: Initialized problem with " << _problem->numDesignVariables() << " design variable(s), " <<
+  SM_DEBUG_STREAM("SamplerMcmc: Initialized problem with " << _negLogDensity->numDesignVariables() << " design variable(s), " <<
                   _errorTermsNS.size() << " non-squared error term(s) and " << _errorTermsS.size() << " squared error term(s)");
 
 }
@@ -121,49 +120,55 @@ void SamplerMcmc::revertUpdateDesignVariables() {
     dv->revertUpdate();
 }
 
-double SamplerMcmc::evaluateLogDensity() const {
-  Timer t("SamplerMcmc: Compute---Log density", false);
-  double logDensity = 0.0;
+double SamplerMcmc::evaluateNegativeLogDensity() const {
+  Timer t("SamplerMcmc: Compute---Negative Log density", false);
+  double negLogDensity = 0.0;
   for (auto e : _errorTermsS)
-    logDensity += e->evaluateError();
+    negLogDensity += e->evaluateError();
   for (auto e : _errorTermsNS)
-    logDensity += e->evaluateError();
-  return logDensity;
+    negLogDensity += e->evaluateError();
+  return negLogDensity;
 }
 
-void SamplerMcmc::run(const std::size_t nSteps) {
+void SamplerMcmc::run(const std::size_t nStepsMax, const std::size_t nAcceptedSamples /* = std::numeric_limits<std::size_t>::max() */) {
+
+  SM_ASSERT_GT(Exception, nStepsMax, 0, "It does not make sense to run the sampler with no steps.");
+  SM_ASSERT_GT(Exception, nAcceptedSamples, 0, "It does not make sense to run the sampler until zero samples were accepted.");
+
+  _nSamplesAccepted = 0;
 
   if (!_isInitialized)
     initialize();
 
-  double logDensity;
-  if (nSteps > 0)
-    logDensity = evaluateLogDensity();
+  double negLogDensity = evaluateNegativeLogDensity();
 
-  for (std::size_t cnt = 0; cnt < nSteps; cnt++, _nIterations++) {
+  for (_nIterations = 0; _nIterations < nStepsMax; _nIterations++) {
+
+    if (_nSamplesAccepted >= nAcceptedSamples) {
+      SM_DEBUG("Required number of accepted samples reached, terminating loop.");
+      break;
+    }
 
     updateDesignVariables();
-    const double logDensityNew = evaluateLogDensity();
+    const double negLogDensityNew = evaluateNegativeLogDensity();
 
-    const double acceptanceProbability = std::exp(std::min(0.0, logDensityNew - logDensity));
-    SM_VERBOSE_STREAM("LogDensity: " << logDensity << "->" << logDensityNew << ", acceptance probability: " << acceptanceProbability);
+    const double acceptanceProbability = std::exp(std::min(0.0, -negLogDensityNew + negLogDensity));
+    SM_VERBOSE_STREAM("NegLogDensity: " << negLogDensity << "->" << negLogDensityNew << ", acceptance probability: " << acceptanceProbability);
 
-    if (sm::random::randLU(0., 1.0) < acceptanceProbability) {
-      logDensity = logDensityNew;
+    if (sm::random::randLU(0., 1.0) < acceptanceProbability) { // sample accepted, we keep the new design variables
+      negLogDensity = negLogDensityNew;
       _nSamplesAccepted++;
       SM_VERBOSE_STREAM("Sample accepted");
-      // sample accepted, we keep the new design variables
-    } else {
+    } else { // sample rejected, we revert the update
       revertUpdateDesignVariables();
       SM_VERBOSE_STREAM("Sample rejected");
-      // sample rejected, we revert the update
     }
 
   }
 
 }
 
-void SamplerMcmc::checkLogDensitySetup()
+void SamplerMcmc::checkNegativeLogDensitySetup()
 {
   // Check that all error terms are hooked up to design variables.
   // TODO: Is this check really necessary? It's not wrong by default, but one could simply remove this error term.

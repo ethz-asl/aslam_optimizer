@@ -12,7 +12,7 @@ using namespace boost;
 using namespace aslam::backend;
 
 /// \brief Encodes the error \f$ -\frac{\left(\mathbf x - \mathbf \mu\right)^2}{2.0 \sigma^2}\f$
-class GaussianLogDensityError : public ScalarNonSquaredErrorTerm {
+class GaussianNegLogDensityError : public ScalarNonSquaredErrorTerm {
 public:
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW;
   typedef ScalarNonSquaredErrorTerm parent_t;
@@ -21,14 +21,14 @@ public:
   Scalar::Vector1d _mu;  /// \brief The mean
   Scalar::Vector1d _varInv;  /// \brief The inverse variance
 
-  GaussianLogDensityError(Scalar* x) : _x(x) {
+  GaussianNegLogDensityError(Scalar* x) : _x(x) {
     _x->setActive(true);
     parent_t::setDesignVariables(_x);
     setWeight(1.0);
     _mu << 0.0;
     _varInv << 1.0;
   }
-  virtual ~GaussianLogDensityError() {}
+  virtual ~GaussianNegLogDensityError() {}
 
   void setMean(const double mu) { _mu << mu; }
   void setVariance(const double var) { _varInv << 1./var; }
@@ -36,12 +36,12 @@ public:
   /// \brief evaluate the error term
   virtual double evaluateErrorImplementation() {
     const Scalar::Vector1d dv = (_x->_v - _mu);
-    return -0.5*(_varInv*dv*dv)[0];
+    return 0.5*(_varInv*dv*dv)[0];
   }
 
   /// \brief evaluate the jacobian
   virtual void evaluateJacobiansImplementation(aslam::backend::JacobianContainer & outJ) {
-    outJ.add( _x, -(_x->_v - _mu)*_varInv );
+    outJ.add( _x, (_x->_v - _mu)*_varInv );
   }
 
 };
@@ -69,7 +69,7 @@ TEST(OptimizerSamplerMcmcTestSuite, testSamplerMcmc)
     sdv->setBlockIndex(0);
     sdv->setActive(true);
     // Add error term
-    boost::shared_ptr<GaussianLogDensityError> err(new GaussianLogDensityError(sdv.get()));
+    boost::shared_ptr<GaussianNegLogDensityError> err(new GaussianNegLogDensityError(sdv.get()));
     err->setMean(meanTrue);
     err->setVariance(sigmaTrue*sigmaTrue);
     gaussian1dLogDensity.addErrorTerm(err);
@@ -84,8 +84,8 @@ TEST(OptimizerSamplerMcmcTestSuite, testSamplerMcmc)
 
     // Set and test log density
     SamplerMcmc sampler(options);
-    sampler.setLogDensity(gaussian1dLogDensityPtr);
-    EXPECT_NO_THROW(sampler.checkLogDensitySetup());
+    sampler.setNegativeLogDensity(gaussian1dLogDensityPtr);
+    EXPECT_NO_THROW(sampler.checkNegativeLogDensitySetup());
     EXPECT_DOUBLE_EQ(sampler.getAcceptanceRate(), 0.0);
     EXPECT_EQ(sampler.getNumIterations(), 0);
 
@@ -106,7 +106,7 @@ TEST(OptimizerSamplerMcmcTestSuite, testSamplerMcmc)
       sampler.run(nStepsSkip);
       EXPECT_GE(sampler.getAcceptanceRate(), 0.0);
       EXPECT_LE(sampler.getAcceptanceRate(), 1.0);
-      EXPECT_EQ(sampler.getNumIterations(), nStepsBurnIn + (i+1)*nStepsSkip);
+      EXPECT_EQ(sampler.getNumIterations(), nStepsSkip);
       ASSERT_EQ(1, gaussian1dLogDensity.numDesignVariables());
       auto dv = gaussian1dLogDensity.designVariable(0);
       Eigen::MatrixXd p;
@@ -123,10 +123,10 @@ TEST(OptimizerSamplerMcmcTestSuite, testSamplerMcmc)
     EXPECT_NEAR((dvValues.array() - dvValues.mean()).matrix().squaredNorm()/(dvValues.rows() - 1.0), sigmaTrue*sigmaTrue, 1e0) << "This failure does "
         "not necessarily have to be an error. It should just appear very rarely";
 
-    // Check that nSteps = 0 is OK
-    const double ar = sampler.getAcceptanceRate();
-    sampler.run(0);
-    EXPECT_DOUBLE_EQ(sampler.getAcceptanceRate(), ar);
+    // Run until a specified number of samples was accepted
+    sampler.run(numeric_limits<size_t>::max(), 1);
+    EXPECT_GT(sampler.getAcceptanceRate(), 0.0);
+    EXPECT_GT(sampler.getNumIterations(), 0);
 
     // Check that re-initializing resets values
     sampler.initialize();
