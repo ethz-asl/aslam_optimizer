@@ -87,6 +87,11 @@ class GenericMatrixExpression {
   template<int IColsOther, typename TOtherNode>
   GenericMatrixExpression<IRows, IColsOther, TScalar> operator*(const GenericMatrixExpression<ICols, IColsOther, TScalar, TOtherNode> & other) const;
 
+  template<typename Derived>
+  GenericMatrixExpression<IRows, Derived::ColsAtCompileTime, TScalar> operator*(const Eigen::MatrixBase<Derived> & otherMatrix) const {
+    return *this * GenericMatrixExpression<ICols, Derived::ColsAtCompileTime, TScalar>(otherMatrix);
+  }
+
   inline operator GenericMatrixExpression<IRows, ICols, TScalar>() const;
 
   default_self_t operator*(const ScalarExpression & scalarExpression) const;
@@ -94,8 +99,12 @@ class GenericMatrixExpression {
   default_self_t operator-() const;
   template<typename TOtherNode>
   default_self_t operator+(const GenericMatrixExpression<IRows, ICols, TScalar, TOtherNode> & other) const;
+  template <typename Derived>
+  default_self_t operator+(const Eigen::MatrixBase<Derived> & m) const { return *this + default_self_t(m); }
   template<typename TOtherNode>
   default_self_t operator-(const GenericMatrixExpression<IRows, ICols, TScalar, TOtherNode> & other) const;
+  template <typename Derived>
+  default_self_t operator-(const Eigen::MatrixBase<Derived> & m) const { return *this - default_self_t(m); }
 
   template<int IColsOther, typename TOtherNode, typename std::enable_if<IRows == 3 && (ICols == 1 || IColsOther == 1), int>::type = 0>
   GenericMatrixExpression<3, (ICols == 1 ? IColsOther : ICols), TScalar> cross(const GenericMatrixExpression<3, IColsOther, TScalar, TOtherNode> & other) const;
@@ -142,6 +151,21 @@ class GenericMatrixExpression {
   class BinaryOperationResult : public BinaryOperationResultNode<TDerived, TLhs, TRhs, self_t, typename node_t::differential_t::domain_t, scalar_t> {
   };
 };
+
+template<int ICols, int IColsOther, typename TScalar, typename TNode, typename Derived>
+GenericMatrixExpression<Derived::RowsAtCompileTime, IColsOther, TScalar> operator*(const Eigen::MatrixBase<Derived> & matrix, GenericMatrixExpression<ICols, IColsOther, TScalar, TNode> otherMatrix) {
+  return  GenericMatrixExpression<Derived::RowsAtCompileTime, ICols, TScalar>(matrix) * otherMatrix;
+}
+
+template<int IRows, int ICols, typename TScalar, typename TNode, typename Derived>
+GenericMatrixExpression<IRows, ICols, TScalar> operator+(const Eigen::MatrixBase<Derived> & matrix, GenericMatrixExpression<IRows, ICols, TScalar, TNode> otherMatrix) {
+  return  GenericMatrixExpression<IRows, ICols, TScalar>(matrix) + otherMatrix;
+}
+
+template<int IRows, int ICols, typename TScalar, typename TNode, typename Derived>
+GenericMatrixExpression<IRows, ICols, TScalar> operator-(const Eigen::MatrixBase<Derived> & matrix, GenericMatrixExpression<IRows, ICols, TScalar, TNode> otherMatrix) {
+  return  GenericMatrixExpression<IRows, ICols, TScalar>(matrix) - otherMatrix;
+}
 
 }  // namespace backend
 }  // namespace aslam

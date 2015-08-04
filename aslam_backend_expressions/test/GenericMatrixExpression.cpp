@@ -439,3 +439,53 @@ TEST(GenericMatrixExpressionNodeTestSuites, testUserConversionToAndFromOneByOneM
     FAIL() << e.what();
   }
 }
+
+TEST(GenericMatrixExpressionNodeTestSuites, testEigenOperands) {
+  try {
+    double sValue = 10.0;
+    Scalar s(sValue);
+    ScalarExpression se(&s);
+
+    typedef GenericMatrixExpression<2, 3, double> GMAT;
+    GMAT::matrix_t m = GMAT::matrix_t::Random();
+    GMAT gMat(m);
+
+
+    gMat = gMat * se;
+    m *= sValue;
+
+    sm::eigen::assertEqual(gMat.evaluate(), (m).eval(), SM_SOURCE_FILE_POS, "Test scalar expression multiplication.");
+
+    GMAT::matrix_t m2 = GMAT::matrix_t::Random();
+    sm::eigen::assertEqual((gMat + m2).evaluate(), (m + m2).eval(), SM_SOURCE_FILE_POS, "Test plus Eigen matrix.");
+    sm::eigen::assertEqual((gMat - m2).evaluate(), (m - m2).eval(), SM_SOURCE_FILE_POS, "Test minus Eigen matrix.");
+    sm::eigen::assertEqual((m2 + gMat).evaluate(), (m2 + m).eval(), SM_SOURCE_FILE_POS, "Test plus Eigen matrix.");
+    sm::eigen::assertEqual((m2 - gMat).evaluate(), (m2 - m).eval(), SM_SOURCE_FILE_POS, "Test minus Eigen matrix.");
+    sm::eigen::assertEqual((gMat.transpose() * m2).evaluate(), (m.transpose() * m2).eval(), SM_SOURCE_FILE_POS, "Test times Eigen matrix.");
+    sm::eigen::assertEqual((m2.transpose() * gMat).evaluate(), (m2.transpose() * m).eval(), SM_SOURCE_FILE_POS, "Test times Eigen matrix.");
+
+
+    for (int i = 0; i < 3; i++){
+      SCOPED_TRACE(std::to_string(i));
+      testExpression((gMat + m2) * GenericMatrixExpression<3, 1, double>(Eigen::Matrix<double, 3, 1>::Unit(i)), 1);
+    }
+
+    for (int i = 0; i < 3; i++){
+      SCOPED_TRACE(std::to_string(i));
+      testExpression((gMat - m2) * GenericMatrixExpression<3, 1, double>(Eigen::Matrix<double, 3, 1>::Unit(i)), 1);
+    }
+
+    for (int i = 0; i < 2; i++){
+      SCOPED_TRACE(std::to_string(i));
+      testExpression((gMat * m2.transpose()) * GenericMatrixExpression<2, 1, double>(Eigen::Matrix<double, 2, 1>::Unit(i)), 1);
+    }
+    for (int i = 0; i < 3; i++){
+      SCOPED_TRACE(std::to_string(i));
+      testExpression((m2.transpose() * gMat) * GenericMatrixExpression<3, 1, double>(Eigen::Matrix<double, 3, 1>::Unit(i)), 1);
+    }
+  }
+  catch(std::exception const & e)
+  {
+    FAIL() << e.what();
+  }
+}
