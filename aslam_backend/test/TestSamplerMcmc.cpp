@@ -1,9 +1,9 @@
 #include <sm/eigen/gtest.hpp>
 #include <sm/random.hpp>
-#include <aslam/backend/SamplerMcmc.hpp>
-#include <aslam/backend/SamplerHmc.hpp>
 #include <aslam/backend/OptimizationProblem.hpp>
 #include <aslam/backend/ErrorTerm.hpp>
+#include <aslam/backend/SamplerHybridMcmc.hpp>
+#include <aslam/backend/SamplerMetropolisHastings.hpp>
 #include <aslam/backend/test/ErrorTermTester.hpp>
 #include "SampleDvAndError.hpp"
 

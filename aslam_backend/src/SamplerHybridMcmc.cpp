@@ -5,12 +5,12 @@
  *      Author: Ulrich Schwesinger
  */
 
+#include <aslam/backend/SamplerHybridMcmc.hpp>
 #include <cmath>
 
 #include <sm/logging.hpp>
 #include <sm/random.hpp>
 
-#include <aslam/backend/SamplerHmc.hpp>
 
 using namespace std;
 
