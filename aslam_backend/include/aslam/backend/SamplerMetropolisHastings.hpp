@@ -5,8 +5,8 @@
  *      Author: sculrich
  */
 
-#ifndef INCLUDE_ASLAM_BACKEND_SAMPLERMCMC_HPP_
-#define INCLUDE_ASLAM_BACKEND_SAMPLERMCMC_HPP_
+#ifndef INCLUDE_ASLAM_BACKEND_SAMPLERMETROPOLISHASTINGS_HPP_
+#define INCLUDE_ASLAM_BACKEND_SAMPLERMETROPOLISHASTINGS_HPP_
 
 #include <limits>
 
@@ -24,13 +24,13 @@
 namespace aslam {
 namespace backend {
 
-struct SamplerMcmcOptions {
-  SamplerMcmcOptions();
-  SamplerMcmcOptions(const sm::PropertyTree& config);
+struct SamplerMetropolisHastingsOptions {
+  SamplerMetropolisHastingsOptions();
+  SamplerMetropolisHastingsOptions(const sm::PropertyTree& config);
   double transitionKernelSigma;  /// \brief Standard deviation for the Gaussian Markov transition kernel \f$ \\mathcal{N(\mathbf 0, \text{diag{\sigma^2})} f$
 };
 
-inline std::ostream& operator<<(std::ostream& out, const aslam::backend::SamplerMcmcOptions& options)
+inline std::ostream& operator<<(std::ostream& out, const aslam::backend::SamplerMetropolisHastingsOptions& options)
 {
   out << "SamplerMcmcOptions:\n";
   out << "\ttransitionKernelSigma: " << options.transitionKernelSigma << std::endl;
@@ -43,10 +43,10 @@ inline std::ostream& operator<<(std::ostream& out, const aslam::backend::Sampler
  * It interprets the objective value of an optimization problem as the negative log density of a probability distribution.
  * The log density has to be defined up to proportionality of the true negative log density.
  */
-class SamplerMcmc {
+class SamplerMetropolisHastings {
 
  public:
-  typedef SamplerMcmc self_t;
+  typedef SamplerMetropolisHastings self_t;
   typedef boost::shared_ptr<self_t> Ptr;
   typedef boost::shared_ptr<const self_t> ConstPtr;
   typedef Eigen::Matrix<double, Eigen::Dynamic, 1> ColumnVectorType;
@@ -61,11 +61,11 @@ class SamplerMcmc {
 
  public:
   /// \brief Default constructor with default options
-  SamplerMcmc();
+  SamplerMetropolisHastings();
   /// \brief Constructor
-  SamplerMcmc(const SamplerMcmcOptions& options);
+  SamplerMetropolisHastings(const SamplerMetropolisHastingsOptions& options);
   /// \brief Destructor
-  ~SamplerMcmc() { }
+  ~SamplerMetropolisHastings() { }
 
   /// \brief Set up to work on the log density. The log density may neglect the normalization constant.
   void setNegativeLogDensity(NegativeLogDensityPtr negLogDensity);
@@ -88,7 +88,7 @@ class SamplerMcmc {
   double evaluateNegativeLogDensity() const;
 
   /// \brief Mutable getter for options
-  SamplerMcmcOptions& options() { return _options; }
+  SamplerMetropolisHastingsOptions& options() { return _options; }
   /// \brief Mutable getter for the log density formulation
   NegativeLogDensityPtr getNegativeLogDensity() { return _negLogDensity; }
   /// \brief Getter for the acceptance rate
@@ -103,7 +103,7 @@ class SamplerMcmc {
   void revertUpdateDesignVariables();
 
  private:
-  SamplerMcmcOptions _options; /// \brief Configuration options
+  SamplerMetropolisHastingsOptions _options; /// \brief Configuration options
   NegativeLogDensityPtr _negLogDensity; /// \brief The negative log probability density
 
   /// \brief all design variables, first the non-marginalized ones (the dense ones), then the marginalized ones.
@@ -123,4 +123,4 @@ class SamplerMcmc {
 } /* namespace aslam */
 } /* namespace backend */
 
-#endif /* INCLUDE_ASLAM_BACKEND_SAMPLERMCMC_HPP_ */
+#endif /* INCLUDE_ASLAM_BACKEND_SAMPLERMETROPOLISHASTINGS_HPP_ */

@@ -1,9 +1,9 @@
 #include <sm/eigen/gtest.hpp>
 #include <sm/timing/Timer.hpp>
 #include <sm/random.hpp>
-#include <aslam/backend/SamplerMcmc.hpp>
 #include <aslam/backend/OptimizationProblem.hpp>
 #include <aslam/backend/ErrorTerm.hpp>
+#include <aslam/backend/SamplerMetropolisHastings.hpp>
 #include <aslam/backend/test/ErrorTermTester.hpp>
 #include "SampleDvAndError.hpp"
 
@@ -79,11 +79,11 @@ TEST(OptimizerSamplerMcmcTestSuite, testSamplerMcmc)
     // Initialize and test options
     sm::BoostPropertyTree pt;
     pt.setDouble("transitionKernelSigma", 1.0);
-    SamplerMcmcOptions options(pt);
+    SamplerMetropolisHastingsOptions options(pt);
     EXPECT_DOUBLE_EQ(pt.getDouble("transitionKernelSigma"), options.transitionKernelSigma);
 
     // Set and test log density
-    SamplerMcmc sampler(options);
+    SamplerMetropolisHastings sampler(options);
     sampler.setNegativeLogDensity(gaussian1dLogDensityPtr);
     EXPECT_NO_THROW(sampler.checkNegativeLogDensitySetup());
     EXPECT_DOUBLE_EQ(sampler.getAcceptanceRate(), 0.0);

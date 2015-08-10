@@ -5,24 +5,24 @@
  *      Author: sculrich
  */
 
+#include <aslam/backend/SamplerMetropolisHastings.hpp>
 #include <cmath>
 
 #include <sm/logging.hpp>
 #include <sm/random.hpp>
 
-#include <aslam/backend/SamplerMcmc.hpp>
 
 using namespace std;
 
 namespace aslam {
 namespace backend {
 
-SamplerMcmcOptions::SamplerMcmcOptions() :
+SamplerMetropolisHastingsOptions::SamplerMetropolisHastingsOptions() :
   transitionKernelSigma(0.1) {
 
 }
 
-SamplerMcmcOptions::SamplerMcmcOptions(const sm::PropertyTree& config) :
+SamplerMetropolisHastingsOptions::SamplerMetropolisHastingsOptions(const sm::PropertyTree& config) :
     transitionKernelSigma(config.getDouble("transitionKernelSigma", transitionKernelSigma)) {
 
 }
@@ -31,7 +31,7 @@ SamplerMcmcOptions::SamplerMcmcOptions(const sm::PropertyTree& config) :
 
 
 
-SamplerMcmc::SamplerMcmc() :
+SamplerMetropolisHastings::SamplerMetropolisHastings() :
   _options(),
   _isInitialized(false),
   _nIterations(0),
@@ -39,7 +39,7 @@ SamplerMcmc::SamplerMcmc() :
 
 }
 
-SamplerMcmc::SamplerMcmc(const SamplerMcmcOptions& options) :
+SamplerMetropolisHastings::SamplerMetropolisHastings(const SamplerMetropolisHastingsOptions& options) :
   _options(options),
   _isInitialized(false),
   _nIterations(0),
@@ -47,12 +47,12 @@ SamplerMcmc::SamplerMcmc(const SamplerMcmcOptions& options) :
 
 }
 
-void SamplerMcmc::setNegativeLogDensity(NegativeLogDensityPtr negLogDensity) {
+void SamplerMetropolisHastings::setNegativeLogDensity(NegativeLogDensityPtr negLogDensity) {
   _negLogDensity = negLogDensity;
   _isInitialized = false;
 }
 
-void SamplerMcmc::initialize() {
+void SamplerMetropolisHastings::initialize() {
 
   SM_ASSERT_FALSE(Exception, _negLogDensity == nullptr, "No negative log density has been set");
   SM_DEBUG_STREAM("SamplerMcmc: Initializing problem...");
@@ -102,7 +102,7 @@ void SamplerMcmc::initialize() {
 
 }
 
-void SamplerMcmc::updateDesignVariables() {
+void SamplerMetropolisHastings::updateDesignVariables() {
   Timer t("SamplerMcmc: Update design variables", false);
   for (auto dv : _designVariables) {
     const int dim = dv->minimalDimensions();
@@ -114,13 +114,13 @@ void SamplerMcmc::updateDesignVariables() {
   }
 }
 
-void SamplerMcmc::revertUpdateDesignVariables() {
+void SamplerMetropolisHastings::revertUpdateDesignVariables() {
   Timer t("SamplerMcmc: Revert update design variables", false);
   for (auto dv : _designVariables)
     dv->revertUpdate();
 }
 
-double SamplerMcmc::evaluateNegativeLogDensity() const {
+double SamplerMetropolisHastings::evaluateNegativeLogDensity() const {
   Timer t("SamplerMcmc: Compute---Negative Log density", false);
   double negLogDensity = 0.0;
   for (auto e : _errorTermsS)
@@ -130,7 +130,7 @@ double SamplerMcmc::evaluateNegativeLogDensity() const {
   return negLogDensity;
 }
 
-void SamplerMcmc::run(const std::size_t nStepsMax, const std::size_t nAcceptedSamples /* = std::numeric_limits<std::size_t>::max() */) {
+void SamplerMetropolisHastings::run(const std::size_t nStepsMax, const std::size_t nAcceptedSamples /* = std::numeric_limits<std::size_t>::max() */) {
 
   SM_ASSERT_GT(Exception, nStepsMax, 0, "It does not make sense to run the sampler with no steps.");
   SM_ASSERT_GT(Exception, nAcceptedSamples, 0, "It does not make sense to run the sampler until zero samples were accepted.");
@@ -168,7 +168,7 @@ void SamplerMcmc::run(const std::size_t nStepsMax, const std::size_t nAcceptedSa
 
 }
 
-void SamplerMcmc::checkNegativeLogDensitySetup()
+void SamplerMetropolisHastings::checkNegativeLogDensitySetup()
 {
   // Check that all error terms are hooked up to design variables.
   // TODO: Is this check really necessary? It's not wrong by default, but one could simply remove this error term.

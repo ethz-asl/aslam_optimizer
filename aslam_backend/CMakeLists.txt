@@ -51,7 +51,7 @@ cs_add_library(${PROJECT_NAME}
   src/Optimizer2.cpp
   src/OptimizerRprop.cpp
   src/ProbDataAssocPolicy.cpp
-  src/SamplerMcmc.cpp
+  src/SamplerMetropolisHastings.cpp
 )
 
 target_link_libraries(${PROJECT_NAME} ${Boost_LIBRARIES} ${TBB_LIBRARIES})
