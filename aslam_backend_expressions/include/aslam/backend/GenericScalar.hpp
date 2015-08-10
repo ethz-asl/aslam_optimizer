@@ -18,6 +18,7 @@ class GenericScalar : public GenericScalarExpressionNode<Scalar_>, public Design
   constexpr static int DesignVariableDimension = 1;
   constexpr static int MinimalDimension = 1;
 
+  GenericScalar() = default;
   GenericScalar(Scalar p);
   virtual ~GenericScalar();
 
