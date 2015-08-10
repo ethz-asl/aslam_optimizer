@@ -61,7 +61,7 @@ class FixedPointNumber{
   inline FixedPointNumber(const FixedPointNumber & other) = default;
 
   inline FixedPointNumber(Integer p) : _p(p){}
-  inline explicit FixedPointNumber(double const & other) : _p(other * getDivider()) {}
+  inline FixedPointNumber(double const & other) : _p(other * getDivider()) {}
 
   template <typename OtherInteger_, std::uintmax_t OtherDivider_>
   inline explicit FixedPointNumber(FixedPointNumber<OtherInteger_, OtherDivider_> const & other) { _p = other._p * getDivider() / other.getDivider(); }
