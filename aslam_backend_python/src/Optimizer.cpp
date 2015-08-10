@@ -175,6 +175,18 @@ void exportOptimizer()
         ;
 
 
+    class_<OptimizerRpropOptions>("OptimizerRpropOptions", init<>())
+        .def_readwrite("etaMinus",&OptimizerRpropOptions::etaMinus)
+        .def_readwrite("etaPlus",&OptimizerRpropOptions::etaPlus)
+        .def_readwrite("initialDelta",&OptimizerRpropOptions::initialDelta)
+        .def_readwrite("minDelta",&OptimizerRpropOptions::minDelta)
+        .def_readwrite("maxDelta",&OptimizerRpropOptions::maxDelta)
+        .def_readwrite("maxIterations",&OptimizerRpropOptions::maxIterations)
+        .def_readwrite("verbose",&OptimizerRpropOptions::verbose)
+        .def_readwrite("nThreads", &OptimizerRpropOptions::nThreads)
+        ;
+
+
     class_<OptimizerRprop, boost::shared_ptr<OptimizerRprop> >("OptimizerRprop", no_init)
         .def(init<OptimizerRpropOptions>())
         .def("setProblem", &OptimizerRprop::setProblem)
@@ -197,8 +209,6 @@ void exportOptimizer()
 
         /// \brief how many dense design variables are involved in the problem
         .add_property("numDesignVariables", &OptimizerRprop::numDesignVariables)
-
-        .def("printTiming", &OptimizerRprop::printTiming)
 
         .def("checkProblemSetup", &OptimizerRprop::checkProblemSetup)
 
