@@ -27,12 +27,7 @@ struct SamplerMetropolisHastingsOptions {
   double transitionKernelSigma;  /// \brief Standard deviation for the Gaussian Markov transition kernel \f$ \\mathcal{N(\mathbf 0, \text{diag{\sigma^2})} f$
 };
 
-inline std::ostream& operator<<(std::ostream& out, const aslam::backend::SamplerMetropolisHastingsOptions& options)
-{
-  out << "SamplerMetropolisHastingsOptions:\n";
-  out << "\ttransitionKernelSigma: " << options.transitionKernelSigma << std::endl;
-  return out;
-}
+std::ostream& operator<<(std::ostream& out, const aslam::backend::SamplerMetropolisHastingsOptions& options);
 
 /**
  * @class SamplerMetropolisHastings
@@ -46,8 +41,6 @@ class SamplerMetropolisHastings : public SamplerBase {
   typedef boost::shared_ptr<SamplerMetropolisHastings> Ptr;
   typedef boost::shared_ptr<const SamplerMetropolisHastings> ConstPtr;
 
-  SM_DEFINE_EXCEPTION(Exception, aslam::Exception);
-
  public:
   /// \brief Default constructor with default options
   SamplerMetropolisHastings();
@@ -59,21 +52,12 @@ class SamplerMetropolisHastings : public SamplerBase {
   /// \brief Mutable getter for options
   SamplerMetropolisHastingsOptions& options() { return _options; }
 
-  /// \brief Getter for the acceptance rate
-  double getAcceptanceRate() const { return _nIterations > 0 ? static_cast<double>(_nSamplesAccepted)/static_cast<double>(_nIterations) : 0.0; }
-
-  /// \brief Getter for the number of iterations since the last run() or initialize() call
-  std::size_t getNumIterations() const { return _nIterations; }
-
  private:
-  virtual void initializeImplementation();
-  virtual void runImplementation(const std::size_t nStepsMax, const std::size_t nAcceptedSamples);
+  virtual void initializeImplementation() override { }
+  virtual void runImplementation(const std::size_t nStepsMax, const std::size_t nAcceptedSamples, Statistics& statistics) override;
 
  private:
    SamplerMetropolisHastingsOptions _options; /// \brief Configuration options
-
-  std::size_t _nIterations; /// \brief How many iterations the sampler has run
-  std::size_t _nSamplesAccepted; /// \brief How many samples were accepted since the last run() or initialize() call
 
 };
 

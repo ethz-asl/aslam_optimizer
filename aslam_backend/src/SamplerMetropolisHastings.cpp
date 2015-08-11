@@ -1,16 +1,16 @@
 /*
- * SamplerMcmc.cpp
+ * SamplerMetropolisHastings.cpp
  *
  *  Created on: 24.07.2015
  *      Author: sculrich
  */
 
 #include <aslam/backend/SamplerMetropolisHastings.hpp>
-#include <cmath>
+
+#include <cmath> // std::exp
 
 #include <sm/logging.hpp>
 #include <sm/random.hpp>
-
 
 using namespace std;
 
@@ -27,40 +27,33 @@ SamplerMetropolisHastingsOptions::SamplerMetropolisHastingsOptions(const sm::Pro
 
 }
 
-
+std::ostream& operator<<(std::ostream& out, const aslam::backend::SamplerMetropolisHastingsOptions& options) {
+  out << "SamplerMetropolisHastingsOptions:" << std::endl;
+  out << "\ttransitionKernelSigma: " << options.transitionKernelSigma << std::endl;
+  return out;
+}
 
 
 
 SamplerMetropolisHastings::SamplerMetropolisHastings() :
-  _options(),
-  _nIterations(0),
-  _nSamplesAccepted(0) {
+  _options() {
 
 }
 
 SamplerMetropolisHastings::SamplerMetropolisHastings(const SamplerMetropolisHastingsOptions& options) :
-  _options(options),
-  _nIterations(0),
-  _nSamplesAccepted(0) {
+  _options(options) {
 
 }
 
-void SamplerMetropolisHastings::initializeImplementation() {
-  _nIterations = 0;
-  _nSamplesAccepted = 0;
-}
-
-void SamplerMetropolisHastings::runImplementation(const std::size_t nStepsMax, const std::size_t nAcceptedSamples) {
+void SamplerMetropolisHastings::runImplementation(const std::size_t nStepsMax, const std::size_t nAcceptedSamples, Statistics& statistics) {
 
   auto normal_dist = [&] (double) { return _options.transitionKernelSigma*sm::random::randn(); };
 
-  _nSamplesAccepted = 0;
-
   double negLogDensity = evaluateNegativeLogDensity();
 
-  for (_nIterations = 0; _nIterations < nStepsMax; _nIterations++) {
+  for (; statistics.nIterationsThisRun < nStepsMax; statistics.nIterationsThisRun++) {
 
-    if (_nSamplesAccepted >= nAcceptedSamples) {
+    if (statistics.nSamplesAcceptedThisRun >= nAcceptedSamples) {
       SM_DEBUG("Required number of accepted samples reached, terminating loop.");
       break;
     }
@@ -73,9 +66,9 @@ void SamplerMetropolisHastings::runImplementation(const std::size_t nStepsMax, c
     const double acceptanceProbability = std::exp(std::min(0.0, -negLogDensityNew + negLogDensity));
     SM_VERBOSE_STREAM("NegLogDensity: " << negLogDensity << "->" << negLogDensityNew << ", acceptance probability: " << acceptanceProbability);
 
-    if (sm::random::randLU(0., 1.0) < acceptanceProbability) { // sample accepted, we keep the new design variables
+    if (sm::random::randLU(0.0, 1.0) < acceptanceProbability) { // sample accepted, we keep the new design variables
       negLogDensity = negLogDensityNew;
-      _nSamplesAccepted++;
+      statistics.nSamplesAcceptedThisRun++;
       SM_VERBOSE_STREAM("Sample accepted");
     } else { // sample rejected, we revert the update
       revertLastStateUpdate();

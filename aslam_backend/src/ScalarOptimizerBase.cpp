@@ -10,10 +10,13 @@
 namespace aslam {
 namespace backend {
 
+/// \brief The return value for a safe job
 struct SafeJobReturnValue {
   SafeJobReturnValue(const std::exception& e) : _e(e) {}
   std::exception _e;
 };
+
+/// \brief Functor running a job catching all exceptions
 struct SafeJob {
   boost::function<void()> _fn;
   SafeJobReturnValue* _rval;
@@ -28,15 +31,15 @@ struct SafeJob {
       _fn();
     } catch (const std::exception& e) {
       _rval = new SafeJobReturnValue(e);
-      std::cerr << "Exception in thread block: " << e.what() << std::endl;
+      SM_FATAL_STREAM("Exception in thread block: " << e.what());
     }
   }
 };
 
 ScalarOptimizerBase::ScalarOptimizerBase() :
-    _numOptParameters(0),
-    _numErrorTerms(0),
-    _isInitialized(false)
+  _numOptParameters(0),
+  _numErrorTerms(0),
+  _isInitialized(false)
 {
 
 }
@@ -58,14 +61,14 @@ void ScalarOptimizerBase::initialize()
 {
 
   SM_ASSERT_FALSE(Exception, _problem == nullptr, "No optimization problem has been set");
-  Timer init("ScalarOptimizerBase: Initialize---Total");
+  Timer init("ScalarOptimizerBase: Initialize total");
   _designVariables.clear();
   _designVariables.reserve(_problem->numDesignVariables());
   _errorTermsNS.clear();
   _errorTermsNS.reserve(_problem->numNonSquaredErrorTerms());
   _errorTermsS.clear();
   _errorTermsS.reserve(_problem->numErrorTerms());
-  Timer initDv("OptimizerRprop: Initialize---Design Variables");
+  Timer initDv("ScalarOptimizerBase: Initialize design Variables");
   // Run through all design variables adding active ones to an active list.
   for (size_t i = 0; i < _problem->numDesignVariables(); ++i) {
     DesignVariable* dv = _problem->designVariable(i);
@@ -85,7 +88,7 @@ void ScalarOptimizerBase::initialize()
   }
   initDv.stop();
 
-  Timer initEt("OptimizerRprop: Initialize---Error Terms");
+  Timer initEt("ScalarOptimizerBase: Initialize error terms");
   // Get all of the error terms that work on these design variables.
   _numErrorTerms = 0;
   for (unsigned i = 0; i < _problem->numNonSquaredErrorTerms(); ++i) {
@@ -101,6 +104,7 @@ void ScalarOptimizerBase::initialize()
   initEt.stop();
   SM_ASSERT_FALSE(Exception, _errorTermsNS.empty() && _errorTermsS.empty(), "It is illegal to run the optimizer with no error terms.");
 
+  // call the initialization method of the child class
   initializeImplementation();
 
   _isInitialized = true;
@@ -117,7 +121,7 @@ DesignVariable* ScalarOptimizerBase::designVariable(size_t i)
   return _designVariables[i];
 }
 
-void ScalarOptimizerBase::checkProblemSetup()
+void ScalarOptimizerBase::checkProblemSetup() const
 {
   // Check that all error terms are hooked up to design variables.
   // TODO: Is this check really necessary? It's not wrong by default, but one could simply remove this error term.
@@ -127,6 +131,12 @@ void ScalarOptimizerBase::checkProblemSetup()
     SM_ASSERT_GT(Exception, _errorTermsS[i]->numDesignVariables(), 0, "Squared error term " << i << " has no design variable(s) attached.");
 }
 
+/**
+ * Computes the gradient of the scalar objective function
+ * @param[out] outGrad The gradient
+ * @param nThreads How many threads to use
+ * @param useMEstimator Whether to use an MEstimator
+ */
 void ScalarOptimizerBase::computeGradient(RowVectorType& outGrad, size_t nThreads, bool useMEstimator)
 {
   SM_ASSERT_GT(Exception, nThreads, 0, "");
@@ -140,7 +150,7 @@ void ScalarOptimizerBase::computeGradient(RowVectorType& outGrad, size_t nThread
 }
 
 double ScalarOptimizerBase::evaluateError() const {
-  Timer t("SamplerMcmc: Compute---Negative Log density", false);
+  Timer t("ScalarOptimizerBase: Compute Negative Log density", false);
   double error = 0.0;
   for (auto e : _errorTermsS)
     error += e->evaluateError();
@@ -151,9 +161,10 @@ double ScalarOptimizerBase::evaluateError() const {
 
 void ScalarOptimizerBase::applyStateUpdate(const ColumnVectorType& dx)
 {
+  Timer t("ScalarOptimizerBase: Apply state update", false);
   // Apply the update to the dense state.
   int startIdx = 0;
-  for (size_t i = 0; i < numDesignVariables(); i++) {
+  for (size_t i = 0; i < _designVariables.size(); i++) {
     DesignVariable* d = _designVariables[i];
     const int dbd = d->minimalDimensions();
     Eigen::VectorXd dxS = dx.segment(startIdx, dbd);
@@ -165,6 +176,7 @@ void ScalarOptimizerBase::applyStateUpdate(const ColumnVectorType& dx)
 
 void ScalarOptimizerBase::revertLastStateUpdate()
 {
+  Timer t("ScalarOptimizerBase: Revert last state update", false);
   for (size_t i = 0; i < _designVariables.size(); i++)
     _designVariables[i]->revertUpdate();
 }
@@ -200,6 +212,14 @@ void ScalarOptimizerBase::setupThreadedJob(boost::function<void(size_t, size_t, 
   }
 }
 
+/**
+ * Evaluate the gradient of the objective function
+ * @param
+ * @param startIdx First error term index (including)
+ * @param endIdx Last error term index (excluding)
+ * @param useMEstimator Whether or not to use an MEstimator
+ * @param J The gradient for the specified error terms
+ */
 void ScalarOptimizerBase::evaluateGradients(size_t /* threadId */, size_t startIdx, size_t endIdx, bool useMEstimator, RowVectorType& J)
 {
   SM_ASSERT_LE_DBG(Exception, endIdx, _numErrorTerms, "");

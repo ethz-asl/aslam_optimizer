@@ -20,112 +20,120 @@
 #include "../Exceptions.hpp"
 
 namespace aslam {
-  namespace backend {
+namespace backend {
 
-    class OptimizationProblemBase;
-    class ErrorTerm;
-    class ScalarNonSquaredErrorTerm;
-    class DesignVariable;
+// Forward declarations
+class OptimizationProblemBase;
+class ErrorTerm;
+class ScalarNonSquaredErrorTerm;
+class DesignVariable;
 
-    /**
-     * \class ScalarOptimizerBase
-     * Interface definition for optimizers working on scalar objective functions
-     */
-    class ScalarOptimizerBase {
-    public:
+/**
+ * \class ScalarOptimizerBase
+ * Interface definition for optimizers working on scalar objective functions
+ */
+class ScalarOptimizerBase {
+ public:
 #ifdef aslam_backend_ENABLE_TIMING
-      typedef sm::timing::Timer Timer;
+  typedef sm::timing::Timer Timer;
 #else
-      typedef sm::timing::DummyTimer Timer;
+  typedef sm::timing::DummyTimer Timer;
 #endif
-      typedef Eigen::Matrix<double, Eigen::Dynamic, 1> ColumnVectorType;
-      typedef Eigen::Matrix<double, 1, Eigen::Dynamic> RowVectorType;
+  typedef Eigen::Matrix<double, Eigen::Dynamic, 1> ColumnVectorType;
+  typedef Eigen::Matrix<double, 1, Eigen::Dynamic> RowVectorType;
 
-      SM_DEFINE_EXCEPTION(Exception, aslam::Exception);
+  SM_DEFINE_EXCEPTION(Exception, aslam::Exception);
 
-      /// \brief Constructor with default options
-      ScalarOptimizerBase();
-      /// \brief Destructor
-      virtual ~ScalarOptimizerBase();
+  /// \brief Constructor with default options
+  ScalarOptimizerBase();
+  /// \brief Destructor
+  virtual ~ScalarOptimizerBase();
 
-      /// \brief Set up to work on the optimization problem.
-      void setProblem(boost::shared_ptr<OptimizationProblemBase> problem);
+  /// \brief Set up to work on the optimization problem.
+  void setProblem(boost::shared_ptr<OptimizationProblemBase> problem);
 
-      /// \brief initialize the optimizer to run on an optimization problem.
-      void initialize();
+  /// \brief initialize the optimizer to run on an optimization problem.
+  virtual void initialize();
 
-      /// \brief Is everything initialized?
-      bool isInitialized() const { return _isInitialized; }
+  /// \brief Is everything initialized?
+  bool isInitialized() const { return _isInitialized; }
 
-      /// \brief Mutable getter for the optimization problem
-      boost::shared_ptr<OptimizationProblemBase> getProblem() { return _problem; }
+  /// \brief Mutable getter for the optimization problem
+  boost::shared_ptr<OptimizationProblemBase> getProblem() { return _problem; }
 
-      /// \brief Get dense design variable i.
-      DesignVariable* designVariable(size_t i);
+  /// \brief Const getter for the optimization problem
+  boost::shared_ptr<const OptimizationProblemBase> getProblem() const { return _problem; }
 
-      /// \brief how many dense design variables are involved in the problem
-      size_t numDesignVariables() const { return _designVariables.size(); };
+  /// \brief Get dense design variable i.
+  DesignVariable* designVariable(size_t i);
 
-      /// \brief how many scalar parameters (design variables with their minimal dimension)
-      ///        are involved in the problem
-      size_t numOptParameters() const { return _numOptParameters; }
+  /// \brief how many dense design variables are involved in the problem
+  size_t numDesignVariables() const { return _designVariables.size(); };
 
-      /// \brief how many error terms are involved in the problem
-      size_t numErrorTerms() const { return _numErrorTerms; }
+  /// \brief how many scalar parameters (design variables with their minimal dimension)
+  ///        are involved in the problem
+  size_t numOptParameters() const { return _numOptParameters; }
 
-      /// \brief Do a bunch of checks to see if the problem is well-defined. This includes checking that every error term is
-      ///        hooked up to design variables and running finite differences on error terms where this is possible.
-      void checkProblemSetup();
+  /// \brief how many error terms are involved in the problem
+  size_t numErrorTerms() const { return _numErrorTerms; }
 
-    protected:
+  /// \brief Do a bunch of checks to see if the problem is well-defined. This includes checking that every error term is
+  ///        hooked up to design variables and running finite differences on error terms where this is possible.
+  void checkProblemSetup() const;
 
-      void setInitialized(bool isInitialized) { _isInitialized = isInitialized; }
+ protected:
 
-      /// \brief Additional initialization functionality by child classes
-      virtual void initializeImplementation() { }
+  /// \brief Set the initialized status
+  void setInitialized(bool isInitialized) { _isInitialized = isInitialized; }
 
-      /// \brief compute the current gradient of the objective function
-      void computeGradient(RowVectorType& outGrad, size_t nThreads, bool useMEstimator);
+  /// \brief Additional initialization functionality by child classes
+  virtual void initializeImplementation() { }
 
-      double evaluateError() const;
+  /// \brief compute the current gradient of the objective function
+  void computeGradient(RowVectorType& outGrad, size_t nThreads, bool useMEstimator);
 
-      /// \brief Apply the update vector to the design variables
-      void applyStateUpdate(const ColumnVectorType& dx);
+  /// \brief Evaluate the value of the objective function
+  double evaluateError() const;
 
-      /// \brief Undo the last state update to the design variables
-      void revertLastStateUpdate();
+  /// \brief Apply the update vector to the design variables
+  void applyStateUpdate(const ColumnVectorType& dx);
 
-    private:
-      void evaluateGradients(size_t threadId, size_t startIdx, size_t endIdx, bool useMEstimator, RowVectorType& grad);
-      void setupThreadedJob(boost::function<void(size_t, size_t, size_t, bool, RowVectorType&)> job,
-                            size_t nThreads,
-                            std::vector<RowVectorType>& out,
-                            bool useMEstimator);
+  /// \brief Undo the last state update to the design variables
+  void revertLastStateUpdate();
 
-    private:
+ private:
+  /// \brief Evaluate the gradient of the objective function
+  void evaluateGradients(size_t threadId, size_t startIdx, size_t endIdx, bool useMEstimator, RowVectorType& grad);
+  /// \brief Create a threaded job
+  void setupThreadedJob(boost::function<void(size_t, size_t, size_t, bool, RowVectorType&)> job,
+                        size_t nThreads,
+                        std::vector<RowVectorType>& out,
+                        bool useMEstimator);
 
-      /// \brief The current optimization problem.
-      boost::shared_ptr<OptimizationProblemBase> _problem;
+ private:
 
-      /// \brief all design variables...first the non-marginalized ones (the dense ones), then the marginalized ones.
-      std::vector<DesignVariable*> _designVariables;
+  /// \brief The current optimization problem.
+  boost::shared_ptr<OptimizationProblemBase> _problem;
 
-      /// \brief all of the error terms involved in this problem
-      std::vector<ErrorTerm*> _errorTermsS;
-      std::vector<ScalarNonSquaredErrorTerm*> _errorTermsNS;
+  /// \brief all design variables...first the non-marginalized ones (the dense ones), then the marginalized ones.
+  std::vector<DesignVariable*> _designVariables;
 
-      /// \brief the total number of parameters of this problem, given by number of design variables and their dimensionality
-      std::size_t _numOptParameters;
+  /// \brief all of the error terms involved in this problem
+  std::vector<ErrorTerm*> _errorTermsS;
+  std::vector<ScalarNonSquaredErrorTerm*> _errorTermsNS;
 
-      /// \brief the total number of error terms as the sum of squared and non-squared error terms
-      std::size_t _numErrorTerms;
+  /// \brief the total number of parameters of this problem, given by number of design variables and their dimensionality
+  std::size_t _numOptParameters;
 
-      /// \brief Whether the optimizer is correctly initialized
-      bool _isInitialized;
+  /// \brief the total number of error terms as the sum of squared and non-squared error terms
+  std::size_t _numErrorTerms;
 
-    };
+  /// \brief Whether the optimizer is correctly initialized
+  bool _isInitialized;
 
-  } // namespace backend
+};
+
+} // namespace backend
 } // namespace aslam
 
 #endif /* INCLUDE_ASLAM_BACKEND_SCALAROPTIMIZERBASE_HPP_ */

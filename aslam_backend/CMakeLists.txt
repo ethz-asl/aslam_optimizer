@@ -49,6 +49,7 @@ cs_add_library(${PROJECT_NAME}
   src/MarginalizationPriorErrorTerm.cpp
   src/DogLegTrustRegionPolicy.cpp
   src/ScalarOptimizerBase.cpp
+  src/SamplerBase.cpp
   src/Optimizer2.cpp
   src/OptimizerRprop.cpp
   src/ProbDataAssocPolicy.cpp
