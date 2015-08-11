@@ -77,6 +77,7 @@ class FixedPointNumber{
 //  inline operator Integer() = delete; TODO find out : why does this disable conversions to double?
 //  inline operator Integer() const { return getNumerator(); }
   inline Integer getNumerator() const { return _p; }
+  inline operator Integer() const { return getNumerator(); }
   inline Integer getDenominator() const { return Integer(getDivider()); }
 
   FixedPointNumber operator - () const {
