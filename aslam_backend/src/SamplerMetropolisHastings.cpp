@@ -58,8 +58,8 @@ void SamplerMetropolisHastings::runImplementation(const std::size_t nStepsMax, c
       break;
     }
 
-    const ColumnVectorType dx = ColumnVectorType::NullaryExpr(numOptParameters(), normal_dist);
-    applyStateUpdate(dx);
+    const ColumnVectorType dx = ColumnVectorType::NullaryExpr(getProblemManager().numOptParameters(), normal_dist);
+    getProblemManager().applyStateUpdate(dx);
 
     const double negLogDensityNew = evaluateNegativeLogDensity();
 
@@ -71,7 +71,7 @@ void SamplerMetropolisHastings::runImplementation(const std::size_t nStepsMax, c
       statistics.nSamplesAcceptedThisRun++;
       SM_VERBOSE_STREAM("Sample accepted");
     } else { // sample rejected, we revert the update
-      revertLastStateUpdate();
+      getProblemManager().revertLastStateUpdate();
       SM_VERBOSE_STREAM("Sample rejected");
     }
 

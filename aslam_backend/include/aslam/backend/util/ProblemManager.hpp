@@ -1,5 +1,5 @@
 /*
- * ScalarOptimizerBase.hpp
+ * ProblemManager.hpp
  *
  *  Created on: 10.08.2015
  *      Author: Ulrich Schwesinger
@@ -13,11 +13,9 @@
 #include <boost/shared_ptr.hpp>
 #include <boost/function.hpp>
 
-#include <Eigen/Core>
+#include "CommonDefinitions.hpp"
 
-#include <sm/timing/Timer.hpp>
-
-#include "../Exceptions.hpp"
+#include "../../Exceptions.hpp"
 
 namespace aslam {
 namespace backend {
@@ -29,25 +27,17 @@ class ScalarNonSquaredErrorTerm;
 class DesignVariable;
 
 /**
- * \class ScalarOptimizerBase
- * Interface definition for optimizers working on scalar objective functions
+ * \class ProblemManager
+ * Utility class to collect functionality for dealing with a problem.
  */
-class ScalarOptimizerBase {
+class ProblemManager {
  public:
-#ifdef aslam_backend_ENABLE_TIMING
-  typedef sm::timing::Timer Timer;
-#else
-  typedef sm::timing::DummyTimer Timer;
-#endif
-  typedef Eigen::Matrix<double, Eigen::Dynamic, 1> ColumnVectorType;
-  typedef Eigen::Matrix<double, 1, Eigen::Dynamic> RowVectorType;
-
   SM_DEFINE_EXCEPTION(Exception, aslam::Exception);
 
   /// \brief Constructor with default options
-  ScalarOptimizerBase();
+  ProblemManager();
   /// \brief Destructor
-  virtual ~ScalarOptimizerBase();
+  virtual ~ProblemManager();
 
   /// \brief Set up to work on the optimization problem.
   void setProblem(boost::shared_ptr<OptimizationProblemBase> problem);
@@ -81,25 +71,24 @@ class ScalarOptimizerBase {
   ///        hooked up to design variables and running finite differences on error terms where this is possible.
   void checkProblemSetup() const;
 
- protected:
-
-  /// \brief Set the initialized status
-  void setInitialized(bool isInitialized) { _isInitialized = isInitialized; }
-
-  /// \brief Additional initialization functionality by child classes
-  virtual void initializeImplementation() { }
-
-  /// \brief compute the current gradient of the objective function
-  void computeGradient(RowVectorType& outGrad, size_t nThreads, bool useMEstimator);
-
   /// \brief Evaluate the value of the objective function
   double evaluateError() const;
+
+  /// \brief Signal that the problem changed.
+  void signalProblemChanged() { setInitialized(false); }
 
   /// \brief Apply the update vector to the design variables
   void applyStateUpdate(const ColumnVectorType& dx);
 
   /// \brief Undo the last state update to the design variables
   void revertLastStateUpdate();
+
+ protected:
+  /// \brief Set the initialized status
+  void setInitialized(bool isInitialized) { _isInitialized = isInitialized; }
+
+  /// \brief compute the current gradient of the objective function
+  void computeGradient(RowVectorType& outGrad, size_t nThreads, bool useMEstimator);
 
  private:
   /// \brief Evaluate the gradient of the objective function

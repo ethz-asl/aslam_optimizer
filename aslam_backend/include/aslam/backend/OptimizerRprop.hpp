@@ -1,7 +1,7 @@
 #ifndef ASLAM_BACKEND_OPTIMIZER_RPROP_HPP
 #define ASLAM_BACKEND_OPTIMIZER_RPROP_HPP
 
-#include <aslam/backend/ScalarOptimizerBase.hpp>
+#include <aslam/backend/util/ProblemManager.hpp>
 
 namespace sm {
   class PropertyTree;
@@ -33,7 +33,7 @@ namespace aslam {
      *
      * RPROP implementation for the ASLAM framework.
      */
-    class OptimizerRprop : public ScalarOptimizerBase {
+    class OptimizerRprop : public ProblemManager {
     public:
       typedef boost::shared_ptr<OptimizerRprop> Ptr;
       typedef boost::shared_ptr<const OptimizerRprop> ConstPtr;
@@ -60,10 +60,8 @@ namespace aslam {
       ///        If it has never been started, the value will be zero.
       inline std::size_t getNumberOfIterations() const { return _nIterations; }
 
-    private:
-
       /// \brief initialize the optimizer to run on an optimization problem.
-      virtual void initializeImplementation();
+      virtual void initialize() override;
 
     private:
 

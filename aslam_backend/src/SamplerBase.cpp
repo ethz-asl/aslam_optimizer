@@ -54,7 +54,7 @@ void SamplerBase::run(const std::size_t nStepsMax, const std::size_t nAcceptedSa
   SM_ASSERT_GT(Exception, nStepsMax, 0, "It does not make sense to run the sampler with no steps.");
   SM_ASSERT_GT(Exception, nAcceptedSamples, 0, "It does not make sense to run the sampler until zero samples were accepted.");
 
-  if (!isInitialized())
+  if (!_problemManager.isInitialized())
     initialize();
 
   _statistics.nSamplesAcceptedThisRun = 0;
@@ -73,39 +73,39 @@ void SamplerBase::run(const std::size_t nStepsMax, const std::size_t nAcceptedSa
 
 /// \brief Set up to work on the log density. The log density may neglect the normalization constant.
 void SamplerBase::setNegativeLogDensity(boost::shared_ptr<OptimizationProblemBase> negLogDensity) {
-  setProblem(negLogDensity);
+  _problemManager.setProblem(negLogDensity);
 }
 
 /// \brief Mutable getter for the log density formulation
 boost::shared_ptr<OptimizationProblemBase> SamplerBase::getNegativeLogDensity() {
-  return getProblem();
+  return _problemManager.getProblem();
 }
 
 /// \brief Const getter for the log density formulation
 boost::shared_ptr<const OptimizationProblemBase> SamplerBase::getNegativeLogDensity() const {
-  return getProblem();
+  return _problemManager.getProblem();
 }
 
 /// \brief Signal the sampler that the negative log density formulation changed.
 void SamplerBase::signalNegativeLogDensityChanged() {
-  setInitialized(false);
+  _problemManager.signalProblemChanged();
 }
 
 /// \brief Do a bunch of checks to see if the problem is well-defined. This includes checking that every error term is
 ///        hooked up to design variables and running finite differences on error terms where this is possible.
 void SamplerBase::checkNegativeLogDensitySetup() const {
-  checkProblemSetup();
+  _problemManager.checkProblemSetup();
 }
 
 /// \brief Evaluate the current negative log density
 double SamplerBase::evaluateNegativeLogDensity() const {
-  return evaluateError();
+  return _problemManager.evaluateError();
 }
 
 /// \brief Initialization method
 void SamplerBase::initialize() {
   _statistics.reset();
-  ScalarOptimizerBase::initialize();
+  _problemManager.initialize();
 }
 
 /// \brief Const getter for statistics
