@@ -7,6 +7,10 @@
 
 #include <aslam/backend/SamplerBase.hpp>
 
+#include <sm/logging.hpp>
+
+using namespace std;
+
 namespace aslam {
 namespace backend {
 
@@ -60,6 +64,10 @@ void SamplerBase::run(const std::size_t nStepsMax, const std::size_t nAcceptedSa
 
   _statistics.nSamplesAcceptedTotal += _statistics.nSamplesAcceptedThisRun;
   _statistics.nIterationsTotal += _statistics.nIterationsThisRun;
+
+  SM_VERBOSE_STREAM("Acceptance rate -- this run: " << fixed << setprecision(4) <<
+                _statistics.getAcceptanceRate(false) << " (" << _statistics.getNumAcceptedSamples(false) << " of " << _statistics.getNumIterations(false) << "), total: " <<
+                _statistics.getAcceptanceRate(true) << " (" << _statistics.getNumAcceptedSamples(true) << " of " << _statistics.getNumIterations(true) << ")");
 
 }
 

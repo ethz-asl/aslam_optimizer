@@ -140,6 +140,7 @@ void ScalarOptimizerBase::checkProblemSetup() const
 void ScalarOptimizerBase::computeGradient(RowVectorType& outGrad, size_t nThreads, bool useMEstimator)
 {
   SM_ASSERT_GT(Exception, nThreads, 0, "");
+  Timer t("ScalarOptimizerBase: Compute gradient", false);
   std::vector<RowVectorType> gradients(nThreads, RowVectorType::Zero(1, _numOptParameters)); // compute gradients separately in different threads and add in the end
   boost::function<void(size_t, size_t, size_t, bool, RowVectorType&)> job(boost::bind(&ScalarOptimizerBase::evaluateGradients, this, _1, _2, _3, _4, _5));
   this->setupThreadedJob(job, nThreads, gradients, useMEstimator);
