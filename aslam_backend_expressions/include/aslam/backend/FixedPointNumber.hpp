@@ -121,6 +121,18 @@ class FixedPointNumber{
   inline bool operator != (const FixedPointNumber & other) const {
     return _p != other._p;
   }
+  inline bool operator < (const FixedPointNumber & other) const {
+    return _p < other._p;
+  }
+  inline bool operator > (const FixedPointNumber & other) const {
+    return _p > other._p;
+  }
+  inline bool operator <= (const FixedPointNumber & other) const {
+    return _p <= other._p;
+  }
+  inline bool operator >= (const FixedPointNumber & other) const {
+    return _p >= other._p;
+  }
 
   friend std::ostream & operator << (std::ostream & o, const FixedPointNumber & v){
     o << typename std::enable_if<(sizeof(v) > 0), char>::type('[') << v.getNumerator() << " / " << v.getDenominator() << ']';
