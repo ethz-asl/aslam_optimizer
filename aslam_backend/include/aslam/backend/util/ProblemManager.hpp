@@ -5,13 +5,12 @@
  *      Author: Ulrich Schwesinger
  */
 
-#ifndef INCLUDE_ASLAM_BACKEND_SCALAROPTIMIZERBASE_HPP_
-#define INCLUDE_ASLAM_BACKEND_SCALAROPTIMIZERBASE_HPP_
+#ifndef INCLUDE_ASLAM_BACKEND_PROBLEMMANAGER_HPP_
+#define INCLUDE_ASLAM_BACKEND_PROBLEMMANAGER_HPP_
 
 #include <vector>
 
 #include <boost/shared_ptr.hpp>
-#include <boost/function.hpp>
 
 #include "CommonDefinitions.hpp"
 
@@ -93,11 +92,6 @@ class ProblemManager {
  private:
   /// \brief Evaluate the gradient of the objective function
   void evaluateGradients(size_t threadId, size_t startIdx, size_t endIdx, bool useMEstimator, RowVectorType& grad);
-  /// \brief Create a threaded job
-  void setupThreadedJob(boost::function<void(size_t, size_t, size_t, bool, RowVectorType&)> job,
-                        size_t nThreads,
-                        std::vector<RowVectorType>& out,
-                        bool useMEstimator);
 
  private:
 
@@ -125,4 +119,4 @@ class ProblemManager {
 } // namespace backend
 } // namespace aslam
 
-#endif /* INCLUDE_ASLAM_BACKEND_SCALAROPTIMIZERBASE_HPP_ */
+#endif /* INCLUDE_ASLAM_BACKEND_PROBLEMMANAGER_HPP_ */

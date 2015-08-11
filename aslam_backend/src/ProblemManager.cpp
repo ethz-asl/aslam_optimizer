@@ -3,38 +3,13 @@
 #include <aslam/backend/ErrorTerm.hpp>
 #include <aslam/backend/ScalarNonSquaredErrorTerm.hpp>
 
-#include <boost/thread.hpp>
+#include <aslam/backend/util/ThreadedRangeProcessor.hpp>
+
 
 #include <sm/logging.hpp>
 
 namespace aslam {
 namespace backend {
-
-/// \brief The return value for a safe job
-struct SafeJobReturnValue {
-  SafeJobReturnValue(const std::exception& e) : _e(e) {}
-  std::exception _e;
-};
-
-/// \brief Functor running a job catching all exceptions
-struct SafeJob {
-  boost::function<void()> _fn;
-  SafeJobReturnValue* _rval;
-  SafeJob() : _rval(NULL) {}
-  SafeJob(boost::function<void()> fn) : _fn(fn), _rval(NULL) {}
-  ~SafeJob() {
-    if (_rval) delete _rval;
-  }
-
-  void operator()() {
-    try {
-      _fn();
-    } catch (const std::exception& e) {
-      _rval = new SafeJobReturnValue(e);
-      SM_FATAL_STREAM("Exception in thread block: " << e.what());
-    }
-  }
-};
 
 ProblemManager::ProblemManager() :
   _numOptParameters(0),
@@ -139,8 +114,8 @@ void ProblemManager::computeGradient(RowVectorType& outGrad, size_t nThreads, bo
   SM_ASSERT_GT(Exception, nThreads, 0, "");
   Timer t("ProblemManager: Compute gradient", false);
   std::vector<RowVectorType> gradients(nThreads, RowVectorType::Zero(1, _numOptParameters)); // compute gradients separately in different threads and add in the end
-  boost::function<void(size_t, size_t, size_t, bool, RowVectorType&)> job(boost::bind(&ProblemManager::evaluateGradients, this, _1, _2, _3, _4, _5));
-  this->setupThreadedJob(job, nThreads, gradients, useMEstimator);
+  boost::function<void(size_t, size_t, size_t, RowVectorType&)> job(boost::bind(&ProblemManager::evaluateGradients, this, _1, _2, _3, useMEstimator, _4));
+  util::runThreadedFunction(job, nThreads, gradients);
   // Add up the gradients
   outGrad = gradients[0];
   for (std::size_t i = 1; i<gradients.size(); i++)
@@ -148,7 +123,7 @@ void ProblemManager::computeGradient(RowVectorType& outGrad, size_t nThreads, bo
 }
 
 double ProblemManager::evaluateError() const {
-  Timer t("ProblemManager: Compute Negative Log density", false);
+  Timer t("ProblemManager: Compute total error", false);
   double error = 0.0;
   for (auto e : _errorTermsS)
     error += e->evaluateError();
@@ -177,37 +152,6 @@ void ProblemManager::revertLastStateUpdate()
   Timer t("ProblemManager: Revert last state update", false);
   for (size_t i = 0; i < _designVariables.size(); i++)
     _designVariables[i]->revertUpdate();
-}
-
-void ProblemManager::setupThreadedJob(boost::function<void(size_t, size_t, size_t, bool, RowVectorType&)> job, size_t nThreads, std::vector<RowVectorType>& out, bool useMEstimator)
-{
-  SM_ASSERT_GT(Exception, nThreads, 0, "");
-  SM_ASSERT_EQ(Exception, nThreads, out.size(), "");
-  if (nThreads == 1) {
-    job(0, 0, _numErrorTerms, useMEstimator, out[0]);
-  } else {
-    nThreads = std::min(nThreads, _numErrorTerms);
-    // Give some error terms to each thread.
-    std::vector<int> indices(nThreads + 1, 0);
-    int nJPerThread = std::max(1, static_cast<int>(_numErrorTerms / nThreads));
-    for (unsigned i = 0; i < nThreads; ++i)
-      indices[i + 1] = indices[i] + nJPerThread;
-    // deal with the remainder.
-    indices.back() = _numErrorTerms;
-    // Build a thread pool and evaluate the jacobians.
-    boost::thread_group threads;
-    std::vector<SafeJob> jobs(nThreads);
-    for (size_t i = 0; i < nThreads; ++i) {
-      jobs[i] = SafeJob(boost::bind(job, i, indices[i], indices[i + 1], useMEstimator, boost::ref(out[i])));
-      threads.create_thread(boost::ref(jobs[i]));
-    }
-    threads.join_all();
-    // Now go through and look for exceptions.
-    for (size_t i = 0; i < nThreads; ++i) {
-      if (jobs[i]._rval != nullptr)
-        throw jobs[i]._rval->_e;
-    }
-  }
 }
 
 /**

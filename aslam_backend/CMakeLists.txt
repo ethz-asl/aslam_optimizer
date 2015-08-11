@@ -54,6 +54,7 @@ cs_add_library(${PROJECT_NAME}
   src/OptimizerRprop.cpp
   src/ProbDataAssocPolicy.cpp
   src/SamplerMetropolisHastings.cpp
+  src/util/ThreadedRangeProcessor.cpp
 )
 
 target_link_libraries(${PROJECT_NAME} ${Boost_LIBRARIES} ${TBB_LIBRARIES})
