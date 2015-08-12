@@ -8,15 +8,9 @@
 #ifndef INCLUDE_ASLAM_BACKEND_SAMPLERMETROPOLISHASTINGS_HPP_
 #define INCLUDE_ASLAM_BACKEND_SAMPLERMETROPOLISHASTINGS_HPP_
 
-#include <limits>
-
 #include <sm/BoostPropertyTree.hpp>
 
 #include "SamplerBase.hpp"
-//#include "OptimizationProblemBase.hpp"
-//#include "DesignVariable.hpp"
-//#include "ErrorTerm.hpp"
-//#include "ScalarNonSquaredErrorTerm.hpp"
 
 namespace aslam {
 namespace backend {
