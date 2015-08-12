@@ -53,7 +53,6 @@ class SamplerMetropolisHastings : public SamplerBase {
   SamplerMetropolisHastingsOptions& options() { return _options; }
 
  private:
-  virtual void initializeImplementation() override { }
   virtual void runImplementation(const std::size_t nStepsMax, const std::size_t nAcceptedSamples, Statistics& statistics) override;
 
  private:

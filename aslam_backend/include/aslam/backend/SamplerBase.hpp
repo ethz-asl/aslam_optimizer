@@ -10,12 +10,12 @@
 
 #include <limits>
 
-#include <aslam/backend/ScalarOptimizerBase.hpp>
+#include <aslam/backend/util/ProblemManager.hpp>
 
 namespace aslam {
 namespace backend {
 
-class SamplerBase : public ScalarOptimizerBase {
+class SamplerBase {
 
  public:
   class Statistics {
@@ -44,11 +44,10 @@ class SamplerBase : public ScalarOptimizerBase {
   };
 
  public:
-  SamplerBase() : ScalarOptimizerBase() { }
   virtual ~SamplerBase() { }
 
   /// \brief Initialization method
-  virtual void initialize() override;
+  virtual void initialize();
 
   /// \brief Run the sampler for at maximum \p nStepsMax until \p nAcceptedSamples samples were accepted
   void run(const std::size_t nStepsMax, const std::size_t nAcceptedSamples = std::numeric_limits<std::size_t>::max());
@@ -76,13 +75,14 @@ class SamplerBase : public ScalarOptimizerBase {
   /// \brief Evaluate the current negative log density
   double evaluateNegativeLogDensity() const;
 
+  ProblemManager& getProblemManager() { return _problemManager; }
  private:
   /// \brief Run the sampler for at maximum \p nStepsMax until \p nAcceptedSamples samples were accepted
   virtual void runImplementation(const std::size_t nStepsMax, const std::size_t nAcceptedSamples, Statistics& statistics) = 0;
 
  private:
   Statistics _statistics; /// \brief statistics collected during runtime
-
+  ProblemManager _problemManager;  /// \brief the manager for the attached problem
 };
 
 }

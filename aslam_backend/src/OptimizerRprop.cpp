@@ -79,8 +79,9 @@ OptimizerRprop::~OptimizerRprop()
 
 /// \brief initialize the optimizer to run on an optimization problem.
 ///        This should be called before calling optimize()
-void OptimizerRprop::initializeImplementation()
+void OptimizerRprop::initialize()
 {
+  ProblemManager::initialize();
   _dx.resize(numOptParameters(), 1);
   _prev_gradient.resize(1, numOptParameters());
   _delta = ColumnVectorType::Constant(numOptParameters(), _options.initialDelta);
