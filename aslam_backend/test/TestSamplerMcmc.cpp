@@ -47,7 +47,7 @@ public:
 };
 
 
-TEST(OptimizerSamplerMcmcTestSuite, testSamplerMcmc)
+TEST(OptimizerSamplerMcmcTestSuite, testSamplerMetropolisHastings)
 {
   try {
     typedef OptimizationProblem LogDensity;
