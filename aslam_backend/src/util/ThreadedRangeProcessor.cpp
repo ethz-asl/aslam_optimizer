@@ -40,18 +40,23 @@ struct SafeJob {
 void runThreadedJob(boost::function<void(size_t, size_t, size_t)> job, size_t rangeLength, size_t nThreads)
 {
   SM_ASSERT_GT(std::runtime_error, nThreads, 0, "");
+  if (rangeLength == 0) // nothing to process here
+    return;
+
   if (nThreads == 1) {
     job(0, 0, rangeLength);
   } else {
     nThreads = std::min(nThreads, rangeLength);
-    // Give some error terms to each thread.
+
+    // Compute the sub-ranges for each thread.
     std::vector<int> indices(nThreads + 1, 0);
     int nJPerThread = std::max(1, static_cast<int>(rangeLength / nThreads));
     for (unsigned i = 0; i < nThreads; ++i)
       indices[i + 1] = indices[i] + nJPerThread;
     // deal with the remainder.
     indices.back() = rangeLength;
-    // Build a thread pool and evaluate the jacobians.
+
+    // Build a thread pool and execute the jobs.
     boost::thread_group threads;
     std::vector<SafeJob> jobs(nThreads);
     for (size_t i = 0; i < nThreads; ++i) {

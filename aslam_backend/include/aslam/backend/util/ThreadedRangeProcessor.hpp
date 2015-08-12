@@ -17,6 +17,7 @@ namespace util {
  *  The first argument will be the job index {0 .. nThreads - 1}).
  *  The second (=:a) and third (=:b) argument specify which subrange of (0..rangeLength-1) the job should work on as (a..b-1).
  * @param rangeLength specifies the length of the range (0 .. rangeLength - 1), which will be processed by the job function after dividing it in subranges.
+ * @param number of threads to create
  */
 
 void runThreadedJob(boost::function<void(size_t, size_t, size_t)> job, size_t rangeLength, size_t nThreads);
@@ -30,6 +31,9 @@ void runThreadedJob(boost::function<void(size_t, size_t, size_t)> job, size_t ra
  *  The function will be run nThreads times in parallel.
  *  For the first three arguments it gets see runThreadedJob.
  *  The fourth will be a reference to out[i] for the i-th thread.
+ * @param rangeLength
+ * custom length of a range, NOT related to \p out. This range
+ * is related to external containers the \p function works upon.
  * @param out the vector of output variables.
  */
 
