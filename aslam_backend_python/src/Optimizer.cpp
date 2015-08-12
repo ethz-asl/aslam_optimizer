@@ -185,11 +185,16 @@ void exportOptimizer()
         .def_readwrite("nThreads", &OptimizerRpropOptions::nThreads)
         ;
 
-    class_<OptimizerRprop, boost::shared_ptr<OptimizerRprop>, bases<ProblemManager> >("OptimizerRprop", init<>("OptimizerRprop(): Constructor with default options"))
+    class_<OptimizerRprop, boost::shared_ptr<OptimizerRprop> >("OptimizerRprop", init<>("OptimizerRprop(): Constructor with default options"))
 
         .def(init<const OptimizerRpropOptions&>("OptimizerRprop(OptimizerRpropOptions options): Constructor with custom options"))
         .def(init<const sm::PropertyTree&>("OptimizerRprop(PropertyTree propertyTree): Constructor from sm::PropertyTree"))
 
+        .def("setProblem", (void (OptimizerRprop::*)(boost::shared_ptr<OptimizationProblemBase>))&OptimizerRprop::setProblem, "Set up to work on the optimization problem.")
+        .def("checkProblemSetup", (void (OptimizerRprop::*)(void))&OptimizerRprop::checkProblemSetup,
+             "Do a bunch of checks to see if the problem is well-defined. This includes checking that every error term is hooked up to design variables and running "
+             "finite differences on error terms where this is possible.")
+//
         .def("initialize", &OptimizerRprop::initialize,
              "Initialize the optimizer to run on an optimization problem. optimize() will call initialize() upon the first call.")
 

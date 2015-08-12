@@ -33,8 +33,12 @@ namespace aslam {
      *
      * RPROP implementation for the ASLAM framework.
      */
-    class OptimizerRprop : public ProblemManager {
+    class OptimizerRprop : private ProblemManager {
     public:
+
+      using ProblemManager::setProblem;
+      using ProblemManager::checkProblemSetup;
+
       typedef boost::shared_ptr<OptimizerRprop> Ptr;
       typedef boost::shared_ptr<const OptimizerRprop> ConstPtr;
 
