@@ -82,12 +82,12 @@ class ProblemManager {
   /// \brief Undo the last state update to the design variables
   void revertLastStateUpdate();
 
+  /// \brief compute the current gradient of the objective function
+  void computeGradient(RowVectorType& outGrad, size_t nThreads, bool useMEstimator);
+
  protected:
   /// \brief Set the initialized status
   void setInitialized(bool isInitialized) { _isInitialized = isInitialized; }
-
-  /// \brief compute the current gradient of the objective function
-  void computeGradient(RowVectorType& outGrad, size_t nThreads, bool useMEstimator);
 
  private:
   /// \brief Evaluate the gradient of the objective function
