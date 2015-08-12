@@ -114,7 +114,7 @@ void ProblemManager::computeGradient(RowVectorType& outGrad, size_t nThreads, bo
   Timer t("ProblemManager: Compute gradient", false);
   std::vector<RowVectorType> gradients(nThreads, RowVectorType::Zero(1, _numOptParameters)); // compute gradients separately in different threads and add in the end
   boost::function<void(size_t, size_t, size_t, RowVectorType&)> job(boost::bind(&ProblemManager::evaluateGradients, this, _1, _2, _3, useMEstimator, _4));
-  util::runThreadedFunction(job, nThreads, gradients);
+  util::runThreadedFunction(job, _numErrorTerms, gradients);
   // Add up the gradients
   outGrad = gradients[0];
   for (std::size_t i = 1; i<gradients.size(); i++)
