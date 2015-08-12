@@ -3,7 +3,7 @@
 #include <aslam/backend/Optimizer2.hpp>
 #include <aslam/backend/OptimizerRprop.hpp>
 #include <boost/shared_ptr.hpp>
-
+#include <sm/PropertyTree.hpp>
 
 // some wrappers:
 Eigen::VectorXd b(const aslam::backend::Optimizer * o)
@@ -18,7 +18,6 @@ Eigen::VectorXd rhs(const aslam::backend::Optimizer * o)
 {
 	return o->rhs();
 }
-
 
 void exportOptimizer()
 {
@@ -186,33 +185,26 @@ void exportOptimizer()
         .def_readwrite("nThreads", &OptimizerRpropOptions::nThreads)
         ;
 
+    class_<OptimizerRprop, boost::shared_ptr<OptimizerRprop>, bases<ProblemManager> >("OptimizerRprop", init<>("OptimizerRprop(): Constructor with default options"))
 
-    class_<OptimizerRprop, boost::shared_ptr<OptimizerRprop> >("OptimizerRprop", no_init)
-        .def(init<OptimizerRpropOptions>())
-        .def("setProblem", &OptimizerRprop::setProblem)
+        .def(init<const OptimizerRpropOptions&>("OptimizerRprop(OptimizerRpropOptions options): Constructor with custom options"))
+        .def(init<const sm::PropertyTree&>("OptimizerRprop(PropertyTree propertyTree): Constructor from sm::PropertyTree"))
 
-        /// \brief initialize the optimizer to run on an optimization problem.
-        ///        This should be called before calling optimize()
-        .def("initialize", &OptimizerRprop::initialize)
+        .def("initialize", &OptimizerRprop::initialize,
+             "Initialize the optimizer to run on an optimization problem. optimize() will call initialize() upon the first call.")
 
-        /// \brief Run the optimization
-        .def("optimize", &OptimizerRprop::optimize)
+        .def("optimize", &OptimizerRprop::optimize,
+             "Run the optimization")
+        .add_property("options", make_function(&OptimizerRprop::options, return_internal_reference<>()),
+                      "The optimizer options.")
 
-        /// \brief Get the optimizer options.
-        .add_property("options", make_function(&OptimizerRprop::options, return_internal_reference<>()))
+        .add_property("gradientNorm", &OptimizerRprop::getGradientNorm,
+                      "The norm of the gradient of the objective function.")
 
-        /// The norm of the gradient of the objective function.
-        .add_property("gradientNorm", &OptimizerRprop::getGradientNorm)
-
-        /// \brief Get dense design variable i.
-        .def("densignVariable", &OptimizerRprop::designVariable, return_internal_reference<>())
-
-        /// \brief how many dense design variables are involved in the problem
-        .add_property("numDesignVariables", &OptimizerRprop::numDesignVariables)
-
-        .def("checkProblemSetup", &OptimizerRprop::checkProblemSetup)
-
+        .add_property("numberOfIterations", &OptimizerRprop::getNumberOfIterations,
+                      "Get the number of iterations the solver has run. If it has never been started, the value will be zero.")
         ;
+    implicitly_convertible< boost::shared_ptr<OptimizerRprop>, boost::shared_ptr<const OptimizerRprop> >();
 
 }
 

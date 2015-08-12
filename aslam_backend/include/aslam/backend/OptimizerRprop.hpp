@@ -60,7 +60,8 @@ namespace aslam {
       ///        If it has never been started, the value will be zero.
       inline std::size_t getNumberOfIterations() const { return _nIterations; }
 
-      /// \brief initialize the optimizer to run on an optimization problem.
+      /// \brief Initialize the optimizer to run on an optimization problem.
+      ///        optimize() will call initialize() upon the first call.
       virtual void initialize() override;
 
     private:

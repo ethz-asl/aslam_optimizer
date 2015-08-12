@@ -1,9 +1,10 @@
 #include <numpy_eigen/boost_python_headers.hpp>
 
-
+void exportProblemManager();
 void exportOptimizer();
 void exportOptimizerOptions();
 void exportOptimizationProblem();
+void exportSampler();
 void exportDesignVariable();
 void exportErrorTerm();
 //void exportBSplineMotionError();
@@ -14,9 +15,11 @@ void exportBackendExpressions();
 
 void exportBackend()
 {
+  exportProblemManager();
   exportOptimizer();
   exportOptimizerOptions();
   exportOptimizationProblem();
+  exportSampler();
   exportDesignVariable();
   exportErrorTerm();
   //exportBSplineMotionError();

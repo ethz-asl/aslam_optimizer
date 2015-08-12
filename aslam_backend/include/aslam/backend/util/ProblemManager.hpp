@@ -41,7 +41,7 @@ class ProblemManager {
   /// \brief Set up to work on the optimization problem.
   void setProblem(boost::shared_ptr<OptimizationProblemBase> problem);
 
-  /// \brief initialize the optimizer to run on an optimization problem.
+  /// \brief initialize the class
   virtual void initialize();
 
   /// \brief Is everything initialized?

@@ -30,8 +30,7 @@ void ProblemManager::setProblem(boost::shared_ptr<OptimizationProblemBase> probl
   _isInitialized = false;
 }
 
-/// \brief initialize the optimizer to run on an optimization problem.
-///        This should be called before calling optimize()
+/// \brief initialize the class
 void ProblemManager::initialize()
 {
 

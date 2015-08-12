@@ -28,6 +28,8 @@ add_python_export_library(${PROJECT_NAME} python/aslam_backend
   src/SparseBlockMatrix.cpp
   src/DesignVariableTimePair.cpp
   src/SampleDvAndError.cpp
+  src/ProblemManager.cpp
+  src/Sampler.cpp
 )
 
 find_package(Boost REQUIRED COMPONENTS thread) 
