@@ -42,6 +42,34 @@ class TestRprop(unittest.TestCase):
     
         self.assertLessEqual(optimizer.gradientNorm, 1e-3);
         
+class TestMetropolisHastings(unittest.TestCase):
+    def test_simple_sampling_problem(self):
+        '''Sample from a twodimensional Gaussian distribution N(0, I)
+        '''
+      
+        options = ab.SamplerMetropolisHastingsOptions()
+        options.transitionKernelSigma = 0.1;
+        sampler = ab.SamplerMetropolisHastings(options)
+        negLogDensity = ab.OptimizationProblem()
+
+        # Add a scalar design variables.
+        point = ab.Point2d(np.array([0, 0]))
+        point.setBlockIndex(0);
+        point.setActive(True);
+        negLogDensity.addDesignVariable(point);
+
+        # Add the error term.
+        grad = np.array( [-1., -1.] );
+        err = ab.TestNonSquaredError(point, grad);
+        err._p = 0.0; # set mean
+        negLogDensity.addScalarNonSquaredErrorTerm(err);
+#             
+        # Now let's sample.
+        sampler.setNegativeLogDensity(negLogDensity);
+        sampler.checkNegativeLogDensitySetup();
+        sampler.run(10000, 10);
+        
 if __name__ == '__main__':
     import rostest
     rostest.rosrun('aslam_backend_python', 'Rprop', TestRprop)
+    rostest.rosrun('aslam_backend_python', 'MetropolisHastings', TestMetropolisHastings)

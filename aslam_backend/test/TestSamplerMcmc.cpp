@@ -47,7 +47,7 @@ public:
 };
 
 
-TEST(OptimizerSamplerMcmcTestSuite, testSamplerMcmc)
+TEST(OptimizerSamplerMcmcTestSuite, testSamplerMetropolisHastings)
 {
   try {
     typedef OptimizationProblem LogDensity;
@@ -80,14 +80,14 @@ TEST(OptimizerSamplerMcmcTestSuite, testSamplerMcmc)
     sm::BoostPropertyTree pt;
     pt.setDouble("transitionKernelSigma", 1.0);
     SamplerMetropolisHastingsOptions options(pt);
-    EXPECT_DOUBLE_EQ(pt.getDouble("transitionKernelSigma"), options.transitionKernelSigma);
+    EXPECT_DOUBLE_EQ(options.transitionKernelSigma, pt.getDouble("transitionKernelSigma"));
 
     // Set and test log density
     SamplerMetropolisHastings sampler(options);
     sampler.setNegativeLogDensity(gaussian1dLogDensityPtr);
     EXPECT_NO_THROW(sampler.checkNegativeLogDensitySetup());
-    EXPECT_DOUBLE_EQ(sampler.getAcceptanceRate(), 0.0);
-    EXPECT_EQ(sampler.getNumIterations(), 0);
+    EXPECT_DOUBLE_EQ(0.0, sampler.statistics().getAcceptanceRate());
+    EXPECT_EQ(0, sampler.statistics().getNumIterations());
 
     // Parameters
     const int nSamples = 1000;
@@ -96,17 +96,17 @@ TEST(OptimizerSamplerMcmcTestSuite, testSamplerMcmc)
 
     // Burn-in
     sampler.run(nStepsBurnIn);
-    EXPECT_GE(sampler.getAcceptanceRate(), 1e-3);
-    EXPECT_LE(sampler.getAcceptanceRate(), 1.0);
-    EXPECT_EQ(sampler.getNumIterations(), nStepsBurnIn);
+    EXPECT_GE(sampler.statistics().getAcceptanceRate(), 1e-3);
+    EXPECT_LE(sampler.statistics().getAcceptanceRate(), 1.0);
+    EXPECT_EQ(nStepsBurnIn, sampler.statistics().getNumIterations());
 
     // Now let's retrieve samples
     Eigen::VectorXd dvValues(nSamples);
     for (size_t i=0; i<nSamples; i++) {
       sampler.run(nStepsSkip);
-      EXPECT_GE(sampler.getAcceptanceRate(), 0.0);
-      EXPECT_LE(sampler.getAcceptanceRate(), 1.0);
-      EXPECT_EQ(sampler.getNumIterations(), nStepsSkip);
+      EXPECT_GE(sampler.statistics().getAcceptanceRate(), 0.0);
+      EXPECT_LE(sampler.statistics().getAcceptanceRate(), 1.0);
+      EXPECT_EQ(sampler.statistics().getNumIterations(), nStepsSkip);
       ASSERT_EQ(1, gaussian1dLogDensity.numDesignVariables());
       auto dv = gaussian1dLogDensity.designVariable(0);
       Eigen::MatrixXd p;
@@ -125,13 +125,13 @@ TEST(OptimizerSamplerMcmcTestSuite, testSamplerMcmc)
 
     // Run until a specified number of samples was accepted
     sampler.run(numeric_limits<size_t>::max(), 1);
-    EXPECT_GT(sampler.getAcceptanceRate(), 0.0);
-    EXPECT_GT(sampler.getNumIterations(), 0);
+    EXPECT_GT(sampler.statistics().getAcceptanceRate(), 0.0);
+    EXPECT_GT(sampler.statistics().getNumIterations(), 0);
 
     // Check that re-initializing resets values
     sampler.initialize();
-    EXPECT_DOUBLE_EQ(sampler.getAcceptanceRate(), 0.0);
-    EXPECT_EQ(sampler.getNumIterations(), 0);
+    EXPECT_DOUBLE_EQ(0.0, sampler.statistics().getAcceptanceRate());
+    EXPECT_EQ(0, sampler.statistics().getNumIterations());
 
 #ifdef aslam_backend_ENABLE_TIMING
     sm::timing::Timing::print(cout, sm::timing::SORT_BY_TOTAL);

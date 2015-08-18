@@ -44,7 +44,7 @@ TEST(OptimizerRpropTestSuite, testRpropNonSquaredErrorTerms)
     OptimizerRpropOptions options;
     options.verbose = false;
     options.maxIterations = 500;
-    options.nThreads = 1;
+    options.nThreads = 8;
     OptimizerRprop optimizer(options);
     optimizer.setProblem(problem_ptr);
 
@@ -93,7 +93,7 @@ TEST(OptimizerRpropTestSuite, testRpropSquaredErrorTerms)
     OptimizerRpropOptions options;
     options.verbose = false;
     options.maxIterations = 500;
-    options.nThreads = 1;
+    options.nThreads = 8;
     OptimizerRprop optimizer(options);
     optimizer.setProblem(problem_ptr);
 

@@ -48,10 +48,13 @@ cs_add_library(${PROJECT_NAME}
   src/Marginalizer.cpp
   src/MarginalizationPriorErrorTerm.cpp
   src/DogLegTrustRegionPolicy.cpp
+  src/SamplerBase.cpp
   src/Optimizer2.cpp
   src/OptimizerRprop.cpp
   src/ProbDataAssocPolicy.cpp
   src/SamplerMetropolisHastings.cpp
+  src/util/ThreadedRangeProcessor.cpp
+  src/util/ProblemManager.cpp
 )
 
 target_link_libraries(${PROJECT_NAME} ${Boost_LIBRARIES} ${TBB_LIBRARIES})
