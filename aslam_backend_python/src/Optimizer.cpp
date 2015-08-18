@@ -3,7 +3,7 @@
 #include <aslam/backend/Optimizer2.hpp>
 #include <aslam/backend/OptimizerRprop.hpp>
 #include <boost/shared_ptr.hpp>
-
+#include <sm/PropertyTree.hpp>
 
 // some wrappers:
 Eigen::VectorXd b(const aslam::backend::Optimizer * o)
@@ -18,7 +18,6 @@ Eigen::VectorXd rhs(const aslam::backend::Optimizer * o)
 {
 	return o->rhs();
 }
-
 
 void exportOptimizer()
 {
@@ -175,34 +174,42 @@ void exportOptimizer()
         ;
 
 
-    class_<OptimizerRprop, boost::shared_ptr<OptimizerRprop> >("OptimizerRprop", no_init)
-        .def(init<OptimizerRpropOptions>())
-        .def("setProblem", &OptimizerRprop::setProblem)
-
-        /// \brief initialize the optimizer to run on an optimization problem.
-        ///        This should be called before calling optimize()
-        .def("initialize", &OptimizerRprop::initialize)
-
-        /// \brief Run the optimization
-        .def("optimize", &OptimizerRprop::optimize)
-
-        /// \brief Get the optimizer options.
-        .add_property("options", make_function(&OptimizerRprop::options, return_internal_reference<>()))
-
-        /// The norm of the gradient of the objective function.
-        .add_property("gradientNorm", &OptimizerRprop::getGradientNorm)
-
-        /// \brief Get dense design variable i.
-        .def("densignVariable", &OptimizerRprop::designVariable, return_internal_reference<>())
-
-        /// \brief how many dense design variables are involved in the problem
-        .add_property("numDesignVariables", &OptimizerRprop::numDesignVariables)
-
-        .def("printTiming", &OptimizerRprop::printTiming)
-
-        .def("checkProblemSetup", &OptimizerRprop::checkProblemSetup)
-
+    class_<OptimizerRpropOptions>("OptimizerRpropOptions", init<>())
+        .def_readwrite("etaMinus",&OptimizerRpropOptions::etaMinus)
+        .def_readwrite("etaPlus",&OptimizerRpropOptions::etaPlus)
+        .def_readwrite("initialDelta",&OptimizerRpropOptions::initialDelta)
+        .def_readwrite("minDelta",&OptimizerRpropOptions::minDelta)
+        .def_readwrite("maxDelta",&OptimizerRpropOptions::maxDelta)
+        .def_readwrite("maxIterations",&OptimizerRpropOptions::maxIterations)
+        .def_readwrite("verbose",&OptimizerRpropOptions::verbose)
+        .def_readwrite("nThreads", &OptimizerRpropOptions::nThreads)
         ;
+
+    class_<OptimizerRprop, boost::shared_ptr<OptimizerRprop> >("OptimizerRprop", init<>("OptimizerRprop(): Constructor with default options"))
+
+        .def(init<const OptimizerRpropOptions&>("OptimizerRprop(OptimizerRpropOptions options): Constructor with custom options"))
+        .def(init<const sm::PropertyTree&>("OptimizerRprop(PropertyTree propertyTree): Constructor from sm::PropertyTree"))
+
+        .def("setProblem", (void (OptimizerRprop::*)(boost::shared_ptr<OptimizationProblemBase>))&OptimizerRprop::setProblem, "Set up to work on the optimization problem.")
+        .def("checkProblemSetup", (void (OptimizerRprop::*)(void))&OptimizerRprop::checkProblemSetup,
+             "Do a bunch of checks to see if the problem is well-defined. This includes checking that every error term is hooked up to design variables and running "
+             "finite differences on error terms where this is possible.")
+//
+        .def("initialize", &OptimizerRprop::initialize,
+             "Initialize the optimizer to run on an optimization problem. optimize() will call initialize() upon the first call.")
+
+        .def("optimize", &OptimizerRprop::optimize,
+             "Run the optimization")
+        .add_property("options", make_function(&OptimizerRprop::options, return_internal_reference<>()),
+                      "The optimizer options.")
+
+        .add_property("gradientNorm", &OptimizerRprop::getGradientNorm,
+                      "The norm of the gradient of the objective function.")
+
+        .add_property("numberOfIterations", &OptimizerRprop::getNumberOfIterations,
+                      "Get the number of iterations the solver has run. If it has never been started, the value will be zero.")
+        ;
+    implicitly_convertible< boost::shared_ptr<OptimizerRprop>, boost::shared_ptr<const OptimizerRprop> >();
 
 }
 

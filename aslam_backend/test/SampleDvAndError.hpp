@@ -7,6 +7,47 @@
 #include <aslam/backend/OptimizationProblem.hpp>
 #include "../include/aslam/backend/ScalarNonSquaredErrorTerm.hpp"
 
+class Scalar : public aslam::backend::DesignVariable {
+public:
+  EIGEN_MAKE_ALIGNED_OPERATOR_NEW
+
+  typedef Eigen::Matrix<double, 1, 1> Vector1d;
+  Vector1d _v;
+  Vector1d _p_v;
+
+  Scalar(const Vector1d& v) : _v(v), _p_v(v) {}
+  virtual ~Scalar() {}
+
+protected:
+  /// \brief Revert the last state update.
+  virtual void revertUpdateImplementation() {
+    _v = _p_v;
+  }
+
+  /// \brief Update the design variable.
+  virtual void updateImplementation(const double* dp, int /* size */) {
+    _p_v = _v;
+    _v[0] += dp[0];
+  }
+
+  /// \brief what is the number of dimensions of the perturbation variable.
+  virtual int minimalDimensionsImplementation() const {
+    return 1;
+  }
+
+  /// Returns the content of the design variable
+  virtual void getParametersImplementation(Eigen::MatrixXd& value) const {
+    value = _v;
+  }
+
+  /// Sets the content of the design variable
+  virtual void setParametersImplementation(const Eigen::MatrixXd& value) {
+    _p_v = _v;
+    _v[0] = value(0);
+  }
+
+};
+
 class Point2d : public aslam::backend::DesignVariable {
 public:
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW
