@@ -54,7 +54,7 @@ void SamplerMetropolisHastings::runImplementation(const std::size_t nStepsMax, c
   for (; statistics.nIterationsThisRun < nStepsMax; statistics.nIterationsThisRun++) {
 
     if (statistics.nSamplesAcceptedThisRun >= nAcceptedSamples) {
-      SM_DEBUG("Required number of accepted samples reached, terminating loop.");
+      SM_FINE("Required number of accepted samples reached, terminating loop.");
       break;
     }
 
