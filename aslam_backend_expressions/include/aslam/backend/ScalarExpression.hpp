@@ -60,9 +60,13 @@ namespace aslam {
 
     };
     
+    std::ostream& operator<<(std::ostream& os, const ScalarExpression& e);
+
     ScalarExpression sqrt(const ScalarExpression& e);
     ScalarExpression log(const ScalarExpression& e);
     ScalarExpression exp(const ScalarExpression& e);
+    ScalarExpression atan(const ScalarExpression& e);
+    ScalarExpression acos(const ScalarExpression& e);
 
   } // namespace backend
 } // namespace aslam

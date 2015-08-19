@@ -96,6 +96,12 @@ ScalarExpression ScalarExpression::operator*(const ScalarExpression & s) const {
 }
 
 
+std::ostream& operator<<(std::ostream& os, const ScalarExpression& e) {
+  os << e.toScalar();
+  return os;
+}
+
+
 ScalarExpression sqrt(const ScalarExpression& e) {
   boost::shared_ptr<ScalarExpressionNode> newRoot(new ScalarExpressionNodeSqrt(e.root()));
   return ScalarExpression(newRoot);
@@ -108,6 +114,16 @@ ScalarExpression log(const ScalarExpression& e) {
 
 ScalarExpression exp(const ScalarExpression& e) {
   boost::shared_ptr<ScalarExpressionNode> newRoot(new ScalarExpressionNodeExp(e.root()));
+  return ScalarExpression(newRoot);
+}
+
+ScalarExpression atan(const ScalarExpression& e) {
+  boost::shared_ptr<ScalarExpressionNode> newRoot(new ScalarExpressionNodeAtan(e.root()));
+  return ScalarExpression(newRoot);
+}
+
+ScalarExpression acos(const ScalarExpression& e) {
+  boost::shared_ptr<ScalarExpressionNode> newRoot(new ScalarExpressionNodeAcos(e.root()));
   return ScalarExpression(newRoot);
 }
 
