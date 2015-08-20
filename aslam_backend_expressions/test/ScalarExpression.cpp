@@ -346,6 +346,48 @@ TEST(ScalarExpressionNodeTestSuites, testExp)
     }
 }
 
+// Test that the jacobian matches the finite difference jacobian
+TEST(ScalarExpressionNodeTestSuites, testAtan)
+{
+    try
+    {
+        using namespace sm::kinematics;
+        Scalar p(sm::random::rand());
+        ScalarExpression pExpr = p.toExpression();
+        ScalarExpression pExprAtan = atan(pExpr);
+
+        ASSERT_EQ(pExprAtan.toValue(), atan(p.toScalar()));
+
+        SCOPED_TRACE("");
+        testExpression(pExprAtan, 1);
+    }
+    catch(std::exception const & e)
+    {
+        FAIL() << e.what();
+    }
+}
+
+// Test that the jacobian matches the finite difference jacobian
+TEST(ScalarExpressionNodeTestSuites, testAcos)
+{
+    try
+    {
+        using namespace sm::kinematics;
+        Scalar p(sm::random::rand());
+        ScalarExpression pExpr = p.toExpression();
+        ScalarExpression pExprAcos = acos(pExpr);
+
+        ASSERT_EQ(pExprAcos.toValue(), acos(p.toScalar()));
+
+        SCOPED_TRACE("");
+        testExpression(pExprAcos, 1);
+    }
+    catch(std::exception const & e)
+    {
+        FAIL() << e.what();
+    }
+}
+
 TEST(ScalarExpressionNodeTestSuites, testVectorOpsFailure)
 {
     using namespace aslam::backend;
