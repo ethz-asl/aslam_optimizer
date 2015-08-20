@@ -307,6 +307,53 @@ namespace aslam {
             _lhs->getDesignVariables(designVariables);
         }
 
+        ScalarExpressionNodeAtan2::ScalarExpressionNodeAtan2(boost::shared_ptr<ScalarExpressionNode> lhs, boost::shared_ptr<ScalarExpressionNode> rhs) :
+            _lhs(lhs),
+            _rhs(rhs)
+        {
+
+        }
+
+        ScalarExpressionNodeAtan2::~ScalarExpressionNodeAtan2()
+        {
+
+        }
+
+        double ScalarExpressionNodeAtan2::toScalarImplementation() const
+        {
+            return atan2(_lhs->toScalar(), _rhs->toScalar());
+        }
+
+        void ScalarExpressionNodeAtan2::evaluateJacobiansImplementation(JacobianContainer & outJacobians) const
+        {
+            // _rhs corresponds to x, _lhs to y
+            Eigen::Matrix<double, 1, 1> R(1,1);
+            Eigen::Matrix<double, 1, 1> L(1,1);
+            const double factor = 1./(_lhs->toScalar()*_lhs->toScalar() + _rhs->toScalar()*_rhs->toScalar());
+            R(0,0) = -_lhs->toScalar()*factor;
+            L(0,0) = _rhs->toScalar()*factor;
+            _lhs->evaluateJacobians(outJacobians, L);
+            _rhs->evaluateJacobians(outJacobians, R);
+        }
+
+        void ScalarExpressionNodeAtan2::evaluateJacobiansImplementation(JacobianContainer & outJacobians, const Eigen::MatrixXd & applyChainRule) const
+        {
+            // _rhs corresponds to x, _lhs to y
+            Eigen::Matrix<double, 1, 1> R(1,1);
+            Eigen::Matrix<double, 1, 1> L(1,1);
+            const double factor = 1./(_lhs->toScalar()*_lhs->toScalar() + _rhs->toScalar()*_rhs->toScalar());
+            R(0,0) = -_lhs->toScalar()*factor;
+            L(0,0) = _rhs->toScalar()*factor;
+            _lhs->evaluateJacobians(outJacobians, applyChainRule*L);
+            _rhs->evaluateJacobians(outJacobians, applyChainRule*R);
+        }
+
+        void ScalarExpressionNodeAtan2::getDesignVariablesImplementation(DesignVariable::set_t & designVariables) const
+        {
+            _lhs->getDesignVariables(designVariables);
+            _rhs->getDesignVariables(designVariables);
+        }
+
         ScalarExpressionNodeAcos::ScalarExpressionNodeAcos(boost::shared_ptr<ScalarExpressionNode> lhs) :
             _lhs(lhs)
         {
@@ -326,6 +373,7 @@ namespace aslam {
         void ScalarExpressionNodeAcos::evaluateJacobiansImplementation(JacobianContainer & outJacobians) const
         {
             Eigen::Matrix<double, 1, 1> R(1,1);
+            SM_ASSERT_LT(std::runtime_error, _lhs->toScalar(), 1.0, "");
             R(0,0) = -1./sqrt(1. - _lhs->toScalar()*_lhs->toScalar());
             _lhs->evaluateJacobians(outJacobians, R);
         }
@@ -333,6 +381,7 @@ namespace aslam {
         void ScalarExpressionNodeAcos::evaluateJacobiansImplementation(JacobianContainer & outJacobians, const Eigen::MatrixXd & applyChainRule) const
         {
             Eigen::Matrix<double, 1, 1> R(1,1);
+            SM_ASSERT_LT(std::runtime_error, _lhs->toScalar(), 1.0, "");
             R(0,0) = -1./sqrt(1. - _lhs->toScalar()*_lhs->toScalar());
             _lhs->evaluateJacobians(outJacobians, applyChainRule * R);
         }
