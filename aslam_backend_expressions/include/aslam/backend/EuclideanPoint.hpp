@@ -30,6 +30,8 @@ namespace aslam {
       HomogeneousExpression toHomogeneousExpression();
 
       void set(const Eigen::Vector3d & p){ _p = p; _p_p = _p; }
+
+      const Eigen::Vector3d & getValue() const { return _p; }
     private:
       virtual Eigen::Vector3d toEuclideanImplementation() const;
 
@@ -56,8 +58,6 @@ namespace aslam {
 
       /// \brief The previous version of the design variable.
       Eigen::Vector3d _p_p;
-
-
     };
     
   } // namespace backend
