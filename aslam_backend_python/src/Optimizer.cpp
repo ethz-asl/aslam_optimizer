@@ -183,6 +183,7 @@ void exportOptimizer()
         .def_readwrite("maxIterations",&OptimizerRpropOptions::maxIterations)
         .def_readwrite("verbose",&OptimizerRpropOptions::verbose)
         .def_readwrite("nThreads", &OptimizerRpropOptions::nThreads)
+        .def_readwrite("convergenceGradientNorm", &OptimizerRpropOptions::convergenceGradientNorm)
         ;
 
     class_<OptimizerRprop, boost::shared_ptr<OptimizerRprop> >("OptimizerRprop", init<>("OptimizerRprop(): Constructor with default options"))
