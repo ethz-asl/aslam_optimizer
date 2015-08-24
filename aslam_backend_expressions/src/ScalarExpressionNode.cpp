@@ -371,16 +371,14 @@ namespace aslam {
 
         double ScalarExpressionNodeAcos::toScalarImplementation() const
         {
-            auto arg = _lhs->toScalar();
-            SM_ASSERT_LE(Exception, arg, 1.0, "");
-            SM_ASSERT_GE(Exception, arg, -1.0, "");
-            return acos(arg);
+            auto lhss = _lhs->toScalar();
+            SM_ASSERT_LE(Exception, lhss, 1.0, "");
+            SM_ASSERT_GE(Exception, lhss, -1.0, "");
+            return acos(lhss);
         }
 
         void ScalarExpressionNodeAcos::evaluateJacobiansImplementation(JacobianContainer & outJacobians) const
         {
-
-            auto arg = _lhs->toScalar();
             Eigen::Matrix<double, 1, 1> R(1,1);
             const auto lhss = _lhs->toScalar();
             SM_ASSERT_LE(std::runtime_error, lhss, 1.0, "");
@@ -390,7 +388,6 @@ namespace aslam {
 
         void ScalarExpressionNodeAcos::evaluateJacobiansImplementation(JacobianContainer & outJacobians, const Eigen::MatrixXd & applyChainRule) const
         {
-            auto arg = _lhs->toScalar();
             Eigen::Matrix<double, 1, 1> R(1,1);
             const auto lhss = _lhs->toScalar();
             SM_ASSERT_LE(std::runtime_error, lhss, 1.0, "");
@@ -417,26 +414,26 @@ namespace aslam {
 
         double ScalarExpressionNodeAcosSquared::toScalarImplementation() const
         {
-            auto arg = _lhs->toScalar();
-            SM_ASSERT_LE(Exception, arg, 1.0, "");
-            SM_ASSERT_GE(Exception, arg, -1.0, "");
-            auto tmp = acos(arg);
+            const auto lhss = _lhs->toScalar();
+            SM_ASSERT_LE(Exception, lhss, 1.0, "");
+            SM_ASSERT_GE(Exception, lhss, -1.0, "");
+            auto tmp = acos(lhss);
             return tmp*tmp;
         }
 
         void ScalarExpressionNodeAcosSquared::evaluateJacobiansImplementation(JacobianContainer & outJacobians) const
         {
-            auto arg = _lhs->toScalar();
             Eigen::Matrix<double, 1, 1> R(1,1);
-            if (pow((1-arg),4) < std::numeric_limits<double>::min())   // series expansion at x = 1
+            const auto lhss = _lhs->toScalar();
+            if (pow((1-lhss),4) < std::numeric_limits<double>::min())   // series expansion at x = 1
             {
-                auto pow1 = arg - 1.0;
+                auto pow1 = lhss - 1.0;
                 auto pow2 = pow1 * pow1;
                 R(0,0) = -2.0 + 2.0/3.0*pow1 - 4.0/15.0*pow2 + 4.0/35.0*pow1*pow2;
             }
             else
             {
-                R(0,0) = -2.0*acos(arg)/sqrt(1.0 - arg*arg);
+                R(0,0) = -2.0*acos(lhss)/sqrt(1.0 - lhss*lhss);
             }
             SM_ASSERT_FALSE(Exception, std::isnan(R(0,0)), "");
             _lhs->evaluateJacobians(outJacobians, R);
@@ -444,9 +441,9 @@ namespace aslam {
 
         void ScalarExpressionNodeAcosSquared::evaluateJacobiansImplementation(JacobianContainer & outJacobians, const Eigen::MatrixXd & applyChainRule) const
         {
-            auto arg = _lhs->toScalar();
             Eigen::Matrix<double, 1, 1> R(1,1);
-            R(0,0) = -2*acos(arg)/sqrt(1. - arg*arg);
+            const auto lhss = _lhs->toScalar();
+            R(0,0) = -2*acos(lhss)/sqrt(1. - lhss*lhss);
             SM_ASSERT_FALSE(Exception, std::isnan(R(0,0)), "");
             _lhs->evaluateJacobians(outJacobians, applyChainRule * R);
 
