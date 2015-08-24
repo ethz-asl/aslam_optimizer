@@ -320,26 +320,78 @@ namespace aslam {
 
         double ScalarExpressionNodeAcos::toScalarImplementation() const
         {
-            return acos(_lhs->toScalar());
+            auto arg = _lhs->toScalar();
+            SM_ASSERT_LE(Exception, arg, 1.0, "");
+            SM_ASSERT_GE(Exception, arg, -1.0, "");
+            return acos(arg);
         }
 
         void ScalarExpressionNodeAcos::evaluateJacobiansImplementation(JacobianContainer & outJacobians) const
         {
+
+            auto arg = _lhs->toScalar();
             Eigen::Matrix<double, 1, 1> R(1,1);
-            R(0,0) = -1./sqrt(1. - _lhs->toScalar()*_lhs->toScalar());
+            R(0,0) = -1./sqrt(1. - arg*arg);
+            SM_ASSERT_FALSE(Exception, std::isnan(R(0,0)), "");
             _lhs->evaluateJacobians(outJacobians, R);
         }
 
         void ScalarExpressionNodeAcos::evaluateJacobiansImplementation(JacobianContainer & outJacobians, const Eigen::MatrixXd & applyChainRule) const
         {
+            auto arg = _lhs->toScalar();
             Eigen::Matrix<double, 1, 1> R(1,1);
-            R(0,0) = -1./sqrt(1. - _lhs->toScalar()*_lhs->toScalar());
+            R(0,0) = -1./sqrt(1. - arg*arg);
+            SM_ASSERT_FALSE(Exception, std::isnan(R(0,0)), "");
             _lhs->evaluateJacobians(outJacobians, applyChainRule * R);
         }
 
         void ScalarExpressionNodeAcos::getDesignVariablesImplementation(DesignVariable::set_t & designVariables) const
         {
             _lhs->getDesignVariables(designVariables);
+        }
+
+
+        ScalarExpressionNodeAcosSquared::ScalarExpressionNodeAcosSquared(boost::shared_ptr<ScalarExpressionNode> lhs) :
+            _lhs(lhs)
+        {
+
+        }
+
+        ScalarExpressionNodeAcosSquared::~ScalarExpressionNodeAcosSquared()
+        {
+
+        }
+
+        double ScalarExpressionNodeAcosSquared::toScalarImplementation() const
+        {
+            auto arg = _lhs->toScalar();
+            SM_ASSERT_LE(Exception, arg, 1.0, "");
+            SM_ASSERT_GE(Exception, arg, -1.0, "");
+            return acos(arg)*acos(arg);
+        }
+
+        void ScalarExpressionNodeAcosSquared::evaluateJacobiansImplementation(JacobianContainer & outJacobians) const
+        {
+            auto arg = _lhs->toScalar();
+            Eigen::Matrix<double, 1, 1> R(1,1);
+            R(0,0) = -2*acos(arg)/sqrt(1. - arg*arg);
+            SM_ASSERT_FALSE(Exception, std::isnan(R(0,0)), "");
+            _lhs->evaluateJacobians(outJacobians, R);
+        }
+
+        void ScalarExpressionNodeAcosSquared::evaluateJacobiansImplementation(JacobianContainer & outJacobians, const Eigen::MatrixXd & applyChainRule) const
+        {
+            auto arg = _lhs->toScalar();
+            Eigen::Matrix<double, 1, 1> R(1,1);
+            R(0,0) = -2*acos(arg)/sqrt(1. - arg*arg);
+            SM_ASSERT_FALSE(Exception, std::isnan(R(0,0)), "");
+            _lhs->evaluateJacobians(outJacobians, applyChainRule * R);
+
+        }
+
+        void ScalarExpressionNodeAcosSquared::getDesignVariablesImplementation(DesignVariable::set_t & designVariables) const
+        {
+          _lhs->getDesignVariables(designVariables);
         }
 
         ScalarExpressionNodeConstant::ScalarExpressionNodeConstant(double s) : _s(s)
