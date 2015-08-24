@@ -100,7 +100,7 @@ void OptimizerRprop::optimize()
   using namespace Eigen;
 
   bool isConverged = false;
-  for (_nIterations = 0; _options.maxIterations == 0 || _nIterations < static_cast<size_t>(_options.maxIterations); ++_nIterations) {
+  for (_nIterations = 0; _options.maxIterations == -1 || _nIterations < static_cast<size_t>(_options.maxIterations); ++_nIterations) {
 
     RowVectorType gradient;
     timeGrad.start();
