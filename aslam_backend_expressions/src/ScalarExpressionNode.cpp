@@ -430,11 +430,11 @@ namespace aslam {
             Eigen::Matrix<double, 1, 1> R(1,1);
             if (pow((1-arg),4) < std::numeric_limits<double>::min())   // series expansion at x = 1
             {
-                R(0,0) = -2 + 2/3*(arg-1) - 4/15*(arg-1)*(arg-1) + 4/35*(arg-1)*(arg-1)*(arg-1);
+                R(0,0) = -2.0 + 2.0/3.0*(arg-1.0) - 4.0/15.0*(arg-1.0)*(arg-1.0) + 4.0/35.0*(arg-1.0)*(arg-1.0)*(arg-1.0);
             }
             else
             {
-                R(0,0) = -2*acos(arg)/sqrt(1. - arg*arg);
+                R(0,0) = -2.0*acos(arg)/sqrt(1.0 - arg*arg);
             }
             SM_ASSERT_FALSE(Exception, std::isnan(R(0,0)), "");
             _lhs->evaluateJacobians(outJacobians, R);
