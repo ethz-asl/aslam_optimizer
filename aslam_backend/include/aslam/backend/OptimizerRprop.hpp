@@ -12,7 +12,7 @@ namespace aslam {
 
     struct OptimizerRpropOptions {
       OptimizerRpropOptions();
-
+      OptimizerRpropOptions(const sm::PropertyTree& config);
       double etaMinus; /// \brief Decrease factor for step size if gradient direction changes
       double etaPlus; /// \brief Increase factor for step size if gradient direction is same
       double initialDelta; /// \brief Initial step size

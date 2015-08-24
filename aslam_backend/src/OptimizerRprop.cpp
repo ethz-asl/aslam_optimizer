@@ -22,6 +22,20 @@ OptimizerRpropOptions::OptimizerRpropOptions() :
 
 }
 
+OptimizerRpropOptions::OptimizerRpropOptions(const sm::PropertyTree& config) :
+    etaMinus(config.getDouble("etaMinus", etaMinus)),
+    etaPlus(config.getDouble("etaPlus", etaPlus)),
+    initialDelta(config.getDouble("initialDelta", initialDelta)),
+    minDelta(config.getDouble("minDelta", minDelta)),
+    maxDelta(config.getDouble("maxDelta", maxDelta)),
+    convergenceGradientNorm(config.getDouble("convergenceGradientNorm", convergenceGradientNorm)),
+    maxIterations(config.getInt("maxIterations", maxIterations)),
+    verbose(config.getBool("verbose", verbose)),
+    nThreads(config.getInt("nThreads", nThreads))
+{
+
+}
+
 std::ostream& operator<<(std::ostream& out, const aslam::backend::OptimizerRpropOptions& options)
 {
   out << "OptimizerRpropOptions:\n";
@@ -59,17 +73,7 @@ OptimizerRprop::OptimizerRprop(const sm::PropertyTree& config) :
             _curr_gradient_norm(std::numeric_limits<double>::signaling_NaN()),
             _nIterations(0)
 {
-  OptimizerRpropOptions options;
-  options.etaMinus = config.getDouble("etaMinus", options.etaMinus);
-  options.etaPlus = config.getDouble("etaPlus", options.etaPlus);
-  options.maxIterations = config.getInt("maxIterations", options.maxIterations);
-  options.initialDelta = config.getDouble("initialDelta", options.initialDelta);
-  options.verbose = config.getBool("verbose", options.verbose);
-  options.maxDelta = config.getDouble("maxDelta", options.maxDelta);
-  options.minDelta = config.getDouble("minDelta", options.minDelta);
-  options.convergenceGradientNorm = config.getDouble("convergenceGradientNorm", options.convergenceGradientNorm);
-  options.nThreads = config.getInt("nThreads", options.nThreads);
-  _options = options;
+  _options = OptimizerRpropOptions(config);
 }
 
 OptimizerRprop::~OptimizerRprop()
