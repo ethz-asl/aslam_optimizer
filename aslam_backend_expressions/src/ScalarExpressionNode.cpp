@@ -425,11 +425,15 @@ namespace aslam {
         {
             Eigen::Matrix<double, 1, 1> R(1,1);
             const auto lhss = _lhs->toScalar();
-            if (pow((1-lhss),4) < std::numeric_limits<double>::min())   // series expansion at x = 1
+
+            auto pow1 = lhss - 1.0;
+            auto pow2 = pow1 * pow1;
+            auto pow3 = pow1 * pow2;
+            auto pow4 = pow1 * pow3;
+
+            if (pow4 < std::numeric_limits<double>::min())   // series expansion at x = 1
             {
-                auto pow1 = lhss - 1.0;
-                auto pow2 = pow1 * pow1;
-                R(0,0) = -2.0 + 2.0/3.0*pow1 - 4.0/15.0*pow2 + 4.0/35.0*pow1*pow2;
+                R(0,0) = -2.0 + 2.0/3.0*pow1 - 4.0/15.0*pow2 + 4.0/35.0*pow3;
             }
             else
             {
