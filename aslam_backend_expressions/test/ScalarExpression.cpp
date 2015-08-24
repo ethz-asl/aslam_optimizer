@@ -176,7 +176,7 @@ TEST(ScalarExpressionNodeTestSuites, testScalarNegation)
 
         ScalarExpression p_neg = -p1;
 
-        ASSERT_EQ(p_neg.toValue(), -point1.toScalar());
+        ASSERT_EQ(-point1.toScalar(), p_neg.toValue());
 
         SCOPED_TRACE("");
         testExpression(p_neg, 1);
@@ -293,7 +293,7 @@ TEST(ScalarExpressionNodeTestSuites, testSqrt)
         ScalarExpression pExpr = p.toExpression();
         ScalarExpression pExprSqrt = sqrt(pExpr);
 
-        ASSERT_EQ(pExprSqrt.toValue(), sqrt(p.toScalar()));
+        ASSERT_EQ(sqrt(p.toScalar()), pExprSqrt.toValue());
 
         SCOPED_TRACE("");
         testExpression(pExprSqrt, 1);
@@ -314,7 +314,7 @@ TEST(ScalarExpressionNodeTestSuites, testLog)
         ScalarExpression pExpr = p.toExpression();
         ScalarExpression pExprLog = log(pExpr);
 
-        ASSERT_EQ(pExprLog.toValue(), log(p.toScalar()));
+        ASSERT_EQ(log(p.toScalar()), pExprLog.toValue());
 
         SCOPED_TRACE("");
         testExpression(pExprLog, 1);
@@ -335,7 +335,7 @@ TEST(ScalarExpressionNodeTestSuites, testExp)
         ScalarExpression pExpr = p.toExpression();
         ScalarExpression pExprExp = exp(pExpr);
 
-        ASSERT_EQ(pExprExp.toValue(), exp(p.toScalar()));
+        ASSERT_EQ(exp(p.toScalar()), pExprExp.toValue());
 
         SCOPED_TRACE("");
         testExpression(pExprExp, 1);
@@ -356,7 +356,7 @@ TEST(ScalarExpressionNodeTestSuites, testAtan)
         ScalarExpression pExpr = p.toExpression();
         ScalarExpression pExprAtan = atan(pExpr);
 
-        ASSERT_EQ(pExprAtan.toValue(), atan(p.toScalar()));
+        ASSERT_EQ(atan(p.toScalar()), pExprAtan.toValue());
 
         SCOPED_TRACE("");
         testExpression(pExprAtan, 1);
@@ -377,7 +377,7 @@ TEST(ScalarExpressionNodeTestSuites, testAcos)
         ScalarExpression pExpr = p.toExpression();
         ScalarExpression pExprAcos = acos(pExpr);
 
-        ASSERT_EQ(pExprAcos.toValue(), acos(p.toScalar()));
+        ASSERT_EQ(acos(p.toScalar()), pExprAcos.toValue());
 
         SCOPED_TRACE("");
         testExpression(pExprAcos, 1);
@@ -398,7 +398,7 @@ TEST(ScalarExpressionNodeTestSuites, testAtan2)
         Scalar y(sm::random::rand());
         ScalarExpression pExprAtan2 = atan2(y.toExpression(), x.toExpression());
 
-        ASSERT_EQ(pExprAtan2.toValue(), atan2(y.toScalar(), x.toScalar()));
+        ASSERT_EQ(atan2(y.toScalar(), x.toScalar()), pExprAtan2.toValue());
 
         SCOPED_TRACE("");
         testExpression(pExprAtan2, 2);
