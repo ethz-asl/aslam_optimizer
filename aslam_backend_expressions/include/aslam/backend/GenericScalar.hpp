@@ -27,6 +27,8 @@ class GenericScalar : public GenericScalarExpressionNode<Scalar_>, public Design
   Eigen::MatrixXd getParameters();
   using DesignVariable::getParameters;
 
+  const Scalar & getValue() const { return _p; }
+  void setValue(Scalar p) { _p = p; }
  protected:
   /// \brief Revert the last state update.
   virtual void revertUpdateImplementation();
