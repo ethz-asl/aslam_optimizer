@@ -66,6 +66,7 @@ namespace aslam {
     ScalarExpression log(const ScalarExpression& e);
     ScalarExpression exp(const ScalarExpression& e);
     ScalarExpression atan(const ScalarExpression& e);
+    ScalarExpression atan2(const ScalarExpression& e0, const ScalarExpression& e1);
     ScalarExpression acos(const ScalarExpression& e);
 
   } // namespace backend
