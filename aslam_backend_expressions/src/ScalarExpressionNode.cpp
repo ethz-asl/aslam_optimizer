@@ -367,14 +367,22 @@ namespace aslam {
             auto arg = _lhs->toScalar();
             SM_ASSERT_LE(Exception, arg, 1.0, "");
             SM_ASSERT_GE(Exception, arg, -1.0, "");
-            return acos(arg)*acos(arg);
+            auto tmp = acos(arg);
+            return tmp*tmp;
         }
 
         void ScalarExpressionNodeAcosSquared::evaluateJacobiansImplementation(JacobianContainer & outJacobians) const
         {
             auto arg = _lhs->toScalar();
             Eigen::Matrix<double, 1, 1> R(1,1);
-            R(0,0) = -2*acos(arg)/sqrt(1. - arg*arg);
+            if (pow((1-arg),4) < std::numeric_limits<double>::min())   // series expansion at x = 1
+            {
+                R(0,0) = -2 + 2/3*(arg-1) - 4/15*(arg-1)*(arg-1) + 4/35*(arg-1)*(arg-1)*(arg-1);
+            }
+            else
+            {
+                R(0,0) = -2*acos(arg)/sqrt(1. - arg*arg);
+            }
             SM_ASSERT_FALSE(Exception, std::isnan(R(0,0)), "");
             _lhs->evaluateJacobians(outJacobians, R);
         }
