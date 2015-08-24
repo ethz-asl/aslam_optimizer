@@ -430,7 +430,9 @@ namespace aslam {
             Eigen::Matrix<double, 1, 1> R(1,1);
             if (pow((1-arg),4) < std::numeric_limits<double>::min())   // series expansion at x = 1
             {
-                R(0,0) = -2.0 + 2.0/3.0*(arg-1.0) - 4.0/15.0*(arg-1.0)*(arg-1.0) + 4.0/35.0*(arg-1.0)*(arg-1.0)*(arg-1.0);
+                auto pow1 = arg - 1.0;
+                auto pow2 = pow1 * pow1;
+                R(0,0) = -2.0 + 2.0/3.0*pow1 - 4.0/15.0*pow2 + 4.0/35.0*pow1*pow2;
             }
             else
             {
