@@ -430,6 +430,64 @@ TEST(ScalarExpressionNodeTestSuites, testAcosSquared)
     }
 }
 
+// Test that the jacobian matches the finite difference jacobian
+TEST(ScalarExpressionNodeTestSuites, testAcosSquaredPole)
+{
+    try
+    {
+        using namespace sm::kinematics;
+        Scalar p(1.0);
+        p.setActive(true);
+        p.setBlockIndex(0);
+        ScalarExpression pExpr = p.toExpression();
+        ScalarExpression pExprAcosSquared = acosSquared(pExpr);
+
+        ASSERT_EQ(acos(p.toScalar())*acos(p.toScalar()), pExprAcosSquared.toValue());
+
+        SCOPED_TRACE("");
+        const size_t rows = 1;
+        JacobianContainer Jc(rows);
+        pExprAcosSquared.evaluateJacobians(Jc);
+        ASSERT_DOUBLE_EQ(-2.0, Jc.asDenseMatrix()(0,0));
+    }
+    catch(std::exception const & e)
+    {
+        FAIL() << e.what();
+    }
+}
+
+// Test that the jacobian matches the finite difference jacobian
+TEST(ScalarExpressionNodeTestSuites, testAcosSquaredLimits)
+{
+    try
+    {
+        using namespace sm::kinematics;
+        double eps = sqrt(std::numeric_limits<double>::epsilon());
+        Scalar p(1.0 - eps);
+        p.setActive(true);
+        p.setBlockIndex(0);
+        ScalarExpression pExpr = p.toExpression();
+        ScalarExpression pExprAcosSquared = acosSquared(pExpr);
+
+        ASSERT_EQ(acos(p.toScalar())*acos(p.toScalar()), pExprAcosSquared.toValue());
+
+        SCOPED_TRACE("");
+        const size_t rows = 1;
+        JacobianContainer Jc(rows);
+        pExprAcosSquared.evaluateJacobians(Jc);
+
+        double pow1 =  p.toScalar() - 1.0;
+        double pow2 = pow1 * pow1;
+        double pow3 = pow1 * pow2;
+
+        ASSERT_DOUBLE_EQ(-2.0 + 2.0/3.0*pow1 - 4.0/15.0*pow2 + 4.0/35.0*pow3, Jc.asDenseMatrix()(0,0));
+    }
+    catch(std::exception const & e)
+    {
+        FAIL() << e.what();
+    }
+}
+
 TEST(ScalarExpressionNodeTestSuites, testVectorOpsFailure)
 {
     using namespace aslam::backend;
