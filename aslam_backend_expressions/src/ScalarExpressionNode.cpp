@@ -371,7 +371,10 @@ namespace aslam {
 
         double ScalarExpressionNodeAcos::toScalarImplementation() const
         {
-            return acos(_lhs->toScalar());
+            auto lhss = _lhs->toScalar();
+            SM_ASSERT_LE(Exception, lhss, 1.0, "");
+            SM_ASSERT_GE(Exception, lhss, -1.0, "");
+            return acos(lhss);
         }
 
         void ScalarExpressionNodeAcos::evaluateJacobiansImplementation(JacobianContainer & outJacobians) const
@@ -395,6 +398,71 @@ namespace aslam {
         void ScalarExpressionNodeAcos::getDesignVariablesImplementation(DesignVariable::set_t & designVariables) const
         {
             _lhs->getDesignVariables(designVariables);
+        }
+
+
+        ScalarExpressionNodeAcosSquared::ScalarExpressionNodeAcosSquared(boost::shared_ptr<ScalarExpressionNode> lhs) :
+            _lhs(lhs)
+        {
+
+        }
+
+        ScalarExpressionNodeAcosSquared::~ScalarExpressionNodeAcosSquared()
+        {
+
+        }
+
+        double ScalarExpressionNodeAcosSquared::toScalarImplementation() const
+        {
+            const auto lhss = _lhs->toScalar();
+            SM_ASSERT_LE(Exception, lhss, 1.0, "");
+            SM_ASSERT_GE(Exception, lhss, -1.0, "");
+            auto tmp = acos(lhss);
+            return tmp*tmp;
+        }
+
+        void ScalarExpressionNodeAcosSquared::evaluateJacobiansImplementation(JacobianContainer & outJacobians) const
+        {
+            Eigen::Matrix<double, 1, 1> R(1,1);
+            const auto lhss = _lhs->toScalar();
+            auto pow1 = lhss - 1.0;
+            auto pow2 = pow1 * pow1;
+
+            if (pow2 < std::numeric_limits<double>::epsilon())   // series expansion at x = 1
+            {
+                R(0,0) = -2.0 + 2.0/3.0*pow1;
+            }
+            else
+            {
+                R(0,0) = -2.0*acos(lhss)/sqrt(1.0 - lhss*lhss);
+            }
+            SM_ASSERT_FALSE(Exception, std::isnan(R(0,0)), "");
+            _lhs->evaluateJacobians(outJacobians, R);
+        }
+
+        void ScalarExpressionNodeAcosSquared::evaluateJacobiansImplementation(JacobianContainer & outJacobians, const Eigen::MatrixXd & applyChainRule) const
+        {
+            Eigen::Matrix<double, 1, 1> R(1,1);
+            const auto lhss = _lhs->toScalar();
+            auto pow1 = lhss - 1.0;
+            auto pow2 = pow1 * pow1;
+
+            if (pow2 < std::numeric_limits<double>::epsilon())   // series expansion at x = 1
+            {
+                R(0,0) = -2.0 + 2.0/3.0*pow1;
+            }
+            else
+            {
+                R(0,0) = -2.0*acos(lhss)/sqrt(1.0 - lhss*lhss);
+            }
+            SM_ASSERT_FALSE(Exception, std::isnan(R(0,0)), "");
+            _lhs->evaluateJacobians(outJacobians, applyChainRule * R);
+
+        }
+
+        void ScalarExpressionNodeAcosSquared::getDesignVariablesImplementation(DesignVariable::set_t & designVariables) const
+        {
+          _lhs->getDesignVariables(designVariables);
         }
 
         ScalarExpressionNodeConstant::ScalarExpressionNodeConstant(double s) : _s(s)

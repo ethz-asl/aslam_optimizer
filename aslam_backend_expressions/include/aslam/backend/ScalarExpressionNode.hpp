@@ -257,6 +257,24 @@ namespace aslam {
           boost::shared_ptr<ScalarExpressionNode> _lhs;
       };
 
+      class ScalarExpressionNodeAcosSquared : public ScalarExpressionNode
+      {
+       public:
+          EIGEN_MAKE_ALIGNED_OPERATOR_NEW
+
+          ScalarExpressionNodeAcosSquared(boost::shared_ptr<ScalarExpressionNode> lhs);
+          virtual ~ScalarExpressionNodeAcosSquared();
+
+       protected:
+          // These functions must be implemented by child classes.
+          virtual double toScalarImplementation() const override;
+          virtual void evaluateJacobiansImplementation(JacobianContainer & outJacobians) const override;
+          virtual void evaluateJacobiansImplementation(JacobianContainer & outJacobians, const Eigen::MatrixXd & applyChainRule) const override;
+          virtual void getDesignVariablesImplementation(DesignVariable::set_t & designVariables) const override;
+
+          boost::shared_ptr<ScalarExpressionNode> _lhs;
+      };
+
       template <int VectorSize, int ComponentIndex = 0>
       class ScalarExpressionNodeFromVectorExpression : public ScalarExpressionNode
       {

@@ -132,6 +132,11 @@ ScalarExpression acos(const ScalarExpression& e) {
   return ScalarExpression(newRoot);
 }
 
+ScalarExpression acosSquared(const ScalarExpression& e) {
+  boost::shared_ptr<ScalarExpressionNode> newRoot(new ScalarExpressionNodeAcosSquared(e.root()));
+  return ScalarExpression(newRoot);
+}
+
 
 }  // namespace backend
 }  // namespace aslam
