@@ -13,6 +13,12 @@ void update(DesignVariable * dv, const Eigen::VectorXd & dp)
     dv->update(&dp[0], dp.size());
 }
 
+Eigen::MatrixXd getParameters(const DesignVariable& dv) {
+  Eigen::MatrixXd p;
+  dv.getParameters(p);
+  return p;
+}
+
 void exportDesignVariable()
 {
 
@@ -47,6 +53,12 @@ void exportDesignVariable()
     .def("setScaling", &DesignVariable::setScaling)
 
     .def("scaling", &DesignVariable::scaling)
+
+    /// Returns the content of the design variable
+    .def("getParameters", &getParameters)
+
+    /// Sets the content of the design variable
+    .def("setParameters", &DesignVariable::setParameters)
     ;
 
 }
