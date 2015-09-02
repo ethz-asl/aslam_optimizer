@@ -121,15 +121,21 @@ void ProblemManager::computeGradient(RowVectorType& outGrad, size_t nThreads, bo
     outGrad += gradients[i];
 }
 
-double ProblemManager::evaluateError() const {
-  Timer t("ProblemManager: Compute total error", false);
+
+double ProblemManager::evaluateError(const size_t nThreads /*= 1*/) const {
+
+  std::vector<double> errors(nThreads, 0.0);
+  boost::function<void(size_t, size_t, size_t, double&)> job(boost::bind(&ProblemManager::sumErrorTerms, this, _1, _2, _3, _4));
+  util::runThreadedFunction(job, _numErrorTerms, errors);
+
   double error = 0.0;
-  for (auto e : _errorTermsS)
-    error += e->evaluateError();
-  for (auto e : _errorTermsNS)
-    error += e->evaluateError();
+  for (auto e : errors)
+    error += e;
+
   return error;
+
 }
+
 
 void ProblemManager::applyStateUpdate(const ColumnVectorType& dx)
 {
@@ -151,6 +157,16 @@ void ProblemManager::revertLastStateUpdate()
   Timer t("ProblemManager: Revert last state update", false);
   for (size_t i = 0; i < _designVariables.size(); i++)
     _designVariables[i]->revertUpdate();
+}
+
+void ProblemManager::sumErrorTerms(size_t /* threadId */, size_t startIdx, size_t endIdx, double& err) const {
+  SM_ASSERT_LE_DBG(Exception, endIdx, _numErrorTerms, "");
+  for (size_t i = startIdx; i < endIdx; ++i) { // iterate through error terms
+    if (i < _errorTermsNS.size())
+      err += _errorTermsNS[i]->evaluateError();
+    else
+      err += _errorTermsS[i - _errorTermsNS.size()]->evaluateError();
+  }
 }
 
 /**

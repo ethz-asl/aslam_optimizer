@@ -53,6 +53,8 @@ void exportSampler()
 
       .def_readwrite("transitionKernelSigma", &SamplerMetropolisHastingsOptions::transitionKernelSigma,
                      "Standard deviation for the Gaussian Markov transition kernel N(0, transitionKernelSigma^2)")
+      .def_readwrite("nThreadsEvaluateLogDensity", &SamplerMetropolisHastingsOptions::nThreadsEvaluateLogDensity,
+                     "How many threads to use to evaluate the error terms involved in the negative log density")
       .def("__str__", &toString<SamplerMetropolisHastingsOptions>)
   ;
 

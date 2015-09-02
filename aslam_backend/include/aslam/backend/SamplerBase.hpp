@@ -79,7 +79,7 @@ class SamplerBase {
 
  protected:
   /// \brief Evaluate the current negative log density
-  double evaluateNegativeLogDensity() const;
+  double evaluateNegativeLogDensity(const size_t nThreads = 1) const;
 
   ProblemManager& getProblemManager() { return _problemManager; }
  private:
