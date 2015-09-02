@@ -1,8 +1,8 @@
 #include <sm/eigen/gtest.hpp>
-#include <sm/timing/Timer.hpp>
 #include <sm/random.hpp>
 #include <aslam/backend/OptimizationProblem.hpp>
 #include <aslam/backend/ErrorTerm.hpp>
+#include <aslam/backend/SamplerHybridMcmc.hpp>
 #include <aslam/backend/SamplerMetropolisHastings.hpp>
 #include <aslam/backend/test/ErrorTermTester.hpp>
 #include "SampleDvAndError.hpp"
@@ -46,35 +46,43 @@ public:
 
 };
 
+boost::shared_ptr<OptimizationProblem> setupProblem(const double meanTrue, const double sigmaTrue) {
+
+  sm::random::seed(std::time(nullptr));
+
+  boost::shared_ptr<OptimizationProblem> gaussian1dLogDensityPtr(new OptimizationProblem);
+  OptimizationProblem& gaussian1dLogDensity = *gaussian1dLogDensityPtr;
+
+  Scalar::Vector1d x;
+  x << meanTrue + 10.0*sm::random::randn();
+
+  // Add some design variables.
+  boost::shared_ptr<Scalar> sdv(new Scalar(x));
+  gaussian1dLogDensity.addDesignVariable(sdv);
+  sdv->setBlockIndex(0);
+  sdv->setActive(true);
+  // Add error term
+  boost::shared_ptr<GaussianNegLogDensityError> err(new GaussianNegLogDensityError(sdv.get()));
+  err->setMean(meanTrue);
+  err->setVariance(sigmaTrue*sigmaTrue);
+  gaussian1dLogDensity.addErrorTerm(err);
+  SCOPED_TRACE("");
+  testErrorTerm(err);
+
+  return gaussian1dLogDensityPtr;
+}
+
 
 TEST(OptimizerSamplerMcmcTestSuite, testSamplerMetropolisHastings)
 {
   try {
-    typedef OptimizationProblem LogDensity;
-    typedef boost::shared_ptr<LogDensity> LogDensityPtr;
 
     sm::random::seed(std::time(nullptr));
 
-    LogDensityPtr gaussian1dLogDensityPtr(new LogDensity);
-    OptimizationProblem& gaussian1dLogDensity = *gaussian1dLogDensityPtr;
-
     const double meanTrue = 10.0;
     const double sigmaTrue = 2.0;
-    Scalar::Vector1d x;
-    x << meanTrue + 10.0*sm::random::randn();
-
-    // Add some design variables.
-    boost::shared_ptr<Scalar> sdv(new Scalar(x));
-    gaussian1dLogDensity.addDesignVariable(sdv);
-    sdv->setBlockIndex(0);
-    sdv->setActive(true);
-    // Add error term
-    boost::shared_ptr<GaussianNegLogDensityError> err(new GaussianNegLogDensityError(sdv.get()));
-    err->setMean(meanTrue);
-    err->setVariance(sigmaTrue*sigmaTrue);
-    gaussian1dLogDensity.addErrorTerm(err);
-    SCOPED_TRACE("");
-    testErrorTerm(err);
+    boost::shared_ptr<OptimizationProblem> gaussian1dLogDensityPtr = setupProblem(meanTrue, sigmaTrue);
+    OptimizationProblem& gaussian1dLogDensity = *gaussian1dLogDensityPtr;
 
     // Initialize and test options
     sm::BoostPropertyTree pt;
@@ -137,9 +145,83 @@ TEST(OptimizerSamplerMcmcTestSuite, testSamplerMetropolisHastings)
     EXPECT_EQ(0, sampler.statistics().getNumIterations());
     EXPECT_NO_THROW(sampler.run(1)); // Check that sampler runs ok
 
-#ifdef aslam_backend_ENABLE_TIMING
-    sm::timing::Timing::print(cout, sm::timing::SORT_BY_TOTAL);
-#endif
+  } catch (const std::exception& e) {
+    FAIL() << e.what();
+  }
+}
+
+
+TEST(OptimizerSamplerMcmcTestSuite, testSamplerHybridMcmc)
+{
+  try {
+
+    sm::random::seed(std::time(nullptr));
+
+    const double meanTrue = 10.0;
+    const double sigmaTrue = 2.0;
+    boost::shared_ptr<OptimizationProblem> gaussian1dLogDensityPtr = setupProblem(meanTrue, sigmaTrue);
+    OptimizationProblem& gaussian1dLogDensity = *gaussian1dLogDensityPtr;
+
+    // Initialize and test options
+    sm::BoostPropertyTree pt;
+    pt.setDouble("leapFrogStepSize", 0.3);
+    pt.setDouble("nLeapFrogSteps", 5);
+    pt.setDouble("nThreads", 1);
+    SamplerHybridMcmcOptions options(pt);
+    EXPECT_DOUBLE_EQ(pt.getDouble("leapFrogStepSize"), options.leapFrogStepSize);
+    EXPECT_DOUBLE_EQ(pt.getInt("nLeapFrogSteps"), options.nLeapFrogSteps);
+    EXPECT_DOUBLE_EQ(pt.getInt("nThreads"), options.nThreads);
+
+    // Set and test log density
+    SamplerHybridMcmc sampler(options);
+    sampler.setNegativeLogDensity(gaussian1dLogDensityPtr);
+    EXPECT_NO_THROW(sampler.checkNegativeLogDensitySetup());
+    EXPECT_DOUBLE_EQ(sampler.statistics().getAcceptanceRate(), 0.0);
+    EXPECT_EQ(sampler.statistics().getNumIterations(), 0);
+
+    // Parameters
+    const int nSamples = 1000;
+    const int nStepsBurnIn = 10;
+    const int nStepsSkip = 5;
+
+    // Burn-in
+    sampler.run(nStepsBurnIn);
+    EXPECT_GT(sampler.statistics().getAcceptanceRate(), 0.0);
+    EXPECT_LE(sampler.statistics().getAcceptanceRate(), 1.0);
+    EXPECT_EQ(nStepsBurnIn, sampler.statistics().getNumIterations());
+
+    // Now let's retrieve samples
+    Eigen::VectorXd dvValues(nSamples);
+    for (size_t i=0; i<nSamples; i++) {
+      sampler.run(nStepsSkip);
+      EXPECT_GE(sampler.statistics().getAcceptanceRate(), 0.0);
+      EXPECT_LE(sampler.statistics().getAcceptanceRate(), 1.0);
+      EXPECT_EQ((i+1)*nStepsSkip + nStepsBurnIn, sampler.statistics().getNumIterations());
+      ASSERT_EQ(gaussian1dLogDensity.numDesignVariables(), 1);
+      auto dv = gaussian1dLogDensity.designVariable(0);
+      Eigen::MatrixXd p;
+      dv->getParameters(p);
+      ASSERT_EQ(1, p.size());
+      dvValues[i] = p(0,0);
+    }
+
+    EXPECT_DOUBLE_EQ((double)sampler.statistics().getNumAcceptedSamples(true)/(double)sampler.statistics().getNumIterations(),
+                     sampler.statistics().getAcceptanceRate());
+    EXPECT_GT(sampler.statistics().getWeightedMeanAcceptanceProbability(), 0.0);
+
+    // check sample mean
+    EXPECT_NEAR(dvValues.mean(), meanTrue, 4.*sigmaTrue) << "This failure does not necessarily have to be an error. It should just appear "
+        " with a probability of 0.00633 %";
+
+    // check sample variance
+    EXPECT_NEAR((dvValues.array() - dvValues.mean()).matrix().squaredNorm()/(dvValues.rows() - 1.0), sigmaTrue*sigmaTrue, 1e0) << "This failure does "
+        "not necessarily have to be an error. It should just appear very rarely";
+
+    // Check that re-initializing resets values
+    sampler.initialize();
+    EXPECT_DOUBLE_EQ(0.0, sampler.statistics().getAcceptanceRate());
+    EXPECT_EQ(0, sampler.statistics().getNumIterations());
+    EXPECT_NO_THROW(sampler.run(1)); // Check that sampler runs ok
 
   } catch (const std::exception& e) {
     FAIL() << e.what();
