@@ -81,8 +81,18 @@ void exportSampler()
                                    "Options for the Hybrid Mcmc sampler",
                                    init<>("SamplerHybridMcmcOptions(): Default constructor"))
 
-      .def_readwrite("leapFrogStepSize", &SamplerHybridMcmcOptions::leapFrogStepSize,
-                     "Step length for the Leap-Frog integration")
+      .def_readwrite("initialLeapFrogStepSize", &SamplerHybridMcmcOptions::initialLeapFrogStepSize,
+                     "Start value for the step length for the Leap-Frog integration")
+      .def_readwrite("minLeapFrogStepSize", &SamplerHybridMcmcOptions::minLeapFrogStepSize,
+                     "Minimum value for the step length for the Leap-Frog integration")
+      .def_readwrite("maxLeapFrogStepSize", &SamplerHybridMcmcOptions::maxLeapFrogStepSize,
+                     "Maximum value for the step length for the Leap-Frog integration")
+      .def_readwrite("incFactorLeapFrogStepSize", &SamplerHybridMcmcOptions::incFactorLeapFrogStepSize,
+                     "Raising factor for the step length for the Leap-Frog integration")
+      .def_readwrite("decFactorLeapFrogStepSize", &SamplerHybridMcmcOptions::decFactorLeapFrogStepSize,
+                     "Lowering factor for the step length for the Leap-Frog integration")
+      .def_readwrite("targetAcceptanceRate", &SamplerHybridMcmcOptions::targetAcceptanceRate,
+                     "The desired acceptance rate")
       .def_readwrite("nLeapFrogSteps", &SamplerHybridMcmcOptions::nLeapFrogSteps,
                      "Number of steps for the Leap-Frog integration")
       .def_readwrite("nThreads", &SamplerHybridMcmcOptions::nThreads,
@@ -103,7 +113,7 @@ void exportSampler()
       .def(init<>("SamplerHybridMcmc(): Default constructor"))
       .def(init<const SamplerHybridMcmcOptions&>("SamplerHybridMcmc(SamplerHybridMcmcOptions options): Constructor with custom options"))
 
-      .add_property("options", make_function(&SamplerHybridMcmc::options, return_internal_reference<>()), "Mutable getter for options")
+      .add_property("options", make_function(&SamplerHybridMcmc::getOptions, return_internal_reference<>()), &SamplerHybridMcmc::setOptions, "HMC options")
 
     ;
   implicitly_convertible< boost::shared_ptr<SamplerHybridMcmc>, boost::shared_ptr<const SamplerHybridMcmc> >();

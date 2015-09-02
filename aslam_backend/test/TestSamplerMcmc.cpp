@@ -164,11 +164,19 @@ TEST(OptimizerSamplerMcmcTestSuite, testSamplerHybridMcmc)
 
     // Initialize and test options
     sm::BoostPropertyTree pt;
-    pt.setDouble("leapFrogStepSize", 0.3);
+    pt.setDouble("initialLeapFrogStepSize", 0.3);
+    pt.setDouble("minLeapFrogStepSize", 0.01);
+    pt.setDouble("maxLeapFrogStepSize", 1.0);
+    pt.setDouble("incFactorLeapFrogStepSize", 1.02);
+    pt.setDouble("decFactorLeapFrogStepSize", 0.98);
     pt.setDouble("nLeapFrogSteps", 5);
     pt.setDouble("nThreads", 1);
     SamplerHybridMcmcOptions options(pt);
-    EXPECT_DOUBLE_EQ(pt.getDouble("leapFrogStepSize"), options.leapFrogStepSize);
+    EXPECT_DOUBLE_EQ(pt.getDouble("initialLeapFrogStepSize"), options.initialLeapFrogStepSize);
+    EXPECT_DOUBLE_EQ(pt.getDouble("minLeapFrogStepSize"), options.minLeapFrogStepSize);
+    EXPECT_DOUBLE_EQ(pt.getDouble("maxLeapFrogStepSize"), options.maxLeapFrogStepSize);
+    EXPECT_DOUBLE_EQ(pt.getDouble("incFactorLeapFrogStepSize"), options.incFactorLeapFrogStepSize);
+    EXPECT_DOUBLE_EQ(pt.getDouble("decFactorLeapFrogStepSize"), options.decFactorLeapFrogStepSize);
     EXPECT_DOUBLE_EQ(pt.getInt("nLeapFrogSteps"), options.nLeapFrogSteps);
     EXPECT_DOUBLE_EQ(pt.getInt("nThreads"), options.nThreads);
 

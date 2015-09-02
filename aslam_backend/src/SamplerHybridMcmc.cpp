@@ -19,31 +19,45 @@ using namespace std;
 namespace aslam {
 namespace backend {
 
-SamplerHybridMcmcOptions::SamplerHybridMcmcOptions() :
-  leapFrogStepSize(0.1),
-  nLeapFrogSteps(20),
-  nThreads(4) {
-
+SamplerHybridMcmcOptions::SamplerHybridMcmcOptions() {
   check();
-
 }
 
-SamplerHybridMcmcOptions::SamplerHybridMcmcOptions(const sm::PropertyTree& config) :
-  leapFrogStepSize(config.getDouble("leapFrogStepSize", leapFrogStepSize)),
-  nLeapFrogSteps(config.getInt("nLeapFrogSteps", nLeapFrogSteps)),
-  nThreads(config.getDouble("nThreads", nThreads)) {
+SamplerHybridMcmcOptions::SamplerHybridMcmcOptions(const sm::PropertyTree& config) {
+
+  initialLeapFrogStepSize = config.getDouble("initialLeapFrogStepSize", initialLeapFrogStepSize);
+  minLeapFrogStepSize = config.getDouble("minLeapFrogStepSize", minLeapFrogStepSize);
+  maxLeapFrogStepSize = config.getDouble("maxLeapFrogStepSize", maxLeapFrogStepSize);
+  incFactorLeapFrogStepSize = config.getDouble("incFactorLeapFrogStepSize", incFactorLeapFrogStepSize);
+  decFactorLeapFrogStepSize = config.getDouble("decFactorLeapFrogStepSize", decFactorLeapFrogStepSize);
+  targetAcceptanceRate = config.getDouble("targetAcceptanceRate", targetAcceptanceRate);
+  nLeapFrogSteps = config.getInt("nLeapFrogSteps", nLeapFrogSteps);
+  nThreads = config.getDouble("nThreads", nThreads);
 
   check();
 
 }
 
 void SamplerHybridMcmcOptions::check() const {
-  SM_WARN_STREAM_COND(leapFrogStepSize > 5.0, "Delta value for Leap-Frog algorithm very high!");
+  SM_ASSERT_GT(Exception, initialLeapFrogStepSize, 0.0, "");
+  SM_ASSERT_GT(Exception, minLeapFrogStepSize, 0.0, "");
+  SM_ASSERT_GT(Exception, maxLeapFrogStepSize, 0.0, "");
+  SM_ASSERT_GE(Exception, maxLeapFrogStepSize, minLeapFrogStepSize, "");
+  SM_ASSERT_GE(Exception, incFactorLeapFrogStepSize, 1.0, "");
+  SM_ASSERT_GT(Exception, decFactorLeapFrogStepSize, 0.0, "");
+  SM_ASSERT_LE(Exception, decFactorLeapFrogStepSize, 1.0, "");
+  SM_ASSERT_GE(Exception, targetAcceptanceRate, 0.0, "");
+  SM_ASSERT_LE(Exception, targetAcceptanceRate, 1.0, "");
 }
 
 ostream& operator<<(ostream& out, const aslam::backend::SamplerHybridMcmcOptions& options) {
   out << "SamplerHmcOptions:\n";
-  out << "\tleapFrogStepSize: " << options.leapFrogStepSize << endl;
+  out << "\tinitialLeapFrogStepSize: " << options.initialLeapFrogStepSize << endl;
+  out << "\tminLeapFrogStepSize: " << options.minLeapFrogStepSize << endl;
+  out << "\tmaxLeapFrogStepSize: " << options.maxLeapFrogStepSize << endl;
+  out << "\tincFactorLeapFrogStepSize: " << options.incFactorLeapFrogStepSize << endl;
+  out << "\tdecFactorLeapFrogStepSize: " << options.decFactorLeapFrogStepSize << endl;
+  out << "\ttargetAcceptanceRate: " << options.targetAcceptanceRate << endl;
   out << "\tnLeapFrogSteps: " << options.nLeapFrogSteps << endl;
   out << "\tnThreads: " << options.nThreads << endl;
   return out;
@@ -56,7 +70,8 @@ SamplerHybridMcmc::SamplerHybridMcmc() :
   _options(),
   _gradient(),
   _u(),
-  _lastSampleAccepted(false) {
+  _lastSampleAccepted(false),
+  _stepLength(_options.initialLeapFrogStepSize) {
 
 }
 
@@ -64,7 +79,8 @@ SamplerHybridMcmc::SamplerHybridMcmc(const SamplerHybridMcmcOptions& options) :
   _options(options),
   _gradient(),
   _u(),
-  _lastSampleAccepted(false) {
+  _lastSampleAccepted(false),
+  _stepLength(_options.initialLeapFrogStepSize) {
 
 }
 
@@ -90,6 +106,11 @@ void SamplerHybridMcmc::initialize() {
   _gradient.resize(getProblemManager().numOptParameters());
 }
 
+void SamplerHybridMcmc::setOptions(const SamplerHybridMcmcOptions& options) {
+  _options = options;
+  _stepLength = _options.initialLeapFrogStepSize;
+}
+
 void SamplerHybridMcmc::step(bool& accepted, double& acceptanceProbability) {
 
   // Note: The notation follows the implementation here:
@@ -99,8 +120,15 @@ void SamplerHybridMcmc::step(bool& accepted, double& acceptanceProbability) {
 
   Timer timeGrad("SamplerHybridMcmc: Compute---Gradient", true);
 
+  // Adapt step length
+  if (statistics().getWeightedMeanAcceptanceProbability() > _options.targetAcceptanceRate)
+    _stepLength *= _options.incFactorLeapFrogStepSize;
+  else
+    _stepLength *= _options.decFactorLeapFrogStepSize;
+  _stepLength = max(min(_stepLength, _options.maxLeapFrogStepSize), _options.minLeapFrogStepSize); // clip
+
   // pre-computations for speed-up of upcoming calculations
-  const double deltaHalf = _options.leapFrogStepSize/2.;
+  const double deltaHalf = _stepLength/2.;
   auto normal_dist = [&] (double) { return sm::random::randn(); };
 
   ColumnVectorType dxStar;
@@ -138,7 +166,7 @@ void SamplerHybridMcmc::step(bool& accepted, double& acceptanceProbability) {
   pStar -= deltaHalf*_gradient;
 
   // first full step for position/sample
-  dxStar = _options.leapFrogStepSize*pStar;
+  dxStar = _stepLength*pStar;
   SM_ASSERT_TRUE_DBG(Exception, pStar.allFinite(), "Position " << dxStar.format(Eigen::IOFormat(2, Eigen::DontAlignCols, ", ", ", ", "", "", "[", "]")) << " is not finite. "
       "Maybe the step length of the Leap-Frog method is too large.");
   getProblemManager().applyStateUpdate(dxStar);
@@ -153,12 +181,12 @@ void SamplerHybridMcmc::step(bool& accepted, double& acceptanceProbability) {
      getProblemManager().computeGradient(_gradient, _options.nThreads, false /*TODO: useMEstimator*/);
      timeGrad.stop();
 
-     pStar -= _options.leapFrogStepSize*_gradient;
+     pStar -= _stepLength*_gradient;
      SM_ASSERT_TRUE_DBG(Exception, pStar.allFinite(), "Momentum " << pStar.format(Eigen::IOFormat(2, Eigen::DontAlignCols, ", ", ", ", "", "", "[", "]")) << " is not finite. "
          "Maybe the step length of the Leap-Frog method is too large.");
 
      // position/sample
-     dxStar = _options.leapFrogStepSize*pStar;
+     dxStar = _stepLength*pStar;
      SM_ASSERT_TRUE_DBG(Exception, dxStar.allFinite(), "Position " << dxStar.format(Eigen::IOFormat(2, Eigen::DontAlignCols, ", ", ", ", "", "", "[", "]")) << " is not finite. "
          "Maybe the step length of the Leap-Frog method is too large.");
      getProblemManager().applyStateUpdate(dxStar);
@@ -189,7 +217,7 @@ void SamplerHybridMcmc::step(bool& accepted, double& acceptanceProbability) {
                        eTotalStar << " (potential: " << _u << ", kinetic: " << kStar << "), acceptanceProbability = " << acceptanceProbability);
     } else {
       SM_WARN_STREAM("Leap-Frog method diverged, reducing step length...");
-      _options.leapFrogStepSize /= 1.01;
+      _stepLength *= _options.decFactorLeapFrogStepSize;
     }
 
     if (sm::random::randLU(0., 1.0) < acceptanceProbability) { // sample accepted, we keep the new design variables

@@ -26,9 +26,14 @@ struct SamplerHybridMcmcOptions {
   SamplerHybridMcmcOptions(const sm::PropertyTree& config);
   void check() const;
 
-  double leapFrogStepSize; /// \brief Step length for the Leap-Frog integration
-  size_t nLeapFrogSteps; /// \brief Number of steps for the Leap-Frog integration
-  size_t nThreads; /// \brief Number of threads to use for gradient computation
+  double initialLeapFrogStepSize = 0.1; /// \brief Start value for the step length for the Leap-Frog integration
+  double minLeapFrogStepSize = 0.001; /// \brief Minimum value for the step length for the Leap-Frog integration
+  double maxLeapFrogStepSize = 0.5; /// \brief Maximum value for the step length for the Leap-Frog integration
+  double incFactorLeapFrogStepSize = 1.02; /// \brief Raising factor for the step length for the Leap-Frog integration
+  double decFactorLeapFrogStepSize = 0.98; /// \brief Lowering factor for the step length for the Leap-Frog integration
+  double targetAcceptanceRate = 0.9; /// \brief The desired acceptance rate
+  size_t nLeapFrogSteps = 20; /// \brief Number of steps for the Leap-Frog integration
+  size_t nThreads = 2; /// \brief Number of threads to use for gradient computation
 };
 
 std::ostream& operator<<(std::ostream& out, const aslam::backend::SamplerHybridMcmcOptions& options);
@@ -58,8 +63,10 @@ class SamplerHybridMcmc : public SamplerBase {
   /// \brief Initialization method
   virtual void initialize() override;
 
-  /// \brief Mutable getter for options
-  SamplerHybridMcmcOptions& options() { return _options; }
+  /// \brief Const getter for options
+  const SamplerHybridMcmcOptions& getOptions() const { return _options; }
+  /// \brief Setter for options
+  void setOptions(const SamplerHybridMcmcOptions& options);
 
  private:
 
@@ -78,6 +85,7 @@ class SamplerHybridMcmc : public SamplerBase {
   RowVectorType _gradient; /// \brief Current gradient of the negative log density
   double _u; /// \brief Current potential energy of the system
   bool _lastSampleAccepted; /// \brief Whether the last sample was accepted or not
+  double _stepLength; /// \brief The current leap-frog step length
 
 };
 
