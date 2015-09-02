@@ -67,7 +67,7 @@ class TestMetropolisHastings(unittest.TestCase):
         # Now let's sample.
         sampler.setNegativeLogDensity(negLogDensity);
         sampler.checkNegativeLogDensitySetup();
-        sampler.run(10000, 10);
+        sampler.run(10000);
         
 if __name__ == '__main__':
     import rostest

@@ -47,10 +47,12 @@ class SamplerMetropolisHastings : public SamplerBase {
   SamplerMetropolisHastingsOptions& options() { return _options; }
 
  private:
-  virtual void runImplementation(const std::size_t nStepsMax, const std::size_t nAcceptedSamples, Statistics& statistics) override;
+  virtual void step(bool& accepted, double& acceptanceProbability) override;
+  virtual void resetImplementation() override;
 
  private:
    SamplerMetropolisHastingsOptions _options; /// \brief Configuration options
+   double _negLogDensity; /// \brief The current negative log density of the system
 
 };
 
