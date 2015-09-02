@@ -18,18 +18,21 @@ namespace aslam {
 namespace backend {
 
 SamplerMetropolisHastingsOptions::SamplerMetropolisHastingsOptions() :
-  transitionKernelSigma(0.1) {
+  transitionKernelSigma(0.1),
+  nThreadsEvaluateLogDensity(1) {
 
 }
 
 SamplerMetropolisHastingsOptions::SamplerMetropolisHastingsOptions(const sm::PropertyTree& config) :
-    transitionKernelSigma(config.getDouble("transitionKernelSigma", transitionKernelSigma)) {
+    transitionKernelSigma(config.getDouble("transitionKernelSigma", transitionKernelSigma)),
+    nThreadsEvaluateLogDensity(config.getDouble("transitionKernelSigma", nThreadsEvaluateLogDensity)) {
 
 }
 
 std::ostream& operator<<(std::ostream& out, const aslam::backend::SamplerMetropolisHastingsOptions& options) {
   out << "SamplerMetropolisHastingsOptions:" << std::endl;
   out << "\ttransitionKernelSigma: " << options.transitionKernelSigma << std::endl;
+  out << "\tnThreadsEvaluateLogDensity: " << options.nThreadsEvaluateLogDensity << std::endl;
   return out;
 }
 
@@ -52,13 +55,13 @@ void SamplerMetropolisHastings::step(bool& accepted, double& acceptanceProbabili
   auto normal_dist = [&] (double) { return _options.transitionKernelSigma*sm::random::randn(); };
 
   if (std::isnan(_negLogDensity))
-    _negLogDensity = evaluateNegativeLogDensity();
-  SM_ASSERT_EQ_DBG(Exception, evaluateNegativeLogDensity(), _negLogDensity, ""); // check that caching works
+    _negLogDensity = evaluateNegativeLogDensity(_options.nThreadsEvaluateLogDensity);
+  SM_ASSERT_EQ_DBG(Exception, evaluateNegativeLogDensity(_options.nThreadsEvaluateLogDensity), _negLogDensity, ""); // check that caching works
 
   const ColumnVectorType dx = ColumnVectorType::NullaryExpr(getProblemManager().numOptParameters(), normal_dist);
   getProblemManager().applyStateUpdate(dx);
 
-  const double negLogDensityNew = evaluateNegativeLogDensity();
+  const double negLogDensityNew = evaluateNegativeLogDensity(_options.nThreadsEvaluateLogDensity);
 
   acceptanceProbability = std::exp(std::min(0.0, -negLogDensityNew + _negLogDensity));
   SM_VERBOSE_STREAM("NegLogDensity: " << _negLogDensity << "->" << negLogDensityNew << ", acceptance probability: " << acceptanceProbability);

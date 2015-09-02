@@ -108,8 +108,8 @@ void SamplerBase::checkNegativeLogDensitySetup() const {
 }
 
 /// \brief Evaluate the current negative log density
-double SamplerBase::evaluateNegativeLogDensity() const {
-  return _problemManager.evaluateError();
+double SamplerBase::evaluateNegativeLogDensity(const size_t nThreads /*= 1*/) const {
+  return _problemManager.evaluateError(nThreads);
 }
 
 /// \brief Initialization method

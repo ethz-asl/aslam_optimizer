@@ -71,7 +71,7 @@ class ProblemManager {
   void checkProblemSetup() const;
 
   /// \brief Evaluate the value of the objective function
-  double evaluateError() const;
+  double evaluateError(const size_t nThreads = 1) const;
 
   /// \brief Signal that the problem changed.
   void signalProblemChanged() { setInitialized(false); }
@@ -92,6 +92,9 @@ class ProblemManager {
  private:
   /// \brief Evaluate the gradient of the objective function
   void evaluateGradients(size_t threadId, size_t startIdx, size_t endIdx, bool useMEstimator, RowVectorType& grad);
+
+  /// \brief Evaluate the objective function
+  void sumErrorTerms(size_t /* threadId */, size_t startIdx, size_t endIdx, double& err) const;
 
  private:
 
