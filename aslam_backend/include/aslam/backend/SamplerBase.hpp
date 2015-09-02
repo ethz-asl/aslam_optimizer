@@ -25,22 +25,25 @@ class SamplerBase {
     Statistics();
     ~Statistics() { }
 
-    /// \brief Reset all information, i.e. counters to zero
+    /// \brief Reset all information, i.e. counters and average acceptance probability to zero
     void reset();
     /// \brief Getter for the acceptance rate
-    double getAcceptanceRate(bool total = false) const;
-    /// \brief Getter for the number of iterations since the last run() or initialize() call
-    std::size_t getNumIterations(bool total = false) const;
-    /// \brief Getter for the number of iterations since the last run() or initialize() call
-    std::size_t getNumAcceptedSamples(bool total = false) const;
+    double getAcceptanceRate() const;
+    /// \brief Getter for the number of iterations since the last initialize() or reset() call
+    std::size_t getNumIterations() const;
+    /// \brief Getter for the number of iterations since the last run(), initialize() or reset() call
+    std::size_t getNumAcceptedSamples(bool total) const;
+
+    double getWeightedMeanAcceptanceProbability() const { return weightedMeanAcceptanceProbability; }
+    void updateWeightedMeanAcceptanceProbability(const double prob);
 
    public:
-    std::size_t nIterationsThisRun; /// \brief How many iterations the sampler has run in the last run() call
-    std::size_t nSamplesAcceptedThisRun; /// \brief How many samples were accepted since the last run() call
 
    private:
-    std::size_t nIterationsTotal; /// \brief How many iterations the sampler has run in the last initialize() call
+    std::size_t nIterations; /// \brief How many iterations the sampler has run in the last initialize() call
     std::size_t nSamplesAcceptedTotal; /// \brief How many samples were accepted since the last initialize() call
+    std::size_t nSamplesAcceptedThisRun; /// \brief How many samples were accepted since the last run() call
+    double weightedMeanAcceptanceProbability; /// \brief Weighted average of acceptance probabilities
   };
 
  public:
@@ -49,8 +52,11 @@ class SamplerBase {
   /// \brief Initialization method
   virtual void initialize();
 
-  /// \brief Run the sampler for at maximum \p nStepsMax until \p nAcceptedSamples samples were accepted
-  void run(const std::size_t nStepsMax, const std::size_t nAcceptedSamples = std::numeric_limits<std::size_t>::max());
+  /// \brief Reset the sampler
+  virtual void reset();
+
+  /// \brief Run the sampler for \p nSteps
+  void run(const std::size_t nSteps);
 
   /// \brief Set up to work on the log density. The log density may neglect the normalization constant.
   void setNegativeLogDensity(boost::shared_ptr<OptimizationProblemBase> negLogDensity);
@@ -77,8 +83,11 @@ class SamplerBase {
 
   ProblemManager& getProblemManager() { return _problemManager; }
  private:
-  /// \brief Run the sampler for at maximum \p nStepsMax until \p nAcceptedSamples samples were accepted
-  virtual void runImplementation(const std::size_t nStepsMax, const std::size_t nAcceptedSamples, Statistics& statistics) = 0;
+  /// \brief Create one sample
+  virtual void step(bool& accepted, double& acceptanceProbability) = 0;
+
+  /// \brief Implement reset functionality for the derived class
+  virtual void resetImplementation() { }
 
  private:
   Statistics _statistics; /// \brief statistics collected during runtime

@@ -16,58 +16,68 @@ namespace backend {
 
 
 SamplerBase::Statistics::Statistics() :
-  nIterationsThisRun(0),
+  nIterations(0),
+  nSamplesAcceptedTotal(0),
   nSamplesAcceptedThisRun(0),
-  nIterationsTotal(0),
-  nSamplesAcceptedTotal(0) {
+  weightedMeanAcceptanceProbability(0.0) {
 
 }
 
 void SamplerBase::Statistics::reset() {
-  nIterationsThisRun = 0;
-  nIterationsTotal = 0;
-  nSamplesAcceptedThisRun = 0;
+  nIterations = 0;
   nSamplesAcceptedTotal = 0;
+  nSamplesAcceptedThisRun = 0;
+  weightedMeanAcceptanceProbability = 0.0;
 }
 
 /// \brief Getter for the acceptance rate
-double SamplerBase::Statistics::getAcceptanceRate(bool total /*= false*/) const {
-  return getNumIterations(total) > 0 ?
-      static_cast<double>(getNumAcceptedSamples(total))/static_cast<double>(getNumIterations(total)) : 0.0;
+double SamplerBase::Statistics::getAcceptanceRate() const {
+  return getNumIterations() > 0 ? static_cast<double>(getNumAcceptedSamples(true))/static_cast<double>(getNumIterations()) : 0.0;
 }
 
 /// \brief Getter for the number of iterations since the last run() or initialize() call
-std::size_t SamplerBase::Statistics::getNumIterations(bool total /*= false*/) const {
-  return total ? nIterationsTotal : nIterationsThisRun;
+std::size_t SamplerBase::Statistics::getNumIterations() const {
+  return nIterations;
 }
 
 /// \brief Getter for the number of iterations since the last run() or initialize() call
-std::size_t SamplerBase::Statistics::getNumAcceptedSamples(bool total /*= false*/) const {
+std::size_t SamplerBase::Statistics::getNumAcceptedSamples(bool total) const {
   return total ? nSamplesAcceptedTotal : nSamplesAcceptedThisRun;
 }
 
+void SamplerBase::Statistics::updateWeightedMeanAcceptanceProbability(const double prob) {
+  SM_ASSERT_GE_DBG(Exception, prob, 0.0, "");
+  SM_ASSERT_LE_DBG(Exception, prob, 1.0, "");
+  weightedMeanAcceptanceProbability += nIterations == 0 ? prob : -0.1 * (weightedMeanAcceptanceProbability - prob);
+}
 
-
-/// \brief Run the sampler for at maximum \p nStepsMax until \p nAcceptedSamples samples were accepted
-void SamplerBase::run(const std::size_t nStepsMax, const std::size_t nAcceptedSamples /*= std::numeric_limits<std::size_t>::max()*/) {
-
-  SM_ASSERT_GT(Exception, nStepsMax, 0, "It does not make sense to run the sampler with no steps.");
-  SM_ASSERT_GT(Exception, nAcceptedSamples, 0, "It does not make sense to run the sampler until zero samples were accepted.");
+/// \brief Run the sampler for \p nSteps
+void SamplerBase::run(const std::size_t nSteps) {
 
   if (!_problemManager.isInitialized())
     initialize();
 
+  bool accepted;
+  double accProb;
   _statistics.nSamplesAcceptedThisRun = 0;
-  _statistics.nIterationsThisRun = 0;
 
-  runImplementation(nStepsMax, nAcceptedSamples, _statistics);
+  for (size_t cnt = 0; cnt < nSteps; cnt++) {
 
-  _statistics.nSamplesAcceptedTotal += _statistics.nSamplesAcceptedThisRun;
-  _statistics.nIterationsTotal += _statistics.nIterationsThisRun;
+    step(accepted, accProb);
+
+    // Update statistics
+    if(accepted) {
+      _statistics.nSamplesAcceptedThisRun++;
+      _statistics.nSamplesAcceptedTotal++;
+    }
+    _statistics.nIterations++;
+    _statistics.updateWeightedMeanAcceptanceProbability(accProb);
+  }
 
   SM_VERBOSE_STREAM("Acceptance rate -- this run: " << fixed << setprecision(4) <<
-                _statistics.getAcceptanceRate(false) << " (" << _statistics.getNumAcceptedSamples(false) << " of " << _statistics.getNumIterations(false) << "), total: " <<
-                _statistics.getAcceptanceRate(true) << " (" << _statistics.getNumAcceptedSamples(true) << " of " << _statistics.getNumIterations(true) << ")");
+                static_cast<double>(_statistics.nSamplesAcceptedThisRun)/nSteps << " (" << _statistics.nSamplesAcceptedThisRun << " of " << nSteps << "), total: " <<
+                _statistics.getAcceptanceRate() << " (" << _statistics.getNumAcceptedSamples(true) << " of " << _statistics.getNumIterations() << "), mean acceptance probability: " <<
+                _statistics.getWeightedMeanAcceptanceProbability());
 
 }
 
@@ -104,8 +114,14 @@ double SamplerBase::evaluateNegativeLogDensity() const {
 
 /// \brief Initialization method
 void SamplerBase::initialize() {
-  _statistics.reset();
+  reset();
   _problemManager.initialize();
+}
+
+/// \brief Reset the sampler
+void SamplerBase::reset() {
+  _statistics.reset();
+  resetImplementation();
 }
 
 /// \brief Const getter for statistics

@@ -106,7 +106,7 @@ TEST(OptimizerSamplerMcmcTestSuite, testSamplerMetropolisHastings)
       sampler.run(nStepsSkip);
       EXPECT_GE(sampler.statistics().getAcceptanceRate(), 0.0);
       EXPECT_LE(sampler.statistics().getAcceptanceRate(), 1.0);
-      EXPECT_EQ(sampler.statistics().getNumIterations(), nStepsSkip);
+      EXPECT_EQ((i+1)*nStepsSkip + nStepsBurnIn, sampler.statistics().getNumIterations());
       ASSERT_EQ(1, gaussian1dLogDensity.numDesignVariables());
       auto dv = gaussian1dLogDensity.designVariable(0);
       Eigen::MatrixXd p;
@@ -123,15 +123,11 @@ TEST(OptimizerSamplerMcmcTestSuite, testSamplerMetropolisHastings)
     EXPECT_NEAR((dvValues.array() - dvValues.mean()).matrix().squaredNorm()/(dvValues.rows() - 1.0), sigmaTrue*sigmaTrue, 1e0) << "This failure does "
         "not necessarily have to be an error. It should just appear very rarely";
 
-    // Run until a specified number of samples was accepted
-    sampler.run(numeric_limits<size_t>::max(), 1);
-    EXPECT_GT(sampler.statistics().getAcceptanceRate(), 0.0);
-    EXPECT_GT(sampler.statistics().getNumIterations(), 0);
-
     // Check that re-initializing resets values
     sampler.initialize();
     EXPECT_DOUBLE_EQ(0.0, sampler.statistics().getAcceptanceRate());
     EXPECT_EQ(0, sampler.statistics().getNumIterations());
+    EXPECT_NO_THROW(sampler.run(1)); // Check that sampler runs ok
 
 #ifdef aslam_backend_ENABLE_TIMING
     sm::timing::Timing::print(cout, sm::timing::SORT_BY_TOTAL);

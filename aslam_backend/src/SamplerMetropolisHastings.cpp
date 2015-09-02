@@ -36,47 +36,47 @@ std::ostream& operator<<(std::ostream& out, const aslam::backend::SamplerMetropo
 
 
 SamplerMetropolisHastings::SamplerMetropolisHastings() :
-  _options() {
+  _options(),
+  _negLogDensity(std::numeric_limits<double>::signaling_NaN()) {
 
 }
 
 SamplerMetropolisHastings::SamplerMetropolisHastings(const SamplerMetropolisHastingsOptions& options) :
-  _options(options) {
+  _options(options),
+  _negLogDensity(std::numeric_limits<double>::signaling_NaN()) {
 
 }
 
-void SamplerMetropolisHastings::runImplementation(const std::size_t nStepsMax, const std::size_t nAcceptedSamples, Statistics& statistics) {
+void SamplerMetropolisHastings::step(bool& accepted, double& acceptanceProbability) {
 
   auto normal_dist = [&] (double) { return _options.transitionKernelSigma*sm::random::randn(); };
 
-  double negLogDensity = evaluateNegativeLogDensity();
+  if (std::isnan(_negLogDensity))
+    _negLogDensity = evaluateNegativeLogDensity();
+  SM_ASSERT_EQ_DBG(Exception, evaluateNegativeLogDensity(), _negLogDensity, ""); // check that caching works
 
-  for (; statistics.nIterationsThisRun < nStepsMax; statistics.nIterationsThisRun++) {
+  const ColumnVectorType dx = ColumnVectorType::NullaryExpr(getProblemManager().numOptParameters(), normal_dist);
+  getProblemManager().applyStateUpdate(dx);
 
-    if (statistics.nSamplesAcceptedThisRun >= nAcceptedSamples) {
-      SM_FINE("Required number of accepted samples reached, terminating loop.");
-      break;
-    }
+  const double negLogDensityNew = evaluateNegativeLogDensity();
 
-    const ColumnVectorType dx = ColumnVectorType::NullaryExpr(getProblemManager().numOptParameters(), normal_dist);
-    getProblemManager().applyStateUpdate(dx);
+  acceptanceProbability = std::exp(std::min(0.0, -negLogDensityNew + _negLogDensity));
+  SM_VERBOSE_STREAM("NegLogDensity: " << _negLogDensity << "->" << negLogDensityNew << ", acceptance probability: " << acceptanceProbability);
 
-    const double negLogDensityNew = evaluateNegativeLogDensity();
-
-    const double acceptanceProbability = std::exp(std::min(0.0, -negLogDensityNew + negLogDensity));
-    SM_VERBOSE_STREAM("NegLogDensity: " << negLogDensity << "->" << negLogDensityNew << ", acceptance probability: " << acceptanceProbability);
-
-    if (sm::random::randLU(0.0, 1.0) < acceptanceProbability) { // sample accepted, we keep the new design variables
-      negLogDensity = negLogDensityNew;
-      statistics.nSamplesAcceptedThisRun++;
-      SM_VERBOSE_STREAM("Sample accepted");
-    } else { // sample rejected, we revert the update
-      getProblemManager().revertLastStateUpdate();
-      SM_VERBOSE_STREAM("Sample rejected");
-    }
-
+  if (sm::random::randLU(0.0, 1.0) < acceptanceProbability) { // sample accepted, we keep the new design variables
+    _negLogDensity = negLogDensityNew;
+    accepted = true;
+    SM_VERBOSE_STREAM("Sample accepted");
+  } else { // sample rejected, we revert the update
+    getProblemManager().revertLastStateUpdate();
+    accepted = false;
+    SM_VERBOSE_STREAM("Sample rejected");
   }
 
+}
+
+void SamplerMetropolisHastings::resetImplementation() {
+  _negLogDensity = std::numeric_limits<double>::signaling_NaN();
 }
 
 } /* namespace aslam */
