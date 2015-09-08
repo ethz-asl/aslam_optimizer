@@ -140,7 +140,7 @@ void SamplerHybridMcmc::step(bool& accepted, double& acceptanceProbability) {
   // ******** Simulate Hamiltonian dynamics via Leap-Frog method ********* //
 
   // sample random momentum
-  auto normal_dist = [&] (double) { return sm::random::randn(); };
+  auto normal_dist = [&] (int) { return sm::random::randn(); };
   pStar = ColumnVectorType::NullaryExpr(getProblemManager().numOptParameters(), normal_dist);
 
   // evaluate energies at start of trajectory

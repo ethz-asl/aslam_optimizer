@@ -56,7 +56,6 @@ SamplerMetropolisHastings::SamplerMetropolisHastings(const SamplerMetropolisHast
 
 void SamplerMetropolisHastings::step(bool& accepted, double& acceptanceProbability) {
 
-  auto normal_dist = [&] (double) { return _options.transitionKernelSigma*sm::random::randn(); };
 
   if (isRecomputationNegLogDensityNecessary())
     _negLogDensity = evaluateNegativeLogDensity(_options.nThreadsEvaluateLogDensity);
@@ -65,6 +64,7 @@ void SamplerMetropolisHastings::step(bool& accepted, double& acceptanceProbabili
     SM_ASSERT_EQ(Exception, evaluateNegativeLogDensity(_options.nThreadsEvaluateLogDensity), _negLogDensity, ""); // check that caching works
 #endif
 
+  auto normal_dist = [&] (int) { return _options.transitionKernelSigma*sm::random::randn(); };
   const ColumnVectorType dx = ColumnVectorType::NullaryExpr(getProblemManager().numOptParameters(), normal_dist);
   getProblemManager().applyStateUpdate(dx);
 
