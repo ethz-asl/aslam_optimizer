@@ -32,6 +32,7 @@ struct SamplerHybridMcmcOptions {
   double incFactorLeapFrogStepSize = 1.02; /// \brief Raising factor for the step length for the Leap-Frog integration
   double decFactorLeapFrogStepSize = 0.98; /// \brief Lowering factor for the step length for the Leap-Frog integration
   double targetAcceptanceRate = 0.9; /// \brief The desired acceptance rate
+  double standardDeviationMomentum = 1.0; /// \brief Standard deviation of random momentum
   size_t nLeapFrogSteps = 20; /// \brief Number of steps for the Leap-Frog integration
   size_t nThreads = 2; /// \brief Number of threads to use for gradient computation
 };
