@@ -127,6 +127,8 @@ void SamplerHybridMcmc::step(bool& accepted, double& acceptanceProbability) {
     _stepLength *= _options.decFactorLeapFrogStepSize;
   _stepLength = max(min(_stepLength, _options.maxLeapFrogStepSize), _options.minLeapFrogStepSize); // clip
 
+  SM_DEBUG_STREAM_NAMED("sampling", "Current leap frog step size is " << _stepLength << ".");
+
   // pre-computations for speed-up of upcoming calculations
   const double deltaHalf = _stepLength/2.;
 
@@ -140,7 +142,7 @@ void SamplerHybridMcmc::step(bool& accepted, double& acceptanceProbability) {
   // ******** Simulate Hamiltonian dynamics via Leap-Frog method ********* //
 
   // sample random momentum
-  auto normal_dist = [&] (int) { return sm::random::randn(); };
+  auto normal_dist = [&] (int) { return sm::random::randn()*_options.standardDeviationMomentum; };
   pStar = ColumnVectorType::NullaryExpr(getProblemManager().numOptParameters(), normal_dist);
 
   // evaluate energies at start of trajectory
@@ -171,7 +173,7 @@ void SamplerHybridMcmc::step(bool& accepted, double& acceptanceProbability) {
       "Maybe the step length of the Leap-Frog method is too large.");
   getProblemManager().applyStateUpdate(dxStar);
 
-  SM_ALL_STREAM("Step 0 -- Momentum: " << pStar.transpose() << ", position update: " << dxStar.transpose());
+  SM_ALL_STREAM_NAMED("sampling", "Step 0 -- Momentum: " << pStar.transpose() << ", position update: " << dxStar.transpose());
 
    // L-1 full steps
    for(size_t l = 1; l < _options.nLeapFrogSteps - 1; ++l) {
@@ -191,7 +193,7 @@ void SamplerHybridMcmc::step(bool& accepted, double& acceptanceProbability) {
          "Maybe the step length of the Leap-Frog method is too large.");
      getProblemManager().applyStateUpdate(dxStar);
 
-     SM_ALL_STREAM("Step " << l << " -- Momentum: " << pStar.transpose() << ", position update: " << dxStar.transpose());
+     SM_ALL_STREAM_NAMED("sampling", "Step " << l << " -- Momentum: " << pStar.transpose() << ", position update: " << dxStar.transpose());
 
    }
 
@@ -213,7 +215,7 @@ void SamplerHybridMcmc::step(bool& accepted, double& acceptanceProbability) {
     acceptanceProbability = 0.0; // this rejects the sample if the energy is not finite
     if (isfinite(eTotalStar)) {
       acceptanceProbability = min(1.0, exp(eTotal0 - eTotalStar)); // TODO: can we remove the thresholding?
-      SM_FINEST_STREAM("Energy " << eTotal0 << " (potential: " << u0 << ", kinetic: " << k0 << ") ==> " <<
+      SM_FINEST_STREAM_NAMED("sampling", "Energy " << eTotal0 << " (potential: " << u0 << ", kinetic: " << k0 << ") ==> " <<
                        eTotalStar << " (potential: " << _u << ", kinetic: " << kStar << "), acceptanceProbability = " << acceptanceProbability);
     } else {
       SM_WARN_STREAM("Leap-Frog method diverged, reducing step length...");
@@ -221,13 +223,13 @@ void SamplerHybridMcmc::step(bool& accepted, double& acceptanceProbability) {
     }
 
     if (sm::random::randLU(0., 1.0) < acceptanceProbability) { // sample accepted, we keep the new design variables
-      SM_FINEST_STREAM("Sample accepted");
+      SM_FINEST_STREAM_NAMED("sampling", "Sample accepted");
       accepted = _lastSampleAccepted = true;
     } else { // sample rejected, we revert the update
       revertUpdateDesignVariables();
       _u = u0;
       _gradient = gradient0;
-      SM_FINEST_STREAM("Sample rejected");
+      SM_FINEST_STREAM_NAMED("sampling", "Sample rejected");
       accepted = _lastSampleAccepted = false;
     }
 
