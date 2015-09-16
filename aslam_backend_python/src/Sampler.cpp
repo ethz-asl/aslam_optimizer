@@ -93,6 +93,8 @@ void exportSampler()
                      "Lowering factor for the step length for the Leap-Frog integration")
       .def_readwrite("targetAcceptanceRate", &SamplerHybridMcmcOptions::targetAcceptanceRate,
                      "The desired acceptance rate")
+      .def_readwrite("standardDeviationMomentum", &SamplerHybridMcmcOptions::standardDeviationMomentum,
+                     "Random momentum for state in Hamiltonian")
       .def_readwrite("nLeapFrogSteps", &SamplerHybridMcmcOptions::nLeapFrogSteps,
                      "Number of steps for the Leap-Frog integration")
       .def_readwrite("nThreads", &SamplerHybridMcmcOptions::nThreads,
