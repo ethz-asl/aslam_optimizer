@@ -74,7 +74,7 @@ void SamplerBase::run(const std::size_t nSteps) {
     _forceRecomputationNegLogDensity = false;
   }
 
-  SM_VERBOSE_STREAM("Acceptance rate -- this run: " << fixed << setprecision(4) <<
+  SM_VERBOSE_STREAM_NAMED("sampling", "Acceptance rate -- this run: " << fixed << setprecision(4) <<
                 static_cast<double>(_statistics.nSamplesAcceptedThisRun)/nSteps << " (" << _statistics.nSamplesAcceptedThisRun << " of " << nSteps << "), total: " <<
                 _statistics.getAcceptanceRate() << " (" << _statistics.getNumAcceptedSamples(true) << " of " << _statistics.getNumIterations() << "), mean acceptance probability: " <<
                 _statistics.getWeightedMeanAcceptanceProbability());
