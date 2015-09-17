@@ -97,6 +97,7 @@ TEST(OptimizerSamplerMcmcTestSuite, testSamplerMetropolisHastings)
     const int nStepsSkip = 50;
 
     // Burn-in
+    EXPECT_TRUE(sampler.isRecomputationNegLogDensityNecessary());
     sampler.run(nStepsBurnIn);
     EXPECT_GE(sampler.statistics().getAcceptanceRate(), 1e-3);
     EXPECT_LE(sampler.statistics().getAcceptanceRate(), 1.0);
@@ -106,6 +107,8 @@ TEST(OptimizerSamplerMcmcTestSuite, testSamplerMetropolisHastings)
     Eigen::VectorXd dvValues(nSamples);
     for (size_t i=0; i<nSamples; i++) {
       sampler.run(nStepsSkip);
+      if (sampler.isLastSampledAccepted())
+        EXPECT_FALSE(sampler.isRecomputationNegLogDensityNecessary());
       EXPECT_GE(sampler.statistics().getAcceptanceRate(), 0.0);
       EXPECT_LE(sampler.statistics().getAcceptanceRate(), 1.0);
       EXPECT_EQ((i+1)*nStepsSkip + nStepsBurnIn, sampler.statistics().getNumIterations());
@@ -116,6 +119,9 @@ TEST(OptimizerSamplerMcmcTestSuite, testSamplerMetropolisHastings)
       ASSERT_EQ(1, p.size());
       dvValues[i] = p(0,0);
     }
+
+    sampler.forceRecomputationNegLogDensity();
+    EXPECT_TRUE(sampler.isRecomputationNegLogDensityNecessary());
 
     // check sample mean
     EXPECT_NEAR(dvValues.mean(), meanTrue, 4.*sigmaTrue) << "This failure does not necessarily have to be an error. It should just appear "

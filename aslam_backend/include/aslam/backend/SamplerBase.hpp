@@ -70,6 +70,15 @@ class SamplerBase {
   /// \brief Signal the sampler that the negative log density formulation changed.
   void signalNegativeLogDensityChanged();
 
+  /// \brief Tell the sampler not to use cached values from accepted samples in the last step
+  void forceRecomputationNegLogDensity();
+
+  /// \brief Whether the very last sample was accepted
+  bool isLastSampledAccepted() const { return _isLastSampleAccepted; }
+
+  /// \brief State of the force recomputation flag
+  bool isRecomputationNegLogDensityNecessary() const { return _forceRecomputationNegLogDensity || !_isLastSampleAccepted; }
+
   /// \brief Do a bunch of checks to see if the problem is well-defined. This includes checking that every error term is
   ///        hooked up to design variables and running finite differences on error terms where this is possible.
   void checkNegativeLogDensitySetup() const;
@@ -81,7 +90,9 @@ class SamplerBase {
   /// \brief Evaluate the current negative log density
   double evaluateNegativeLogDensity(const size_t nThreads = 1) const;
 
+  /// \brief Getter for problem manager
   ProblemManager& getProblemManager() { return _problemManager; }
+
  private:
   /// \brief Create one sample
   virtual void step(bool& accepted, double& acceptanceProbability) = 0;
@@ -92,6 +103,9 @@ class SamplerBase {
  private:
   Statistics _statistics; /// \brief statistics collected during runtime
   ProblemManager _problemManager;  /// \brief the manager for the attached problem
+
+  bool _isLastSampleAccepted = false; /// \brief Was the sample in the last iteration accepted
+  bool _forceRecomputationNegLogDensity = true; /// \brief Should density information definitely be recomputed in the next step
 };
 
 }

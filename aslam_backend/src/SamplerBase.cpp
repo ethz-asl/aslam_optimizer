@@ -57,21 +57,21 @@ void SamplerBase::run(const std::size_t nSteps) {
   if (!_problemManager.isInitialized())
     initialize();
 
-  bool accepted;
   double accProb;
   _statistics.nSamplesAcceptedThisRun = 0;
 
   for (size_t cnt = 0; cnt < nSteps; cnt++) {
 
-    step(accepted, accProb);
+    step(_isLastSampleAccepted, accProb);
 
     // Update statistics
-    if(accepted) {
+    if(_isLastSampleAccepted) {
       _statistics.nSamplesAcceptedThisRun++;
       _statistics.nSamplesAcceptedTotal++;
     }
     _statistics.nIterations++;
     _statistics.updateWeightedMeanAcceptanceProbability(accProb);
+    _forceRecomputationNegLogDensity = false;
   }
 
   SM_VERBOSE_STREAM("Acceptance rate -- this run: " << fixed << setprecision(4) <<
@@ -101,6 +101,11 @@ void SamplerBase::signalNegativeLogDensityChanged() {
   _problemManager.signalProblemChanged();
 }
 
+/// \brief Tell the sampler not to use cached values from accepted samples in the last step
+void SamplerBase::forceRecomputationNegLogDensity() {
+  _forceRecomputationNegLogDensity = true;
+}
+
 /// \brief Do a bunch of checks to see if the problem is well-defined. This includes checking that every error term is
 ///        hooked up to design variables and running finite differences on error terms where this is possible.
 void SamplerBase::checkNegativeLogDensitySetup() const {
@@ -121,6 +126,8 @@ void SamplerBase::initialize() {
 /// \brief Reset the sampler
 void SamplerBase::reset() {
   _statistics.reset();
+  _isLastSampleAccepted = false;
+  _forceRecomputationNegLogDensity = true;
   resetImplementation();
 }
 
