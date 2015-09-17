@@ -4,6 +4,7 @@
 #include <sm/eigen/assert_macros.hpp>
 #include <aslam/backend/sparse_matrix_functions.hpp>
 #include <sm/PropertyTree.hpp>
+#include <sm/logging.hpp>
 
 namespace aslam {
 namespace backend {
@@ -16,7 +17,6 @@ OptimizerRpropOptions::OptimizerRpropOptions() :
     maxDelta(1.0),
     convergenceGradientNorm(1e-3),
     maxIterations(20),
-    verbose(false),
     nThreads(4)
 {
 
@@ -30,7 +30,6 @@ OptimizerRpropOptions::OptimizerRpropOptions(const sm::PropertyTree& config) :
     maxDelta(config.getDouble("maxDelta", maxDelta)),
     convergenceGradientNorm(config.getDouble("convergenceGradientNorm", convergenceGradientNorm)),
     maxIterations(config.getInt("maxIterations", maxIterations)),
-    verbose(config.getBool("verbose", verbose)),
     nThreads(config.getInt("nThreads", nThreads))
 {
 
@@ -45,7 +44,6 @@ std::ostream& operator<<(std::ostream& out, const aslam::backend::OptimizerRprop
   out << "\tminDelta: " << options.minDelta << std::endl;
   out << "\tmaxDelta: " << options.maxDelta << std::endl;
   out << "\tmaxIterations: " << options.maxIterations << std::endl;
-  out << "\tverbose: " << options.verbose << std::endl;
   out << "\tnThreads: " << options.nThreads << std::endl;
   return out;
 }
@@ -54,24 +52,24 @@ std::ostream& operator<<(std::ostream& out, const aslam::backend::OptimizerRprop
 
 
 OptimizerRprop::OptimizerRprop() :
-            _curr_gradient_norm(std::numeric_limits<double>::signaling_NaN()),
-            _options(OptimizerRpropOptions()),
-            _nIterations(0)
+    _curr_gradient_norm(std::numeric_limits<double>::signaling_NaN()),
+    _options(OptimizerRpropOptions()),
+    _nIterations(0)
 {
 
 }
 
 OptimizerRprop::OptimizerRprop(const OptimizerRpropOptions& options) :
-            _curr_gradient_norm(std::numeric_limits<double>::signaling_NaN()),
-            _options(options),
-            _nIterations(0)
+    _curr_gradient_norm(std::numeric_limits<double>::signaling_NaN()),
+    _options(options),
+    _nIterations(0)
 {
 
 }
 
 OptimizerRprop::OptimizerRprop(const sm::PropertyTree& config) :
-            _curr_gradient_norm(std::numeric_limits<double>::signaling_NaN()),
-            _nIterations(0)
+    _curr_gradient_norm(std::numeric_limits<double>::signaling_NaN()),
+    _nIterations(0)
 {
   _options = OptimizerRpropOptions(config);
 }
@@ -118,8 +116,8 @@ void OptimizerRprop::optimize()
 
     if (_curr_gradient_norm < _options.convergenceGradientNorm) {
       isConverged = true;
-      _options.verbose && std::cout << "RPROP: Current gradient norm " << _curr_gradient_norm <<
-          " is smaller than convergenceGradientNorm option -> terminating" << std::endl;
+      SM_DEBUG_STREAM_NAMED("optimization", "RPROP: Current gradient norm " << _curr_gradient_norm <<
+                            " is smaller than convergenceGradientNorm option -> terminating");
     }
 
     if (isConverged)
@@ -147,13 +145,12 @@ void OptimizerRprop::optimize()
         _prev_gradient(d) = gradient(d);
     }
 
-    if (_options.verbose) {
-      std::cout << "Number of iterations: " << _nIterations << std::endl;
-      std::cout << "\t gradient: " << gradient.format(IOFormat(StreamPrecision, DontAlignCols, ", ", ", ", "", "", "[", "]")) << std::endl;
-      std::cout << "\t dx:    " << _dx.format(IOFormat(StreamPrecision, DontAlignCols, ", ", ", ", "", "", "[", "]"))  << std::endl;
-      std::cout << "\t delta:    " << _delta.format(IOFormat(StreamPrecision, DontAlignCols, ", ", ", ", "", "", "[", "]"))  << std::endl;
-      std::cout << "\t norm:     " << _curr_gradient_norm << std::endl;
-    }
+    SM_FINE_STREAM_NAMED("optimization", "Number of iterations: " << _nIterations);
+    SM_FINE_STREAM_NAMED("optimization", "\t gradient: " << gradient.format(IOFormat(StreamPrecision, DontAlignCols, ", ", ", ", "", "", "[", "]")));
+    SM_FINE_STREAM_NAMED("optimization", "\t dx:    " << _dx.format(IOFormat(StreamPrecision, DontAlignCols, ", ", ", ", "", "", "[", "]")) );
+    SM_FINE_STREAM_NAMED("optimization", "\t delta:    " << _delta.format(IOFormat(StreamPrecision, DontAlignCols, ", ", ", ", "", "", "[", "]")) );
+    SM_FINE_STREAM_NAMED("optimization", "\t norm:     " << _curr_gradient_norm);
+
     timeStep.stop();
 
     timeUpdate.start();
@@ -162,10 +159,8 @@ void OptimizerRprop::optimize()
 
   }
 
-  if (_options.verbose) {
-    std::string convergence = isConverged ? "SUCCESS" : "FAILURE";
-    std::cout << "RPROP: Convergence " << convergence << std::endl;
-  }
+  std::string convergence = isConverged ? "YES" : "NO";
+  SM_DEBUG_STREAM_NAMED("optimization", "RPROP: Convergence " << convergence);
 
 }
 

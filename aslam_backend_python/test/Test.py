@@ -7,7 +7,6 @@ import unittest
 class TestRprop(unittest.TestCase):
     def test_simple_optimization(self):
         options = ab.OptimizerRpropOptions()
-        options.verbose = False;
         options.maxIterations = 500;
         options.nThreads = 1;
         optimizer = ab.OptimizerRprop(options)

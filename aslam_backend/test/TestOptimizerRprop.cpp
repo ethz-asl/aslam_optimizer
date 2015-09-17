@@ -42,7 +42,6 @@ TEST(OptimizerRpropTestSuite, testRpropNonSquaredErrorTerms)
     }
     // Now let's optimize.
     OptimizerRpropOptions options;
-    options.verbose = false;
     options.maxIterations = 500;
     options.nThreads = 8;
     OptimizerRprop optimizer(options);
@@ -50,6 +49,7 @@ TEST(OptimizerRpropTestSuite, testRpropNonSquaredErrorTerms)
 
     EXPECT_NO_THROW(optimizer.checkProblemSetup());
 
+    SCOPED_TRACE("");
     optimizer.optimize();
 
     EXPECT_LT(optimizer.getGradientNorm(), 1e-3);
@@ -91,7 +91,6 @@ TEST(OptimizerRpropTestSuite, testRpropSquaredErrorTerms)
     }
     // Now let's optimize.
     OptimizerRpropOptions options;
-    options.verbose = false;
     options.maxIterations = 500;
     options.nThreads = 8;
     OptimizerRprop optimizer(options);
@@ -99,6 +98,7 @@ TEST(OptimizerRpropTestSuite, testRpropSquaredErrorTerms)
 
     EXPECT_NO_THROW(optimizer.checkProblemSetup());
 
+    SCOPED_TRACE("");
     optimizer.optimize();
 
     EXPECT_LT(optimizer.getGradientNorm(), 1e-3);
