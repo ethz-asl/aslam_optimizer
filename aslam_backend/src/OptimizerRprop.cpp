@@ -85,7 +85,7 @@ void OptimizerRprop::initialize()
 {
   ProblemManager::initialize();
   _dx.resize(numOptParameters(), 1);
-  _prev_gradient.resize(1, numOptParameters());
+  _prev_gradient = ColumnVectorType::Constant(numOptParameters(), 0.0);
   _delta = ColumnVectorType::Constant(numOptParameters(), _options.initialDelta);
   _nIterations = 0;
 }
@@ -123,7 +123,6 @@ void OptimizerRprop::optimize()
     if (isConverged)
       break;
 
-    _dx.setZero();
     for (std::size_t d = 0; d < numOptParameters(); ++d) {
 
       // Adapt delta
@@ -134,9 +133,11 @@ void OptimizerRprop::optimize()
 
       // Compute design variable update vector
       if (gradient(d) > 0.0)
-        _dx(d) -= _delta(d);
+        _dx(d) = -_delta(d);
       else if (gradient(d) < 0.0)
-        _dx(d) += _delta(d);
+        _dx(d) = +_delta(d);
+      else
+        _dx(d) = 0.0;
 
       // Set previous gradient
       if (_prev_gradient(d) * gradient(d) < 0.0)
