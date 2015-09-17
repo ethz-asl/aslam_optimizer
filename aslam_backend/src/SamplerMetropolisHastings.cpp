@@ -24,8 +24,8 @@ SamplerMetropolisHastingsOptions::SamplerMetropolisHastingsOptions() :
 }
 
 SamplerMetropolisHastingsOptions::SamplerMetropolisHastingsOptions(const sm::PropertyTree& config) :
-    transitionKernelSigma(config.getDouble("transitionKernelSigma", transitionKernelSigma)),
-    nThreadsEvaluateLogDensity(config.getDouble("transitionKernelSigma", nThreadsEvaluateLogDensity)) {
+    transitionKernelSigma(config.getDouble("transitionKernelSigma")),
+    nThreadsEvaluateLogDensity(config.getDouble("nThreadsEvaluateLogDensity")) {
 
 }
 
