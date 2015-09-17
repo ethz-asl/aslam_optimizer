@@ -169,8 +169,8 @@ TEST(OptimizerSamplerMcmcTestSuite, testSamplerHybridMcmc)
     pt.setDouble("maxLeapFrogStepSize", 1.0);
     pt.setDouble("incFactorLeapFrogStepSize", 1.02);
     pt.setDouble("decFactorLeapFrogStepSize", 0.98);
-    pt.setDouble("nLeapFrogSteps", 5);
-    pt.setDouble("nThreads", 1);
+    pt.setInt("nLeapFrogSteps", 5);
+    pt.setInt("nThreads", 1);
     SamplerHybridMcmcOptions options(pt);
     EXPECT_DOUBLE_EQ(pt.getDouble("initialLeapFrogStepSize"), options.initialLeapFrogStepSize);
     EXPECT_DOUBLE_EQ(pt.getDouble("minLeapFrogStepSize"), options.minLeapFrogStepSize);
