@@ -20,7 +20,6 @@ namespace aslam {
       double maxDelta; /// \brief Maximum step size
       double convergenceGradientNorm; /// \brief Stopping criterion on gradient norm
       int maxIterations; /// \brief stop if we reach this number of iterations without hitting any of the above stopping criteria.
-      bool verbose; /// \brief should we print out some information each iteration?
       int nThreads; /// \brief The number of threads to use
 
     };
