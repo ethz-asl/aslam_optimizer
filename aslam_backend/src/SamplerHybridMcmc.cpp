@@ -72,7 +72,6 @@ SamplerHybridMcmc::SamplerHybridMcmc() :
   _options(),
   _gradient(),
   _u(),
-  _lastSampleAccepted(false),
   _stepLength(_options.initialLeapFrogStepSize) {
 
 }
@@ -81,7 +80,6 @@ SamplerHybridMcmc::SamplerHybridMcmc(const SamplerHybridMcmcOptions& options) :
   _options(options),
   _gradient(),
   _u(),
-  _lastSampleAccepted(false),
   _stepLength(_options.initialLeapFrogStepSize) {
 
 }
@@ -147,28 +145,35 @@ void SamplerHybridMcmc::step(bool& accepted, double& acceptanceProbability) {
   while (!success) { // repeat until a valid sample was produced (no divergence of trajectory simulation)
 
     bool diverged = false;
+    const bool doRecompute = isRecomputationNegLogDensityNecessary();
 
     // sample random momentum
     auto normal_dist = [&] (int) { return sm::random::randn()*_options.standardDeviationMomentum; };
     pStar = ColumnVectorType::NullaryExpr(getProblemManager().numOptParameters(), normal_dist);
 
     // evaluate energies at start of trajectory
-    u0 = _lastSampleAccepted ? _u : evaluateNegativeLogDensity(); // potential energy
-    SM_ASSERT_EQ_DBG(Exception, evaluateNegativeLogDensity(), u0, ""); // check that caching works
+    if (doRecompute) {
+      u0 = evaluateNegativeLogDensity(); // potential energy
+    } else {
+      u0 = _u;
+      SM_ASSERT_EQ_DBG(Exception, evaluateNegativeLogDensity(), u0, ""); // check that caching works
+    }
     k0 = 0.5*pStar.transpose()*pStar; // kinetic energy
     eTotal0 = u0 + k0;
 
     // first half step of momentum
-    if (!_lastSampleAccepted) { // we can avoid recomputing the gradient if the last sample was accepted
+    if (doRecompute) { // we can avoid recomputing the gradient if the last sample was accepted
       timeGrad.start();
       getProblemManager().computeGradient(_gradient, _options.nThreads, false /*TODO: useMEstimator*/);
       timeGrad.stop();
     }
-  #ifndef NDEBUG
-    RowVectorType grad;
-    getProblemManager().computeGradient(grad, _options.nThreads, false);
-    SM_ASSERT_TRUE(Exception, _gradient.isApprox(grad), ""); // check that caching works
-  #endif
+#ifndef NDEBUG
+    else {
+      RowVectorType grad;
+      getProblemManager().computeGradient(grad, _options.nThreads, false);
+      SM_ASSERT_TRUE(Exception, _gradient.isApprox(grad), ""); // check that caching works
+    }
+#endif
     RowVectorType gradient0 = _gradient; // to be able to restore later
 
 
@@ -233,13 +238,13 @@ void SamplerHybridMcmc::step(bool& accepted, double& acceptanceProbability) {
 
       if (sm::random::randLU(0., 1.0) < acceptanceProbability) { // sample accepted, we keep the new design variables
         SM_FINEST_STREAM_NAMED("sampling", "Sample accepted");
-        accepted = _lastSampleAccepted = true;
+        accepted = true;
       } else { // sample rejected, we revert the update
         revertUpdateDesignVariables();
         _u = u0;
         _gradient = gradient0;
         SM_FINEST_STREAM_NAMED("sampling", "Sample rejected");
-        accepted = _lastSampleAccepted = false;
+        accepted = false;
       }
 
       if (diverged && _stepLength - _options.minLeapFrogStepSize < 1e-12) {

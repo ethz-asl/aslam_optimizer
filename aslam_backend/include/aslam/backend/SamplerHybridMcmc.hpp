@@ -85,7 +85,6 @@ class SamplerHybridMcmc : public SamplerBase {
 
   RowVectorType _gradient; /// \brief Current gradient of the negative log density
   double _u; /// \brief Current potential energy of the system
-  bool _lastSampleAccepted; /// \brief Whether the last sample was accepted or not
   double _stepLength; /// \brief The current leap-frog step length
 
 };
