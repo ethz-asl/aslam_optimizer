@@ -29,6 +29,10 @@ SamplerMetropolisHastingsOptions::SamplerMetropolisHastingsOptions(const sm::Pro
 
 }
 
+void SamplerMetropolisHastingsOptions::check() const {
+  SM_ASSERT_GT( Exception, transitionKernelSigma, 0.0, "");
+}
+
 std::ostream& operator<<(std::ostream& out, const aslam::backend::SamplerMetropolisHastingsOptions& options) {
   out << "SamplerMetropolisHastingsOptions:" << std::endl;
   out << "\ttransitionKernelSigma: " << options.transitionKernelSigma << std::endl;
