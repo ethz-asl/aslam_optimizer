@@ -19,9 +19,10 @@ namespace aslam {
       double minDelta; /// \brief Minimum step size
       double maxDelta; /// \brief Maximum step size
       double convergenceGradientNorm; /// \brief Stopping criterion on gradient norm
-      int maxIterations; /// \brief stop if we reach this number of iterations without hitting any of the above stopping criteria.
-      int nThreads; /// \brief The number of threads to use
+      int maxIterations; /// \brief stop if we reach this number of iterations without hitting any of the above stopping criteria. -1
+      std::size_t nThreads; /// \brief The number of threads to use
 
+      void check() const;
     };
 
     std::ostream& operator<<(std::ostream& out, const aslam::backend::OptimizerRpropOptions& options);

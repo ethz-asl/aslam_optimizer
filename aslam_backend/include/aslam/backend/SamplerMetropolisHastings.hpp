@@ -20,6 +20,8 @@ struct SamplerMetropolisHastingsOptions {
   SamplerMetropolisHastingsOptions(const sm::PropertyTree& config);
   double transitionKernelSigma;  /// \brief Standard deviation for the Gaussian Markov transition kernel \f$ \\mathcal{N(\mathbf 0, \text{diag{\sigma^2})} f$
   std::size_t nThreadsEvaluateLogDensity; /// \brief How many threads to use to evaluate the error terms involved in the negative log density
+
+  void check() const;
 };
 
 std::ostream& operator<<(std::ostream& out, const aslam::backend::SamplerMetropolisHastingsOptions& options);

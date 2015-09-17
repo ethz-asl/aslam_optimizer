@@ -19,7 +19,7 @@ OptimizerRpropOptions::OptimizerRpropOptions() :
     maxIterations(20),
     nThreads(4)
 {
-
+  check();
 }
 
 OptimizerRpropOptions::OptimizerRpropOptions(const sm::PropertyTree& config) :
@@ -32,7 +32,17 @@ OptimizerRpropOptions::OptimizerRpropOptions(const sm::PropertyTree& config) :
     maxIterations(config.getInt("maxIterations", maxIterations)),
     nThreads(config.getInt("nThreads", nThreads))
 {
+  check();
+}
 
+void OptimizerRpropOptions::check() const {
+  SM_ASSERT_GT( Exception, etaMinus, 0.0, "");
+  SM_ASSERT_GT( Exception, etaPlus, etaMinus, "");
+  SM_ASSERT_GT( Exception, initialDelta, 0.0, "");
+  SM_ASSERT_GT( Exception, minDelta, 0.0, "");
+  SM_ASSERT_GT( Exception, maxDelta, minDelta, "");
+  SM_ASSERT_GT( Exception, convergenceGradientNorm, 0.0, "");
+  SM_ASSERT_GE( Exception, maxIterations, -1, "");
 }
 
 std::ostream& operator<<(std::ostream& out, const aslam::backend::OptimizerRpropOptions& options)
