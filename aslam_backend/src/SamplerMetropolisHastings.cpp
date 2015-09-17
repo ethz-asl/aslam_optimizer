@@ -58,9 +58,12 @@ void SamplerMetropolisHastings::step(bool& accepted, double& acceptanceProbabili
 
   auto normal_dist = [&] (double) { return _options.transitionKernelSigma*sm::random::randn(); };
 
-  if (std::isnan(_negLogDensity))
+  if (isRecomputationNegLogDensityNecessary())
     _negLogDensity = evaluateNegativeLogDensity(_options.nThreadsEvaluateLogDensity);
-  SM_ASSERT_EQ_DBG(Exception, evaluateNegativeLogDensity(_options.nThreadsEvaluateLogDensity), _negLogDensity, ""); // check that caching works
+#ifndef NDEBUG
+  else
+    SM_ASSERT_EQ(Exception, evaluateNegativeLogDensity(_options.nThreadsEvaluateLogDensity), _negLogDensity, ""); // check that caching works
+#endif
 
   const ColumnVectorType dx = ColumnVectorType::NullaryExpr(getProblemManager().numOptParameters(), normal_dist);
   getProblemManager().applyStateUpdate(dx);
