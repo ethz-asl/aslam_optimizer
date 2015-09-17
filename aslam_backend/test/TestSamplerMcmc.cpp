@@ -78,7 +78,7 @@ TEST(OptimizerSamplerMcmcTestSuite, testSamplerMetropolisHastings)
 
     // Initialize and test options
     sm::BoostPropertyTree pt;
-    pt.setDouble("transitionKernelSigma", 1.0);
+    pt.setDouble("transitionKernelSigma", 3.0);
     pt.setInt("nThreadsEvaluateLogDensity", 1);
     SamplerMetropolisHastingsOptions options(pt);
     EXPECT_DOUBLE_EQ(pt.getDouble("transitionKernelSigma"), options.transitionKernelSigma);
