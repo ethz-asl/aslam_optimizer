@@ -56,7 +56,6 @@ SamplerMetropolisHastings::SamplerMetropolisHastings(const SamplerMetropolisHast
 
 void SamplerMetropolisHastings::step(bool& accepted, double& acceptanceProbability) {
 
-  auto normal_dist = [&] (double) { return _options.transitionKernelSigma*sm::random::randn(); };
 
   if (isRecomputationNegLogDensityNecessary())
     _negLogDensity = evaluateNegativeLogDensity(_options.nThreadsEvaluateLogDensity);
@@ -65,22 +64,23 @@ void SamplerMetropolisHastings::step(bool& accepted, double& acceptanceProbabili
     SM_ASSERT_EQ(Exception, evaluateNegativeLogDensity(_options.nThreadsEvaluateLogDensity), _negLogDensity, ""); // check that caching works
 #endif
 
+  auto normal_dist = [&] (int) { return _options.transitionKernelSigma*sm::random::randn(); };
   const ColumnVectorType dx = ColumnVectorType::NullaryExpr(getProblemManager().numOptParameters(), normal_dist);
   getProblemManager().applyStateUpdate(dx);
 
   const double negLogDensityNew = evaluateNegativeLogDensity(_options.nThreadsEvaluateLogDensity);
 
   acceptanceProbability = std::exp(std::min(0.0, -negLogDensityNew + _negLogDensity));
-  SM_VERBOSE_STREAM("NegLogDensity: " << _negLogDensity << "->" << negLogDensityNew << ", acceptance probability: " << acceptanceProbability);
+  SM_VERBOSE_STREAM_NAMED("sampling", "NegLogDensity: " << _negLogDensity << "->" << negLogDensityNew << ", acceptance probability: " << acceptanceProbability);
 
   if (sm::random::randLU(0.0, 1.0) < acceptanceProbability) { // sample accepted, we keep the new design variables
     _negLogDensity = negLogDensityNew;
     accepted = true;
-    SM_VERBOSE_STREAM("Sample accepted");
+    SM_VERBOSE_STREAM_NAMED("sampling", "Sample accepted");
   } else { // sample rejected, we revert the update
     getProblemManager().revertLastStateUpdate();
     accepted = false;
-    SM_VERBOSE_STREAM("Sample rejected");
+    SM_VERBOSE_STREAM_NAMED("sampling", "Sample rejected");
   }
 
 }

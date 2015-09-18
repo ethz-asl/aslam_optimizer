@@ -10,6 +10,7 @@
 
 #include <aslam/backend/SamplerBase.hpp>
 #include <aslam/backend/SamplerMetropolisHastings.hpp>
+#include <aslam/backend/SamplerHybridMcmc.hpp>
 #include <aslam/backend/OptimizationProblemBase.hpp>
 
 using namespace boost::python;
@@ -74,6 +75,50 @@ void exportSampler()
 
     ;
   implicitly_convertible< boost::shared_ptr<SamplerMetropolisHastings>, boost::shared_ptr<const SamplerMetropolisHastings> >();
+
+
+  class_<SamplerHybridMcmcOptions>("SamplerHybridMcmcOptions",
+                                   "Options for the Hybrid Mcmc sampler",
+                                   init<>("SamplerHybridMcmcOptions(): Default constructor"))
+
+      .def_readwrite("initialLeapFrogStepSize", &SamplerHybridMcmcOptions::initialLeapFrogStepSize,
+                     "Start value for the step length for the Leap-Frog integration")
+      .def_readwrite("minLeapFrogStepSize", &SamplerHybridMcmcOptions::minLeapFrogStepSize,
+                     "Minimum value for the step length for the Leap-Frog integration")
+      .def_readwrite("maxLeapFrogStepSize", &SamplerHybridMcmcOptions::maxLeapFrogStepSize,
+                     "Maximum value for the step length for the Leap-Frog integration")
+      .def_readwrite("incFactorLeapFrogStepSize", &SamplerHybridMcmcOptions::incFactorLeapFrogStepSize,
+                     "Raising factor for the step length for the Leap-Frog integration")
+      .def_readwrite("decFactorLeapFrogStepSize", &SamplerHybridMcmcOptions::decFactorLeapFrogStepSize,
+                     "Lowering factor for the step length for the Leap-Frog integration")
+      .def_readwrite("targetAcceptanceRate", &SamplerHybridMcmcOptions::targetAcceptanceRate,
+                     "The desired acceptance rate")
+      .def_readwrite("standardDeviationMomentum", &SamplerHybridMcmcOptions::standardDeviationMomentum,
+                     "Random momentum for state in Hamiltonian")
+      .def_readwrite("nLeapFrogSteps", &SamplerHybridMcmcOptions::nLeapFrogSteps,
+                     "Number of steps for the Leap-Frog integration")
+      .def_readwrite("nThreads", &SamplerHybridMcmcOptions::nThreads,
+                     "Number of threads to use for gradient computation")
+      .def("__str__", &toString<SamplerHybridMcmcOptions>)
+  ;
+
+  classDocString = "Hybrid Markov Chain Monte-Carlo Sampler using Hamiltonian dynamics.\n"
+      "\n"
+      " The sampler returns samples (design variables) of a probability distribution that cannot be directly sampled."
+      " It interprets the objective value of an optimization problem as the negative log density of a probability distribution."
+      " The log density has to be defined up to proportionality of the true negative log density.";
+
+  class_<SamplerHybridMcmc, boost::shared_ptr<SamplerHybridMcmc>, bases<SamplerBase> >("SamplerHybridMcmc",
+                                                                                       classDocString.c_str(),
+                                                                                       no_init)
+
+      .def(init<>("SamplerHybridMcmc(): Default constructor"))
+      .def(init<const SamplerHybridMcmcOptions&>("SamplerHybridMcmc(SamplerHybridMcmcOptions options): Constructor with custom options"))
+
+      .add_property("options", make_function(&SamplerHybridMcmc::getOptions, return_internal_reference<>()), &SamplerHybridMcmc::setOptions, "HMC options")
+
+  ;
+  implicitly_convertible< boost::shared_ptr<SamplerHybridMcmc>, boost::shared_ptr<const SamplerHybridMcmc> >();
 
 }
 
