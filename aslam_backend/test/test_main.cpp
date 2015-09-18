@@ -9,8 +9,8 @@ int main(int argc, char** argv)
   testing::InitGoogleTest(&argc, argv);
   auto rval = RUN_ALL_TESTS();
 #ifdef aslam_backend_ENABLE_TIMING
-    sm::timing::Timing::print(std::cout, sm::timing::SORT_BY_TOTAL);
+  sm::timing::Timing::print(std::cout, sm::timing::SORT_BY_TOTAL);
 #endif
-    return rval;
+  return rval;
 }
 
