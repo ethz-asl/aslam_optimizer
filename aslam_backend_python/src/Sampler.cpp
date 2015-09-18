@@ -117,7 +117,7 @@ void exportSampler()
 
       .add_property("options", make_function(&SamplerHybridMcmc::getOptions, return_internal_reference<>()), &SamplerHybridMcmc::setOptions, "HMC options")
 
-    ;
+  ;
   implicitly_convertible< boost::shared_ptr<SamplerHybridMcmc>, boost::shared_ptr<const SamplerHybridMcmc> >();
 
 }
