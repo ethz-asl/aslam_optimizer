@@ -211,37 +211,36 @@ public:
 };
 
 
-/// \brief Encodes the error \f$ (\mathbf p - \mathbf g \mathbf v^T)^2\f$
+/// \brief Encodes the error \f$ 0.5*(y - (a + b*x))^2\f$
 class TestNonSquaredError : public aslam::backend::ScalarNonSquaredErrorTerm {
 public:
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW;
 
   typedef aslam::backend::ScalarNonSquaredErrorTerm parent_t;
-  typedef Eigen::Matrix<double, 1, 2> grad_t;
 
-  double _p;                          /// \brief The desired scalar value
-  grad_t _grad;                       /// \brief The gradient
-  Point2d* _p2d;                      /// \brief The design variable
+  double _y;                          /// \brief The observation value
+  Point2d* _dv;                       /// \brief The design variable
 
-  TestNonSquaredError(Point2d* p2d, const grad_t& grad) : _grad(grad), _p2d(p2d) {
-    _p2d->setActive(true);
-    _p = _grad * _p2d->_v; // set desired value to [g_0, g_1] * [p_0, p_1]^T
-    _p += sm::random::randn() * 0.1; // move away a little from desired scalar value
-    parent_t::setDesignVariables(_p2d);
+  TestNonSquaredError(Point2d* dv, const double x, const double y) : _y(y), _dv(dv) {
+    dv->setActive(true);
+    _grad << 1.0, x;
+    parent_t::setDesignVariables(_dv);
     setWeight(1.0);
   }
   virtual ~TestNonSquaredError() {}
 
   /// \brief evaluate the error term
   virtual double evaluateErrorImplementation() {
-    double v = _p - _grad * _p2d->_v;
-    return v*v;
+    double v = _y - _grad*_dv->_v;
+    return 0.5*v*v;
   }
 
   /// \brief evaluate the jacobian
   virtual void evaluateJacobiansImplementation(aslam::backend::JacobianContainer & outJ) {
-    outJ.add(_p2d, -2.*_grad*(_p - _grad*_p2d->_v));
+    outJ.add(_dv, -_grad*(_y - _grad*_dv->_v));
   }
+private:
+  Eigen::Matrix<double, 1, 2> _grad;
 
 };
 

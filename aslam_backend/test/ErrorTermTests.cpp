@@ -111,27 +111,30 @@ TEST(ErrorTermTestSuite, testNonSquaredErrorTerm) {
     Eigen::Vector2d v(1.0, 2.0);
     Point2d p(v);
     p.setBlockIndex(0);
-    TestNonSquaredError::grad_t g(1.0, 2.0);
-    TestNonSquaredError e(&p, g);
+    p.setActive(true);
+    const double x = 2.0;
+    const double y = 7.0;
+    TestNonSquaredError e(&p, x, y);
 
-    e._p = 3.0;
-    for (double w : {0.1, 1.0, 10.}){
+    // Note: e = w*0.5*(y - (a + b*x))^2 = w*0.5*(7 - (1 + 2*2))^2 = w*0.5*4.0 = w*2.0
+    // Note: de/dp = [-w*(7 - (1 + 2*2)), -w*2*(7 - (1 + 2*2))] = [-w*2.0, -w*4.0]
+
+    for (double w : {0.1, 1.0, 10.}) {
       e.setWeight(w);
-      for (double mEstWeight : {0.1, 1.0, 10.}){
-        if(mEstWeight != 1.0){
-          e.setMEstimatorPolicy(boost::make_shared<FixedWeightMEstimator>(mEstWeight));
-        }
-        else {
-          e.clearMEstimatorPolicy();
-        }
+      for (double mEstWeight : {0.1, 1.0, 10.}) {
 
-        EXPECT_DOUBLE_EQ(w * 4.0, e.updateRawError());
-        EXPECT_DOUBLE_EQ(w * mEstWeight * 4.0, e.getWeightedError());
+        if(mEstWeight != 1.0)
+          e.setMEstimatorPolicy(boost::make_shared<FixedWeightMEstimator>(mEstWeight));
+        else
+          e.clearMEstimatorPolicy();
+
+        EXPECT_DOUBLE_EQ(w * 2.0, e.updateRawError());
+        EXPECT_DOUBLE_EQ(w * mEstWeight * 2.0, e.getWeightedError());
         EXPECT_DOUBLE_EQ(e.getRawError(), e.getError(false));
         EXPECT_DOUBLE_EQ(e.getWeightedError(), e.getError(true));
 
         Eigen::MatrixXd grad;
-        grad.resize(1,2); grad << 4., 8.;
+        grad.resize(1,2); grad << -2., -4.;
         grad *= w;
 
         JacobianContainerSparse<> jc(1);
@@ -140,13 +143,15 @@ TEST(ErrorTermTestSuite, testNonSquaredErrorTerm) {
         jc.clear();
         e.evaluateJacobians(jc, false);
         Eigen::MatrixXd J = jc.asDenseMatrix();
-        EXPECT_TRUE((J.array() == grad.array()).all()) << "J: " << J << std::endl <<
+        SCOPED_TRACE("");
+        EXPECT_TRUE(J.isApprox(grad)) << "J: " << J << std::endl <<
             "Grad: " << grad << std::endl;
 
         jc.clear();
         e.evaluateRawJacobians(jc);
         J = jc.asDenseMatrix();
-        EXPECT_TRUE((J.array() == grad.array()).all()) << "J: " << J << std::endl <<
+        SCOPED_TRACE("");
+        EXPECT_TRUE(J.isApprox(grad)) << "J: " << J << std::endl <<
             "Grad: " << grad << std::endl;
 
 
@@ -155,13 +160,15 @@ TEST(ErrorTermTestSuite, testNonSquaredErrorTerm) {
         e.evaluateJacobians(jc, true);
         J = jc.asDenseMatrix();
         grad *= mEstWeight;
-        EXPECT_TRUE((J.array() == grad.array()).all()) << "J: " << J << std::endl <<
+        SCOPED_TRACE("");
+        EXPECT_TRUE(J.isApprox(grad)) << "J: " << J << std::endl <<
             "Grad: " << grad << std::endl;
 
         jc.clear();
         e.evaluateWeightedJacobians(jc);
         J = jc.asDenseMatrix();
-        EXPECT_TRUE((J.array() == grad.array()).all()) << "J: " << J << std::endl <<
+        SCOPED_TRACE("");
+        EXPECT_TRUE(J.isApprox(grad)) << "J: " << J << std::endl <<
             "Grad: " << grad << std::endl;
 
       }

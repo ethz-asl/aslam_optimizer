@@ -1,6 +1,7 @@
 #include <sm/eigen/gtest.hpp>
 #include <string>
 #include <bitset>
+#include <sm/random.hpp>
 #include <aslam/backend/util/ProblemManager.hpp>
 #include <aslam/backend/JacobianContainerDense.hpp>
 #include <aslam/backend/JacobianContainerSparse.hpp>
@@ -25,8 +26,8 @@ TEST(OptimizationProblemTestSuite, testProblemManager)
 
   // Create two non-squared error terms with with the same design variable
   Point2d dv1(Eigen::Vector2d::Random());
-  TestNonSquaredError err1(&dv1, TestNonSquaredError::grad_t::Random());
-  TestNonSquaredError err2(&dv1, TestNonSquaredError::grad_t::Random());
+  TestNonSquaredError err1(&dv1, sm::random::randn(), sm::random::randn());
+  TestNonSquaredError err2(&dv1, sm::random::randn(), sm::random::randn());
 
   boost::shared_ptr<OptimizationProblem> problem(new OptimizationProblem());
   problem->addDesignVariable(&dv0, false);

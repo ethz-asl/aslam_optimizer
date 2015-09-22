@@ -14,37 +14,40 @@ TEST(OptimizerBFGSTestSuite, testBFGS)
     boost::shared_ptr<OptimizationProblem> problem_ptr(new OptimizationProblem);
     OptimizationProblem& problem = *problem_ptr;
 
-    const int P = 2;
-    const int E = 3;
-    // Add some design variables.
-    std::vector< boost::shared_ptr<Point2d> > p2d;
-    p2d.reserve(P);
-    for (int p = 0; p < P; ++p) {
-      boost::shared_ptr<Point2d> point(new Point2d(Eigen::Vector2d::Random())); // random initialization of design variable
-      p2d.push_back(point);
-      problem.addDesignVariable(point);
-      point->setBlockIndex(p);
-      point->setActive(true);
+    sm::random::seed( std::time(NULL) );
+    auto normal_dist = [&] (int) { return sm::random::randn(); };
+
+    // implement least squares line fit through data
+    // Set up problem representing a linear function fit of the form y = a + b*x + N(0,1)
+    // to noisy samples from a linear function
+    const double a = 1.0;
+    const double b = 2.0;
+    const Eigen::Vector2d paramTrue(a, b);
+    const double stddev = 0.1;
+    const int numErrors = 1000;
+
+    Point2d dv( paramTrue + 2.0*Eigen::Vector2d::NullaryExpr(normal_dist) ); // random initialization of design variable
+    dv.setBlockIndex(0);
+    dv.setColumnBase(0);
+    dv.setActive(true);
+    problem.addDesignVariable(&dv, false);
+
+    std::vector< boost::shared_ptr<TestNonSquaredError> > ets;
+    ets.reserve(numErrors);
+    for (std::size_t e = 0; e < numErrors; ++e) {
+      const double x = (double)e/numErrors;
+      const double y = a + b*x + stddev*sm::random::randn();
+      boost::shared_ptr<TestNonSquaredError> err(new TestNonSquaredError(&dv, x, y));
+      testErrorTerm(err);
+      ets.push_back(err);
+      problem.addErrorTerm(err);
     }
 
-    // Add some error terms.
-    std::vector< boost::shared_ptr<TestNonSquaredError> > e1;
-    e1.reserve(P*E);
-    for (int p = 0; p < P; ++p) {
-      for (int e = 0; e < E; ++e) {
-        TestNonSquaredError::grad_t g(p+1, e+1);
-        boost::shared_ptr<TestNonSquaredError> err(new TestNonSquaredError(p2d[p].get(), g));
-        err->_p = 1.0;
-        e1.push_back(err);
-        problem.addErrorTerm(err);
-        SCOPED_TRACE("");
-        testErrorTerm(err);
-      }
-    }
     // Now let's optimize.
     OptimizerBFGS::Options options;
     options.maxIterations = 500;
     options.numThreadsGradient = 8;
+    options.convergenceDeltaObjective = 0.0;
     options.convergenceGradientNorm = 0.0;
     options.convergenceDeltaX = 0.0;
     EXPECT_ANY_THROW(options.check());
@@ -61,7 +64,7 @@ TEST(OptimizerBFGSTestSuite, testBFGS)
     EXPECT_NO_THROW(optimizer.checkProblemSetup());
 
     optimizer.initialize();
-    SCOPED_TRACE("");
+    SCOPED_TRACE("Optimizing");
     optimizer.optimize();
     const auto& ret = optimizer.getStatus();
 
@@ -74,6 +77,8 @@ TEST(OptimizerBFGSTestSuite, testBFGS)
     EXPECT_LT(ret.maxDeltaX, 1e-3);
     EXPECT_LT(ret.error, std::numeric_limits<double>::max());
     EXPECT_GT(ret.numIterations, 0);
+    EXPECT_NEAR(dv._v[0], a, 1e-1);
+    EXPECT_NEAR(dv._v[1], b, 1e-1);
 
   } catch (const std::exception& e) {
     FAIL() << e.what();
