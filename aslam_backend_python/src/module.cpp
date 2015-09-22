@@ -6,6 +6,7 @@ void exportBackend();
 void exportCompressedColumnMatrix() ;
 void exportLinearSystemSolver();
 void exportErrorTermTransformation();
+void exportL1Regularizer();
 void exportTrustRegionPolicies();
 void exportSBM();
 void exportErrorTermDs();
@@ -25,6 +26,7 @@ BOOST_PYTHON_MODULE(libaslam_backend_python)
   exportSBM();
   exportErrorTermDs();
   exportScalarNonSquaredErrorTerm();
+  exportL1Regularizer();
   exportDesignVariableTimePair();
   exportSampleDvAndError();
 }
