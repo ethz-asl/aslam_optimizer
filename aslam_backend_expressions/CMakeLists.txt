@@ -47,6 +47,7 @@ cs_add_library(${PROJECT_NAME}
 
   src/ErrorTermTransformation.cpp
   src/ErrorTermEuclidean.cpp
+  src/L1Regularizer.cpp
 
   src/MapTransformation.cpp
   )
@@ -70,6 +71,7 @@ catkin_add_gtest(${PROJECT_NAME}_test
   test/ExpressionUtils.cpp
   test/ErrorTest_Transformation.cpp
   test/ErrorTest_Euclidean.cpp
+  test/ErrorTest_L1Regularizer.cpp
   )
 
 target_link_libraries(${PROJECT_NAME}_test ${PROJECT_NAME})
