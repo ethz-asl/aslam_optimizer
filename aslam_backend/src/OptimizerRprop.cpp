@@ -1,5 +1,6 @@
 #include <aslam/backend/OptimizerRprop.hpp>
 #include <aslam/backend/ErrorTerm.hpp>
+#include <aslam/backend/ScalarNonSquaredErrorTerm.hpp>
 #include <Eigen/Dense>
 #include <sm/eigen/assert_macros.hpp>
 #include <aslam/backend/sparse_matrix_functions.hpp>
@@ -117,6 +118,15 @@ void OptimizerRprop::optimize()
     RowVectorType gradient;
     timeGrad.start();
     this->computeGradient(gradient, _options.nThreads, false /*TODO: useMEstimator*/);
+
+    // optionally add regularizer
+    if (_options.regularizer) {
+      JacobianContainer jc(1);
+      _options.regularizer->evaluateJacobians(jc);
+      SM_FINER_STREAM("RPROP: Regularization term gradient: " << jc.asDenseMatrix().transpose());
+      gradient += jc.asDenseMatrix();
+    }
+
     timeGrad.stop();
 
     SM_ASSERT_TRUE_DBG(Exception, gradient.allFinite (), "Gradient " << gradient.format(IOFormat(2, DontAlignCols, ", ", ", ", "", "", "[", "]")) << " is not finite");
