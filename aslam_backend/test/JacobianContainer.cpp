@@ -1,5 +1,6 @@
 #include <sm/eigen/gtest.hpp>
 #include <aslam/backend/JacobianContainer.hpp>
+#include <aslam/backend/util/utils.hpp>
 // std::partial_sum
 #include <numeric>
 #include "DummyDesignVariable.hpp"
@@ -314,6 +315,34 @@ TEST(JacobianContainerTests, testBuildHessian2)
     ASSERT_DOUBLE_MX_EQ(rhs.segment(0, J1.cols()), -2.0 * J1.transpose() * invR * e, 1e-9, "Block 0");
     ASSERT_DOUBLE_MX_EQ(rhs.segment(Hessian.rowBaseOfBlock(1), J2.cols()), -2.0 * J2.transpose() * invR * e, 1e-9, "Block 1");
   } catch (const std::exception& e) {
+    FAIL() << "Exception: " << e.what();
+  }
+}
+
+TEST(JacobianContainerTests, testIsFinite)
+{
+  try {
+
+    using namespace aslam::backend;
+    JacobianContainer jc(2);
+    DummyDesignVariable<1> dv1, dv2;
+    dv1.setBlockIndex(0);
+    dv1.setActive(true);
+    dv2.setBlockIndex(1);
+    dv2.setActive(true);
+    Eigen::Matrix<double, 2, 1> J;
+    J.setRandom();
+    jc.add(&dv1, J);
+    jc.add(&dv2, J);
+    EXPECT_TRUE(utils::isFinite(jc, static_cast<const DesignVariable&>(dv1)));
+    EXPECT_TRUE(utils::isFinite(jc, static_cast<const DesignVariable&>(dv2)));
+
+    J(0,0) = std::numeric_limits<double>::signaling_NaN();
+    jc.add(&dv1, J);
+    EXPECT_FALSE(utils::isFinite(jc, static_cast<const DesignVariable&>(dv1)));
+    EXPECT_TRUE(utils::isFinite(jc, static_cast<const DesignVariable&>(dv2)));
+
+  }  catch (const std::exception& e) {
     FAIL() << "Exception: " << e.what();
   }
 }
