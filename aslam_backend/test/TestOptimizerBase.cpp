@@ -156,7 +156,7 @@ TEST(OptimizerTestSuite, testOptimizerBase)
     dv.setActive(true);
 
     // Create an error term
-    TestNonSquaredError err(&dv, TestNonSquaredError::grad_t::Random());
+    TestNonSquaredError err(&dv, 1.0, 2.0);
 
     boost::shared_ptr<OptimizationProblem> problem(new OptimizationProblem());
     problem->addDesignVariable(&dv, false);
