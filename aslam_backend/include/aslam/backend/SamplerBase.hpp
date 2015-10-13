@@ -37,13 +37,17 @@ class SamplerBase {
     double getWeightedMeanAcceptanceProbability() const { return weightedMeanAcceptanceProbability; }
     void updateWeightedMeanAcceptanceProbability(const double prob);
 
+    double getWeightedMeanSmoothingFactor() const { return weightedMeanSmoothingFactor; }
+    void setWeightedMeanSmoothingFactor(const double alpha) { weightedMeanSmoothingFactor = alpha; }
+
    public:
 
    private:
-    std::size_t nIterations; /// \brief How many iterations the sampler has run in the last initialize() call
-    std::size_t nSamplesAcceptedTotal; /// \brief How many samples were accepted since the last initialize() call
-    std::size_t nSamplesAcceptedThisRun; /// \brief How many samples were accepted since the last run() call
-    double weightedMeanAcceptanceProbability; /// \brief Weighted average of acceptance probabilities
+    std::size_t nIterations = 0; /// \brief How many iterations the sampler has run in the last initialize() call
+    std::size_t nSamplesAcceptedTotal = 0; /// \brief How many samples were accepted since the last initialize() call
+    std::size_t nSamplesAcceptedThisRun = 0; /// \brief How many samples were accepted since the last run() call
+    double weightedMeanAcceptanceProbability = 0.0; /// \brief Exponential moving average of acceptance probabilities
+    double weightedMeanSmoothingFactor = 0.1; /// \brief Smoothing factor (0.0, 1.0] for exponential moving average of acceptance probabilities
   };
 
  public:
@@ -85,6 +89,9 @@ class SamplerBase {
 
   /// \brief Const getter for statistics
   const Statistics& statistics() const;
+
+  /// \brief Set smoothing factor for exponential moving average of acceptance probabilities
+  void setWeightedMeanSmoothingFactor(const double alpha);
 
  protected:
   /// \brief Evaluate the current negative log density

@@ -15,11 +15,7 @@ namespace aslam {
 namespace backend {
 
 
-SamplerBase::Statistics::Statistics() :
-  nIterations(0),
-  nSamplesAcceptedTotal(0),
-  nSamplesAcceptedThisRun(0),
-  weightedMeanAcceptanceProbability(0.0) {
+SamplerBase::Statistics::Statistics() {
 
 }
 
@@ -48,7 +44,10 @@ std::size_t SamplerBase::Statistics::getNumAcceptedSamples(bool total) const {
 void SamplerBase::Statistics::updateWeightedMeanAcceptanceProbability(const double prob) {
   SM_ASSERT_GE_DBG(Exception, prob, 0.0, "");
   SM_ASSERT_LE_DBG(Exception, prob, 1.0, "");
-  weightedMeanAcceptanceProbability += nIterations == 0 ? prob : -0.1 * (weightedMeanAcceptanceProbability - prob);
+  if (nIterations < 2)
+    weightedMeanAcceptanceProbability = prob;
+  else
+    weightedMeanAcceptanceProbability += -weightedMeanSmoothingFactor * (weightedMeanAcceptanceProbability - prob);
 }
 
 /// \brief Run the sampler for \p nSteps
@@ -59,6 +58,9 @@ void SamplerBase::run(const std::size_t nSteps) {
 
   double accProb;
   _statistics.nSamplesAcceptedThisRun = 0;
+
+  if (nSteps == 0)
+    return;
 
   for (size_t cnt = 0; cnt < nSteps; cnt++) {
 
@@ -134,6 +136,13 @@ void SamplerBase::reset() {
 /// \brief Const getter for statistics
 const SamplerBase::Statistics& SamplerBase::statistics() const {
   return _statistics;
+}
+
+/// \brief Set smoothing factor for exponential moving average of acceptance probabilities
+void SamplerBase::setWeightedMeanSmoothingFactor(const double alpha) {
+  SM_ASSERT_GT(Exception, alpha, 0.0, "");
+  SM_ASSERT_LE(Exception, alpha, 1.0, "");
+  _statistics.setWeightedMeanSmoothingFactor(alpha);
 }
 
 }
