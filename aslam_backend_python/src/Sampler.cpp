@@ -33,6 +33,7 @@ void exportSampler()
       .def("getNumAcceptedSamples", &SamplerBase::Statistics::getNumAcceptedSamples)
       .def("getWeightedMeanAcceptanceProbability", &SamplerBase::Statistics::getWeightedMeanAcceptanceProbability)
       .def("updateWeightedMeanAcceptanceProbability", &SamplerBase::Statistics::updateWeightedMeanAcceptanceProbability)
+      .add_property("weightedMeanSmoothingFactor", &SamplerBase::Statistics::getWeightedMeanSmoothingFactor, &SamplerBase::Statistics::setWeightedMeanSmoothingFactor)
   ;
 
   class_<SamplerBase, boost::shared_ptr<SamplerBase> , boost::noncopyable>("SamplerBase", no_init)
@@ -43,6 +44,7 @@ void exportSampler()
       .def("getNegativeLogDensity", (boost::shared_ptr<const OptimizationProblemBase> (SamplerBase::*) (void) const)&SamplerBase::getNegativeLogDensity)
       .def("signalNegativeLogDensityChanged", &SamplerBase::signalNegativeLogDensityChanged)
       .def("checkNegativeLogDensitySetup", &SamplerBase::checkNegativeLogDensitySetup)
+      .def("setWeightedMeanSmoothingFactor", &SamplerBase::setWeightedMeanSmoothingFactor)
       .add_property("statistics", make_function(&SamplerBase::statistics, return_internal_reference<>()))
   ;
   implicitly_convertible< boost::shared_ptr<SamplerBase>, boost::shared_ptr<const SamplerBase> >();

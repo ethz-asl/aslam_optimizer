@@ -127,7 +127,7 @@ void SamplerHybridMcmc::step(bool& accepted, double& acceptanceProbability) {
     _stepLength *= _options.decFactorLeapFrogStepSize;
   _stepLength = max(min(_stepLength, _options.maxLeapFrogStepSize), _options.minLeapFrogStepSize); // clip
 
-  SM_DEBUG_STREAM_NAMED("sampling", "Current leap frog step size is " << _stepLength << ".");
+  SM_FINEST_STREAM_NAMED("sampling", "Current leap frog step size is " << _stepLength << ".");
 
   // pre-computations for speed-up of upcoming calculations
   const double deltaHalf = _stepLength/2.;
