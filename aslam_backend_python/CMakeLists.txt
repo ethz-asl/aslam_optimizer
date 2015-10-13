@@ -24,6 +24,7 @@ add_python_export_library(${PROJECT_NAME} python/aslam_backend
   src/CompressedColumnMatrix.cpp
   src/LinearSystemSolver.cpp
   src/ErrorTermTransformation.cpp
+  src/L1Regularizer.cpp
   src/TrustRegionPolicies.cpp
   src/SparseBlockMatrix.cpp
   src/DesignVariableTimePair.cpp

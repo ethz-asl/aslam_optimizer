@@ -21,6 +21,7 @@ namespace aslam {
       double convergenceGradientNorm; /// \brief Stopping criterion on gradient norm
       int maxIterations; /// \brief stop if we reach this number of iterations without hitting any of the above stopping criteria. -1
       std::size_t nThreads; /// \brief The number of threads to use
+      boost::shared_ptr<ScalarNonSquaredErrorTerm> regularizer = NULL; /// \brief Regularizer
 
       void check() const;
     };
