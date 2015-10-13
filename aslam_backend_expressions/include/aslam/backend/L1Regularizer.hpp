@@ -17,7 +17,7 @@ namespace backend {
 class L1Regularizer : public aslam::backend::ScalarNonSquaredErrorTerm {
 
  public:
-  L1Regularizer(const std::vector<Scalar*>& dvs, const double beta);
+  L1Regularizer(const std::vector<Scalar*>& scalarDvs, const double beta);
   virtual ~L1Regularizer() { }
 
   void setBeta(const double beta) { setWeight(beta); }

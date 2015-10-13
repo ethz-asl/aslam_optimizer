@@ -12,15 +12,14 @@ namespace backend {
 
 using namespace std;
 
-L1Regularizer::L1Regularizer(const vector<Scalar*>& dvs, const double beta) :
-    _dvs(dvs) {
+L1Regularizer::L1Regularizer(const vector<Scalar*>& scalarDvs, const double beta) :
+    _dvs(scalarDvs) {
 
-  vector<DesignVariable*> dvstmp(dvs.begin(), dvs.end());
+  vector<DesignVariable*> dvstmp(scalarDvs.begin(), scalarDvs.end());
   setDesignVariables(dvstmp);
   setWeight(beta);
 }
 
-/// \brief evaluate the error term and return the scalar error \f$ e \f$
 double L1Regularizer::evaluateErrorImplementation() {
 
   double sum = 0.;
@@ -31,7 +30,6 @@ double L1Regularizer::evaluateErrorImplementation() {
   return sum;
 }
 
-/// \brief evaluate the Jacobians for \f$ e \f$
 void L1Regularizer::evaluateJacobiansImplementation(JacobianContainer & outJacobians) {
   Eigen::MatrixXd J(1,1);
   for (auto& dv : _dvs) {
