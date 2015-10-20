@@ -2,6 +2,7 @@
 #include <aslam/backend/Optimizer.hpp>
 #include <aslam/backend/Optimizer2.hpp>
 #include <aslam/backend/OptimizerRprop.hpp>
+#include <aslam/backend/ScalarNonSquaredErrorTerm.hpp>
 #include <boost/shared_ptr.hpp>
 #include <sm/PropertyTree.hpp>
 
@@ -183,6 +184,7 @@ void exportOptimizer()
         .def_readwrite("maxIterations",&OptimizerRpropOptions::maxIterations)
         .def_readwrite("nThreads", &OptimizerRpropOptions::nThreads)
         .def_readwrite("convergenceGradientNorm", &OptimizerRpropOptions::convergenceGradientNorm)
+        .def_readwrite("regularizer", &OptimizerRpropOptions::regularizer)
         ;
 
     class_<OptimizerRprop, boost::shared_ptr<OptimizerRprop> >("OptimizerRprop", init<>("OptimizerRprop(): Constructor with default options"))
