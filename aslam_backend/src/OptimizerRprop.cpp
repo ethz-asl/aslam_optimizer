@@ -123,7 +123,7 @@ void OptimizerRprop::optimize()
     if (_options.regularizer) {
       JacobianContainer jc(1);
       _options.regularizer->evaluateJacobians(jc);
-      SM_FINER_STREAM("RPROP: Regularization term gradient: " << jc.asDenseMatrix().transpose());
+      SM_FINER_STREAM_NAMED("optimization", "RPROP: Regularization term gradient: " << jc.asDenseMatrix().transpose());
       gradient += jc.asDenseMatrix();
     }
 
@@ -181,7 +181,7 @@ void OptimizerRprop::optimize()
   }
 
   std::string convergence = isConverged ? "YES" : "NO";
-  SM_DEBUG_STREAM_NAMED("optimization", "RPROP: Convergence " << convergence);
+  SM_DEBUG_STREAM_NAMED("optimization", "RPROP: Convergence " << convergence << " (iterations: " << _nIterations << ", gradient norm: " << _curr_gradient_norm << ")");
 
 }
 
