@@ -52,6 +52,7 @@ std::ostream& operator<<(std::ostream& out, const aslam::backend::OptimizerRprop
   out << "\tconvergenceDx: " << options.convergenceDx << std::endl;
   out << "\tmaxIterations: " << options.maxIterations << std::endl;
   out << "\tnThreads: " << options.nThreads << std::endl;
+  out << "\tmethod: " << options.method << std::endl;
   return out;
 }
 
@@ -59,25 +60,18 @@ std::ostream& operator<<(std::ostream& out, const aslam::backend::OptimizerRprop
 
 
 OptimizerRprop::OptimizerRprop() :
-    _curr_gradient_norm(std::numeric_limits<double>::signaling_NaN()),
-    _options(OptimizerRpropOptions()),
-    _nIterations(0)
+    _options(OptimizerRpropOptions())
 {
 
 }
 
 OptimizerRprop::OptimizerRprop(const OptimizerRpropOptions& options) :
-    _curr_gradient_norm(std::numeric_limits<double>::signaling_NaN()),
-    _options(options),
-    _nIterations(0)
+    _options(options)
 {
   _options.check();
 }
 
-OptimizerRprop::OptimizerRprop(const sm::PropertyTree& config) :
-    _curr_gradient_norm(std::numeric_limits<double>::signaling_NaN()),
-    _nIterations(0)
-{
+OptimizerRprop::OptimizerRprop(const sm::PropertyTree& config) {
   _options = OptimizerRpropOptions(config);
 }
 
@@ -91,10 +85,12 @@ OptimizerRprop::~OptimizerRprop()
 void OptimizerRprop::initialize()
 {
   ProblemManager::initialize();
-  _dx.resize(numOptParameters(), 1);
+  _dx = ColumnVectorType::Constant(numOptParameters(), 0.0);
   _prev_gradient = ColumnVectorType::Constant(numOptParameters(), 0.0);
+  _prev_error = std::numeric_limits<double>::max();
   _delta = ColumnVectorType::Constant(numOptParameters(), _options.initialDelta);
   _nIterations = 0;
+  _curr_gradient_norm = std::numeric_limits<double>::signaling_NaN();
 }
 
 void OptimizerRprop::optimize()
@@ -105,6 +101,9 @@ void OptimizerRprop::optimize()
 
   if (!isInitialized())
     initialize();
+
+  if (_options.method == OptimizerRpropOptions::IRPROP_PLUS && std::isnan(_prev_error))
+    _prev_error = this->evaluateError(_options.nThreads);
 
   using namespace Eigen;
 
@@ -137,27 +136,91 @@ void OptimizerRprop::optimize()
       break;
     }
 
+    // Compute error for iPRop+
+    bool errorIncreased = false;
+    if (_options.method == OptimizerRpropOptions::IRPROP_PLUS) {
+      const double error = this->evaluateError(_options.nThreads);
+      errorIncreased = (error - _prev_error) > 0.0;
+      _prev_error = error;
+    }
+
+    // determine whether gradient direction switched
+    Eigen::Matrix<double, 1, Eigen::Dynamic> gg = _prev_gradient.cwiseProduct(gradient);
+    Eigen::Matrix<bool, 1, Eigen::Dynamic> switchNo = gg.array() > 0.0;
+    Eigen::Matrix<bool, 1, Eigen::Dynamic> switchYes = gg.array() < 0.0;
+    _prev_gradient = gradient;
+
     for (std::size_t d = 0; d < numOptParameters(); ++d) {
 
       // Adapt delta
-      if (_prev_gradient(d) * gradient(d) > 0.0)
+      if (switchNo(d))
         _delta(d) = std::min(_delta(d) * _options.etaPlus, _options.maxDelta);
-      else if (_prev_gradient(d) * gradient(d) < 0.0)
+      else if (switchYes(d))
         _delta(d) = std::max(_delta(d) * _options.etaMinus, _options.minDelta);
 
-      // Compute design variable update vector
-      if (gradient(d) > 0.0)
-        _dx(d) = -_delta(d);
-      else if (gradient(d) < 0.0)
-        _dx(d) = +_delta(d);
-      else
-        _dx(d) = 0.0;
+      // Note: see http://citeseerx.ist.psu.edu/viewdoc/summary?doi=10.1.1.17.1332
+      // for a good description of the algorithms
+      switch (_options.method) {
 
-      // Set previous gradient
-      if (_prev_gradient(d) * gradient(d) < 0.0)
-        _prev_gradient(d) = 0.0;
-      else
-        _prev_gradient(d) = gradient(d);
+        // RPROP_PLUS
+        // With backtracking. If gradient switched direction, revert this update.
+        case OptimizerRpropOptions::RPROP_PLUS:
+        {
+          // Compute design variable update vector
+          if (switchYes(d)) {
+            _dx(d) = -_dx(d); // revert update
+            _prev_gradient(d) = 0.0; // this forces switchYes=false in the next step
+          } else {
+            _dx(d) = -sign(gradient(d))*_delta(d);
+          }
+
+          break;
+        }
+
+        // RPROP_MINUS
+        // No backtracking. Reduce step-length if gradient switched direction,
+        // Increase step-length if gradient in same direction.
+        case OptimizerRpropOptions::RPROP_MINUS:
+        {
+          // Compute design variable update vector
+          _dx(d) = -sign(gradient(d))*_delta(d);
+
+          break;
+        }
+        // IRPROP_MINUS
+        // In case gradient direction switched, stay at this point for one iteration and
+        // then move into the direction of the gradient with half the step-length.
+        case OptimizerRpropOptions::IRPROP_MINUS:
+        {
+          // Compute design variable update vector
+          if (switchYes(d))
+            _dx(d) = _prev_gradient(d) = 0.0;
+          else
+            _dx(d) = -sign(gradient(d))*_delta(d);
+
+          break;
+        }
+        // IRPROP_PLUS
+        // Revert only weight updates that have caused changes of the corresponding
+        // partial derivatives in case of an error increase.
+        case OptimizerRpropOptions::IRPROP_PLUS:
+        {
+
+          // Compute design variable update vector
+          if (switchYes(d)) {
+            if (errorIncreased)
+              _dx(d) = -_dx(d); // revert update if gradient direction switched and error increased
+            else
+              _dx(d) = 0.0;
+            _prev_gradient(d) = 0.0; // this forces switchYes=false in the next step
+          } else {
+            _dx(d) = -sign(gradient(d))*_delta(d);
+          }
+
+          break;
+        }
+      }
+
     }
 
     const double maxAbsCoeff = _dx.cwiseAbs().maxCoeff();

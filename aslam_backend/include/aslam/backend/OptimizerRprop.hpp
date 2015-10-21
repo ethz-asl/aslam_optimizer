@@ -11,6 +11,9 @@ namespace aslam {
   namespace backend {
 
     struct OptimizerRpropOptions {
+
+      enum Method { RPROP_PLUS, RPROP_MINUS, IRPROP_MINUS, IRPROP_PLUS };
+
       OptimizerRpropOptions();
       OptimizerRpropOptions(const sm::PropertyTree& config);
       double etaMinus = 0.5; /// \brief Decrease factor for step size if gradient direction changes
@@ -23,6 +26,7 @@ namespace aslam {
       int maxIterations = 20; /// \brief stop if we reach this number of iterations without hitting any of the above stopping criteria. -1
       std::size_t nThreads = 4; /// \brief The number of threads to use
       boost::shared_ptr<ScalarNonSquaredErrorTerm> regularizer = NULL; /// \brief Regularizer
+      Method method = RPROP_PLUS; /// \brief the RProp method used
 
       void check() const;
     };
@@ -71,6 +75,12 @@ namespace aslam {
       virtual void initialize() override;
 
     private:
+      /// \brief branchless signum method
+      static inline int sign(const double& val) {
+        return (0.0 < val) - (val < 0.0);
+      }
+
+    private:
 
       /// \brief The dense update vector.
       ColumnVectorType _dx;
@@ -81,14 +91,17 @@ namespace aslam {
       /// \brief gradient in the previous iteration
       RowVectorType _prev_gradient;
 
+      /// \brief error in the previous iteration (only used for IRPROP_PLUS version)
+      double _prev_error = std::numeric_limits<double>::max();
+
       /// \brief Current norm of the gradient
-      double _curr_gradient_norm;
+      double _curr_gradient_norm = std::numeric_limits<double>::signaling_NaN();
 
       /// \brief the current set of options
       OptimizerRpropOptions _options;
 
       /// \brief How many iterations the solver has run
-      std::size_t _nIterations;
+      std::size_t _nIterations = 0;
 
     };
 

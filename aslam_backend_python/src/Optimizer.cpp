@@ -175,6 +175,13 @@ void exportOptimizer()
         ;
 
 
+    enum_<OptimizerRpropOptions::Method>("RpropMethod")
+        .value("RPROP_PLUS", OptimizerRpropOptions::Method::RPROP_PLUS)
+        .value("RPROP_MINUS", OptimizerRpropOptions::Method::RPROP_MINUS)
+        .value("IRPROP_MINUS", OptimizerRpropOptions::Method::IRPROP_MINUS)
+        .value("IRPROP_PLUS", OptimizerRpropOptions::Method::IRPROP_PLUS)
+        ;
+
     class_<OptimizerRpropOptions>("OptimizerRpropOptions", init<>())
         .def_readwrite("etaMinus",&OptimizerRpropOptions::etaMinus)
         .def_readwrite("etaPlus",&OptimizerRpropOptions::etaPlus)
@@ -186,6 +193,7 @@ void exportOptimizer()
         .def_readwrite("convergenceGradientNorm", &OptimizerRpropOptions::convergenceGradientNorm)
         .def_readwrite("convergenceDx", &OptimizerRpropOptions::convergenceDx)
         .def_readwrite("regularizer", &OptimizerRpropOptions::regularizer)
+        .def_readwrite("method", &OptimizerRpropOptions::method)
         ;
 
     class_<OptimizerRprop, boost::shared_ptr<OptimizerRprop> >("OptimizerRprop", init<>("OptimizerRprop(): Constructor with default options"))
