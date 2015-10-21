@@ -123,7 +123,7 @@ void OptimizerRprop::optimize()
     if (_options.regularizer) {
       JacobianContainer jc(1);
       _options.regularizer->evaluateJacobians(jc);
-      SM_FINER_STREAM_NAMED("optimization", "RPROP: Regularization term gradient: " << jc.asDenseMatrix().transpose());
+      SM_FINER_STREAM_NAMED("optimization", "RPROP: Regularization term gradient: " << jc.asDenseMatrix());
       gradient += jc.asDenseMatrix();
     }
 
