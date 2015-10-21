@@ -44,6 +44,11 @@ TEST(OptimizerRpropTestSuite, testRpropNonSquaredErrorTerms)
     OptimizerRpropOptions options;
     options.maxIterations = 500;
     options.nThreads = 8;
+    options.convergenceGradientNorm = 0.0;
+    options.convergenceDx = 0.0;
+    EXPECT_ANY_THROW(options.check());
+    options.convergenceGradientNorm = 1e-6;
+    EXPECT_NO_THROW(options.check());
     OptimizerRprop optimizer(options);
     optimizer.setProblem(problem_ptr);
 

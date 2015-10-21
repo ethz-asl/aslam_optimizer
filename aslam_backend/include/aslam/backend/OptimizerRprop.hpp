@@ -13,14 +13,15 @@ namespace aslam {
     struct OptimizerRpropOptions {
       OptimizerRpropOptions();
       OptimizerRpropOptions(const sm::PropertyTree& config);
-      double etaMinus; /// \brief Decrease factor for step size if gradient direction changes
-      double etaPlus; /// \brief Increase factor for step size if gradient direction is same
-      double initialDelta; /// \brief Initial step size
-      double minDelta; /// \brief Minimum step size
-      double maxDelta; /// \brief Maximum step size
-      double convergenceGradientNorm; /// \brief Stopping criterion on gradient norm
-      int maxIterations; /// \brief stop if we reach this number of iterations without hitting any of the above stopping criteria. -1
-      std::size_t nThreads; /// \brief The number of threads to use
+      double etaMinus = 0.5; /// \brief Decrease factor for step size if gradient direction changes
+      double etaPlus = 1.2; /// \brief Increase factor for step size if gradient direction is same
+      double initialDelta = 0.1; /// \brief Initial step size
+      double minDelta = 1e-20; /// \brief Minimum step size
+      double maxDelta = 1.0; /// \brief Maximum step size
+      double convergenceGradientNorm = 1e-3; /// \brief Stopping criterion on gradient norm
+      double convergenceDx = 0.0; /// \brief Stopping criterion on maximum state update coefficient
+      int maxIterations = 20; /// \brief stop if we reach this number of iterations without hitting any of the above stopping criteria. -1
+      std::size_t nThreads = 4; /// \brief The number of threads to use
       boost::shared_ptr<ScalarNonSquaredErrorTerm> regularizer = NULL; /// \brief Regularizer
 
       void check() const;

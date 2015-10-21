@@ -184,6 +184,7 @@ void exportOptimizer()
         .def_readwrite("maxIterations",&OptimizerRpropOptions::maxIterations)
         .def_readwrite("nThreads", &OptimizerRpropOptions::nThreads)
         .def_readwrite("convergenceGradientNorm", &OptimizerRpropOptions::convergenceGradientNorm)
+        .def_readwrite("convergenceDx", &OptimizerRpropOptions::convergenceDx)
         .def_readwrite("regularizer", &OptimizerRpropOptions::regularizer)
         ;
 

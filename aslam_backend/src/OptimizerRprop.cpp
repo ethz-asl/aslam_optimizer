@@ -10,16 +10,7 @@
 namespace aslam {
 namespace backend {
 
-OptimizerRpropOptions::OptimizerRpropOptions() :
-    etaMinus(0.5),
-    etaPlus(1.2),
-    initialDelta(0.1), // TODO: what is a good initial value?
-    minDelta(1e-20),
-    maxDelta(1.0),
-    convergenceGradientNorm(1e-3),
-    maxIterations(20),
-    nThreads(4)
-{
+OptimizerRpropOptions::OptimizerRpropOptions() {
   check();
 }
 
@@ -30,6 +21,7 @@ OptimizerRpropOptions::OptimizerRpropOptions(const sm::PropertyTree& config) :
     minDelta(config.getDouble("minDelta", minDelta)),
     maxDelta(config.getDouble("maxDelta", maxDelta)),
     convergenceGradientNorm(config.getDouble("convergenceGradientNorm", convergenceGradientNorm)),
+    convergenceDx(config.getDouble("convergenceMaxAbsDx", convergenceDx)),
     maxIterations(config.getInt("maxIterations", maxIterations)),
     nThreads(config.getInt("nThreads", nThreads))
 {
@@ -42,7 +34,9 @@ void OptimizerRpropOptions::check() const {
   SM_ASSERT_GT( Exception, initialDelta, 0.0, "");
   SM_ASSERT_GT( Exception, minDelta, 0.0, "");
   SM_ASSERT_GT( Exception, maxDelta, minDelta, "");
-  SM_ASSERT_GT( Exception, convergenceGradientNorm, 0.0, "");
+  SM_ASSERT_GE( Exception, convergenceGradientNorm, 0.0, "");
+  SM_ASSERT_GE( Exception, convergenceDx, 0.0, "");
+  SM_ASSERT_TRUE( Exception, convergenceDx > 0 || convergenceGradientNorm > 0.0, "");
   SM_ASSERT_GE( Exception, maxIterations, -1, "");
 }
 
@@ -54,6 +48,8 @@ std::ostream& operator<<(std::ostream& out, const aslam::backend::OptimizerRprop
   out << "\tinitialDelta: " << options.initialDelta << std::endl;
   out << "\tminDelta: " << options.minDelta << std::endl;
   out << "\tmaxDelta: " << options.maxDelta << std::endl;
+  out << "\tconvergenceGradientNorm: " << options.convergenceGradientNorm << std::endl;
+  out << "\tconvergenceDx: " << options.convergenceDx << std::endl;
   out << "\tmaxIterations: " << options.maxIterations << std::endl;
   out << "\tnThreads: " << options.nThreads << std::endl;
   return out;
@@ -75,7 +71,7 @@ OptimizerRprop::OptimizerRprop(const OptimizerRpropOptions& options) :
     _options(options),
     _nIterations(0)
 {
-
+  _options.check();
 }
 
 OptimizerRprop::OptimizerRprop(const sm::PropertyTree& config) :
@@ -138,10 +134,8 @@ void OptimizerRprop::optimize()
       isConverged = true;
       SM_DEBUG_STREAM_NAMED("optimization", "RPROP: Current gradient norm " << _curr_gradient_norm <<
                             " is smaller than convergenceGradientNorm option -> terminating");
-    }
-
-    if (isConverged)
       break;
+    }
 
     for (std::size_t d = 0; d < numOptParameters(); ++d) {
 
@@ -164,6 +158,14 @@ void OptimizerRprop::optimize()
         _prev_gradient(d) = 0.0;
       else
         _prev_gradient(d) = gradient(d);
+    }
+
+    const double maxAbsCoeff = _dx.cwiseAbs().maxCoeff();
+    if (maxAbsCoeff < _options.convergenceDx) {
+      isConverged = true;
+      SM_DEBUG_STREAM_NAMED("optimization", "RPROP: Maximum dx coefficient " << maxAbsCoeff <<
+                            " is smaller than convergenceMaxAbsDx option -> terminating");
+      break;
     }
 
     SM_FINE_STREAM_NAMED("optimization", "Number of iterations: " << _nIterations);
