@@ -21,7 +21,7 @@ OptimizerRpropOptions::OptimizerRpropOptions(const sm::PropertyTree& config) :
     minDelta(config.getDouble("minDelta", minDelta)),
     maxDelta(config.getDouble("maxDelta", maxDelta)),
     convergenceGradientNorm(config.getDouble("convergenceGradientNorm", convergenceGradientNorm)),
-    convergenceDx(config.getDouble("convergenceMaxAbsDx", convergenceDx)),
+    convergenceDx(config.getDouble("convergenceDx", convergenceDx)),
     maxIterations(config.getInt("maxIterations", maxIterations)),
     nThreads(config.getInt("nThreads", nThreads))
 {
@@ -227,7 +227,7 @@ void OptimizerRprop::optimize()
     if (maxAbsCoeff < _options.convergenceDx) {
       isConverged = true;
       SM_DEBUG_STREAM_NAMED("optimization", "RPROP: Maximum dx coefficient " << maxAbsCoeff <<
-                            " is smaller than convergenceMaxAbsDx option -> terminating");
+                            " is smaller than convergenceDx option -> terminating");
       break;
     }
 
