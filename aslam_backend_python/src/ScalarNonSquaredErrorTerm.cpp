@@ -6,6 +6,11 @@
 using namespace boost::python;
 using namespace aslam::backend;
 
+Eigen::VectorXd evaluateJacobians(ScalarNonSquaredErrorTerm& e, bool useMEstimator) {
+  JacobianContainer jc(1);
+  e.evaluateJacobians(jc, useMEstimator);
+  return jc.asDenseMatrix();
+}
 
 void exportScalarNonSquaredErrorTerm()
 {
@@ -24,6 +29,7 @@ void exportScalarNonSquaredErrorTerm()
     .def("getWeightedErrorWithMEstimator", &ScalarNonSquaredErrorTerm::getWeightedError)
     .def("getRawError", &ScalarNonSquaredErrorTerm::getRawError)
     .def("getTime", &ScalarNonSquaredErrorTerm::getTime)
+    .def("evaluateJacobians", &evaluateJacobians)
     ;
 
 }
