@@ -80,9 +80,9 @@ void ProblemManager::initialize()
 
   _isInitialized = true;
 
-  SM_DEBUG_STREAM("ProblemManager: Initialized problem with " << _problem->numDesignVariables() <<
-                  " design variable(s), " << _errorTermsNS.size() << " non-squared error term(s) and " <<
-                  _errorTermsS.size() << " squared error term(s)");
+  SM_FINEST_STREAM("ProblemManager: Initialized problem with " << _problem->numDesignVariables() <<
+                    " design variable(s), " << _errorTermsNS.size() << " non-squared error term(s) and " <<
+                    _errorTermsS.size() << " squared error term(s)");
 
 }
 
@@ -119,6 +119,25 @@ void ProblemManager::computeGradient(RowVectorType& outGrad, size_t nThreads, bo
   outGrad = gradients[0];
   for (std::size_t i = 1; i<gradients.size(); i++)
     outGrad += gradients[i];
+}
+
+void ProblemManager::computeGradientForErrorTerm(RowVectorType& J, ErrorTerm* e, bool useMEstimator) {
+  JacobianContainer jc(e->dimension());
+  e->getWeightedJacobians(jc, useMEstimator);
+  ColumnVectorType ev;
+  e->updateRawSquaredError();
+  e->getWeightedError(ev, useMEstimator);
+  for (JacobianContainer::map_t::iterator it = jc.begin(); it != jc.end(); ++it) {// iterate over design variables of this error term
+    RowVectorType grad = 2.0*ev.transpose()*it->second;
+    J.block(0 /*e->rowBase()*/, it->first->columnBase(), grad.rows(), grad.cols()) += grad;
+  }
+}
+
+void ProblemManager::computeGradientForErrorTerm(RowVectorType& J, ScalarNonSquaredErrorTerm* e, bool useMEstimator) {
+    JacobianContainer jc(1 /* dimension */);
+    e->evaluateJacobians(jc, useMEstimator);
+    for (JacobianContainer::map_t::iterator it = jc.begin(); it != jc.end(); ++it) // iterate over design variables of this error term
+      J.block(0 /*e->rowBase()*/, it->first->columnBase(), it->second.rows(), it->second.cols()) += it->second;
 }
 
 
@@ -181,24 +200,10 @@ void ProblemManager::evaluateGradients(size_t /* threadId */, size_t startIdx, s
 {
   SM_ASSERT_LE_DBG(Exception, endIdx, _numErrorTerms, "");
   for (size_t i = startIdx; i < endIdx; ++i) { // iterate through error terms
-    if (i < _errorTermsNS.size()) {
-      JacobianContainer jc(1 /* dimension */);
-      ScalarNonSquaredErrorTerm* e = _errorTermsNS[i];
-      e->evaluateJacobians(jc, useMEstimator);
-      for (JacobianContainer::map_t::iterator it = jc.begin(); it != jc.end(); ++it) // iterate over design variables of this error term
-        J.block(0 /*e->rowBase()*/, it->first->columnBase(), it->second.rows(), it->second.cols()) += it->second;
-    } else {
-      ErrorTerm* e = _errorTermsS[i - _errorTermsNS.size()];
-      JacobianContainer jc(e->dimension());
-      e->getWeightedJacobians(jc, useMEstimator);
-      ColumnVectorType ev;
-      e->updateRawSquaredError();
-      e->getWeightedError(ev, useMEstimator);
-      for (JacobianContainer::map_t::iterator it = jc.begin(); it != jc.end(); ++it) {// iterate over design variables of this error term
-        RowVectorType grad = 2.0*ev.transpose()*it->second;
-        J.block(0 /*e->rowBase()*/, it->first->columnBase(), grad.rows(), grad.cols()) += grad;
-      }
-    }
+    if (i < _errorTermsNS.size())
+      computeGradientForErrorTerm(J, _errorTermsNS[i], useMEstimator);
+    else
+      computeGradientForErrorTerm(J, _errorTermsS[i - _errorTermsNS.size()], useMEstimator);
   }
 }
 

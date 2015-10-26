@@ -85,6 +85,11 @@ class ProblemManager {
   /// \brief compute the current gradient of the objective function
   void computeGradient(RowVectorType& outGrad, size_t nThreads, bool useMEstimator);
 
+  /// \brief computes the gradient of a specific error term
+  /// NOTE: make sure to set all coefficients of J to zero before calling this method
+  void computeGradientForErrorTerm(RowVectorType& J, ErrorTerm* e, bool useMEstimator);
+  void computeGradientForErrorTerm(RowVectorType& J, ScalarNonSquaredErrorTerm* e, bool useMEstimator);
+
  protected:
   /// \brief Set the initialized status
   void setInitialized(bool isInitialized) { _isInitialized = isInitialized; }
