@@ -127,8 +127,9 @@ void ProblemManager::addGradientForErrorTerm(RowVectorType& J, ErrorTerm* e, boo
   ColumnVectorType ev;
   e->updateRawSquaredError();
   e->getWeightedError(ev, useMEstimator);
+  ev *= 2.0;
   for (JacobianContainer::map_t::iterator it = jc.begin(); it != jc.end(); ++it) {// iterate over design variables of this error term
-    RowVectorType grad = 2.0*ev.transpose()*it->second;
+    RowVectorType grad = ev.transpose()*it->second;
     J.block(0 /*e->rowBase()*/, it->first->columnBase(), grad.rows(), grad.cols()) += grad;
   }
 }
