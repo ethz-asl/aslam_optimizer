@@ -1,5 +1,6 @@
 #include <numpy_eigen/boost_python_headers.hpp>
 #include <aslam/backend/OptimizationProblem.hpp>
+#include <aslam/backend/util/ProblemManager.hpp>
 #include <aslam/backend/SimpleOptimizationProblem.hpp>
 #include <aslam/backend/ErrorTerm.hpp>
 #include <aslam/backend/ScalarNonSquaredErrorTerm.hpp>
@@ -26,6 +27,40 @@ void (SimpleOptimizationProblem::*saet)( const boost::shared_ptr<ErrorTerm> &) =
 
 void (SimpleOptimizationProblem::*sasnset)( const boost::shared_ptr<ScalarNonSquaredErrorTerm> &) = &SimpleOptimizationProblem::addErrorTerm;
 
+template <typename E>
+RowVectorType computeGradientForErrorTerm(boost::shared_ptr<OptimizationProblemBase> problem, E* errorTerm, bool useMEstimator = true) {
+
+  ProblemManager pm;
+  pm.setProblem(problem);
+  pm.initialize();
+
+  RowVectorType J = RowVectorType::Zero(1, pm.numOptParameters());
+  pm.computeGradientForErrorTerm(J, errorTerm, useMEstimator);
+  return J;
+}
+
+RowVectorType computeGradient(boost::shared_ptr<OptimizationProblemBase> problem, std::size_t nThreads = 2, bool useMEstimator = true) {
+
+  ProblemManager pm;
+  pm.setProblem(problem);
+  pm.initialize();
+
+  RowVectorType J = RowVectorType::Zero(1, pm.numOptParameters());
+  pm.computeGradient(J, nThreads, useMEstimator);
+  return J;
+}
+
+double evaluateError(boost::shared_ptr<OptimizationProblemBase> problem, std::size_t nThreads = 2) {
+  ProblemManager pm;
+  pm.setProblem(problem);
+  pm.initialize();
+  return pm.evaluateError(nThreads);
+}
+
+BOOST_PYTHON_FUNCTION_OVERLOADS(computeGradientForErrorTerm_overloads, computeGradientForErrorTerm<ErrorTerm>, 2, 3);
+BOOST_PYTHON_FUNCTION_OVERLOADS(computeGradientForScalarNonSquaredErrorTerm_overloads, computeGradientForErrorTerm<ScalarNonSquaredErrorTerm>, 2, 3);
+BOOST_PYTHON_FUNCTION_OVERLOADS(computeGradient_overloads, computeGradient, 1, 3);
+BOOST_PYTHON_FUNCTION_OVERLOADS(evaluateError_overloads, evaluateError, 1, 2);
 
 void exportOptimizationProblem()
 {
@@ -43,6 +78,16 @@ void exportOptimizationProblem()
     .def("errorTerm", etptr, return_internal_reference<>())
     /// \brief get scalar non squared error term i
     .def("scalarNonSquaredErrorTerm", nsetptr, return_internal_reference<>())
+    /// \brief get the gradient contribution of the scalar non squared error term i
+    .def("computeGradientForScalarNonSquaredErrorTerm", &computeGradientForErrorTerm<ScalarNonSquaredErrorTerm>,
+         computeGradientForScalarNonSquaredErrorTerm_overloads("computeGradientForScalarNonSquaredErrorTerm(ScalarNonSquaredErrorTerm e, bool useMEstimator)"))
+    /// \brief get the gradient contribution of the scalar non squared error term i
+    .def("computeGradientForErrorTerm", &computeGradientForErrorTerm<ErrorTerm>,
+         computeGradientForErrorTerm_overloads("computeGradientForErrorTerm(ErrorTerm e, int nThreads, bool useMEstimator)"))
+    /// \brief compute the full gradient
+    .def("computeGradient", &computeGradient, computeGradient_overloads("computeGradient(int nThreads, bool useMEstimator)"))
+    /// \brief Evaluates the full error
+    .def("evaluateError", &evaluateError, evaluateError_overloads("evaluateError(int nThreads)"))
     ;
 
   class_<OptimizationProblem, boost::shared_ptr<OptimizationProblem>, bases<OptimizationProblemBase> >("OptimizationProblem", init<>())
