@@ -35,7 +35,7 @@ RowVectorType computeGradientForErrorTerm(boost::shared_ptr<OptimizationProblemB
   pm.initialize();
 
   RowVectorType J = RowVectorType::Zero(1, pm.numOptParameters());
-  pm.computeGradientForErrorTerm(J, errorTerm, useMEstimator);
+  pm.addGradientForErrorTerm(J, errorTerm, useMEstimator);
   return J;
 }
 

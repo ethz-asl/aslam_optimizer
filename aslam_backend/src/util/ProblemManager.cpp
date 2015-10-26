@@ -121,7 +121,7 @@ void ProblemManager::computeGradient(RowVectorType& outGrad, size_t nThreads, bo
     outGrad += gradients[i];
 }
 
-void ProblemManager::computeGradientForErrorTerm(RowVectorType& J, ErrorTerm* e, bool useMEstimator) {
+void ProblemManager::addGradientForErrorTerm(RowVectorType& J, ErrorTerm* e, bool useMEstimator) {
   JacobianContainer jc(e->dimension());
   e->getWeightedJacobians(jc, useMEstimator);
   ColumnVectorType ev;
@@ -133,7 +133,7 @@ void ProblemManager::computeGradientForErrorTerm(RowVectorType& J, ErrorTerm* e,
   }
 }
 
-void ProblemManager::computeGradientForErrorTerm(RowVectorType& J, ScalarNonSquaredErrorTerm* e, bool useMEstimator) {
+void ProblemManager::addGradientForErrorTerm(RowVectorType& J, ScalarNonSquaredErrorTerm* e, bool useMEstimator) {
     JacobianContainer jc(1 /* dimension */);
     e->evaluateJacobians(jc, useMEstimator);
     for (JacobianContainer::map_t::iterator it = jc.begin(); it != jc.end(); ++it) // iterate over design variables of this error term
@@ -201,9 +201,9 @@ void ProblemManager::evaluateGradients(size_t /* threadId */, size_t startIdx, s
   SM_ASSERT_LE_DBG(Exception, endIdx, _numErrorTerms, "");
   for (size_t i = startIdx; i < endIdx; ++i) { // iterate through error terms
     if (i < _errorTermsNS.size())
-      computeGradientForErrorTerm(J, _errorTermsNS[i], useMEstimator);
+      addGradientForErrorTerm(J, _errorTermsNS[i], useMEstimator);
     else
-      computeGradientForErrorTerm(J, _errorTermsS[i - _errorTermsNS.size()], useMEstimator);
+      addGradientForErrorTerm(J, _errorTermsS[i - _errorTermsNS.size()], useMEstimator);
   }
 }
 
