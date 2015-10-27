@@ -74,6 +74,9 @@ namespace aslam {
       ///        optimize() will call initialize() upon the first call.
       virtual void initialize() override;
 
+      /// \brief Reset internal states but don't re-initialize the whole problem
+      void reset();
+
     private:
       /// \brief branchless signum method
       static inline int sign(const double& val) {

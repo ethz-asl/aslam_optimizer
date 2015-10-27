@@ -209,6 +209,9 @@ void exportOptimizer()
         .def("initialize", &OptimizerRprop::initialize,
              "Initialize the optimizer to run on an optimization problem. optimize() will call initialize() upon the first call.")
 
+       .def("reset", &OptimizerRprop::reset,
+            "Reset internal states but don't re-initialize the whole problem")
+
         .def("optimize", &OptimizerRprop::optimize,
              "Run the optimization")
         .add_property("options", make_function(&OptimizerRprop::options, return_internal_reference<>()),

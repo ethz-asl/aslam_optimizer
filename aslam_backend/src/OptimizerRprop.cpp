@@ -80,11 +80,13 @@ OptimizerRprop::~OptimizerRprop()
 }
 
 
-/// \brief initialize the optimizer to run on an optimization problem.
-///        This should be called before calling optimize()
 void OptimizerRprop::initialize()
 {
   ProblemManager::initialize();
+  reset();
+}
+
+void OptimizerRprop::reset() {
   _dx = ColumnVectorType::Constant(numOptParameters(), 0.0);
   _prev_gradient = ColumnVectorType::Constant(numOptParameters(), 0.0);
   _prev_error = std::numeric_limits<double>::max();
@@ -101,9 +103,6 @@ void OptimizerRprop::optimize()
 
   if (!isInitialized())
     initialize();
-
-  if (_options.method == OptimizerRpropOptions::IRPROP_PLUS && std::isnan(_prev_error))
-    _prev_error = this->evaluateError(_options.nThreads);
 
   using namespace Eigen;
 
