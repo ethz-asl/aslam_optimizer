@@ -66,6 +66,7 @@ catkin_add_gtest(${PROJECT_NAME}_test
   test/test_main.cpp
   test/JacobianContainer.cpp
   test/test_sparse_matrix_functions.cpp
+  test/TestProblemManager.cpp
   test/TestOptimizer.cpp
   test/TestOptimizerRprop.cpp
   test/TestSamplerMcmc.cpp
