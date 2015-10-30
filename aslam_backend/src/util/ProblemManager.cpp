@@ -180,6 +180,48 @@ void ProblemManager::revertLastStateUpdate()
     _designVariables[i]->revertUpdate();
 }
 
+void ProblemManager::saveDesignVariables() {
+  _dvState.resize(numDesignVariables());
+  for (size_t i = 0; i < numDesignVariables(); i++) {
+    _dvState[i].first = designVariable(i);
+    _dvState[i].first->getParameters(_dvState[i].second);
+  }
+}
+
+void ProblemManager::restoreDesignVariables() {
+  for (auto& dvParamPair : _dvState)
+    dvParamPair.first->setParameters(dvParamPair.second);
+}
+
+Eigen::VectorXd ProblemManager::getFlattenedDesignVariableParameters() const {
+
+  // Allocate memory so vector-space design variables fit into the output vector
+  int numParametersMin = 0;
+  for (auto& dv : _designVariables)
+    numParametersMin += dv->minimalDimensions();
+
+  Eigen::VectorXd rval(numParametersMin);
+
+  int cnt = 0;
+  for (auto& dv : _designVariables) {
+    Eigen::MatrixXd p;
+    dv->getParameters(p);
+    int d = p.size();
+    p.conservativeResize(d, 1);
+
+    // Resize has to be performed if we have non-vector-space design variables
+    int newSize = cnt + d;
+    if (newSize > numParametersMin)
+      rval.conservativeResize(newSize);
+
+    rval.segment(cnt, d) = p;
+    cnt += d;
+  }
+
+  return rval;
+
+}
+
 void ProblemManager::sumErrorTerms(size_t /* threadId */, size_t startIdx, size_t endIdx, double& err) const {
   SM_ASSERT_LE_DBG(Exception, endIdx, _numErrorTerms, "");
   for (size_t i = startIdx; i < endIdx; ++i) { // iterate through error terms

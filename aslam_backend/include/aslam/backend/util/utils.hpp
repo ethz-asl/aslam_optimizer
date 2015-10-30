@@ -20,6 +20,18 @@ inline bool isFinite(const JacobianContainer& jc, const DesignVariable& dv) {
   return jc.Jacobian(&dv).allFinite();
 }
 
+/** branchless signum method */
+template <typename T>
+inline int sign(const T& val) {
+  return (0.0 < val) - (val < 0.0);
+}
+
+/** power-2 */
+template <typename T>
+inline T sqr(const T& val) {
+  return val*val;
+}
+
 }
 }
 }
