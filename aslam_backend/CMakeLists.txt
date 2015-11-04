@@ -52,6 +52,7 @@ cs_add_library(${PROJECT_NAME}
   src/SamplerBase.cpp
   src/Optimizer2.cpp
   src/OptimizerRprop.cpp
+  src/OptimizerBFGS.cpp
   src/ProbDataAssocPolicy.cpp
   src/SamplerMetropolisHastings.cpp
   src/SamplerHybridMcmc.cpp
@@ -71,6 +72,7 @@ catkin_add_gtest(${PROJECT_NAME}_test
   test/TestLineSearch.cpp
   test/TestOptimizer.cpp
   test/TestOptimizerRprop.cpp
+  test/TestOptimizerBFGS.cpp
   test/TestSamplerMcmc.cpp
   test/TestOptimizationProblem.cpp
   test/CompressedColumnMatrixTest.cpp
