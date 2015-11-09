@@ -15,6 +15,8 @@ namespace backend {
 namespace utils {
 
 inline bool isFinite(const JacobianContainer& jc, const DesignVariable& dv) {
+  if (!dv.isActive())
+    return true;
   return jc.Jacobian(&dv).allFinite();
 }
 
