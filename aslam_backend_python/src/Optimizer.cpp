@@ -175,6 +175,13 @@ void exportOptimizer()
         ;
 
 
+    enum_<OptimizerRpropOptions::Method>("RpropMethod")
+        .value("RPROP_PLUS", OptimizerRpropOptions::Method::RPROP_PLUS)
+        .value("RPROP_MINUS", OptimizerRpropOptions::Method::RPROP_MINUS)
+        .value("IRPROP_MINUS", OptimizerRpropOptions::Method::IRPROP_MINUS)
+        .value("IRPROP_PLUS", OptimizerRpropOptions::Method::IRPROP_PLUS)
+        ;
+
     class_<OptimizerRpropOptions>("OptimizerRpropOptions", init<>())
         .def_readwrite("etaMinus",&OptimizerRpropOptions::etaMinus)
         .def_readwrite("etaPlus",&OptimizerRpropOptions::etaPlus)
@@ -184,7 +191,25 @@ void exportOptimizer()
         .def_readwrite("maxIterations",&OptimizerRpropOptions::maxIterations)
         .def_readwrite("nThreads", &OptimizerRpropOptions::nThreads)
         .def_readwrite("convergenceGradientNorm", &OptimizerRpropOptions::convergenceGradientNorm)
+        .def_readwrite("convergenceDx", &OptimizerRpropOptions::convergenceDx)
         .def_readwrite("regularizer", &OptimizerRpropOptions::regularizer)
+        .def_readwrite("method", &OptimizerRpropOptions::method)
+        ;
+
+    enum_<RpropReturnValue::ConvergenceCriterion>("RpropConvergenceCriterion")
+        .value("NO_CONVERGENCE", RpropReturnValue::ConvergenceCriterion::NO_CONVERGENCE)
+        .value("GRADIENT_NORM", RpropReturnValue::ConvergenceCriterion::GRADIENT_NORM)
+        .value("DX", RpropReturnValue::ConvergenceCriterion::DX)
+        ;
+
+    class_<RpropReturnValue>("RpropReturnValue", init<>())
+        .def_readwrite("convergence",&RpropReturnValue::convergence)
+        .def_readwrite("nIterations",&RpropReturnValue::nIterations)
+        .def_readwrite("nGradEvaluations",&RpropReturnValue::nGradEvaluations)
+        .def_readwrite("nObjectiveEvaluations",&RpropReturnValue::nObjectiveEvaluations)
+        .def_readwrite("gradientNorm",&RpropReturnValue::gradientNorm)
+        .def_readwrite("maxDx",&RpropReturnValue::maxDx)
+        .def_readwrite("error",&RpropReturnValue::error)
         ;
 
     class_<OptimizerRprop, boost::shared_ptr<OptimizerRprop> >("OptimizerRprop", init<>("OptimizerRprop(): Constructor with default options"))
@@ -200,7 +225,10 @@ void exportOptimizer()
         .def("initialize", &OptimizerRprop::initialize,
              "Initialize the optimizer to run on an optimization problem. optimize() will call initialize() upon the first call.")
 
-        .def("optimize", &OptimizerRprop::optimize,
+       .def("reset", &OptimizerRprop::reset,
+            "Reset internal states but don't re-initialize the whole problem")
+
+        .def("optimize", make_function(&OptimizerRprop::optimize, return_internal_reference<>()),
              "Run the optimization")
         .add_property("options", make_function(&OptimizerRprop::options, return_internal_reference<>()),
                       "The optimizer options.")

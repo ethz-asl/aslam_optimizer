@@ -10,16 +10,7 @@
 namespace aslam {
 namespace backend {
 
-OptimizerRpropOptions::OptimizerRpropOptions() :
-    etaMinus(0.5),
-    etaPlus(1.2),
-    initialDelta(0.1), // TODO: what is a good initial value?
-    minDelta(1e-20),
-    maxDelta(1.0),
-    convergenceGradientNorm(1e-3),
-    maxIterations(20),
-    nThreads(4)
-{
+OptimizerRpropOptions::OptimizerRpropOptions() {
   check();
 }
 
@@ -30,6 +21,7 @@ OptimizerRpropOptions::OptimizerRpropOptions(const sm::PropertyTree& config) :
     minDelta(config.getDouble("minDelta", minDelta)),
     maxDelta(config.getDouble("maxDelta", maxDelta)),
     convergenceGradientNorm(config.getDouble("convergenceGradientNorm", convergenceGradientNorm)),
+    convergenceDx(config.getDouble("convergenceDx", convergenceDx)),
     maxIterations(config.getInt("maxIterations", maxIterations)),
     nThreads(config.getInt("nThreads", nThreads))
 {
@@ -42,7 +34,9 @@ void OptimizerRpropOptions::check() const {
   SM_ASSERT_GT( Exception, initialDelta, 0.0, "");
   SM_ASSERT_GT( Exception, minDelta, 0.0, "");
   SM_ASSERT_GT( Exception, maxDelta, minDelta, "");
-  SM_ASSERT_GT( Exception, convergenceGradientNorm, 0.0, "");
+  SM_ASSERT_GE( Exception, convergenceGradientNorm, 0.0, "");
+  SM_ASSERT_GE( Exception, convergenceDx, 0.0, "");
+  SM_ASSERT_TRUE( Exception, convergenceDx > 0 || convergenceGradientNorm > 0.0, "");
   SM_ASSERT_GE( Exception, maxIterations, -1, "");
 }
 
@@ -54,34 +48,51 @@ std::ostream& operator<<(std::ostream& out, const aslam::backend::OptimizerRprop
   out << "\tinitialDelta: " << options.initialDelta << std::endl;
   out << "\tminDelta: " << options.minDelta << std::endl;
   out << "\tmaxDelta: " << options.maxDelta << std::endl;
+  out << "\tconvergenceGradientNorm: " << options.convergenceGradientNorm << std::endl;
+  out << "\tconvergenceDx: " << options.convergenceDx << std::endl;
   out << "\tmaxIterations: " << options.maxIterations << std::endl;
   out << "\tnThreads: " << options.nThreads << std::endl;
+  out << "\tmethod: " << options.method << std::endl;
+  return out;
+}
+
+void RpropReturnValue::reset() {
+  convergence = NO_CONVERGENCE;
+  nIterations = nGradEvaluations = nObjectiveEvaluations = 0;
+  gradientNorm = std::numeric_limits<double>::signaling_NaN();
+  maxDx = std::numeric_limits<double>::signaling_NaN();
+  error = std::numeric_limits<double>::max();
+}
+
+std::ostream& operator<<(std::ostream& out, const RpropReturnValue::ConvergenceCriterion& convergence) {
+  switch (convergence) {
+    case RpropReturnValue::ConvergenceCriterion::NO_CONVERGENCE:
+      out << "NO_CONVERGENCE";
+      break;
+    case RpropReturnValue::ConvergenceCriterion::GRADIENT_NORM:
+      out << "GRADIENT_NORM";
+      break;
+    case RpropReturnValue::ConvergenceCriterion::DX:
+      out << "DX";
+      break;
+  }
   return out;
 }
 
 
-
-
 OptimizerRprop::OptimizerRprop() :
-    _curr_gradient_norm(std::numeric_limits<double>::signaling_NaN()),
-    _options(OptimizerRpropOptions()),
-    _nIterations(0)
+    _options(OptimizerRpropOptions())
 {
 
 }
 
 OptimizerRprop::OptimizerRprop(const OptimizerRpropOptions& options) :
-    _curr_gradient_norm(std::numeric_limits<double>::signaling_NaN()),
-    _options(options),
-    _nIterations(0)
+    _options(options)
 {
-
+  _options.check();
 }
 
-OptimizerRprop::OptimizerRprop(const sm::PropertyTree& config) :
-    _curr_gradient_norm(std::numeric_limits<double>::signaling_NaN()),
-    _nIterations(0)
-{
+OptimizerRprop::OptimizerRprop(const sm::PropertyTree& config) {
   _options = OptimizerRpropOptions(config);
 }
 
@@ -90,18 +101,21 @@ OptimizerRprop::~OptimizerRprop()
 }
 
 
-/// \brief initialize the optimizer to run on an optimization problem.
-///        This should be called before calling optimize()
 void OptimizerRprop::initialize()
 {
   ProblemManager::initialize();
-  _dx.resize(numOptParameters(), 1);
-  _prev_gradient = ColumnVectorType::Constant(numOptParameters(), 0.0);
-  _delta = ColumnVectorType::Constant(numOptParameters(), _options.initialDelta);
-  _nIterations = 0;
+  reset();
 }
 
-void OptimizerRprop::optimize()
+void OptimizerRprop::reset() {
+  _dx = ColumnVectorType::Constant(numOptParameters(), 0.0);
+  _prev_gradient = ColumnVectorType::Constant(numOptParameters(), 0.0);
+  _prev_error = std::numeric_limits<double>::max();
+  _delta = ColumnVectorType::Constant(numOptParameters(), _options.initialDelta);
+  _returnValue.reset();
+}
+
+const RpropReturnValue& OptimizerRprop::optimize()
 {
   Timer timeGrad("OptimizerRprop: Compute---Gradient", true);
   Timer timeStep("OptimizerRprop: Compute---Step size", true);
@@ -112,8 +126,10 @@ void OptimizerRprop::optimize()
 
   using namespace Eigen;
 
-  bool isConverged = false;
-  for (_nIterations = 0; _options.maxIterations == -1 || _nIterations < static_cast<size_t>(_options.maxIterations); ++_nIterations) {
+  std::size_t cnt = 0;
+  for (cnt = 0; _options.maxIterations == -1 || cnt < static_cast<size_t>(_options.maxIterations); ++cnt) {
+
+    _returnValue.nIterations++;
 
     RowVectorType gradient;
     timeGrad.start();
@@ -126,51 +142,122 @@ void OptimizerRprop::optimize()
       SM_FINER_STREAM_NAMED("optimization", "RPROP: Regularization term gradient: " << jc.asDenseMatrix());
       gradient += jc.asDenseMatrix();
     }
-
+    _returnValue.nGradEvaluations++;
     timeGrad.stop();
 
     SM_ASSERT_TRUE_DBG(Exception, gradient.allFinite (), "Gradient " << gradient.format(IOFormat(2, DontAlignCols, ", ", ", ", "", "", "[", "]")) << " is not finite");
 
     timeStep.start();
-    _curr_gradient_norm = gradient.norm();
+    _returnValue.gradientNorm = gradient.norm();
 
-    if (_curr_gradient_norm < _options.convergenceGradientNorm) {
-      isConverged = true;
-      SM_DEBUG_STREAM_NAMED("optimization", "RPROP: Current gradient norm " << _curr_gradient_norm <<
+    if (_returnValue.gradientNorm < _options.convergenceGradientNorm) {
+      _returnValue.convergence = RpropReturnValue::GRADIENT_NORM;
+      SM_DEBUG_STREAM_NAMED("optimization", "RPROP: Current gradient norm " << _returnValue.gradientNorm <<
                             " is smaller than convergenceGradientNorm option -> terminating");
+      break;
     }
 
-    if (isConverged)
-      break;
+    // Compute error for iPRop+
+    bool errorIncreased = false;
+    if (_options.method == OptimizerRpropOptions::IRPROP_PLUS) {
+      _returnValue.error = this->evaluateError(_options.nThreads);
+      _returnValue.nObjectiveEvaluations++;
+      errorIncreased = (_returnValue.error - _prev_error) > 0.0;
+      _prev_error = _returnValue.error;
+    }
+
+    // determine whether gradient direction switched
+    Eigen::Matrix<double, 1, Eigen::Dynamic> gg = _prev_gradient.cwiseProduct(gradient);
+    Eigen::Matrix<bool, 1, Eigen::Dynamic> switchNo = gg.array() > 0.0;
+    Eigen::Matrix<bool, 1, Eigen::Dynamic> switchYes = gg.array() < 0.0;
+    _prev_gradient = gradient;
 
     for (std::size_t d = 0; d < numOptParameters(); ++d) {
 
       // Adapt delta
-      if (_prev_gradient(d) * gradient(d) > 0.0)
+      if (switchNo(d))
         _delta(d) = std::min(_delta(d) * _options.etaPlus, _options.maxDelta);
-      else if (_prev_gradient(d) * gradient(d) < 0.0)
+      else if (switchYes(d))
         _delta(d) = std::max(_delta(d) * _options.etaMinus, _options.minDelta);
 
-      // Compute design variable update vector
-      if (gradient(d) > 0.0)
-        _dx(d) = -_delta(d);
-      else if (gradient(d) < 0.0)
-        _dx(d) = +_delta(d);
-      else
-        _dx(d) = 0.0;
+      // Note: see http://citeseerx.ist.psu.edu/viewdoc/summary?doi=10.1.1.17.1332
+      // for a good description of the algorithms
+      switch (_options.method) {
 
-      // Set previous gradient
-      if (_prev_gradient(d) * gradient(d) < 0.0)
-        _prev_gradient(d) = 0.0;
-      else
-        _prev_gradient(d) = gradient(d);
+        // RPROP_PLUS
+        // With backtracking. If gradient switched direction, revert this update.
+        case OptimizerRpropOptions::RPROP_PLUS:
+        {
+          // Compute design variable update vector
+          if (switchYes(d)) {
+            _dx(d) = -_dx(d); // revert update
+            _prev_gradient(d) = 0.0; // this forces switchYes=false in the next step
+          } else {
+            _dx(d) = -sign(gradient(d))*_delta(d);
+          }
+
+          break;
+        }
+
+        // RPROP_MINUS
+        // No backtracking. Reduce step-length if gradient switched direction,
+        // Increase step-length if gradient in same direction.
+        case OptimizerRpropOptions::RPROP_MINUS:
+        {
+          // Compute design variable update vector
+          _dx(d) = -sign(gradient(d))*_delta(d);
+
+          break;
+        }
+        // IRPROP_MINUS
+        // In case gradient direction switched, stay at this point for one iteration and
+        // then move into the direction of the gradient with half the step-length.
+        case OptimizerRpropOptions::IRPROP_MINUS:
+        {
+          // Compute design variable update vector
+          if (switchYes(d))
+            _dx(d) = _prev_gradient(d) = 0.0;
+          else
+            _dx(d) = -sign(gradient(d))*_delta(d);
+
+          break;
+        }
+        // IRPROP_PLUS
+        // Revert only weight updates that have caused changes of the corresponding
+        // partial derivatives in case of an error increase.
+        case OptimizerRpropOptions::IRPROP_PLUS:
+        {
+
+          // Compute design variable update vector
+          if (switchYes(d)) {
+            if (errorIncreased)
+              _dx(d) = -_dx(d); // revert update if gradient direction switched and error increased
+            else
+              _dx(d) = 0.0;
+            _prev_gradient(d) = 0.0; // this forces switchYes=false in the next step
+          } else {
+            _dx(d) = -sign(gradient(d))*_delta(d);
+          }
+
+          break;
+        }
+      }
+
     }
 
-    SM_FINE_STREAM_NAMED("optimization", "Number of iterations: " << _nIterations);
+    _returnValue.maxDx = _dx.cwiseAbs().maxCoeff();
+    if (_returnValue.maxDx < _options.convergenceDx) {
+      _returnValue.convergence = RpropReturnValue::DX;
+      SM_DEBUG_STREAM_NAMED("optimization", "RPROP: Maximum dx coefficient " << _returnValue.maxDx <<
+                            " is smaller than convergenceDx option -> terminating");
+      break;
+    }
+
+    SM_FINE_STREAM_NAMED("optimization", "Number of iterations: " << _returnValue.nIterations);
     SM_FINE_STREAM_NAMED("optimization", "\t gradient: " << gradient.format(IOFormat(StreamPrecision, DontAlignCols, ", ", ", ", "", "", "[", "]")));
     SM_FINE_STREAM_NAMED("optimization", "\t dx:    " << _dx.format(IOFormat(StreamPrecision, DontAlignCols, ", ", ", ", "", "", "[", "]")) );
     SM_FINE_STREAM_NAMED("optimization", "\t delta:    " << _delta.format(IOFormat(StreamPrecision, DontAlignCols, ", ", ", ", "", "", "[", "]")) );
-    SM_FINE_STREAM_NAMED("optimization", "\t norm:     " << _curr_gradient_norm);
+    SM_FINE_STREAM_NAMED("optimization", "\t norm:     " << _returnValue.gradientNorm);
 
     timeStep.stop();
 
@@ -180,9 +267,10 @@ void OptimizerRprop::optimize()
 
   }
 
-  std::string convergence = isConverged ? "YES" : "NO";
-  SM_DEBUG_STREAM_NAMED("optimization", "RPROP: Convergence " << convergence << " (iterations: " << _nIterations << ", gradient norm: " << _curr_gradient_norm << ")");
+  SM_DEBUG_STREAM_NAMED("optimization", "RPROP: Convergence " << _returnValue.convergence <<
+                        " (iterations: " << _returnValue.nIterations << ", gradient norm: " << _returnValue.gradientNorm << ")");
 
+  return _returnValue;
 }
 
 } // namespace backend

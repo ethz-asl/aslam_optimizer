@@ -11,23 +11,41 @@ namespace aslam {
   namespace backend {
 
     struct OptimizerRpropOptions {
+
+      enum Method { RPROP_PLUS, RPROP_MINUS, IRPROP_MINUS, IRPROP_PLUS };
+
       OptimizerRpropOptions();
       OptimizerRpropOptions(const sm::PropertyTree& config);
-      double etaMinus; /// \brief Decrease factor for step size if gradient direction changes
-      double etaPlus; /// \brief Increase factor for step size if gradient direction is same
-      double initialDelta; /// \brief Initial step size
-      double minDelta; /// \brief Minimum step size
-      double maxDelta; /// \brief Maximum step size
-      double convergenceGradientNorm; /// \brief Stopping criterion on gradient norm
-      int maxIterations; /// \brief stop if we reach this number of iterations without hitting any of the above stopping criteria. -1
-      std::size_t nThreads; /// \brief The number of threads to use
+      double etaMinus = 0.5; /// \brief Decrease factor for step size if gradient direction changes
+      double etaPlus = 1.2; /// \brief Increase factor for step size if gradient direction is same
+      double initialDelta = 0.1; /// \brief Initial step size
+      double minDelta = 1e-20; /// \brief Minimum step size
+      double maxDelta = 1.0; /// \brief Maximum step size
+      double convergenceGradientNorm = 1e-3; /// \brief Stopping criterion on gradient norm
+      double convergenceDx = 0.0; /// \brief Stopping criterion on maximum state update coefficient
+      int maxIterations = 20; /// \brief stop if we reach this number of iterations without hitting any of the above stopping criteria. -1
+      std::size_t nThreads = 4; /// \brief The number of threads to use
       boost::shared_ptr<ScalarNonSquaredErrorTerm> regularizer = NULL; /// \brief Regularizer
+      Method method = RPROP_PLUS; /// \brief the RProp method used
 
       void check() const;
     };
 
     std::ostream& operator<<(std::ostream& out, const aslam::backend::OptimizerRpropOptions& options);
 
+    struct RpropReturnValue {
+      enum ConvergenceCriterion { NO_CONVERGENCE, GRADIENT_NORM, DX };
+      RpropReturnValue() { }
+      void reset();
+      ConvergenceCriterion convergence = NO_CONVERGENCE;
+      std::size_t nIterations = 0;
+      std::size_t nGradEvaluations = 0;
+      std::size_t nObjectiveEvaluations = 0;
+      double gradientNorm = std::numeric_limits<double>::signaling_NaN();
+      double maxDx = std::numeric_limits<double>::signaling_NaN();
+      double error = std::numeric_limits<double>::max();
+    };
+    std::ostream& operator<<(std::ostream& out, const RpropReturnValue::ConvergenceCriterion& convergence);
 
     /**
      * \class OptimizerRprop
@@ -53,21 +71,30 @@ namespace aslam {
       ~OptimizerRprop();
 
       /// \brief Run the optimization
-      void optimize();
+      const RpropReturnValue& optimize();
 
       /// \brief Get the optimizer options.
       OptimizerRpropOptions& options() { return _options; }
 
       /// \brief Return the current gradient norm
-      inline double getGradientNorm() { return _curr_gradient_norm; }
+      inline double getGradientNorm() { return _returnValue.gradientNorm; }
 
       /// \brief Get the number of iterations the solver has run.
       ///        If it has never been started, the value will be zero.
-      inline std::size_t getNumberOfIterations() const { return _nIterations; }
+      inline std::size_t getNumberOfIterations() const { return _returnValue.nIterations; }
 
       /// \brief Initialize the optimizer to run on an optimization problem.
       ///        optimize() will call initialize() upon the first call.
       virtual void initialize() override;
+
+      /// \brief Reset internal states but don't re-initialize the whole problem
+      void reset();
+
+    private:
+      /// \brief branchless signum method
+      static inline int sign(const double& val) {
+        return (0.0 < val) - (val < 0.0);
+      }
 
     private:
 
@@ -80,14 +107,14 @@ namespace aslam {
       /// \brief gradient in the previous iteration
       RowVectorType _prev_gradient;
 
-      /// \brief Current norm of the gradient
-      double _curr_gradient_norm;
+      /// \brief error in the previous iteration (only used for IRPROP_PLUS version)
+      double _prev_error = std::numeric_limits<double>::max();
 
       /// \brief the current set of options
       OptimizerRpropOptions _options;
 
-      /// \brief How many iterations the solver has run
-      std::size_t _nIterations;
+      /// \brief Struct returned by optimize method
+      RpropReturnValue _returnValue;
 
     };
 

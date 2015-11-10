@@ -109,12 +109,13 @@ TEST(AslamVChargeBackendTestSuite, testL1RegularizerRprop)
     }
 
     // Now let's optimize.
-//    sm::logging::setLevel(sm::logging::Level::Verbose);
-//    sm::logging::enableNamedStream("optimization");
+    sm::logging::setLevel(sm::logging::Level::Verbose);
+    sm::logging::enableNamedStream("optimization");
     OptimizerRpropOptions options;
     options.maxIterations = 500;
     options.nThreads = 1;
     options.convergenceGradientNorm = 1e-6;
+    options.convergenceDx = 1e-6;
     options.regularizer.reset(new L1Regularizer(dvs, 1.0));
     OptimizerRprop optimizer(options);
     optimizer.setProblem(problem_ptr);
@@ -124,7 +125,6 @@ TEST(AslamVChargeBackendTestSuite, testL1RegularizerRprop)
     SCOPED_TRACE("");
     optimizer.optimize();
 
-    EXPECT_LE(optimizer.getGradientNorm(), options.convergenceGradientNorm);
     EXPECT_NEAR(dv2.getParameters()(0,0), 0.0, 1e-3);
 
   } catch(const std::exception & e) {

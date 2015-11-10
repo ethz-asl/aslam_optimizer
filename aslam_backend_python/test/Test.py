@@ -9,6 +9,8 @@ class TestRprop(unittest.TestCase):
         options = ab.OptimizerRpropOptions()
         options.maxIterations = 500;
         options.nThreads = 1;
+        options.convergenceGradientNorm = 1e-6
+        options.method = ab.RpropMethod.RPROP_PLUS
         optimizer = ab.OptimizerRprop(options)
         problem = ab.OptimizationProblem()
         
@@ -62,7 +64,7 @@ class TestMetropolisHastings(unittest.TestCase):
         err = ab.TestNonSquaredError(point, grad);
         err._p = 0.0; # set mean
         negLogDensity.addScalarNonSquaredErrorTerm(err);
-#             
+
         # Now let's sample.
         sampler.setNegativeLogDensity(negLogDensity);
         sampler.checkNegativeLogDensitySetup();
