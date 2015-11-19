@@ -54,11 +54,12 @@ namespace aslam {
 
       typedef boost::shared_ptr<OptimizerBFGS> Ptr;
       typedef boost::shared_ptr<const OptimizerBFGS> ConstPtr;
+      typedef OptimizerBFGSOptions Options;
 
       /// \brief Constructor with default options
       OptimizerBFGS();
       /// \brief Constructor with custom options
-      OptimizerBFGS(const OptimizerBFGSOptions& options);
+      OptimizerBFGS(const Options& options);
       /// \brief Constructor from property tree
       OptimizerBFGS(const sm::PropertyTree& config);
       /// \brief Destructor
@@ -68,10 +69,10 @@ namespace aslam {
       const BFGSReturnValue& optimize();
 
       /// \brief Get the optimizer options.
-      const OptimizerBFGSOptions& getOptions() const { return _options; }
+      const Options& getOptions() const { return _options; }
 
       /// \brief Set the optimizer options.
-      void setOptions(const OptimizerBFGSOptions&);
+      void setOptions(const Options&);
 
       /// \brief Return the current gradient norm
       inline double getGradientNorm() { return _returnValue.gradientNorm; }
@@ -95,7 +96,7 @@ namespace aslam {
     private:
 
       /// \brief the current set of options
-      OptimizerBFGSOptions _options;
+      Options _options;
 
       /// \brief The current estimate of the Hessian
       Eigen::MatrixXd _Hk;

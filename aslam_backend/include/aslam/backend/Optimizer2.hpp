@@ -54,10 +54,11 @@ namespace aslam {
       /// Swapping this to the dummy timer will disable timing
        typedef sm::timing::DummyTimer Timer;
       typedef sparse_block_matrix::SparseBlockMatrix<Eigen::MatrixXd> SparseBlockMatrix;
+      typedef Optimizer2Options Options;
 
       SM_DEFINE_EXCEPTION(Exception, aslam::Exception);
 
-      Optimizer2(const Optimizer2Options& options = Optimizer2Options());
+      Optimizer2(const Options& options = Options());
       Optimizer2(const sm::PropertyTree& config, boost::shared_ptr<LinearSystemSolver> linearSystemSolver, boost::shared_ptr<TrustRegionPolicy> trustRegionPolicy);
       virtual ~Optimizer2();
 
@@ -76,7 +77,10 @@ namespace aslam {
       SolutionReturnValue optimize();
 
       /// \brief Get the optimizer options.
-      Optimizer2Options& options();
+      Options& options();
+
+      /// \brief Set the optimizer options.
+      void setOptions(const Options& options);
 
       /// \brief return the reduced system dx
       const Eigen::VectorXd& dx() const;
@@ -163,7 +167,7 @@ namespace aslam {
       std::vector<ErrorTerm*> _errorTerms;
 
       /// \brief the current set of options
-      Optimizer2Options _options;
+      Options _options;
 
     };
 
