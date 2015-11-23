@@ -176,6 +176,13 @@ inline ::boost::shared_ptr<ErrorTerm> toErrorTerm(TExpression expression, const 
   errorTerm->setInvR(invR);
   return errorTerm;
 }
+
+inline ::boost::shared_ptr<ErrorTerm> toErrorTerm(ScalarExpression expression, double invR) {
+  auto errorTerm = toErrorTerm(expression);
+  errorTerm->setInvR(Eigen::Matrix<double, 1, 1>::Ones() * invR);
+  return errorTerm;
+}
+
 template<typename TExpression, int IDimension = internal::ExpressionDimensionTraits<TExpression>::Dimension, typename DERIVED_MATRIX>
 inline ::boost::shared_ptr<ErrorTerm> toErrorTermSqrt(TExpression expression, const Eigen::MatrixBase<DERIVED_MATRIX> & sqrtInvR) {
   auto errorTerm = toErrorTerm(expression);
