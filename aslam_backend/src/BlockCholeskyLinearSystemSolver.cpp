@@ -1,3 +1,5 @@
+#include <numeric>
+
 #include <aslam/backend/BlockCholeskyLinearSystemSolver.hpp>
 #include <sparse_block_matrix/linear_solver_cholmod.h>
 #include <sparse_block_matrix/linear_solver_spqr.h>
@@ -101,7 +103,7 @@ namespace aslam {
         // This seems to help when the CHOLMOD stuff gets into a bad state
         initSolver();
       }
-      
+
       return solutionSuccess;
     }
 
@@ -166,15 +168,15 @@ namespace aslam {
         const BlockCholeskyLinearSolverOptions& options) {
       _options = options;
     }
-      
-      
-      
+
+
+
     double BlockCholeskyLinearSystemSolver::rhsJtJrhs() {
         Eigen::VectorXd JtJrhs;
         _H.rightMultiply(_rhs, JtJrhs);
         return _rhs.dot(JtJrhs);
     }
-      
+
 
   } // namespace backend
 } // namespace aslam

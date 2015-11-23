@@ -1,6 +1,8 @@
 #ifndef INCLUDE_ASLAM_BACKEND_THREADEDVECTORPROCESSOR_HPP_
 #define INCLUDE_ASLAM_BACKEND_THREADEDVECTORPROCESSOR_HPP_
 
+#include <vector>
+
 #include <boost/function.hpp>
 #include <boost/bind.hpp>
 
