@@ -137,6 +137,21 @@ ScalarExpression acosSquared(const ScalarExpression& e) {
   return ScalarExpression(newRoot);
 }
 
+ScalarExpression inverseSigmoid(const ScalarExpression& e, const double height, const double scale, const double shift) {
+  boost::shared_ptr<ScalarExpressionNode> newRoot(new ScalarExpressionNodeInverseSigmoid(e.root(), height, scale, shift));
+  return ScalarExpression(newRoot);
+}
+
+ScalarExpression powerExpression(const ScalarExpression& e, const int k) {
+  boost::shared_ptr<ScalarExpressionNode> newRoot(new ScalarExpressionNodePower(e.root(), k));
+  return ScalarExpression(newRoot);
+}
+
+ScalarExpression piecewiseExpression(const ScalarExpression& e1, const ScalarExpression& e2, std::function<bool()> useFirst) {
+  boost::shared_ptr<ScalarExpressionNode> newRoot(new ScalarExpressionPiecewiseExpression(e1.root(), e2.root(), useFirst));
+  return ScalarExpression(newRoot);
+}
+
 
 }  // namespace backend
 }  // namespace aslam

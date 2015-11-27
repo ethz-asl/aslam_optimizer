@@ -49,6 +49,12 @@ namespace aslam {
       ScalarExpression operator-() const;
       ScalarExpression operator*(double s) const;
       ScalarExpression operator/(double s) const;
+      bool operator < (const ScalarExpression & s) const { return this->toValue() < s.toValue(); }
+      bool operator > (const ScalarExpression & s) const { return this->toValue() > s.toValue(); }
+      bool operator <= (const ScalarExpression & s) const { return this->toValue() <= s.toValue(); }
+      bool operator >= (const ScalarExpression & s) const { return this->toValue() >= s.toValue(); }
+      bool operator == (const ScalarExpression & s) const { return this->toValue() == s.toValue(); }
+      bool operator != (const ScalarExpression & s) const { return this->toValue() != s.toValue(); }
 
     private:
       /// \todo make the default constructor private.
@@ -69,6 +75,9 @@ namespace aslam {
     ScalarExpression atan2(const ScalarExpression& e0, const ScalarExpression& e1);
     ScalarExpression acos(const ScalarExpression& e);
     ScalarExpression acosSquared(const ScalarExpression& e);
+    ScalarExpression inverseSigmoid(const ScalarExpression& e, const double height, const double scale, const double shift);
+    ScalarExpression powerExpression(const ScalarExpression& e, const int k);
+    ScalarExpression piecewiseExpression(const ScalarExpression& e1, const ScalarExpression& e2, std::function<bool()> useFirst);
     inline ScalarExpression operator / (const double num, const ScalarExpression& den) {
       return ScalarExpression(num) / den;
     }
