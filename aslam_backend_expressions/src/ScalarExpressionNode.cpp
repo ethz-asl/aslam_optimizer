@@ -465,6 +465,167 @@ namespace aslam {
           _lhs->getDesignVariables(designVariables);
         }
 
+        ScalarExpressionNodeInverseSigmoid::ScalarExpressionNodeInverseSigmoid(boost::shared_ptr<ScalarExpressionNode> lhs,
+                                                                 const double height,
+                                                                 const double scale,
+                                                                 const double shift)
+          : _lhs(lhs), _height(height), _scale(scale), _shift(shift)
+        {
+
+        }
+
+        ScalarExpressionNodeInverseSigmoid::~ScalarExpressionNodeInverseSigmoid()
+        {
+
+        }
+
+        double ScalarExpressionNodeInverseSigmoid::toScalarImplementation() const
+        {
+            const auto lhss = _lhs->toScalar();
+            return _height / (exp((lhss - _shift) * _scale) + 1.0);
+        }
+
+        void ScalarExpressionNodeInverseSigmoid::evaluateJacobiansImplementation(JacobianContainer & outJacobians) const
+        {
+            Eigen::Matrix<double, 1, 1> R(1,1);
+            const auto lhss = _lhs->toScalar();
+            const double threshold = 50;
+
+            if (lhss > threshold) {
+              // approximate with Taylor expansion since exponents become too big otherwise
+              auto den = exp(_scale*_shift) + exp(_scale*threshold);
+              auto denSq = den*den;
+              R(0,0) = - _height*_scale*exp(_scale*(threshold+_shift)) / denSq +
+                       _height*_scale*_scale*(lhss-threshold)*exp(_scale*(_shift+threshold))
+                       *(exp(threshold*_scale) - exp(_scale*_shift)) / (denSq*den);
+            }
+            else {
+              auto den = 1 + exp(_scale*(lhss-_shift));
+              R(0,0) = - _height*_scale*exp(_scale*(lhss-_shift)) / (den * den);
+            }
+
+            SM_ASSERT_FALSE(Exception, std::isnan(R(0,0)), "");
+            _lhs->evaluateJacobians(outJacobians, R);
+        }
+
+        void ScalarExpressionNodeInverseSigmoid::evaluateJacobiansImplementation(JacobianContainer & outJacobians, const Eigen::MatrixXd & applyChainRule) const
+        {
+          Eigen::Matrix<double, 1, 1> R(1,1);
+          const auto lhss = _lhs->toScalar();
+          const double threshold = 50;
+
+          if (lhss > threshold) {
+            // approximate with Taylor expansion since exponents become too big otherwise
+            auto den = exp(_scale*_shift) + exp(_scale*threshold);
+            auto denSq = den*den;
+            R(0,0) = - _height*_scale*exp(_scale*(threshold+_shift)) / denSq +
+                     _height*_scale*_scale*(lhss-threshold)*exp(_scale*(_shift+threshold))
+                     *(exp(threshold*_scale) - exp(_scale*_shift)) / (denSq*den);
+          }
+          else {
+            auto den = 1 + exp(_scale*(lhss-_shift));
+            R(0,0) = - _height*_scale*exp(_scale*(lhss-_shift)) / (den * den);
+          }
+
+            SM_ASSERT_FALSE(Exception, std::isnan(R(0,0)), "");
+            _lhs->evaluateJacobians(outJacobians, applyChainRule * R);
+
+        }
+
+        void ScalarExpressionNodeInverseSigmoid::getDesignVariablesImplementation(DesignVariable::set_t & designVariables) const
+        {
+          _lhs->getDesignVariables(designVariables);
+        }
+
+
+        ScalarExpressionNodePower::ScalarExpressionNodePower(boost::shared_ptr<ScalarExpressionNode> lhs, const int k)
+          :_lhs(lhs), _power(k)
+        {
+
+        }
+
+        ScalarExpressionNodePower::~ScalarExpressionNodePower()
+        {
+
+        }
+
+        double ScalarExpressionNodePower::toScalarImplementation() const
+        {
+            const auto lhss = _lhs->toScalar();
+            return pow(lhss, _power);
+        }
+
+        void ScalarExpressionNodePower::evaluateJacobiansImplementation(JacobianContainer & outJacobians) const
+        {
+            Eigen::Matrix<double, 1, 1> R(1,1);
+            const auto lhss = _lhs->toScalar();
+            R(0,0) = _power * pow(lhss, _power-1);
+            SM_ASSERT_FALSE(Exception, std::isnan(R(0,0)), "");
+            _lhs->evaluateJacobians(outJacobians, R);
+        }
+
+        void ScalarExpressionNodePower::evaluateJacobiansImplementation(JacobianContainer & outJacobians, const Eigen::MatrixXd & applyChainRule) const
+        {
+            Eigen::Matrix<double, 1, 1> R(1,1);
+            const auto lhss = _lhs->toScalar();
+            R(0,0) = _power * pow(lhss, _power-1);
+            SM_ASSERT_FALSE(Exception, std::isnan(R(0,0)), "");
+            _lhs->evaluateJacobians(outJacobians, applyChainRule * R);
+        }
+
+        void ScalarExpressionNodePower::getDesignVariablesImplementation(DesignVariable::set_t & designVariables) const
+        {
+          _lhs->getDesignVariables(designVariables);
+        }
+
+
+        ScalarExpressionPiecewiseExpression::ScalarExpressionPiecewiseExpression(boost::shared_ptr<ScalarExpressionNode> e1, boost::shared_ptr<ScalarExpressionNode> e2, std::function<bool()> useFirst)
+          : _e1(e1), _e2(e2), _useFirst(useFirst)
+        {
+
+        }
+
+        ScalarExpressionPiecewiseExpression::~ScalarExpressionPiecewiseExpression()
+        {
+
+        }
+
+        double ScalarExpressionPiecewiseExpression::toScalarImplementation() const
+        {
+          if (_useFirst()) {
+            return _e1->toScalar();
+          } else {
+            return _e2->toScalar();
+          }
+        }
+
+        void ScalarExpressionPiecewiseExpression::evaluateJacobiansImplementation(JacobianContainer & outJacobians) const
+        {
+          if (_useFirst()) {
+            return _e1->evaluateJacobians(outJacobians);
+          } else {
+            return _e2->evaluateJacobians(outJacobians);
+          }
+        }
+
+        void ScalarExpressionPiecewiseExpression::evaluateJacobiansImplementation(JacobianContainer & outJacobians, const Eigen::MatrixXd & applyChainRule) const
+        {
+          if (_useFirst()) {
+            return _e1->evaluateJacobians(outJacobians, applyChainRule);
+          } else {
+            return _e2->evaluateJacobians(outJacobians, applyChainRule);
+          }
+        }
+
+        void ScalarExpressionPiecewiseExpression::getDesignVariablesImplementation(DesignVariable::set_t & designVariables) const
+        {
+          if (_useFirst()) {
+            return _e1->getDesignVariables(designVariables);
+          } else {
+            return _e2->getDesignVariables(designVariables);
+          }
+        }
+
         ScalarExpressionNodeConstant::ScalarExpressionNodeConstant(double s) : _s(s)
         {
         }

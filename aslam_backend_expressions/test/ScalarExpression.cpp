@@ -188,7 +188,6 @@ TEST(ScalarExpressionNodeTestSuites, testScalarNegation)
 }
 
 
-
 // Test that the jacobian matches the finite difference jacobian
 TEST(ScalarExpressionNodeTestSuites, testScalarAddition)
 {
@@ -430,6 +429,7 @@ TEST(ScalarExpressionNodeTestSuites, testAcosSquared)
     }
 }
 
+
 // Test that the jacobian matches the finite difference jacobian
 TEST(ScalarExpressionNodeTestSuites, testAcosSquaredPole)
 {
@@ -481,6 +481,115 @@ TEST(ScalarExpressionNodeTestSuites, testAcosSquaredLimits)
         double pow3 = pow1 * pow2;
 
         ASSERT_DOUBLE_EQ(-2.0 + 2.0/3.0*pow1 - 4.0/15.0*pow2 + 4.0/35.0*pow3, Jc.asDenseMatrix()(0,0));
+    }
+    catch(std::exception const & e)
+    {
+        FAIL() << e.what();
+    }
+}
+
+TEST(ScalarExpressionNodeTestSuites, testSigmoid)
+{
+    try
+    {
+        using namespace sm::kinematics;
+        Scalar p(sm::random::rand());
+        ScalarExpression pExpr = p.toExpression();
+        double _height = 100;
+        double _scale = 5;
+        double _shift = 1;
+        ScalarExpression pExprSigmoid = inverseSigmoid(pExpr, _height, _scale, _shift);
+        ScalarExpression p1 = _height / (exp((p.toExpression() - _shift) * _scale) + 1.0);
+
+        ASSERT_EQ(p1.toScalar(), pExprSigmoid.toScalar());
+
+        SCOPED_TRACE("");
+        testExpression(pExprSigmoid, 1);
+    }
+    catch(std::exception const & e)
+    {
+        FAIL() << e.what();
+    }
+}
+
+TEST(ScalarExpressionNodeTestSuites, testSigmoidLimits)
+{
+    try
+    {
+        using namespace sm::kinematics;
+        Scalar p(10000);
+        p.setActive(true);
+        p.setBlockIndex(0);
+        ScalarExpression pExpr = p.toExpression();
+        double _height = 100;
+        double _scale = 5;
+        double _shift = 1;
+        double threshold = 50;
+        ScalarExpression pExprSigmoid = inverseSigmoid(pExpr, _height, _scale, _shift);
+        ScalarExpression p1 = _height / (exp((p.toExpression() - _shift) * _scale) + 1.0);
+
+        ASSERT_EQ(p1.toScalar(), pExprSigmoid.toScalar());
+
+        SCOPED_TRACE("");
+        const size_t rows = 1;
+        JacobianContainer Jc(rows);
+        pExprSigmoid.evaluateJacobians(Jc);
+        testExpression(pExprSigmoid, 1);
+
+        auto den = exp(_scale*_shift) + exp(_scale*threshold);
+        auto denSq = den*den;
+
+        ASSERT_DOUBLE_EQ(-_height*_scale*exp(_scale*(threshold+_shift)) / denSq + _height*_scale*_scale*(p.toScalar()-threshold)*exp(_scale*(_shift+threshold)) *(exp(threshold*_scale) - exp(_scale*_shift)) / (denSq*den), Jc.asDenseMatrix()(0,0));
+    }
+    catch(std::exception const & e)
+    {
+        FAIL() << e.what();
+    }
+}
+
+// Test that the jacobian matches the finite difference jacobian
+TEST(ScalarExpressionNodeTestSuites, testPower)
+{
+    try
+    {
+        using namespace sm::kinematics;
+        Scalar p(sm::random::rand());
+        int k = int(sm::random::rand());
+        ScalarExpression pExpr = p.toExpression();
+        ScalarExpression pExprPow = powerExpression(pExpr,k);
+
+        ASSERT_EQ(pow(p.toScalar(), k), pExprPow.toValue());
+
+        SCOPED_TRACE("");
+        testExpression(pExprPow, 1);
+    }
+    catch(std::exception const & e)
+    {
+        FAIL() << e.what();
+    }
+}
+
+
+// Test that the jacobian matches the finite difference jacobian
+TEST(ScalarExpressionNodeTestSuites, testPiecewiseExpression)
+{
+    try
+    {
+        using namespace sm::kinematics;
+        Scalar p1(10);
+        Scalar p2(20);
+        ScalarExpression p1Expr = p1.toExpression();
+        ScalarExpression p2Expr = p2.toExpression();
+        bool condition = true;
+        ScalarExpression jointExpr = piecewiseExpression(p1Expr, p2Expr, [&condition](){return condition;});
+        EXPECT_EQ(p1.toScalar(), jointExpr.toValue());
+        SCOPED_TRACE("");
+        testExpression(jointExpr, 1);
+
+        condition = false;
+        EXPECT_EQ(p2.toScalar(), jointExpr.toValue());
+        testExpression(jointExpr, 1);
+
     }
     catch(std::exception const & e)
     {
