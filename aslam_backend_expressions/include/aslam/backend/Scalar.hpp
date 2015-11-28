@@ -31,6 +31,8 @@ class Scalar : public ScalarExpressionNode, public DesignVariable {
 
   Eigen::MatrixXd getParameters();
 
+  double getValue() const { return _p; }
+  void setValue(double p) { _p = p; }
  private:
   virtual double toScalarImplementation() const;
 
