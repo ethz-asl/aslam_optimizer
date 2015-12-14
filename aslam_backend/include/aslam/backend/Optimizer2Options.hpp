@@ -14,6 +14,7 @@ namespace aslam {
         convergenceDeltaJ(1e-3),
         convergenceDeltaX(1e-3),
         maxIterations(20),
+        doSchurComplement(false),
         verbose(false),
         linearSolverMaximumFails(0),
         nThreads(4)
