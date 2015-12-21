@@ -69,7 +69,7 @@ TEST(OptimizerRpropTestSuite, testRpropNonSquaredErrorTerms)
       for (std::size_t i=0; i<p2d.size(); i++) p2d[i]->_v = p2d0[i]->_v;
       SCOPED_TRACE("");
       auto ret = optimizer.optimize();
-      EXPECT_NE(ret.convergence, RpropReturnValue::NO_CONVERGENCE);
+      EXPECT_TRUE(ret.success());
       EXPECT_LE(optimizer.getGradientNorm(), 1e-6);
     }
 
@@ -133,7 +133,7 @@ TEST(OptimizerRpropTestSuite, testRpropSquaredErrorTerms)
       for (std::size_t i=0; i<p2d.size(); i++) p2d[i]->_v = p2d0[i]->_v;
       SCOPED_TRACE("");
       auto ret = optimizer.optimize();
-      EXPECT_NE(ret.convergence, RpropReturnValue::NO_CONVERGENCE);
+      EXPECT_TRUE(ret.success());
       EXPECT_LT(optimizer.getGradientNorm(), 1e-3);
     }
 

@@ -197,7 +197,8 @@ void exportOptimizer()
         ;
 
     enum_<RpropReturnValue::ConvergenceCriterion>("RpropConvergenceCriterion")
-        .value("NO_CONVERGENCE", RpropReturnValue::ConvergenceCriterion::NO_CONVERGENCE)
+        .value("IN_PROGRESS", RpropReturnValue::ConvergenceCriterion::IN_PROGRESS)
+        .value("FAILURE", RpropReturnValue::ConvergenceCriterion::FAILURE)
         .value("GRADIENT_NORM", RpropReturnValue::ConvergenceCriterion::GRADIENT_NORM)
         .value("DX", RpropReturnValue::ConvergenceCriterion::DX)
         ;
@@ -210,6 +211,8 @@ void exportOptimizer()
         .def_readwrite("gradientNorm",&RpropReturnValue::gradientNorm)
         .def_readwrite("maxDx",&RpropReturnValue::maxDx)
         .def_readwrite("error",&RpropReturnValue::error)
+        .def("success", &RpropReturnValue::success)
+        .def("failure", &RpropReturnValue::failure)
         ;
 
     class_<OptimizerRprop, boost::shared_ptr<OptimizerRprop> >("OptimizerRprop", init<>("OptimizerRprop(): Constructor with default options"))
