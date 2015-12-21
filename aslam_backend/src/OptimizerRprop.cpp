@@ -57,17 +57,28 @@ std::ostream& operator<<(std::ostream& out, const aslam::backend::OptimizerRprop
 }
 
 void RpropReturnValue::reset() {
-  convergence = NO_CONVERGENCE;
+  convergence = IN_PROGRESS;
   nIterations = nGradEvaluations = nObjectiveEvaluations = 0;
   gradientNorm = std::numeric_limits<double>::signaling_NaN();
   maxDx = std::numeric_limits<double>::signaling_NaN();
   error = std::numeric_limits<double>::max();
 }
 
+bool RpropReturnValue::success() const {
+  return convergence != FAILURE && convergence != IN_PROGRESS;
+}
+
+bool RpropReturnValue::failure() const {
+  return convergence == FAILURE;
+}
+
 std::ostream& operator<<(std::ostream& out, const RpropReturnValue::ConvergenceCriterion& convergence) {
   switch (convergence) {
-    case RpropReturnValue::ConvergenceCriterion::NO_CONVERGENCE:
-      out << "NO_CONVERGENCE";
+    case RpropReturnValue::ConvergenceCriterion::IN_PROGRESS:
+      out << "IN_PROGRESS";
+      break;
+    case RpropReturnValue::ConvergenceCriterion::FAILURE:
+      out << "FAILURE";
       break;
     case RpropReturnValue::ConvergenceCriterion::GRADIENT_NORM:
       out << "GRADIENT_NORM";

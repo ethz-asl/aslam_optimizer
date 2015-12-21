@@ -34,10 +34,12 @@ namespace aslam {
     std::ostream& operator<<(std::ostream& out, const aslam::backend::OptimizerRpropOptions& options);
 
     struct RpropReturnValue {
-      enum ConvergenceCriterion { NO_CONVERGENCE, GRADIENT_NORM, DX };
+      enum ConvergenceCriterion { IN_PROGRESS = 0, FAILURE, GRADIENT_NORM, DX };
       RpropReturnValue() { }
       void reset();
-      ConvergenceCriterion convergence = NO_CONVERGENCE;
+      bool success() const;
+      bool failure() const;
+      ConvergenceCriterion convergence = IN_PROGRESS;
       std::size_t nIterations = 0;
       std::size_t nGradEvaluations = 0;
       std::size_t nObjectiveEvaluations = 0;
