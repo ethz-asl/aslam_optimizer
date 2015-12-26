@@ -118,6 +118,7 @@ namespace aslam {
       double _fy;           /// \brief Function (error) value at point y
       const double _ginit;  /// \brief Initial function (error) derivative
       const double _gtest;
+      const double _ginitTimesNegGtol; /// \brief Helper variable to save computation time
       double _gx;           /// \brief Function (error) derivative at point x
       double _gy;           /// \brief Function (error) derivative at point y
       double _stx = 0.0;    /// \brief The best step obtained so far. stx is an endpoint of the interval that contains the minimizer.
@@ -184,7 +185,7 @@ namespace aslam {
        * Modifies the current search direction
        * @param searchDirection New search direction
        */
-      inline void setSearchDirection(const RowVectorType& searchDirection);
+      void setSearchDirection(const RowVectorType& searchDirection);
 
       /**
        * Set a callback when the error is evaluated
@@ -228,6 +229,11 @@ namespace aslam {
        * Updates the error-related information of the class
        */
       void updateError();
+
+      /**
+       * Updates the gradient at the current state
+       */
+      void updateGradient();
 
       /**
        * Updates the gradient-related information of the class
@@ -317,13 +323,6 @@ namespace aslam {
 
     // Inlined methods
 
-    inline void LineSearch::setSearchDirection(const RowVectorType& searchDirection) {
-      _stepLength = 0.0; // if the search direction changed, we must avoid skipping updates with same step lengths
-      _searchDirection = searchDirection;
-      _derror = computeErrorDerivative();
-      SM_ASSERT_LT(Exception, _derror, 0.0, "Wrong search direction supplied"); // Check the input arguments for errors.
-    }
-
     inline void LineSearch::setEvaluateErrorCallback(const boost::function<void(void)>& cb) {
       _evalErrorCallback = cb;
     }
@@ -338,7 +337,7 @@ namespace aslam {
       return _error;
     }
     inline double LineSearch::getErrorDerivative() const {
-      SM_ASSERT_FALSE(Exception, _derrorOutdated, "Missing call to updateDError()");
+      SM_ASSERT_FALSE(Exception, _derrorOutdated, "Missing call to updateErrorDerivative()");
       return _derror;
     }
     inline const RowVectorType& LineSearch::getGradient() const {

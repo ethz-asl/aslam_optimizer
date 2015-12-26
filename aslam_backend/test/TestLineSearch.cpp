@@ -7,6 +7,7 @@
 #include "SampleDvAndError.hpp"
 
 #include <sm/random.hpp>
+#include <sm/logging.hpp>
 
 using namespace std;
 using namespace aslam::backend;
@@ -37,7 +38,7 @@ TEST(LineSearchTestSuite, testLineSearch)
   try {
     using namespace aslam::backend;
 
-    const double x = sm::random::randLU(-10.0, 10.0); // initial abscissa
+    double x = sm::random::randLU(-10.0, 10.0); // initial abscissa
     Scalar dv( (Scalar::Vector1d() << x).finished() );
     dv.setActive(true);
 
@@ -96,32 +97,49 @@ TEST(LineSearchTestSuite, testLineSearch)
 
     for ( auto& method : {WOLFE1, WOLFE2, WOLFE12} ) {
 
-      dv._v[0] = x;
-      ls.initialize(searchDirection);
-      SCOPED_TRACE("");
+      bool success = true;
+      double error1;
+      double derror1;
+      for (std::size_t cntStart = 0; cntStart < 10; cntStart++) {
 
-      bool success;
-      switch (method) {
-        case WOLFE1:
-          success = ls.lineSearchWolfe1();
-          break;
-        case WOLFE2:
-          success = ls.lineSearchWolfe2();
-          break;
-        case WOLFE12:
-          success = ls.lineSearchWolfe12();
-          break;
+        x = sm::random::randLU(-10.0, 10.0); // initial abscissa
+        dv._v[0] = x;
+        ls.initialize();
+
+        for (std::size_t iter = 0; iter < 10; iter++) {
+
+          ls.setSearchDirection(-ls.getGradient());
+
+          switch (method) {
+            case WOLFE1:
+              success &= ls.lineSearchWolfe1();
+              break;
+            case WOLFE2:
+              success &= ls.lineSearchWolfe2();
+              break;
+            case WOLFE12:
+              success &= ls.lineSearchWolfe12();
+              break;
+          }
+
+          EXPECT_TRUE(success);
+
+          // Check strong Wolfe conditions
+          error1 = ls.getError();
+          derror1 = ls.computeErrorDerivative();
+          RowVectorType grad1;
+          pm.computeGradient(grad1, 1, true);
+          {
+            SCOPED_TRACE("");
+            checkWolfeConditions(error0, error1, derror0, derror1, ls.options().c1WolfeCondition,
+                                 ls.options().c2WolfeCondition, ls.getCurrentStepLength());
+          }
+        }
+
+        // Check error and derivative after consecutive line search calls
+        EXPECT_NEAR(error1, 0.0, 1e-12);
+        EXPECT_NEAR(derror1, 0.0, 1e-12);
       }
-      ASSERT_TRUE(success);
-
-      // Check strong Wolfe conditions
-      const double error1 = ls.getError();
-      const double derror1 = ls.computeErrorDerivative();
-      RowVectorType grad1;
-      pm.computeGradient(grad1, 1, true);
-      SCOPED_TRACE("");
-      checkWolfeConditions(error0, error1, derror0, derror1, ls.options().c1WolfeCondition,
-                           ls.options().c2WolfeCondition, ls.getCurrentStepLength());
     }
 
   } catch (const std::exception& e) {

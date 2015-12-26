@@ -207,6 +207,7 @@ Dcsrch::Dcsrch(double stepLengthInit, double error, double errorDerivative, doub
     _fy(error),
     _ginit(errorDerivative),
     _gtest(_ftol*_ginit),
+    _ginitTimesNegGtol(-_gtol*_ginit),
     _gx(errorDerivative),
     _gy(errorDerivative),
     _stmax(stepLengthInit + _xtrapu*stepLengthInit),
@@ -258,8 +259,15 @@ double Dcsrch::updateStepLength(double error, double errorDerivative) {
   }
 
   // Test for convergence.
-  if (error <= ftest && abs(errorDerivative) <= _gtol*(-_ginit))
-    _status = CONVERGED;
+  if (error <= ftest) {
+    if (abs(errorDerivative) <= _ginitTimesNegGtol)
+      _status = CONVERGED;
+    else
+      SM_ALL_STREAM_NAMED("optimization", setprecision(20) << "LineSearch: dcsrch -- curvature condition not satisfied: " << abs(errorDerivative) << " <= " << _ginitTimesNegGtol);
+
+  } else {
+    SM_ALL_STREAM_NAMED("optimization", setprecision(20) << "LineSearch: dcsrch -- sufficient decrease condition not satisfied: " << error << " <= " << ftest);
+  }
 
   // Test for termination.
   if (_status == WARNING || _status == CONVERGED)
@@ -321,7 +329,7 @@ double Dcsrch::updateStepLength(double error, double errorDerivative) {
       (_brackt && _maxStepLength-_minStepLength <= _xtol*_maxStepLength))
     _stepLength = _stx;
 
-  SM_ALL_STREAM("Dcsrch: new interval: [" << _stx << ", " << _sty << "], step length = " << _stepLength);
+  SM_ALL_STREAM_NAMED("optimization", "Dcsrch: new interval: [" << _stx << ", " << _sty << "], step length = " << _stepLength);
 
   return _stepLength;
 }
@@ -403,18 +411,29 @@ void LineSearch::initialize(boost::optional<const RowVectorType&> searchDirectio
     _error = error.get();
   else
     this->updateError();
+  _errorOutdated = false;
 
   if (gradient)
     _gradient = gradient.get();
   else
-    this->updateErrorDerivative();
+    this->updateGradient();
 
   if (searchDirection)
     this->setSearchDirection(searchDirection.get());
   else
     _searchDirection = RowVectorType::Zero(0);
 
-  _errorOutdated = _derrorOutdated = false;
+}
+
+
+void LineSearch::setSearchDirection(const RowVectorType& searchDirection) {
+  _stepLength = 0.0; // if the search direction changed, we must avoid skipping updates with same step lengths
+  _searchDirection = searchDirection;
+  _derror = computeErrorDerivative();
+  _derrorOutdated = false;
+  SM_VERBOSE_STREAM_NAMED("optimization", setprecision(20) << "LineSearch: set search direction to " << _searchDirection);
+  SM_VERBOSE_STREAM_NAMED("optimization", setprecision(20) << "LineSearch: computed error derivative " << _derror);
+  SM_ASSERT_LE(Exception, _derror, 0.0, "Wrong search direction supplied"); // Check the input arguments for errors.
 }
 
 
@@ -426,10 +445,12 @@ void LineSearch::applyStateUpdate(const double s) {
   _stepLength = s;
 
   if (ds != 0.0) { // save computation time
+    Eigen::RowVectorXd p = sm::logging::getLevel() <= sm::logging::Level::Verbose ?
+        _problemManager->getFlattenedDesignVariableParameters().transpose() :  Eigen::RowVectorXd();
     _problemManager->applyStateUpdate(ds*_searchDirection);
     _errorOutdated = _derrorOutdated = true;
     SM_VERBOSE_STREAM_NAMED("optimization", "LineSearch: update step length " << s - ds << " -> " << _stepLength << " (ds: " << ds<< ")");
-    SM_VERBOSE_STREAM_NAMED("optimization", "LineSearch: update state " << _problemManager->getFlattenedDesignVariableParameters().transpose().format(IOFormat(2, DontAlignCols, ", ", ", ", "", "", "[", "]")) <<
+    SM_VERBOSE_STREAM_NAMED("optimization", "LineSearch: update state " << p.format(IOFormat(2, DontAlignCols, ", ", ", ", "", "", "[", "]")) <<
                             " -> " << _problemManager->getFlattenedDesignVariableParameters().transpose().format(IOFormat(2, DontAlignCols, ", ", ", ", "", "", "[", "]")));
   } else {
     SM_ALL_NAMED("optimization", "LineSearch: skipping unnecessary update of information");
@@ -442,18 +463,22 @@ void LineSearch::updateError() {
     const double errorOld = _error;
     _error = _problemManager->evaluateError(_options.nThreads);
     if (_evalErrorCallback) _evalErrorCallback();
-    SM_VERBOSE_STREAM_NAMED("optimization", "LineSearch: update error " << setprecision(15) << errorOld << " -> " << _error);
+    SM_VERBOSE_STREAM_NAMED("optimization", setprecision(20) << "LineSearch: update error " << errorOld << " -> " << _error);
   }
   _errorOutdated = false;
+}
+
+void LineSearch::updateGradient() {
+  _problemManager->computeGradient(_gradient, _options.nThreads, false /*TODO*/);
+  if (_evalGradCallback) _evalGradCallback();
 }
 
 void LineSearch::updateErrorDerivative() {
   if (_derrorOutdated) {
     const double dErrorOld = _derror;
-    _problemManager->computeGradient(_gradient, _options.nThreads, false /*TODO*/);
+    this->updateGradient();
     _derror = computeErrorDerivative();
-    if (_evalGradCallback) _evalGradCallback();
-    SM_VERBOSE_STREAM_NAMED("optimization", "LineSearch: update error derivative " << setprecision(15) << dErrorOld << " -> " << _derror);
+    SM_VERBOSE_STREAM_NAMED("optimization", setprecision(20) << "LineSearch: update error derivative "<< dErrorOld << " -> " << _derror);
   }
   _derrorOutdated = false;
 }
@@ -468,84 +493,93 @@ bool LineSearch::zoom(double minStepSize, double maxStepSize, double error_lo, d
   double stepSize_rec = 0.0;
 
   while (true) {
-      // Interpolate to find a trial step length between a_lo and a_hi.
-      // Use cubic interpolation in the first step.
-      // If the result is within delta * dalpha or outside of the bounded interval defined by a_lo or a_hi use quadratic interpolation.
-      // If the result is still too close, then use bisection
+    // Interpolate to find a trial step length between a_lo and a_hi.
+    // Use cubic interpolation in the first step.
+    // If the result is within delta * dalpha or outside of the bounded interval defined by a_lo or a_hi use quadratic interpolation.
+    // If the result is still too close, then use bisection
 
-      const double dStepLength = maxStepSize - minStepSize;
-      double a, b;
-      if (dStepLength < 0.0) {
-        a = maxStepSize;
-        b = minStepSize;
-      } else {
-        a = minStepSize;
-        b = maxStepSize;
-      }
+    const double dStepLength = maxStepSize - minStepSize;
+    double a, b;
+    if (dStepLength < 0.0) {
+      a = maxStepSize;
+      b = minStepSize;
+    } else {
+      a = minStepSize;
+      b = maxStepSize;
+    }
 
-      // Try cubic interpolation
-      double cubicchk;
-      double stepSize_j = numeric_limits<double>::signaling_NaN();
-      if (i > 0) {
-        cubicchk = delta1 * dStepLength;
-        stepSize_j = cubicMin(minStepSize, error_lo, derror_lo, maxStepSize, error_hi, stepSize_rec, error_rec);
-      }
+    // Try cubic interpolation
+    double cubicchk;
+    double stepSize_j = numeric_limits<double>::signaling_NaN();
+    if (i > 0) {
+      cubicchk = delta1 * dStepLength;
+      stepSize_j = cubicMin(minStepSize, error_lo, derror_lo, maxStepSize, error_hi, stepSize_rec, error_rec);
+      SM_ALL_STREAM_NAMED("optimization", setprecision(20) << "LineSearch: zoom -- cubic interpolation through points [" << minStepSize <<
+                          ", " << maxStepSize << ", " << stepSize_rec << "] with errors " << "[" << error_lo << ", " << error_hi << ", " << error_rec <<
+                          "] and derivative at lower interval point " << derror_lo << " returned step length " << stepSize_j);
+    }
 
-      // Try quadratic interpolation
-      if (i == 0 || isnan(stepSize_j) || stepSize_j > b - cubicchk || stepSize_j < a + cubicchk) {
-        const double quadchk = delta2 * dStepLength;
-        stepSize_j = quadMin(minStepSize, error_lo, derror_lo, maxStepSize, error_hi);
-        if (isnan(stepSize_j) || stepSize_j > b - quadchk || stepSize_j < a + quadchk)
-          stepSize_j = minStepSize + 0.5*dStepLength;
-      }
+    // Try quadratic interpolation
+    if (i == 0 || isnan(stepSize_j) || stepSize_j > b - cubicchk || stepSize_j < a + cubicchk) {
+      const double quadchk = delta2 * dStepLength;
+      stepSize_j = quadMin(minStepSize, error_lo, derror_lo, maxStepSize, error_hi);
+      SM_ALL_STREAM_NAMED("optimization", setprecision(20) << "LineSearch: zoom -- quadratic interpolation through points [" << minStepSize <<
+                          ", " << maxStepSize << "] with errors " << "[" << error_lo << ", " << error_hi << "] and derivative at lower interval point " <<
+                          derror_lo << " returned step length " << stepSize_j);
+      if (isnan(stepSize_j) || stepSize_j > b - quadchk || stepSize_j < a + quadchk)
+        stepSize_j = minStepSize + 0.5*dStepLength;
+    }
 
-      // Move state to stepSize_j, do not compute gradient information at new point yet since
-      // we have to check first whether the error decreased. If not, there's no need to compute the gradient.
-      this->applyStateUpdate(stepSize_j);
-      this->updateError();
+    // Move state to stepSize_j, do not compute gradient information at new point yet since
+    // we have to check first whether the error decreased. If not, there's no need to compute the gradient.
+    this->applyStateUpdate(stepSize_j);
+    this->updateError();
 
-      // Check new value of stepSize_j
-      const double error_j = getError();
+    // Check new value of stepSize_j
+    const double error_j = getError();
 
-      // Check Wolfe condition 1 (Armijo rule)
-      if ((error_j > error0 + _options.c1WolfeCondition*stepSize_j*derror_lo) or (error_j >= error_lo)) {
-        // If condition is not satisfied, set endpoint of interval to new point stepSize_j
+    // Check Wolfe condition 1 (Armijo rule)
+    if ((error_j > error0 + _options.c1WolfeCondition*stepSize_j*derror_lo) or (error_j >= error_lo)) {
+      // If condition is not satisfied, set endpoint of interval to new point stepSize_j
+      error_rec = error_hi;
+      stepSize_rec = maxStepSize;
+      maxStepSize = stepSize_j;
+      error_hi = error_j;
+      SM_ALL_STREAM_NAMED("optimization", setprecision(20) << "LineSearch: zoom -- sufficient decrease condition not satisfied: " << error_j << " <= " << error0 + _options.c1WolfeCondition*stepSize_j*derror_lo);
+    } else {
+      // If Armijo rule is satisfied, also check curvature condition.
+      // Therefore we have to update the gradient based information now.
+      this->updateErrorDerivative();
+      const double derror_j = getErrorDerivative();
+      if (abs(derror_j) <= -_options.c2WolfeCondition*derror0) // If curvature condition is satisfied, we found a suitable point
+        break;
+
+      SM_ALL_STREAM_NAMED("optimization", setprecision(20) << "LineSearch: zoom -- curvature condition not satisfied: " << abs(derror_j) << " <= " << -_options.c2WolfeCondition*derror0);
+
+      if (derror_j*(maxStepSize - minStepSize) >= 0) {
         error_rec = error_hi;
         stepSize_rec = maxStepSize;
-        maxStepSize = stepSize_j;
-        error_hi = error_j;
+        maxStepSize = minStepSize;
+        error_hi = error_lo;
       } else {
-        // If Armijo rule is satisfied, also check curvature condition.
-        // Therefore we have to update the gradient based information now.
-        this->updateErrorDerivative();
-        const double derror_j = getErrorDerivative();
-        if (abs(derror_j) <= -_options.c2WolfeCondition*derror0) // If curvature condition is satisfied, we found a suitable point
-          break;
-
-        if (derror_j*(maxStepSize - minStepSize) >= 0) {
-          error_rec = error_hi;
-          stepSize_rec = maxStepSize;
-          maxStepSize = minStepSize;
-          error_hi = error_lo;
-        } else {
-          error_rec = error_lo;
-          stepSize_rec = minStepSize;
-        }
-        minStepSize = stepSize_j;
-        error_lo = error_j;
-        derror_lo = derror_j;
+        error_rec = error_lo;
+        stepSize_rec = minStepSize;
       }
+      minStepSize = stepSize_j;
+      error_lo = error_j;
+      derror_lo = derror_j;
+    }
 
-      i++;
-      if (i == maxiter) {
-        SM_ERROR("LineSearch: zoom -- Failed to find a conforming step size");
-        return false;
-      }
+    i++;
+    if (i == maxiter) {
+      SM_ERROR("LineSearch: zoom -- Failed to find a conforming step size");
+      return false;
+    }
+
+    SM_ALL_STREAM_NAMED("optimization", setprecision(20) << "LineSearch: zoom -- update interval: [" << minStepSize << ", " << maxStepSize << "]");
   }
 
   return true;
-
-//  return a_star, val_star, valprime_star
 }
 
 double LineSearch::computeErrorDerivative() const {
@@ -560,7 +594,7 @@ bool LineSearch::lineSearchWolfe1() {
   SM_ASSERT_FALSE(Exception, isnan(getErrorDerivative()), "");
 
   double stepLength = 1.0;
-  if (!isnan(_errorOld) && _derror != 0) {
+  if (!isnan(_errorOld) && _derror != 0.0) {
     stepLength = min(1.0, 1.01*2.0*(_error - _errorOld)/_derror);
     if (stepLength < 0.0) stepLength = 1.0;
   }
@@ -569,6 +603,14 @@ bool LineSearch::lineSearchWolfe1() {
 
   SM_ASSERT_GE(Exception, stepLength, _options.minStepLength, "");
   SM_ASSERT_LE(Exception, stepLength, _options.maxStepLength, "");
+
+  SM_ALL_STREAM_NAMED("optimization", setprecision(20) << "LineSearch: wolfe1 -- starting line search at error value " <<
+                      _error << " and derivative " << _derror);
+
+  if (_derror == 0.0) {
+    SM_DEBUG_STREAM("LineSearch: Error derivative is zero, seems like the system is at it's optimum.");
+    return true;
+  }
 
   bool success = false;
   bool terminate = false;
@@ -589,7 +631,8 @@ bool LineSearch::lineSearchWolfe1() {
         this->updateErrorDerivative();
         break;
       case Dcsrch::CONVERGED:
-        SM_DEBUG_STREAM_NAMED("optimization", "LineSearch: converged, final step length " << stp << ", final error " << getError());
+        SM_DEBUG_STREAM_NAMED("optimization", setprecision(20) << "LineSearch: wolfe1 -- converged, final step length " << stp <<
+                              ", final error " << getError() << ", final error derivative " << getErrorDerivative());
         success = terminate = true;
         break;
       case Dcsrch::WARNING:
@@ -629,6 +672,14 @@ bool LineSearch::lineSearchWolfe2() {
 
   _errorOld = _error;
 
+  SM_ALL_STREAM_NAMED("optimization", setprecision(20) << "LineSearch: wolfe2 -- starting line search at error value " <<
+                      _error << " and derivative " << _derror);
+
+  if (_derror == 0.0) {
+    SM_DEBUG_STREAM("LineSearch: Error derivative is zero, seems like the system is at it's optimum.");
+    return true;
+  }
+
   if (maxStepLength == 0.0) {
     SM_WARN("LineSearch: wolfe2 -- Maximum step length is zero. This shouldn't happen. "
         "Perhaps the increment has slipped below machine precision?");
@@ -653,8 +704,12 @@ bool LineSearch::lineSearchWolfe2() {
       break;
 
     // Check Wolfe condition 1 (Armijo rule)
-    if ((errorStepMax > getError() + _options.c1WolfeCondition * maxStepLength * derror0) || ((errorStepMax >= errorStepMin) && (i > 1))) {
+    if ((errorStepMax > error0 + _options.c1WolfeCondition * maxStepLength * derror0) || ((errorStepMax >= errorStepMin) && (i > 0))) {
+      SM_ALL_STREAM_NAMED("optimization", setprecision(20) << "LineSearch: wolfe2 -- sufficient decrease condition not satisfied: " <<
+                          errorStepMax << " <= " <<  error0 + _options.c1WolfeCondition * maxStepLength * derror0);
       // zoom will move the state to a good position in the interval [minStepLength, maxStepLength]
+      SM_ALL_STREAM_NAMED("optimization", setprecision(20) << "LineSearch: wolfe2 -- calling zoom with interval [ " << minStepLength << ", " << maxStepLength << "] with errors " <<
+                          "[ " << errorStepMin << ", " << errorStepMax << "] and derivative at lower interval point " << derrorStepMin);
       success = this->zoom(minStepLength, maxStepLength, errorStepMin, errorStepMax, derrorStepMin, error0, derror0);
       break;
     }
@@ -666,9 +721,13 @@ bool LineSearch::lineSearchWolfe2() {
     if ((abs(derrorStepMax) <= -_options.c2WolfeCondition*derror0)) {
       success = true;
       break;
+    } else {
+      SM_ALL_STREAM_NAMED("optimization", setprecision(20) << "LineSearch: wolfe2 -- curvature condition not satisfied: " << abs(derrorStepMax) << " <= " << -_options.c2WolfeCondition*derror0);
     }
 
     if ((derrorStepMax >= 0.0)) {
+      SM_ALL_STREAM_NAMED("optimization", setprecision(20) << "LineSearch: wolfe2 -- calling zoom with interval [ " << maxStepLength << ", " << minStepLength << "] with errors " <<
+                          "[ " << errorStepMax << ", " << errorStepMin << "] and derivative at lower interval point " << derrorStepMax);
       success = zoom(maxStepLength, minStepLength, errorStepMax, errorStepMin, derrorStepMax, error0, derror0);
       break;
     }
@@ -683,11 +742,13 @@ bool LineSearch::lineSearchWolfe2() {
     errorStepMax = getError();
     derrorStepMin = derrorStepMax;
 
+    SM_ALL_STREAM_NAMED("optimization", setprecision(20) << "LineSearch: wolfe2 -- update interval: [" << minStepLength << ", " << maxStepLength << "]");
+
   }
 
   if (success)
-    SM_DEBUG_STREAM_NAMED("optimization", "LineSearch: wolfe2 -- converged, final step length " << getCurrentStepLength() <<
-                            ", final error " << getError());
+    SM_DEBUG_STREAM_NAMED("optimization", setprecision(20) << "LineSearch: wolfe2 -- converged, final step length " << getCurrentStepLength() <<
+                          ", final error " << getError());
   else
     SM_ERROR_STREAM("LineSearch: wolfe2 -- no solution found in " << maxiter << " iterations");
 
@@ -697,18 +758,23 @@ bool LineSearch::lineSearchWolfe2() {
 
 bool LineSearch::lineSearchWolfe12() {
 
-  bool success = false;
-  _problemManager->saveDesignVariables();
+  const double errorOld0 = _errorOld; // _errorOld gets modified by lineSearchWolfe1
+  const double error0 = _error;
+  const double derror0 = _derror;
 
-  success = lineSearchWolfe1();
-
-  if (success == false) {
+  if (!lineSearchWolfe1()) {
     SM_DEBUG_STREAM_NAMED("optimization", "LineSearch: method wolfe1 failed, trying method wolfe2");
-    _problemManager->restoreDesignVariables();
-    success = lineSearchWolfe2();
+
+    // restore error values to the ones before calling lineSearchWolfe1().
+    // These are the values that correspond to step length zero.
+    _errorOld = errorOld0;
+    _error = error0;
+    _derror = derror0;
+
+    return lineSearchWolfe2();
   }
 
-  return success;
+  return true;
 }
 
 } // namespace backend
