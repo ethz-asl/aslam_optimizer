@@ -9,7 +9,7 @@
 
 #include <sm/logging.hpp> // TODO: remove
 
-TEST(OptimizerRpropTestSuite, testBFGS)
+TEST(OptimizerBFGSTestSuite, testBFGS)
 {
   try {
     using namespace aslam::backend;
