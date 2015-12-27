@@ -346,7 +346,11 @@ LineSearchOptions::LineSearchOptions(const sm::PropertyTree& config) :
     c2WolfeCondition(config.getDouble("c2WolfeCondition", c2WolfeCondition)),
     maxStepLength(config.getDouble("maxStepLength", maxStepLength)),
     minStepLength(config.getDouble("minStepLength", minStepLength)),
-    xtol(config.getDouble("xtol", xtol))
+    xtol(config.getDouble("xtol", xtol)),
+    initialStepLength(config.getDouble("initialStepLength", initialStepLength)),
+    nMaxIterWolfe1(config.getInt("nMaxIterWolfe1", nMaxIterWolfe1)),
+    nMaxIterWolfe2(config.getInt("nMaxIterWolfe2", nMaxIterWolfe2)),
+    nMaxIterZoom(config.getInt("nMaxIterZoom", nMaxIterZoom))
 {
   check();
 }
@@ -357,6 +361,10 @@ void LineSearchOptions::check() const {
   SM_ASSERT_GE(Exception, maxStepLength, 0.0, "");
   SM_ASSERT_GE(Exception, minStepLength, 0.0, "");
   SM_ASSERT_GE(Exception, xtol, 0.0, "");
+  SM_ASSERT_GT(Exception, initialStepLength, 0.0, "");
+  SM_ASSERT_GT(Exception, nMaxIterWolfe1, 0, "");
+  SM_ASSERT_GT(Exception, nMaxIterWolfe2, 0, "");
+  SM_ASSERT_GT(Exception, nMaxIterZoom, 0, "");
 }
 
 ostream& operator<<(ostream& out, const aslam::backend::LineSearchOptions& options)
@@ -367,6 +375,10 @@ ostream& operator<<(ostream& out, const aslam::backend::LineSearchOptions& optio
   out << "\tmaxStepLength: " << options.maxStepLength << endl;
   out << "\tminStepLength: " << options.minStepLength << endl;
   out << "\txtol: " << options.xtol << endl;
+  out << "\tinitialStepLength: " << options.initialStepLength << endl;
+  out << "\tnMaxIterWolfe1: " << options.nMaxIterWolfe1 << endl;
+  out << "\tnMaxIterWolfe2: " << options.nMaxIterWolfe2 << endl;
+  out << "\tnMaxIterZoom: " << options.nMaxIterZoom << endl;
   return out;
 }
 
@@ -427,11 +439,12 @@ void LineSearch::initialize(boost::optional<const RowVectorType&> searchDirectio
 
 
 void LineSearch::setSearchDirection(const RowVectorType& searchDirection) {
+  using namespace Eigen;
   _stepLength = 0.0; // if the search direction changed, we must avoid skipping updates with same step lengths
   _searchDirection = searchDirection;
   _derror = computeErrorDerivative();
   _derrorOutdated = false;
-  SM_VERBOSE_STREAM_NAMED("optimization", setprecision(20) << "LineSearch: set search direction to " << _searchDirection);
+  SM_VERBOSE_STREAM_NAMED("optimization", setprecision(20) << "LineSearch: set search direction to " << _searchDirection.format(IOFormat(2, DontAlignCols, ", ", ", ", "", "", "[", "]")));
   SM_VERBOSE_STREAM_NAMED("optimization", setprecision(20) << "LineSearch: computed error derivative " << _derror);
   SM_ASSERT_LE(Exception, _derror, 0.0, "Wrong search direction supplied"); // Check the input arguments for errors.
 }
@@ -485,7 +498,6 @@ void LineSearch::updateErrorDerivative() {
 
 bool LineSearch::zoom(double minStepSize, double maxStepSize, double error_lo, double error_hi, double derror_lo, double error0, double derror0) {
 
-  const size_t maxiter = 10;
   size_t i = 0;
   const double delta1 = 0.2;  // cubic interpolant check
   const double delta2 = 0.1;  // quadratic interpolant check
@@ -571,7 +583,7 @@ bool LineSearch::zoom(double minStepSize, double maxStepSize, double error_lo, d
     }
 
     i++;
-    if (i == maxiter) {
+    if (i == _options.nMaxIterZoom) {
       SM_ERROR("LineSearch: zoom -- Failed to find a conforming step size");
       return false;
     }
@@ -593,10 +605,10 @@ bool LineSearch::lineSearchWolfe1() {
   SM_ASSERT_FALSE(Exception, isnan(getError()), "");
   SM_ASSERT_FALSE(Exception, isnan(getErrorDerivative()), "");
 
-  double stepLength = 1.0;
+  double stepLength = _options.initialStepLength;
   if (!isnan(_errorOld) && _derror != 0.0) {
-    stepLength = min(1.0, 1.01*2.0*(_error - _errorOld)/_derror);
-    if (stepLength < 0.0) stepLength = 1.0;
+    stepLength = min(_options.initialStepLength, 1.01*2.0*(_error - _errorOld)/_derror);
+    if (stepLength < 0.0) stepLength = _options.initialStepLength;
   }
 
   _errorOld = _error;
@@ -614,12 +626,13 @@ bool LineSearch::lineSearchWolfe1() {
 
   bool success = false;
   bool terminate = false;
-  size_t maxiter = 30;
   Dcsrch dcsrch(stepLength, getError(), getErrorDerivative(), _options.minStepLength,
                 _options.maxStepLength, _options.c1WolfeCondition, _options.xtol, _options.c2WolfeCondition);
 
   size_t cnt = 0;
-  while(!terminate && cnt < maxiter) {
+  while(!terminate && cnt < _options.nMaxIterWolfe1) {
+
+    SM_ALL_STREAM_NAMED("optimization", "LineSearch: wolfe1 -- iteration " << cnt);
 
     const double stp = dcsrch.updateStepLength(getError(), getErrorDerivative());
 
@@ -643,8 +656,8 @@ bool LineSearch::lineSearchWolfe1() {
     cnt++;
   }
 
-  if (cnt == maxiter) { // maxiter reached, the line search did not converge
-    SM_ERROR_STREAM("LineSearch: wolfe1 -- no solution found in " << maxiter << " iterations");
+  if (cnt == _options.nMaxIterWolfe1) { // maxiter reached, the line search did not converge
+    SM_ERROR_STREAM("LineSearch: wolfe1 -- no solution found in " << _options.nMaxIterWolfe1 << " iterations");
     return false;
   }
 
@@ -664,10 +677,10 @@ bool LineSearch::lineSearchWolfe2() {
   SM_ASSERT_FALSE(Exception, isnan(getErrorDerivative()), "");
 
   double minStepLength = 0.0;
-  double maxStepLength = 1.0;
+  double maxStepLength = _options.initialStepLength;
   if (!isnan(_errorOld) && _derror != 0) {
-    maxStepLength = min(1.0, 1.01*2.0*(_error - _errorOld)/_derror);
-    if (maxStepLength < 0.0) maxStepLength = 1.0;
+    maxStepLength = min(_options.initialStepLength, 1.01*2.0*(_error - _errorOld)/_derror);
+    if (maxStepLength < 0.0) maxStepLength = _options.initialStepLength;
   }
 
   _errorOld = _error;
@@ -696,9 +709,10 @@ bool LineSearch::lineSearchWolfe2() {
   double errorStepMax = getError();
 //  double derrorStepMax; // evaluated below
 
-  size_t maxiter = 10;
   bool success = false;
-  for (size_t i=0; i<maxiter; ++i) {
+  for (size_t i=0; i<_options.nMaxIterWolfe2; ++i) {
+
+    SM_ALL_STREAM_NAMED("optimization", "LineSearch: wolfe2 -- iteration " << i);
 
     if (maxStepLength == 0.0)
       break;
@@ -750,7 +764,7 @@ bool LineSearch::lineSearchWolfe2() {
     SM_DEBUG_STREAM_NAMED("optimization", setprecision(20) << "LineSearch: wolfe2 -- converged, final step length " << getCurrentStepLength() <<
                           ", final error " << getError());
   else
-    SM_ERROR_STREAM("LineSearch: wolfe2 -- no solution found in " << maxiter << " iterations");
+    SM_ERROR_STREAM("LineSearch: wolfe2 -- no solution found in " << _options.nMaxIterWolfe2 << " iterations");
 
   return success;
 

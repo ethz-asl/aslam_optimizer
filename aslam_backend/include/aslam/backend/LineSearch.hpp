@@ -141,6 +141,10 @@ namespace aslam {
       double maxStepLength = 50;      /// \brief A nonnegative upper bound for the step.
       double minStepLength = 1e-8;    /// \brief A nonnegative lower bound for the step.
       double xtol = 1e-14;            /// \brief A nonnegative relative tolerance for an acceptable step.
+      double initialStepLength = 1.0; /// \brief A nonnegative initial step length.
+      std::size_t nMaxIterWolfe1 = 30; /// \brief Maximum number of iterations for method wolfe1
+      std::size_t nMaxIterWolfe2 = 10; /// \brief Maximum number of iterations for method wolfe2
+      std::size_t nMaxIterZoom = 10;   /// \brief Maximum number of iterations for the internal zoom method
     };
 
     std::ostream& operator<<(std::ostream& out, const aslam::backend::LineSearchOptions& options);
