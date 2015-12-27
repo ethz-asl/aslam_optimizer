@@ -775,6 +775,7 @@ bool LineSearch::lineSearchWolfe12() {
   const double errorOld0 = _errorOld; // _errorOld gets modified by lineSearchWolfe1
   const double error0 = _error;
   const double derror0 = _derror;
+  _problemManager->saveDesignVariables();
 
   if (!lineSearchWolfe1()) {
     SM_DEBUG_STREAM_NAMED("optimization", "LineSearch: method wolfe1 failed, trying method wolfe2");
@@ -784,6 +785,7 @@ bool LineSearch::lineSearchWolfe12() {
     _errorOld = errorOld0;
     _error = error0;
     _derror = derror0;
+    _problemManager->restoreDesignVariables();
 
     return lineSearchWolfe2();
   }
