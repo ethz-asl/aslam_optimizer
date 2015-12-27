@@ -167,6 +167,9 @@ const BFGSReturnValue& OptimizerBFGS::optimize()
       break;
     }
 
+    SM_DEBUG_STREAM_NAMED("optimization", "OptimizerBFGS: Iteration " << cnt << " -- Performed step with length " << alpha_k <<
+                          ". New error: " << _returnValue.error << ", new gradient norm: " << _returnValue.gradientNorm);
+
     timeUpdateHessian.start();
 
     RowVectorType sk = alpha_k * pk;
@@ -189,11 +192,11 @@ const BFGSReturnValue& OptimizerBFGS::optimize()
   }
 
   if (!_returnValue.failure())
-    SM_DEBUG_STREAM_NAMED("optimization", "BFGS: Convergence " << _returnValue.convergence <<
+    SM_DEBUG_STREAM_NAMED("optimization", "OptimizerBFGS: Convergence " << _returnValue.convergence <<
                           " (iterations: " << _returnValue.nIterations << ", error: " << _returnValue.error <<
                           ", gradient norm: " << _returnValue.gradientNorm << ")");
   else
-    SM_ERROR_STREAM("BFGS: Failed to converge with status " << _returnValue.convergence << " (iterations: " <<
+    SM_ERROR_STREAM("OptimizerBFGS: Failed to converge with status " << _returnValue.convergence << " (iterations: " <<
                     _returnValue.nIterations << ", error: " << _returnValue.error << ", gradient norm: " <<
                     _returnValue.gradientNorm << ")");
 
