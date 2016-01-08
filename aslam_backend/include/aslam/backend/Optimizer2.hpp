@@ -13,6 +13,7 @@
 #include <sm/timing/Timer.hpp>
 #include <boost/thread.hpp>
 #include <sparse_block_matrix/linear_solver.h>
+#include <aslam/backend/util/CommonDefinitions.hpp>
 #include <aslam/backend/TrustRegionPolicy.hpp>
 #include <aslam/backend/LevenbergMarquardtTrustRegionPolicy.hpp>
 #include <aslam/backend/GaussNewtonTrustRegionPolicy.hpp>
@@ -50,9 +51,7 @@ namespace aslam {
      */
     class Optimizer2 {
     public:
-        //  typedef sm::timing::Timer Timer;
-      /// Swapping this to the dummy timer will disable timing
-       typedef sm::timing::DummyTimer Timer;
+      typedef aslam::backend::Timer Timer;
       typedef sparse_block_matrix::SparseBlockMatrix<Eigen::MatrixXd> SparseBlockMatrix;
 
       SM_DEFINE_EXCEPTION(Exception, aslam::Exception);
