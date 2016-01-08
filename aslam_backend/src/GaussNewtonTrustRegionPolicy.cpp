@@ -1,4 +1,5 @@
 #include <aslam/backend/GaussNewtonTrustRegionPolicy.hpp>
+#include <aslam/backend/util/CommonDefinitions.hpp>
 
 namespace aslam {
     namespace backend {
@@ -17,7 +18,10 @@ namespace aslam {
         // Returns true if the solution was successful
     bool GaussNewtonTrustRegionPolicy::solveSystemImplementation(double /* J */, bool /* previousIterationFailed */, int nThreads, Eigen::VectorXd& outDx)
         {
+            Timer timeBuild("GnTrustRegionPolicy: Build linear system", false);
             _solver->buildSystem(nThreads, true);
+            timeBuild.stop();
+            Timer timeSolve("GnTrustRegionPolicy: Solve linear system", false);// will stop on return
             return _solver->solveSystem(outDx);
         }
         
