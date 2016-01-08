@@ -11,6 +11,8 @@ include_directories(${Eigen_INCLUDE_DIRS})
 add_definitions( -std=c++0x )
 
 # enable timing via cmake option -Daslam_backend_ENABLE_TIMING
+
+SET(aslam_backend_ENABLE_TIMING OFF CACHE BOOL "Enable sm::timing based profiling in aslam_backend")
 # cmake -Daslam_backend_ENABLE_TIMING=1 or catkin build -Daslam_backend_ENABLE_TIMING
 if (${PROJECT_NAME}_ENABLE_TIMING)
   message(STATUS "${PROJECT_NAME}: Timing enabled")
