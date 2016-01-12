@@ -1,3 +1,4 @@
+#include <iomanip>
 #include <aslam/backend/OptimizerBFGS.hpp>
 #include <aslam/backend/ErrorTerm.hpp>
 #include <aslam/backend/ScalarNonSquaredErrorTerm.hpp>
@@ -133,62 +134,61 @@ const BFGSReturnValue& OptimizerBFGS::optimize()
   const MatrixXd I = MatrixXd::Identity(numOptParameters(), numOptParameters());
   RowVectorType gfk, gfkp1;
   gfk = _linesearch.getGradient();
+  _returnValue.gradientNorm = gfk.norm();
+  _returnValue.error = _linesearch.getError();
+  SM_DEBUG_STREAM_NAMED("optimization", std::setprecision(20) << "OptimizerBFGS: Start optimization at state " <<
+                        this->getFlattenedDesignVariableParameters().transpose().format(IOFormat(15, DontAlignCols, ", ", ", ", "", "", "[", "]")) <<
+                        " with gradient " << gfk.transpose().format(IOFormat(15, DontAlignCols, ", ", ", ", "", "", "[", "]")) << " (norm: " <<
+                        _returnValue.gradientNorm << ") and error " << _returnValue.error);
+  this->updateStatus(true);
 
-  std::size_t cnt = 0;
-  for (cnt = 0; _options.maxIterations == -1 || cnt < static_cast<size_t>(_options.maxIterations); ++cnt) {
+  if (!_returnValue.success()) {
 
-    _returnValue.nIterations++;
+    std::size_t cnt = 0;
+    for (cnt = 0; _options.maxIterations == -1 || cnt < static_cast<size_t>(_options.maxIterations); ++cnt) {
 
-    // compute search direction
-    RowVectorType pk = -_Hk*gfk.transpose();
-    _linesearch.setSearchDirection(pk);
+      _returnValue.nIterations++;
 
-    // perform line search
-    if(!_linesearch.lineSearchWolfe12()) {
-      _returnValue.convergence = BFGSReturnValue::FAILURE;
-      break;
+      // compute search direction
+      RowVectorType pk = -_Hk*gfk.transpose();
+      _linesearch.setSearchDirection(pk);
+
+      // perform line search
+      bool lsSuccess = _linesearch.lineSearchWolfe12();
+
+      const double alpha_k = _linesearch.getCurrentStepLength();
+      gfkp1 = _linesearch.getGradient();
+      _returnValue.gradientNorm = gfkp1.norm();
+      _returnValue.error = _linesearch.getError();
+
+      this->updateStatus(lsSuccess);
+      if (_returnValue.success() || _returnValue.failure())
+        break;
+
+      SM_DEBUG_STREAM_NAMED("optimization", std::setprecision(20) << "OptimizerBFGS: Iteration " << cnt << " -- Performed step with length " <<
+                            alpha_k << ". New error: " << _returnValue.error << ", new gradient norm: " << _returnValue.gradientNorm);
+
+      // Update Hessian
+      timeUpdateHessian.start();
+
+      RowVectorType sk = alpha_k * pk;
+      RowVectorType yk = gfkp1 - gfk;
+      gfk = gfkp1;
+
+      double rhok = 1./(yk*sk.transpose());
+      if (std::isinf(rhok)) {
+        rhok = 1000.0;
+        SM_WARN("Divide-by-zero encountered: rhok assumed large");
+      }
+
+      MatrixXd C = sk.transpose() * yk * rhok;
+      MatrixXd A1 = I - C;
+      MatrixXd A2 = I - C.transpose();
+      _Hk = A1 * (_Hk * A2) + (rhok * sk.transpose() * sk);
+
+      timeUpdateHessian.stop();
+
     }
-
-    const double alpha_k = _linesearch.getCurrentStepLength();
-    gfkp1 = _linesearch.getGradient();
-
-    _returnValue.gradientNorm = gfk.norm();
-    if (_returnValue.gradientNorm < _options.convergenceGradientNorm) {
-      _returnValue.convergence = BFGSReturnValue::GRADIENT_NORM;
-      SM_DEBUG_STREAM_NAMED("optimization", "BFGS: Current gradient norm " << _returnValue.gradientNorm <<
-                            " is smaller than convergenceGradientNorm option -> terminating");
-      break;
-    }
-
-    _returnValue.error = _linesearch.getError();
-    if (!std::isfinite(_returnValue.error)) {
-      _returnValue.convergence = BFGSReturnValue::FAILURE; // TODO: Is this really a failure?
-      SM_WARN("BFGS: We correctly found +-inf as optimal value, or something went wrong?");
-      break;
-    }
-
-    SM_DEBUG_STREAM_NAMED("optimization", "OptimizerBFGS: Iteration " << cnt << " -- Performed step with length " << alpha_k <<
-                          ". New error: " << _returnValue.error << ", new gradient norm: " << _returnValue.gradientNorm);
-
-    timeUpdateHessian.start();
-
-    RowVectorType sk = alpha_k * pk;
-    RowVectorType yk = gfkp1 - gfk;
-    gfk = gfkp1;
-
-    double rhok = 1./(yk*sk.transpose());
-    if (std::isinf(rhok)) {
-      rhok = 1000.0;
-      SM_WARN("Divide-by-zero encountered: rhok assumed large");
-    }
-
-    MatrixXd C = sk.transpose() * yk * rhok;
-    MatrixXd A1 = I - C;
-    MatrixXd A2 = I - C.transpose();
-    _Hk = A1 * (_Hk * A2) + (rhok * sk.transpose() * sk);
-
-    timeUpdateHessian.stop();
-
   }
 
   if (!_returnValue.failure())
@@ -206,6 +206,30 @@ const BFGSReturnValue& OptimizerBFGS::optimize()
 void OptimizerBFGS::setOptions(const OptimizerBFGSOptions& options) {
   _options = options;
   _linesearch.options() = _options.linesearch;
+}
+
+void OptimizerBFGS::updateStatus(bool lineSearchSuccess) {
+
+  // Test failure criteria
+  if (!lineSearchSuccess) {
+    _returnValue.convergence = BFGSReturnValue::FAILURE;
+    return;
+  }
+
+  if (!std::isfinite(_returnValue.error)) {
+    _returnValue.convergence = BFGSReturnValue::FAILURE; // TODO: Is this really a failure?
+    SM_WARN("OptimizerBFGS: We correctly found +-inf as optimal value, or something went wrong?");
+    return;
+  }
+
+  // Test success criteria
+  if (_returnValue.gradientNorm < _options.convergenceGradientNorm) {
+    _returnValue.convergence = BFGSReturnValue::GRADIENT_NORM;
+    SM_DEBUG_STREAM_NAMED("optimization", "BFGS: Current gradient norm " << _returnValue.gradientNorm <<
+                          " is smaller than convergenceGradientNorm option -> terminating");
+    return;
+  }
+
 }
 
 } // namespace backend

@@ -90,14 +90,12 @@ namespace aslam {
     private:
       void increaseEvaluateErrorCounter() { _returnValue.nObjectiveEvaluations++; }
       void increaseEvaluateGradientCounter() { _returnValue.nGradEvaluations++; }
+      void updateStatus(bool lineSearchSuccess);
 
     private:
 
       /// \brief the current set of options
       OptimizerBFGSOptions _options;
-
-      /// \brief The dense update vector.
-      ColumnVectorType _dx;
 
       /// \brief The current estimate of the Hessian
       Eigen::MatrixXd _Hk;
