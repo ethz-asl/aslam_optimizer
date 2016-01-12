@@ -2,6 +2,7 @@
 #include <aslam/backend/Optimizer.hpp>
 #include <aslam/backend/Optimizer2.hpp>
 #include <aslam/backend/OptimizerRprop.hpp>
+#include <aslam/backend/OptimizerBFGS.hpp>
 #include <aslam/backend/ScalarNonSquaredErrorTerm.hpp>
 #include <boost/shared_ptr.hpp>
 #include <sm/PropertyTree.hpp>
@@ -243,6 +244,76 @@ void exportOptimizer()
                       "Get the number of iterations the solver has run. If it has never been started, the value will be zero.")
         ;
     implicitly_convertible< boost::shared_ptr<OptimizerRprop>, boost::shared_ptr<const OptimizerRprop> >();
+
+
+    enum_<BFGSReturnValue::ConvergenceCriterion>("BFGSConvergenceCriterion")
+        .value("IN_PROGRESS", BFGSReturnValue::ConvergenceCriterion::IN_PROGRESS)
+        .value("FAILURE", BFGSReturnValue::ConvergenceCriterion::FAILURE)
+        .value("GRADIENT_NORM", BFGSReturnValue::ConvergenceCriterion::GRADIENT_NORM)
+        .value("DX", BFGSReturnValue::ConvergenceCriterion::DX)
+        ;
+
+    class_<LineSearchOptions>("LineSearchOptions", init<>())
+        .def_readwrite("nThreads",&LineSearchOptions::nThreads)
+        .def_readwrite("c1WolfeCondition",&LineSearchOptions::c1WolfeCondition)
+        .def_readwrite("c2WolfeCondition", &LineSearchOptions::c2WolfeCondition)
+        .def_readwrite("maxStepLength", &LineSearchOptions::maxStepLength)
+        .def_readwrite("minStepLength", &LineSearchOptions::minStepLength)
+        .def_readwrite("xtol", &LineSearchOptions::xtol)
+        .def_readwrite("initialStepLength", &LineSearchOptions::initialStepLength)
+        .def_readwrite("nMaxIterWolfe1", &LineSearchOptions::nMaxIterWolfe1)
+        .def_readwrite("nMaxIterWolfe2", &LineSearchOptions::nMaxIterWolfe2)
+        .def_readwrite("nMaxIterZoom", &LineSearchOptions::nMaxIterZoom)
+        ;
+
+    class_<OptimizerBFGSOptions>("OptimizerBFGSOptions", init<>())
+        .def_readwrite("linesearch",&OptimizerBFGSOptions::linesearch)
+        .def_readwrite("maxIterations",&OptimizerBFGSOptions::maxIterations)
+        .def_readwrite("nThreads", &OptimizerBFGSOptions::nThreads)
+        .def_readwrite("convergenceGradientNorm", &OptimizerBFGSOptions::convergenceGradientNorm)
+        .def_readwrite("regularizer", &OptimizerBFGSOptions::regularizer)
+        ;
+
+    class_<BFGSReturnValue>("BFGSReturnValue", init<>())
+        .def_readwrite("convergence",&BFGSReturnValue::convergence)
+        .def_readwrite("nIterations",&BFGSReturnValue::nIterations)
+        .def_readwrite("nGradEvaluations",&BFGSReturnValue::nGradEvaluations)
+        .def_readwrite("nObjectiveEvaluations",&BFGSReturnValue::nObjectiveEvaluations)
+        .def_readwrite("gradientNorm",&BFGSReturnValue::gradientNorm)
+        .def_readwrite("error",&BFGSReturnValue::error)
+        .def("reset", &BFGSReturnValue::reset)
+        .def("success", &BFGSReturnValue::success)
+        .def("failure", &BFGSReturnValue::failure)
+        ;
+
+    class_<OptimizerBFGS, boost::shared_ptr<OptimizerBFGS> >("OptimizerBFGS", init<>("OptimizerBFGS(): Constructor with default options"))
+
+        .def(init<const OptimizerBFGSOptions&>("OptimizerBFGSOptions(OptimizerRpropOptions options): Constructor with custom options"))
+        .def(init<const sm::PropertyTree&>("OptimizerRprop(PropertyTree propertyTree): Constructor from sm::PropertyTree"))
+
+        .def("setProblem", (void (OptimizerBFGS::*)(boost::shared_ptr<OptimizationProblemBase>))&OptimizerBFGS::setProblem, "Set up to work on the optimization problem.")
+        .def("checkProblemSetup", (void (OptimizerBFGS::*)(void))&OptimizerBFGS::checkProblemSetup,
+             "Do a bunch of checks to see if the problem is well-defined. This includes checking that every error term is hooked up to design variables and running "
+             "finite differences on error terms where this is possible.")
+//
+        .def("initialize", &OptimizerBFGS::initialize,
+             "Initialize the optimizer to run on an optimization problem. optimize() will call initialize() upon the first call.")
+
+        .def("reset", &OptimizerBFGS::reset,
+             "Reset internal states but don't re-initialize the whole problem")
+
+        .def("optimize", make_function(&OptimizerBFGS::optimize, return_internal_reference<>()),
+             "Run the optimization")
+        .add_property("options", make_function(&OptimizerBFGS::getOptions, return_internal_reference<>()), &OptimizerBFGS::setOptions,
+                      "The optimizer options.")
+
+        .add_property("gradientNorm", &OptimizerBFGS::getGradientNorm,
+                      "The norm of the gradient of the objective function.")
+
+        .add_property("numberOfIterations", &OptimizerBFGS::getNumberOfIterations,
+                      "Get the number of iterations the solver has run. If it has never been started, the value will be zero.")
+        ;
+    implicitly_convertible< boost::shared_ptr<OptimizerBFGS>, boost::shared_ptr<const OptimizerBFGS> >();
 
 }
 
