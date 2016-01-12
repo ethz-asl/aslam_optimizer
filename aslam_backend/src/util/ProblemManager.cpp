@@ -80,9 +80,10 @@ void ProblemManager::initialize()
 
   _isInitialized = true;
 
-  SM_FINEST_STREAM("ProblemManager: Initialized problem with " << _problem->numDesignVariables() <<
-                    " design variable(s), " << _errorTermsNS.size() << " non-squared error term(s) and " <<
-                    _errorTermsS.size() << " squared error term(s)");
+  SM_FINEST_STREAM_NAMED("optimization",
+                         "ProblemManager: Initialized problem with " << _problem->numDesignVariables() <<
+                         " design variable(s), " << _errorTermsNS.size() << " non-squared error term(s) and " <<
+                         _errorTermsS.size() << " squared error term(s)");
 
 }
 
