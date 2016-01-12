@@ -82,6 +82,14 @@ class ProblemManager {
   /// \brief Undo the last state update to the design variables
   void revertLastStateUpdate();
 
+  /// \brief Save the current state of the design variables
+  void saveDesignVariables();
+  /// \brief Revert to the last state saved by a call to saveDesignVariables()
+  void restoreDesignVariables();
+
+  /// \brief Returns a flattened version of the design variables' parameters
+  Eigen::VectorXd getFlattenedDesignVariableParameters() const;
+
   /// \brief compute the current gradient of the objective function
   void computeGradient(RowVectorType& outGrad, size_t nThreads, bool useMEstimator);
 
@@ -107,6 +115,9 @@ class ProblemManager {
 
   /// \brief all design variables...first the non-marginalized ones (the dense ones), then the marginalized ones.
   std::vector<DesignVariable*> _designVariables;
+
+   /// \brief State of the design variables, will only be filled upon saveDesignVariables()
+  std::vector< std::pair<DesignVariable*, Eigen::MatrixXd> > _dvState;
 
   /// \brief all of the error terms involved in this problem
   std::vector<ErrorTerm*> _errorTermsS;

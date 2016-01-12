@@ -24,6 +24,7 @@ cs_add_library(${PROJECT_NAME}
   src/ErrorTerm.cpp
   src/ScalarNonSquaredErrorTerm.cpp
   src/OptimizationProblemBase.cpp
+  src/LineSearch.cpp
   src/Optimizer.cpp
   src/sparse_matrix_functions.cpp
   src/OptimizationProblem.cpp
@@ -67,6 +68,7 @@ catkin_add_gtest(${PROJECT_NAME}_test
   test/JacobianContainer.cpp
   test/test_sparse_matrix_functions.cpp
   test/TestProblemManager.cpp
+  test/TestLineSearch.cpp
   test/TestOptimizer.cpp
   test/TestOptimizerRprop.cpp
   test/TestSamplerMcmc.cpp
