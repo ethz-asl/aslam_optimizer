@@ -18,7 +18,7 @@ namespace aslam {
   namespace backend {
 
 
-    Optimizer::Optimizer(const OptimizerOptions& options) :
+    Optimizer::Optimizer(const Options& options) :
       _options(options)
     {
       initializeLinearSolver();
@@ -649,11 +649,14 @@ namespace aslam {
     }
 
 
-    OptimizerOptions& Optimizer::options()
+    Optimizer::Options& Optimizer::options()
     {
       return _options;
     }
 
+    void Optimizer::setOptions(const Options& options) {
+      _options = options;
+    }
 
     double Optimizer::evaluateError()
     {

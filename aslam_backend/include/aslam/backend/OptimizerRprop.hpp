@@ -62,11 +62,12 @@ namespace aslam {
 
       typedef boost::shared_ptr<OptimizerRprop> Ptr;
       typedef boost::shared_ptr<const OptimizerRprop> ConstPtr;
+      typedef OptimizerRpropOptions Options;
 
       /// \brief Constructor with default options
       OptimizerRprop();
       /// \brief Constructor with custom options
-      OptimizerRprop(const OptimizerRpropOptions& options);
+      OptimizerRprop(const Options& options);
       /// \brief Constructor from property tree
       OptimizerRprop(const sm::PropertyTree& config);
       /// \brief Destructor
@@ -76,7 +77,7 @@ namespace aslam {
       const RpropReturnValue& optimize();
 
       /// \brief Get the optimizer options.
-      OptimizerRpropOptions& options() { return _options; }
+      Options& options() { return _options; }
 
       /// \brief Return the current gradient norm
       inline double getGradientNorm() { return _returnValue.gradientNorm; }
@@ -113,7 +114,7 @@ namespace aslam {
       double _prev_error = std::numeric_limits<double>::max();
 
       /// \brief the current set of options
-      OptimizerRpropOptions _options;
+      Options _options;
 
       /// \brief Struct returned by optimize method
       RpropReturnValue _returnValue;

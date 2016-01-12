@@ -22,7 +22,7 @@ namespace aslam {
     namespace backend {
 
 
-        Optimizer2::Optimizer2(const Optimizer2Options& options) :
+        Optimizer2::Optimizer2(const Options& options) :
             _options(options)
         {
             initializeLinearSolver();
@@ -30,7 +30,7 @@ namespace aslam {
         }
 
         Optimizer2::Optimizer2(const sm::PropertyTree& config, boost::shared_ptr<LinearSystemSolver> linearSystemSolver, boost::shared_ptr<TrustRegionPolicy> trustRegionPolicy) {
-          Optimizer2Options options;
+          Options options;
           options.convergenceDeltaJ = config.getDouble("convergenceDeltaJ", options.convergenceDeltaJ);
           options.convergenceDeltaX = config.getDouble("convergenceDeltaX", options.convergenceDeltaX);
           options.maxIterations = config.getInt("maxIterations", options.maxIterations);
@@ -317,11 +317,14 @@ namespace aslam {
             }
 
 
-            Optimizer2Options& Optimizer2::options()
+            Optimizer2::Options& Optimizer2::options()
             {
                 return _options;
             }
 
+            void Optimizer2::setOptions(const Options& options) {
+              _options = options;
+            }
 
             double Optimizer2::evaluateError(bool useMEstimator)
             {

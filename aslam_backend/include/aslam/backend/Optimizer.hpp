@@ -43,12 +43,13 @@ namespace aslam {
         //typedef sm::timing::Timer Timer;
       /// Swapping this to the dummy timer will disable timing
       typedef sm::timing::DummyTimer Timer;
+      typedef OptimizerOptions Options;
 
       SM_DEFINE_EXCEPTION(Exception, aslam::Exception);
 
       typedef sparse_block_matrix::LinearSolver<Eigen::MatrixXd> LinearSolver;
 
-      Optimizer(const OptimizerOptions& options = OptimizerOptions());
+      Optimizer(const Options& options = Options());
       virtual ~Optimizer();
 
       /// \brief Set up to work on the optimization problem.
@@ -70,7 +71,10 @@ namespace aslam {
 #endif
 
       /// \brief Get the optimizer options.
-      OptimizerOptions& options();
+      Options& options();
+
+      /// \brief Set the optimizer options.
+      void setOptions(const Options& options);
 
       /// \brief Build the GaussNewton matrices from the optimization problem.
       void buildMatrices();
@@ -219,7 +223,7 @@ namespace aslam {
       int _marginalizedStartingBlock;
 
       /// \brief the current set of options
-      OptimizerOptions _options;
+      Options _options;
 
       /// \brief A class that contains a callback function to be called 
       /// immediately after computing the raw squared errors, but before 
