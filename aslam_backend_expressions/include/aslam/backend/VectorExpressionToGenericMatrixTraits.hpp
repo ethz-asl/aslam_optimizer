@@ -4,6 +4,8 @@
 #include "GenericMatrixExpression.hpp"
 #include "VectorExpression.hpp"
 #include "VectorExpressionNode.hpp"
+#include "EuclideanExpression.hpp"
+#include "EuclideanExpressionNode.hpp"
 
 namespace aslam {
 namespace backend {
@@ -37,6 +39,11 @@ struct GenericMatrixNodeTraits<VectorExpressionNode<D> > {
 template<int D>
 struct GenericMatrixTraits<VectorExpression<D> > {
   typedef GenericMatrixExpression<D, 1, double, VectorExpressionNode<D> > gme_expression_type;
+};
+
+template <>
+struct GenericMatrixTraits<EuclideanExpression > {
+  typedef GenericMatrixExpression<3, 1, double, EuclideanExpressionNode > gme_expression_type;
 };
 
 }  // namespace internal
