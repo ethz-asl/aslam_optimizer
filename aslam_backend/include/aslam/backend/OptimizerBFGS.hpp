@@ -16,6 +16,7 @@ namespace aslam {
       OptimizerBFGSOptions(const sm::PropertyTree& config);
       double convergenceGradientNorm = 1e-3; /// \brief Stopping criterion on gradient norm
       double convergenceDx = 0.0; /// \brief Stopping criterion on maximum state update coefficient
+      double convergenceDObjective = 0.0; /// \brief Stopping criterion on change of objective/error
       int maxIterations = 20; /// \brief stop if we reach this number of iterations without hitting any of the above stopping criteria. -1
       std::size_t nThreads = 4; /// \brief The number of threads to use
       LineSearchOptions linesearch;
@@ -27,7 +28,7 @@ namespace aslam {
     std::ostream& operator<<(std::ostream& out, const aslam::backend::OptimizerBFGSOptions& options);
 
     struct BFGSReturnValue {
-      enum ConvergenceCriterion { IN_PROGRESS = 0, FAILURE = 1, GRADIENT_NORM = 2, DX = 3 };
+      enum ConvergenceCriterion { IN_PROGRESS = 0, FAILURE = 1, GRADIENT_NORM = 2, DX = 3, DOBJECTIVE = 4 };
       BFGSReturnValue() { }
       void reset();
       bool success() const;
@@ -38,6 +39,8 @@ namespace aslam {
       std::size_t nObjectiveEvaluations = 0;
       double gradientNorm = std::numeric_limits<double>::signaling_NaN();
       double error = std::numeric_limits<double>::max();
+      double derror = std::numeric_limits<double>::signaling_NaN(); /// \brief last change of the error
+      double maxDx = std::numeric_limits<double>::signaling_NaN(); /// \brief last maximum change design variables
     };
     std::ostream& operator<<(std::ostream& out, const BFGSReturnValue::ConvergenceCriterion& convergence);
 
