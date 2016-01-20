@@ -7,8 +7,6 @@
 #include <aslam/backend/test/ErrorTermTester.hpp>
 #include "SampleDvAndError.hpp"
 
-#include <sm/logging.hpp> // TODO: remove
-
 TEST(OptimizerBFGSTestSuite, testBFGS)
 {
   try {
@@ -66,6 +64,8 @@ TEST(OptimizerBFGSTestSuite, testBFGS)
     EXPECT_GT(ret.nObjectiveEvaluations, 0);
     EXPECT_GT(ret.nGradEvaluations, 0);
     EXPECT_GE(ret.error, 0.0);
+    EXPECT_LT(ret.derror, 1e-12);
+    EXPECT_LT(ret.maxDx, 1e-3);
     EXPECT_LT(ret.error, std::numeric_limits<double>::max());
     EXPECT_GT(ret.nIterations, 0);
 

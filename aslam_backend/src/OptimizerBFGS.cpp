@@ -18,6 +18,7 @@ OptimizerBFGSOptions::OptimizerBFGSOptions() {
 OptimizerBFGSOptions::OptimizerBFGSOptions(const sm::PropertyTree& config) :
     convergenceGradientNorm(config.getDouble("convergenceGradientNorm", convergenceGradientNorm)),
     convergenceDx(config.getDouble("convergenceDx", convergenceDx)),
+    convergenceDObjective(config.getDouble("convergenceDObjective", convergenceDObjective)),
     maxIterations(config.getInt("maxIterations", maxIterations)),
     nThreads(config.getInt("nThreads", nThreads)),
     linesearch(config)
@@ -28,6 +29,7 @@ OptimizerBFGSOptions::OptimizerBFGSOptions(const sm::PropertyTree& config) :
 void OptimizerBFGSOptions::check() const {
   SM_ASSERT_GE( Exception, convergenceGradientNorm, 0.0, "");
   SM_ASSERT_GE( Exception, convergenceDx, 0.0, "");
+  SM_ASSERT_GE( Exception, convergenceDObjective, 0.0, "");
   SM_ASSERT_TRUE( Exception, convergenceDx > 0 || convergenceGradientNorm > 0.0, "");
   SM_ASSERT_GE( Exception, maxIterations, -1, "");
   linesearch.check();
@@ -38,6 +40,7 @@ std::ostream& operator<<(std::ostream& out, const aslam::backend::OptimizerBFGSO
   out << "OptimizerBFGSOptions:\n";
   out << "\tconvergenceGradientNorm: " << options.convergenceGradientNorm << std::endl;
   out << "\tconvergenceDx: " << options.convergenceDx << std::endl;
+  out << "\tconvergenceDObjective: " << options.convergenceDObjective << std::endl;
   out << "\tmaxIterations: " << options.maxIterations << std::endl;
   out << "\tnThreads: " << options.nThreads << std::endl;
   out << options.linesearch << std::endl;
@@ -72,6 +75,9 @@ std::ostream& operator<<(std::ostream& out, const BFGSReturnValue::ConvergenceCr
       break;
     case BFGSReturnValue::ConvergenceCriterion::DX:
       out << "DX";
+      break;
+    case BFGSReturnValue::ConvergenceCriterion::DOBJECTIVE:
+      out << "DOBJECTIVE";
       break;
   }
   return out;
@@ -153,20 +159,29 @@ const BFGSReturnValue& OptimizerBFGS::optimize()
       RowVectorType pk = -_Hk*gfk.transpose();
       _linesearch.setSearchDirection(pk);
 
+      // store last design variables
+      const Eigen::VectorXd dv = this->getFlattenedDesignVariableParameters();
+
       // perform line search
       bool lsSuccess = _linesearch.lineSearchWolfe12();
 
       const double alpha_k = _linesearch.getCurrentStepLength();
       gfkp1 = _linesearch.getGradient();
       _returnValue.gradientNorm = gfkp1.norm();
+      _returnValue.derror = _linesearch.getError() - _returnValue.error;
       _returnValue.error = _linesearch.getError();
+      _returnValue.maxDx = (this->getFlattenedDesignVariableParameters() - dv).cwiseAbs().maxCoeff();
 
       this->updateStatus(lsSuccess);
       if (_returnValue.success() || _returnValue.failure())
         break;
 
-      SM_DEBUG_STREAM_NAMED("optimization", std::setprecision(20) << "OptimizerBFGS: Iteration " << cnt << " -- Performed step with length " <<
-                            alpha_k << ". New error: " << _returnValue.error << ", new gradient norm: " << _returnValue.gradientNorm);
+      SM_DEBUG_STREAM_NAMED("optimization", std::setprecision(20) << "OptimizerBFGS: Iteration " << cnt);
+      SM_DEBUG_STREAM_NAMED("optimization", std::setprecision(20) << "\t steplength: " << alpha_k);
+      SM_DEBUG_STREAM_NAMED("optimization", std::setprecision(20) << "\t error: " << _returnValue.error);
+      SM_DEBUG_STREAM_NAMED("optimization", std::setprecision(20) << "\t derror " << _returnValue.derror);
+      SM_DEBUG_STREAM_NAMED("optimization", std::setprecision(20) << "\t gradient norm: " << _returnValue.gradientNorm);
+      SM_DEBUG_STREAM_NAMED("optimization", std::setprecision(20) << "\t max dx: " << _returnValue.maxDx);
 
       // Update Hessian
       timeUpdateHessian.start();
@@ -208,7 +223,7 @@ void OptimizerBFGS::setOptions(const OptimizerBFGSOptions& options) {
   _linesearch.options() = _options.linesearch;
 }
 
-void OptimizerBFGS::updateStatus(bool lineSearchSuccess) {
+void OptimizerBFGS::updateStatus(const bool lineSearchSuccess) {
 
   // Test failure criteria
   if (!lineSearchSuccess) {
@@ -227,6 +242,20 @@ void OptimizerBFGS::updateStatus(bool lineSearchSuccess) {
     _returnValue.convergence = BFGSReturnValue::GRADIENT_NORM;
     SM_DEBUG_STREAM_NAMED("optimization", "BFGS: Current gradient norm " << _returnValue.gradientNorm <<
                           " is smaller than convergenceGradientNorm option -> terminating");
+    return;
+  }
+
+  if (fabs(_returnValue.derror) < _options.convergenceDObjective) {
+      _returnValue.convergence = BFGSReturnValue::DOBJECTIVE;
+    SM_DEBUG_STREAM_NAMED("optimization", "BFGS: Change in error " << _returnValue.derror <<
+                          " is smaller than convergenceDObjective option -> terminating");
+    return;
+  }
+
+  if (_returnValue.maxDx < _options.convergenceDx) {
+      _returnValue.convergence = BFGSReturnValue::DX;
+    SM_DEBUG_STREAM_NAMED("optimization", "BFGS: Maximum change in design variables " << _returnValue.maxDx <<
+                          " is smaller than convergenceDx option -> terminating");
     return;
   }
 
