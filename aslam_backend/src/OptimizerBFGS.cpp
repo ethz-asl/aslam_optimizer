@@ -263,7 +263,7 @@ void OptimizerBFGS::updateStatus(const bool lineSearchSuccess) {
     return;
   }
 
-  if (_returnValue.maxDx < _options.convergenceDx) {
+  if (_returnValue.nIterations > 0 && _returnValue.maxDx < _options.convergenceDx) {
       _returnValue.convergence = BFGSReturnValue::DX;
     SM_DEBUG_STREAM_NAMED("optimization", "BFGS: Maximum change in design variables " << _returnValue.maxDx <<
                           " is smaller than convergenceDx option -> terminating");
