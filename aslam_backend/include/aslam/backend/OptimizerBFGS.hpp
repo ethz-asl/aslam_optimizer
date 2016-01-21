@@ -42,6 +42,7 @@ namespace aslam {
       double derror = std::numeric_limits<double>::signaling_NaN(); /// \brief last change of the error
       double maxDx = std::numeric_limits<double>::signaling_NaN(); /// \brief last maximum change design variables
     };
+    std::ostream& operator<<(std::ostream& out, const BFGSReturnValue& ret);
     std::ostream& operator<<(std::ostream& out, const BFGSReturnValue::ConvergenceCriterion& convergence);
 
     /**
