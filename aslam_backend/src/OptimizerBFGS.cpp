@@ -60,6 +60,19 @@ bool BFGSReturnValue::failure() const {
   return convergence == FAILURE;
 }
 
+std::ostream& operator<<(std::ostream& out, const BFGSReturnValue& ret) {
+  out << "BFGSReturnValue: " << std::endl;
+  out << "\t convergence: " << ret.convergence << std::endl;
+  out << "\t iterations: " << ret.nIterations << std::endl;
+  out << "\t gradient norm: " << ret.gradientNorm << std::endl;
+  out << "\t error: " << ret.error << std::endl;
+  out << "\t derror: " << ret.derror << std::endl;
+  out << "\t max dx: " << ret.maxDx << std::endl;
+  out << "\t evals error: " << ret.nObjectiveEvaluations << std::endl;
+  out << "\t evals gradient: " << ret.nObjectiveEvaluations << std::endl;
+  return out;
+}
+
 std::ostream& operator<<(std::ostream& out, const BFGSReturnValue::ConvergenceCriterion& convergence) {
   switch (convergence) {
     case BFGSReturnValue::ConvergenceCriterion::IN_PROGRESS:
