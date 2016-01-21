@@ -20,7 +20,6 @@ OptimizerBFGSOptions::OptimizerBFGSOptions(const sm::PropertyTree& config) :
     convergenceDx(config.getDouble("convergenceDx", convergenceDx)),
     convergenceDObjective(config.getDouble("convergenceDObjective", convergenceDObjective)),
     maxIterations(config.getInt("maxIterations", maxIterations)),
-    nThreads(config.getInt("nThreads", nThreads)),
     linesearch(config)
 {
   check();
@@ -42,7 +41,6 @@ std::ostream& operator<<(std::ostream& out, const aslam::backend::OptimizerBFGSO
   out << "\tconvergenceDx: " << options.convergenceDx << std::endl;
   out << "\tconvergenceDObjective: " << options.convergenceDObjective << std::endl;
   out << "\tmaxIterations: " << options.maxIterations << std::endl;
-  out << "\tnThreads: " << options.nThreads << std::endl;
   out << options.linesearch << std::endl;
   return out;
 }
