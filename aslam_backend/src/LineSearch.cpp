@@ -348,7 +348,8 @@ LineSearchOptions::LineSearchOptions() {
 }
 
 LineSearchOptions::LineSearchOptions(const sm::PropertyTree& config) :
-    nThreads(config.getInt("nThreads", nThreads)),
+    nThreadsError(config.getInt("nThreadsError", nThreadsError)),
+    nThreadsGradient(config.getInt("nThreadsGradient", nThreadsGradient)),
     c1WolfeCondition(config.getDouble("c1WolfeCondition", c1WolfeCondition)),
     c2WolfeCondition(config.getDouble("c2WolfeCondition", c2WolfeCondition)),
     maxStepLength(config.getDouble("maxStepLength", maxStepLength)),
@@ -484,7 +485,7 @@ void LineSearch::applyStateUpdate(const double s) {
 void LineSearch::updateError() {
   if (_errorOutdated) {
     const double errorOld = _error;
-    _error = _problemManager->evaluateError(_options.nThreads);
+    _error = _problemManager->evaluateError(_options.nThreadsError);
     if (_evalErrorCallback) _evalErrorCallback();
     SM_VERBOSE_STREAM_NAMED("optimization", setprecision(20) << "LineSearch: update error " << errorOld << " -> " << _error << " (" << _error - errorOld << ")");
   }
@@ -492,7 +493,7 @@ void LineSearch::updateError() {
 }
 
 void LineSearch::updateGradient() {
-  _problemManager->computeGradient(_gradient, _options.nThreads, false /*TODO*/);
+  _problemManager->computeGradient(_gradient, _options.nThreadsGradient, false /*TODO*/);
   if (_evalGradCallback) _evalGradCallback();
 }
 

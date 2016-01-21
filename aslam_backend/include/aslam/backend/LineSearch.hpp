@@ -135,7 +135,8 @@ namespace aslam {
       LineSearchOptions(const sm::PropertyTree& config);
       void check() const;
 
-      std::size_t nThreads = 1;       /// \brief Number of threads for evaluation of gradient and error
+      std::size_t nThreadsError = 1;       /// \brief Number of threads for evaluation of error
+      std::size_t nThreadsGradient = 1;    /// \brief Number of threads for evaluation of gradient
       double c1WolfeCondition = 1e-4; /// \brief A nonnegative tolerance for the sufficient decrease condition
       double c2WolfeCondition = 0.9;  /// \brief A nonnegative tolerance for the curvature condition
       double maxStepLength = 50;      /// \brief A nonnegative upper bound for the step.
