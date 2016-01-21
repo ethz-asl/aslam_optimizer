@@ -50,6 +50,8 @@ void BFGSReturnValue::reset() {
   nIterations = nGradEvaluations = nObjectiveEvaluations = 0;
   gradientNorm = std::numeric_limits<double>::signaling_NaN();
   error = std::numeric_limits<double>::max();
+  derror = std::numeric_limits<double>::signaling_NaN();
+  maxDx = std::numeric_limits<double>::signaling_NaN();
 }
 
 bool BFGSReturnValue::success() const {
@@ -263,7 +265,7 @@ void OptimizerBFGS::updateStatus(const bool lineSearchSuccess) {
     return;
   }
 
-  if (_returnValue.nIterations > 0 && _returnValue.maxDx < _options.convergenceDx) {
+  if (_returnValue.maxDx < _options.convergenceDx) {
       _returnValue.convergence = BFGSReturnValue::DX;
     SM_DEBUG_STREAM_NAMED("optimization", "BFGS: Maximum change in design variables " << _returnValue.maxDx <<
                           " is smaller than convergenceDx option -> terminating");
