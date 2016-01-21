@@ -124,11 +124,15 @@ TEST(LineSearchTestSuite, testLineSearch)
 
           EXPECT_TRUE(success);
 
-          // Check strong Wolfe conditions
-          error1 = ls.getError();
-          derror1 = ls.computeErrorDerivative();
+          // Check that information is consistent
           RowVectorType grad1;
           pm.computeGradient(grad1, 1, true);
+          EXPECT_TRUE(grad1.isApprox(ls.getGradient()));
+          EXPECT_DOUBLE_EQ(ls.getErrorDerivative(), ls.computeErrorDerivative());
+
+          // Check strong Wolfe conditions
+          error1 = ls.getError();
+          derror1 = ls.getErrorDerivative();
           {
             SCOPED_TRACE("");
             checkWolfeConditions(error0, error1, derror0, derror1, ls.options().c1WolfeCondition,
