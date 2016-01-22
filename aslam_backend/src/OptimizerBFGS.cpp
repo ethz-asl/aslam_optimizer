@@ -64,14 +64,14 @@ bool BFGSReturnValue::failure() const {
 
 std::ostream& operator<<(std::ostream& out, const BFGSReturnValue& ret) {
   out << "BFGSReturnValue: " << std::endl;
-  out << "\t convergence: " << ret.convergence << std::endl;
-  out << "\t iterations: " << ret.nIterations << std::endl;
-  out << "\t gradient norm: " << ret.gradientNorm << std::endl;
-  out << "\t error: " << ret.error << std::endl;
-  out << "\t derror: " << ret.derror << std::endl;
-  out << "\t max dx: " << ret.maxDx << std::endl;
-  out << "\t evals error: " << ret.nObjectiveEvaluations << std::endl;
-  out << "\t evals gradient: " << ret.nObjectiveEvaluations;
+  out << "\tconvergence: " << ret.convergence << std::endl;
+  out << "\titerations: " << ret.nIterations << std::endl;
+  out << "\tgradient norm: " << ret.gradientNorm << std::endl;
+  out << "\terror: " << ret.error << std::endl;
+  out << "\tderror: " << ret.derror << std::endl;
+  out << "\tmax dx: " << ret.maxDx << std::endl;
+  out << "\tevals error: " << ret.nObjectiveEvaluations << std::endl;
+  out << "\tevals gradient: " << ret.nObjectiveEvaluations;
   return out;
 }
 
