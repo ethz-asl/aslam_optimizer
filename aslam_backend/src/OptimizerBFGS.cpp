@@ -71,7 +71,7 @@ std::ostream& operator<<(std::ostream& out, const BFGSReturnValue& ret) {
   out << "\t derror: " << ret.derror << std::endl;
   out << "\t max dx: " << ret.maxDx << std::endl;
   out << "\t evals error: " << ret.nObjectiveEvaluations << std::endl;
-  out << "\t evals gradient: " << ret.nObjectiveEvaluations << std::endl;
+  out << "\t evals gradient: " << ret.nObjectiveEvaluations;
   return out;
 }
 
