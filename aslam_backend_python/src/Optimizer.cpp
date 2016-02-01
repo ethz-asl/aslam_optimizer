@@ -251,6 +251,7 @@ void exportOptimizer()
         .value("FAILURE", BFGSReturnValue::ConvergenceCriterion::FAILURE)
         .value("GRADIENT_NORM", BFGSReturnValue::ConvergenceCriterion::GRADIENT_NORM)
         .value("DX", BFGSReturnValue::ConvergenceCriterion::DX)
+        .value("DOBJECTIVE", BFGSReturnValue::ConvergenceCriterion::DOBJECTIVE)
         ;
 
     class_<LineSearchOptions>("LineSearchOptions", init<>())
