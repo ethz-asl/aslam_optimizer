@@ -193,6 +193,7 @@ void exportOptimizer()
         .def_readwrite("nThreads", &OptimizerRpropOptions::nThreads)
         .def_readwrite("convergenceGradientNorm", &OptimizerRpropOptions::convergenceGradientNorm)
         .def_readwrite("convergenceDx", &OptimizerRpropOptions::convergenceDx)
+        .def_readwrite("convergenceDObjective", &OptimizerRpropOptions::convergenceDObjective)
         .def_readwrite("regularizer", &OptimizerRpropOptions::regularizer)
         .def_readwrite("method", &OptimizerRpropOptions::method)
         ;
@@ -202,6 +203,7 @@ void exportOptimizer()
         .value("FAILURE", RpropReturnValue::ConvergenceCriterion::FAILURE)
         .value("GRADIENT_NORM", RpropReturnValue::ConvergenceCriterion::GRADIENT_NORM)
         .value("DX", RpropReturnValue::ConvergenceCriterion::DX)
+        .value("DOBJECTIVE", RpropReturnValue::ConvergenceCriterion::DOBJECTIVE)
         ;
 
     class_<RpropReturnValue>("RpropReturnValue", init<>())
@@ -212,6 +214,7 @@ void exportOptimizer()
         .def_readwrite("gradientNorm",&RpropReturnValue::gradientNorm)
         .def_readwrite("maxDx",&RpropReturnValue::maxDx)
         .def_readwrite("error",&RpropReturnValue::error)
+        .def_readwrite("derror",&RpropReturnValue::derror)
         .def("success", &RpropReturnValue::success)
         .def("failure", &RpropReturnValue::failure)
         ;

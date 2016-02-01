@@ -71,6 +71,10 @@ TEST(OptimizerRpropTestSuite, testRpropNonSquaredErrorTerms)
       auto ret = optimizer.optimize();
       EXPECT_TRUE(ret.success());
       EXPECT_LE(optimizer.getGradientNorm(), 1e-6);
+      EXPECT_GE(ret.error, 0.0);
+      EXPECT_LT(ret.maxDx, 1e-3);
+      if (method == OptimizerRpropOptions::IRPROP_PLUS)
+        EXPECT_LT(ret.derror, 1e-12);
     }
 
   } catch (const std::exception& e) {
@@ -135,6 +139,10 @@ TEST(OptimizerRpropTestSuite, testRpropSquaredErrorTerms)
       auto ret = optimizer.optimize();
       EXPECT_TRUE(ret.success());
       EXPECT_LT(optimizer.getGradientNorm(), 1e-3);
+      EXPECT_GE(ret.error, 0.0);
+      EXPECT_LT(ret.maxDx, 1e-3);
+      if (method == OptimizerRpropOptions::IRPROP_PLUS)
+        EXPECT_LT(ret.derror, 1e-12);
     }
 
   } catch (const std::exception& e) {

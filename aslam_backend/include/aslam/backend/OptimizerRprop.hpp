@@ -23,6 +23,7 @@ namespace aslam {
       double maxDelta = 1.0; /// \brief Maximum step size
       double convergenceGradientNorm = 1e-3; /// \brief Stopping criterion on gradient norm
       double convergenceDx = 0.0; /// \brief Stopping criterion on maximum state update coefficient
+      double convergenceDObjective = 0.0; /// \brief Stopping criterion on change of objective/error
       int maxIterations = 20; /// \brief stop if we reach this number of iterations without hitting any of the above stopping criteria. -1
       std::size_t nThreads = 4; /// \brief The number of threads to use
       boost::shared_ptr<ScalarNonSquaredErrorTerm> regularizer = NULL; /// \brief Regularizer
@@ -34,7 +35,7 @@ namespace aslam {
     std::ostream& operator<<(std::ostream& out, const aslam::backend::OptimizerRpropOptions& options);
 
     struct RpropReturnValue {
-      enum ConvergenceCriterion { IN_PROGRESS = 0, FAILURE, GRADIENT_NORM, DX };
+      enum ConvergenceCriterion { IN_PROGRESS = 0, FAILURE, GRADIENT_NORM, DX, DOBJECTIVE };
       RpropReturnValue() { }
       void reset();
       bool success() const;
@@ -46,6 +47,7 @@ namespace aslam {
       double gradientNorm = std::numeric_limits<double>::signaling_NaN();
       double maxDx = std::numeric_limits<double>::signaling_NaN();
       double error = std::numeric_limits<double>::max();
+      double derror = std::numeric_limits<double>::signaling_NaN(); /// \brief last change of the error
     };
     std::ostream& operator<<(std::ostream& out, const RpropReturnValue::ConvergenceCriterion& convergence);
 

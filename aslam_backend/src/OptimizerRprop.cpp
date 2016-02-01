@@ -22,6 +22,7 @@ OptimizerRpropOptions::OptimizerRpropOptions(const sm::PropertyTree& config) :
     maxDelta(config.getDouble("maxDelta", maxDelta)),
     convergenceGradientNorm(config.getDouble("convergenceGradientNorm", convergenceGradientNorm)),
     convergenceDx(config.getDouble("convergenceDx", convergenceDx)),
+    convergenceDObjective(config.getDouble("convergenceDObjective", convergenceDObjective)),
     maxIterations(config.getInt("maxIterations", maxIterations)),
     nThreads(config.getInt("nThreads", nThreads))
 {
@@ -36,6 +37,7 @@ void OptimizerRpropOptions::check() const {
   SM_ASSERT_GT( Exception, maxDelta, minDelta, "");
   SM_ASSERT_GE( Exception, convergenceGradientNorm, 0.0, "");
   SM_ASSERT_GE( Exception, convergenceDx, 0.0, "");
+  SM_ASSERT_GE( Exception, convergenceDObjective, 0.0, "");
   SM_ASSERT_TRUE( Exception, convergenceDx > 0 || convergenceGradientNorm > 0.0, "");
   SM_ASSERT_GE( Exception, maxIterations, -1, "");
 }
@@ -50,6 +52,7 @@ std::ostream& operator<<(std::ostream& out, const aslam::backend::OptimizerRprop
   out << "\tmaxDelta: " << options.maxDelta << std::endl;
   out << "\tconvergenceGradientNorm: " << options.convergenceGradientNorm << std::endl;
   out << "\tconvergenceDx: " << options.convergenceDx << std::endl;
+  out << "\tconvergenceDObjective: " << options.convergenceDObjective << std::endl;
   out << "\tmaxIterations: " << options.maxIterations << std::endl;
   out << "\tnThreads: " << options.nThreads << std::endl;
   out << "\tmethod: " << options.method << std::endl;
@@ -62,6 +65,7 @@ void RpropReturnValue::reset() {
   gradientNorm = std::numeric_limits<double>::signaling_NaN();
   maxDx = std::numeric_limits<double>::signaling_NaN();
   error = std::numeric_limits<double>::max();
+  derror = std::numeric_limits<double>::signaling_NaN();
 }
 
 bool RpropReturnValue::success() const {
@@ -85,6 +89,9 @@ std::ostream& operator<<(std::ostream& out, const RpropReturnValue::ConvergenceC
       break;
     case RpropReturnValue::ConvergenceCriterion::DX:
       out << "DX";
+      break;
+    case RpropReturnValue::ConvergenceCriterion::DOBJECTIVE:
+      out << "DOBJECTIVE";
       break;
   }
   return out;
@@ -264,11 +271,24 @@ const RpropReturnValue& OptimizerRprop::optimize()
       break;
     }
 
+    if (_options.method == OptimizerRpropOptions::IRPROP_PLUS) {
+      _returnValue.derror = this->evaluateError(_options.nThreads) - _returnValue.error;
+      if (_returnValue.derror < _options.convergenceDObjective) {
+        _returnValue.convergence = RpropReturnValue::DOBJECTIVE;
+        SM_DEBUG_STREAM_NAMED("optimization", "RPROP: Change in error " << _returnValue.derror <<
+                              " is smaller than convergenceDObjective option -> terminating");
+        break;
+      }
+    }
+
     SM_FINE_STREAM_NAMED("optimization", "Number of iterations: " << _returnValue.nIterations);
-    SM_FINE_STREAM_NAMED("optimization", "\t gradient: " << gradient.format(IOFormat(StreamPrecision, DontAlignCols, ", ", ", ", "", "", "[", "]")));
-    SM_FINE_STREAM_NAMED("optimization", "\t dx:    " << _dx.format(IOFormat(StreamPrecision, DontAlignCols, ", ", ", ", "", "", "[", "]")) );
-    SM_FINE_STREAM_NAMED("optimization", "\t delta:    " << _delta.format(IOFormat(StreamPrecision, DontAlignCols, ", ", ", ", "", "", "[", "]")) );
-    SM_FINE_STREAM_NAMED("optimization", "\t norm:     " << _returnValue.gradientNorm);
+    SM_FINE_STREAM_NAMED("optimization", "\tgradient: " << gradient.format(IOFormat(StreamPrecision, DontAlignCols, ", ", ", ", "", "", "[", "]")));
+    SM_FINE_STREAM_NAMED("optimization", "\tdx: " << _dx.format(IOFormat(StreamPrecision, DontAlignCols, ", ", ", ", "", "", "[", "]")) );
+    SM_FINE_STREAM_NAMED("optimization", "\tdelta: " << _delta.format(IOFormat(StreamPrecision, DontAlignCols, ", ", ", ", "", "", "[", "]")) );
+    SM_FINE_STREAM_NAMED("optimization", "\tgradient norm: " << _returnValue.gradientNorm);
+    SM_FINE_STREAM_NAMED("optimization", "\tmax dx: " << _returnValue.maxDx);
+    SM_FINE_STREAM_NAMED("optimization", "\tobjective: " << _returnValue.error);
+    SM_FINE_STREAM_NAMED("optimization", "\tdelta objective: " << _returnValue.derror);
 
     timeStep.stop();
 
