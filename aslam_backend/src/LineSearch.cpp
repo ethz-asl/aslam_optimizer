@@ -634,7 +634,7 @@ bool LineSearch::lineSearchWolfe1() {
                       _error << " and derivative " << _derror);
 
   if (_derror == 0.0) {
-    SM_DEBUG_STREAM("LineSearch: Error derivative is zero, seems like the system is at its optimum.");
+    SM_FINE_STREAM_NAMED("optimization", "LineSearch: Error derivative is zero, seems like the system is at its optimum.");
     return true;
   }
 
@@ -658,7 +658,7 @@ bool LineSearch::lineSearchWolfe1() {
         this->updateErrorDerivative();
         break;
       case Dcsrch::CONVERGED:
-        SM_DEBUG_STREAM_NAMED("optimization", setprecision(20) << "LineSearch: wolfe1 -- converged, final step length " << stp <<
+        SM_FINE_STREAM_NAMED("optimization", setprecision(20) << "LineSearch: wolfe1 -- converged, final step length " << stp <<
                               ", final error " << getError() << ", final error derivative " << getErrorDerivative());
         success = terminate = true;
         break;
@@ -703,7 +703,7 @@ bool LineSearch::lineSearchWolfe2() {
                       _error << " and derivative " << _derror);
 
   if (_derror == 0.0) {
-    SM_DEBUG_STREAM("LineSearch: Error derivative is zero, seems like the system is at its optimum.");
+    SM_FINE_STREAM_NAMED("optimization", "LineSearch: Error derivative is zero, seems like the system is at its optimum.");
     return true;
   }
 
@@ -776,8 +776,8 @@ bool LineSearch::lineSearchWolfe2() {
   }
 
   if (success)
-    SM_DEBUG_STREAM_NAMED("optimization", setprecision(20) << "LineSearch: wolfe2 -- converged, final step length " << getCurrentStepLength() <<
-                          ", final error " << getError());
+    SM_FINE_STREAM_NAMED("optimization", setprecision(20) << "LineSearch: wolfe2 -- converged, final step length " << getCurrentStepLength() <<
+                         ", final error " << getError());
   else
     SM_ERROR_STREAM("LineSearch: wolfe2 -- no solution found in " << _options.nMaxIterWolfe2 << " iterations");
 
@@ -793,7 +793,7 @@ bool LineSearch::lineSearchWolfe12() {
   _problemManager->saveDesignVariables();
 
   if (!lineSearchWolfe1()) {
-    SM_DEBUG_STREAM_NAMED("optimization", "LineSearch: method wolfe1 failed, trying method wolfe2");
+    SM_FINE_STREAM_NAMED("optimization", "LineSearch: method wolfe1 failed, trying method wolfe2");
 
     // restore error values to the ones before calling lineSearchWolfe1().
     // These are the values that correspond to step length zero.

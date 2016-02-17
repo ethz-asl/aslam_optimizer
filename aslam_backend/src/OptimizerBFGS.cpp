@@ -155,7 +155,7 @@ const BFGSReturnValue& OptimizerBFGS::optimize()
   gfk = _linesearch.getGradient();
   _returnValue.gradientNorm = gfk.norm();
   _returnValue.error = _linesearch.getError();
-  SM_DEBUG_STREAM_NAMED("optimization", std::setprecision(20) << "OptimizerBFGS: Start optimization at state " <<
+  SM_FINE_STREAM_NAMED("optimization", std::setprecision(20) << "OptimizerBFGS: Start optimization at state " <<
                         this->getFlattenedDesignVariableParameters().transpose().format(IOFormat(15, DontAlignCols, ", ", ", ", "", "", "[", "]")) <<
                         " with gradient " << gfk.transpose().format(IOFormat(15, DontAlignCols, ", ", ", ", "", "", "[", "]")) << " (norm: " <<
                         _returnValue.gradientNorm << ") and error " << _returnValue.error);
@@ -189,12 +189,8 @@ const BFGSReturnValue& OptimizerBFGS::optimize()
       if (_returnValue.success() || _returnValue.failure())
         break;
 
-      SM_DEBUG_STREAM_NAMED("optimization", std::setprecision(20) << "OptimizerBFGS: Iteration " << cnt);
-      SM_DEBUG_STREAM_NAMED("optimization", std::setprecision(20) << "\t steplength: " << alpha_k);
-      SM_DEBUG_STREAM_NAMED("optimization", std::setprecision(20) << "\t error: " << _returnValue.error);
-      SM_DEBUG_STREAM_NAMED("optimization", std::setprecision(20) << "\t derror " << _returnValue.derror);
-      SM_DEBUG_STREAM_NAMED("optimization", std::setprecision(20) << "\t gradient norm: " << _returnValue.gradientNorm);
-      SM_DEBUG_STREAM_NAMED("optimization", std::setprecision(20) << "\t max dx: " << _returnValue.maxDx);
+      SM_FINE_STREAM_NAMED("optimization", std::setprecision(20) << _returnValue);
+      SM_FINE_STREAM_NAMED("optimization", std::setprecision(20) << "\tsteplength: " << alpha_k);
 
       // Update Hessian
       timeUpdateHessian.start();
@@ -220,13 +216,9 @@ const BFGSReturnValue& OptimizerBFGS::optimize()
   }
 
   if (!_returnValue.failure())
-    SM_DEBUG_STREAM_NAMED("optimization", "OptimizerBFGS: Convergence " << _returnValue.convergence <<
-                          " (iterations: " << _returnValue.nIterations << ", error: " << _returnValue.error <<
-                          ", gradient norm: " << _returnValue.gradientNorm << ")");
+    SM_DEBUG_STREAM_NAMED("optimization", _returnValue);
   else
-    SM_ERROR_STREAM("OptimizerBFGS: Failed to converge with status " << _returnValue.convergence << " (iterations: " <<
-                    _returnValue.nIterations << ", error: " << _returnValue.error << ", gradient norm: " <<
-                    _returnValue.gradientNorm << ")");
+    SM_ERROR_STREAM(_returnValue);
 
   return _returnValue;
 }
@@ -253,22 +245,22 @@ void OptimizerBFGS::updateStatus(const bool lineSearchSuccess) {
   // Test success criteria
   if (_returnValue.gradientNorm < _options.convergenceGradientNorm) {
     _returnValue.convergence = BFGSReturnValue::GRADIENT_NORM;
-    SM_DEBUG_STREAM_NAMED("optimization", "BFGS: Current gradient norm " << _returnValue.gradientNorm <<
-                          " is smaller than convergenceGradientNorm option -> terminating");
+    SM_FINE_STREAM_NAMED("optimization", "BFGS: Current gradient norm " << _returnValue.gradientNorm <<
+                         " is smaller than convergenceGradientNorm option -> terminating");
     return;
   }
 
   if (fabs(_returnValue.derror) < _options.convergenceDObjective) {
-      _returnValue.convergence = BFGSReturnValue::DOBJECTIVE;
-    SM_DEBUG_STREAM_NAMED("optimization", "BFGS: Change in error " << _returnValue.derror <<
-                          " is smaller than convergenceDObjective option -> terminating");
+    _returnValue.convergence = BFGSReturnValue::DOBJECTIVE;
+    SM_FINE_STREAM_NAMED("optimization", "BFGS: Change in error " << _returnValue.derror <<
+                         " is smaller than convergenceDObjective option -> terminating");
     return;
   }
 
   if (_returnValue.maxDx < _options.convergenceDx) {
-      _returnValue.convergence = BFGSReturnValue::DX;
-    SM_DEBUG_STREAM_NAMED("optimization", "BFGS: Maximum change in design variables " << _returnValue.maxDx <<
-                          " is smaller than convergenceDx option -> terminating");
+    _returnValue.convergence = BFGSReturnValue::DX;
+    SM_FINE_STREAM_NAMED("optimization", "BFGS: Maximum change in design variables " << _returnValue.maxDx <<
+                        " is smaller than convergenceDx option -> terminating");
     return;
   }
 
