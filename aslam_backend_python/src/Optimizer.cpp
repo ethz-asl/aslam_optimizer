@@ -237,6 +237,8 @@ void exportOptimizer()
 
         .def("optimize", make_function(&OptimizerRprop::optimize, return_internal_reference<>()),
              "Run the optimization")
+        .add_property("status", make_function(&OptimizerRprop::getStatus, return_internal_reference<>()),
+                      "Return the status")
         .add_property("options", make_function(&OptimizerRprop::options, return_internal_reference<>()),
                       "The optimizer options.")
 

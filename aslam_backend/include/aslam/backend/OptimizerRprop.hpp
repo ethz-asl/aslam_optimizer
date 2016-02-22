@@ -78,6 +78,9 @@ namespace aslam {
       /// \brief Run the optimization
       const RpropReturnValue& optimize();
 
+      /// \brief Return the status
+      const RpropReturnValue& getStatus() const { return _returnValue; }
+
       /// \brief Get the optimizer options.
       Options& options() { return _options; }
 
