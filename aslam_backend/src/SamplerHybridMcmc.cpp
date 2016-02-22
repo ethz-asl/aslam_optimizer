@@ -118,8 +118,6 @@ void SamplerHybridMcmc::step(bool& accepted, double& acceptanceProbability) {
 
   using namespace Eigen;
 
-  Timer timeGrad("SamplerHybridMcmc: Compute---Gradient", true);
-
   // Adapt step length
   if (statistics().getWeightedMeanAcceptanceProbability() > _options.targetAcceptanceRate)
     _stepLength *= _options.incFactorLeapFrogStepSize;
@@ -163,9 +161,9 @@ void SamplerHybridMcmc::step(bool& accepted, double& acceptanceProbability) {
 
     // first half step of momentum
     if (doRecompute) { // we can avoid recomputing the gradient if the last sample was accepted
-      timeGrad.start();
+      Timer timer("SamplerHybridMcmc: Compute---Gradient", false);
       getProblemManager().computeGradient(_gradient, _options.nThreads, false /*TODO: useMEstimator*/);
-      timeGrad.stop();
+      timer.stop();
     }
 #ifndef NDEBUG
     else {
@@ -185,73 +183,85 @@ void SamplerHybridMcmc::step(bool& accepted, double& acceptanceProbability) {
 
     SM_ALL_STREAM_NAMED("sampling", "Step 0 -- Momentum: " << pStar.transpose() << ", position update: " << dxStar.transpose());
 
-     // L-1 full steps
-     for(size_t l = 1; l < _options.nLeapFrogSteps - 1; ++l) {
+    // L-1 full steps
+    for(size_t l = 1; l < _options.nLeapFrogSteps - 1; ++l) {
+      try {
+        // momentum
+        Timer timer("SamplerHybridMcmc: Compute---Gradient", false);
+        getProblemManager().computeGradient(_gradient, _options.nThreads, false /*TODO: useMEstimator*/);
+        timer.stop();
 
-       // momentum
-       timeGrad.start();
-       getProblemManager().computeGradient(_gradient, _options.nThreads, false /*TODO: useMEstimator*/);
-       timeGrad.stop();
+        pStar -= _stepLength*_gradient;
 
-       pStar -= _stepLength*_gradient;
+        // position/sample
+        dxStar = _stepLength*pStar;
+        if(!dxStar.allFinite()) { // we can abort the trajectory generation if it diverged
+          diverged = true;
+          break;
+        }
+        getProblemManager().applyStateUpdate(dxStar);
 
-       // position/sample
-       dxStar = _stepLength*pStar;
-       if(!dxStar.allFinite()) { // we can abort the trajectory generation if it diverged
-         diverged = true;
-         break;
-       }
-       getProblemManager().applyStateUpdate(dxStar);
-
-       SM_ALL_STREAM_NAMED("sampling", "Step " << l << " -- Momentum: " << pStar.transpose() << ", position update: " << dxStar.transpose());
-
-     }
-
-      // last half step
-      timeGrad.start();
-      getProblemManager().computeGradient(_gradient, _options.nThreads, false /*TODO: useMEstimator*/);
-      timeGrad.stop();
-      pStar -= deltaHalf*_gradient;
-
-      // ******************************************************************* //
-
-      // evaluate energies at end of trajectory
-      _u = evaluateNegativeLogDensity(); // potential energy
-      kStar = 0.5*pStar.transpose()*pStar; // kinetic energy
-      eTotalStar = _u + kStar;
-
-      // Check the total energy is finite
-      diverged = diverged || !isfinite(eTotalStar);
-
-      // acceptance/rejection probability
-      acceptanceProbability = 0.0; // this rejects the sample if the energy is not finite
-      if (!diverged) {
-        acceptanceProbability = min(1.0, exp(eTotal0 - eTotalStar)); // TODO: can we remove the thresholding?
-        SM_FINEST_STREAM_NAMED("sampling", "Energy " << eTotal0 << " (potential: " << u0 << ", kinetic: " << k0 << ") ==> " <<
-                         eTotalStar << " (potential: " << _u << ", kinetic: " << kStar << "), acceptanceProbability = " << acceptanceProbability);
-        success = true;
-      } else {
-        _stepLength *= _options.decFactorLeapFrogStepSize;
-        _stepLength = max(_stepLength, _options.minLeapFrogStepSize); // clip
-        SM_WARN_STREAM("Leap-Frog method diverged, reducing step length to " << _stepLength << " and repeating sample...");
-      }
-
-      if (sm::random::randLU(0., 1.0) < acceptanceProbability) { // sample accepted, we keep the new design variables
-        SM_FINEST_STREAM_NAMED("sampling", "Sample accepted");
-        accepted = true;
-      } else { // sample rejected, we revert the update
-        revertUpdateDesignVariables();
-        _u = u0;
-        _gradient = gradient0;
-        SM_FINEST_STREAM_NAMED("sampling", "Sample rejected");
-        accepted = false;
-      }
-
-      if (diverged && _stepLength - _options.minLeapFrogStepSize < 1e-12) {
-        SM_ERROR("Leap-Frog method diverged and current step length reached minimum. "
-            "Cannot generate sample. Consider reducing minimum step length!");
+        SM_ALL_STREAM_NAMED("sampling", "Step " << l << " -- Momentum: " << pStar.transpose() << ", position update: " << dxStar.transpose());
+      } catch (const std::exception& e) {
+        SM_WARN_STREAM(e.what() << ": Compute gradient failed, terminating leap-frog simulation and rejecting sample");
+        diverged = true;
         break;
       }
+    }
+
+    if (!diverged) {
+      try {
+        // last half step
+        Timer timer("SamplerHybridMcmc: Compute---Gradient", false);
+        getProblemManager().computeGradient(_gradient, _options.nThreads, false /*TODO: useMEstimator*/);
+        timer.stop();
+        pStar -= deltaHalf*_gradient;
+
+        // ******************************************************************* //
+
+        // evaluate energies at end of trajectory
+        _u = evaluateNegativeLogDensity(); // potential energy
+        kStar = 0.5*pStar.transpose()*pStar; // kinetic energy
+        eTotalStar = _u + kStar;
+      } catch (const std::exception& e) {
+        SM_WARN_STREAM(e.what() << ": Compute gradient failed, terminating leap-frog simulation and rejecting sample");
+        diverged = true;
+      }
+    }
+
+    // Check the total energy is finite
+    diverged = diverged || !isfinite(eTotalStar);
+
+    // acceptance/rejection probability
+    acceptanceProbability = 0.0; // this rejects the sample if the energy is not finite
+    if (!diverged) {
+      acceptanceProbability = min(1.0, exp(eTotal0 - eTotalStar)); // TODO: can we remove the thresholding?
+      SM_FINEST_STREAM_NAMED("sampling", "Energy " << eTotal0 << " (potential: " << u0 << ", kinetic: " << k0 << ") ==> " <<
+                             eTotalStar << " (potential: " << _u << ", kinetic: " << kStar << "), acceptanceProbability = " << acceptanceProbability);
+      success = true;
+    } else {
+      _stepLength *= _options.decFactorLeapFrogStepSize;
+      _stepLength = max(_stepLength, _options.minLeapFrogStepSize); // clip
+      SM_WARN_STREAM("Leap-Frog method diverged, reducing step length to " << _stepLength <<
+                     ", increasing number of leap-frog steps to " << _options.nLeapFrogSteps << " and repeating sample...");
+    }
+
+    if (sm::random::randLU(0., 1.0) < acceptanceProbability) { // sample accepted, we keep the new design variables
+      SM_FINEST_STREAM_NAMED("sampling", "Sample accepted");
+      accepted = true;
+    } else { // sample rejected, we revert the update
+      revertUpdateDesignVariables();
+      _u = u0;
+      _gradient = gradient0;
+      SM_FINEST_STREAM_NAMED("sampling", "Sample rejected");
+      accepted = false;
+    }
+
+    if (diverged && _stepLength - _options.minLeapFrogStepSize < 1e-12) {
+      SM_ERROR("Leap-Frog method diverged and current step length reached minimum. "
+          "Cannot generate sample. Consider reducing minimum step length!");
+      break;
+    }
   }
 
 }
