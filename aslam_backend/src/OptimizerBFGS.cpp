@@ -67,10 +67,10 @@ std::ostream& operator<<(std::ostream& out, const BFGSReturnValue& ret) {
   out << "\tconvergence: " << ret.convergence << std::endl;
   out << "\titerations: " << ret.nIterations << std::endl;
   out << "\tgradient norm: " << ret.gradientNorm << std::endl;
-  out << "\terror: " << ret.error << std::endl;
-  out << "\tderror: " << ret.derror << std::endl;
+  out << "\tobjective: " << ret.error << std::endl;
+  out << "\tdobjective: " << ret.derror << std::endl;
   out << "\tmax dx: " << ret.maxDx << std::endl;
-  out << "\tevals error: " << ret.nObjectiveEvaluations << std::endl;
+  out << "\tevals objective: " << ret.nObjectiveEvaluations << std::endl;
   out << "\tevals gradient: " << ret.nObjectiveEvaluations;
   return out;
 }
@@ -137,7 +137,7 @@ void OptimizerBFGS::initialize()
 
 void OptimizerBFGS::reset() {
   _returnValue.reset();
-  _Hk = Eigen::MatrixXd::Identity(numOptParameters(), numOptParameters());
+  _Bk = Eigen::MatrixXd::Identity(numOptParameters(), numOptParameters());
   _linesearch.initialize();
 }
 
@@ -169,8 +169,25 @@ const BFGSReturnValue& OptimizerBFGS::optimize()
       _returnValue.nIterations++;
 
       // compute search direction
-      RowVectorType pk = -_Hk*gfk.transpose();
-      _linesearch.setSearchDirection(pk);
+      // Note: this could fail due to numerical issues making the inverse Hessian approximation negative definite
+      // and resulting in an ascent direction where the eigenvalues become negative. We rely on the line search to detect
+      // that here, and reset the inverse Hessian to the identity matrix. This will be done only once, if it fails the exception
+      // is re-thrown. Instead of resetting to identity we could of course do something smarter.
+      RowVectorType pk;
+      for(std::size_t j=0; j<2; ++j) {
+        try {
+          pk = -_Bk*gfk.transpose();
+          _linesearch.setSearchDirection(pk);
+        } catch (const std::exception& e) {
+          if (j == 0) {
+            SM_WARN("Inverse Hessian approximation became negative, resetting to identity matrix. "
+                "Check your problem setup anyways and potentially re-scale your parameters.");
+            _Bk = I;
+          } else {
+            throw;
+          }
+        }
+      }
 
       // store last design variables
       const Eigen::VectorXd dv = this->getFlattenedDesignVariableParameters();
@@ -206,9 +223,8 @@ const BFGSReturnValue& OptimizerBFGS::optimize()
       }
 
       MatrixXd C = sk.transpose() * yk * rhok;
-      MatrixXd A1 = I - C;
-      MatrixXd A2 = I - C.transpose();
-      _Hk = A1 * (_Hk * A2) + (rhok * sk.transpose() * sk);
+      MatrixXd A = I - C;
+      _Bk = A * (_Bk * A.transpose()) + (rhok * sk.transpose() * sk); // Sherman-Morrison formula
 
       timeUpdateHessian.stop();
 

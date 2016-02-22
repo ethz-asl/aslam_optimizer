@@ -72,6 +72,9 @@ namespace aslam {
       /// \brief Run the optimization
       const BFGSReturnValue& optimize();
 
+      /// \brief Return the status
+      const BFGSReturnValue& getStatus() const { return _returnValue; }
+
       /// \brief Get the optimizer options.
       const Options& getOptions() const { return _options; }
 
@@ -102,8 +105,8 @@ namespace aslam {
       /// \brief the current set of options
       Options _options;
 
-      /// \brief The current estimate of the Hessian
-      Eigen::MatrixXd _Hk;
+      /// \brief The current estimate of the inverse Hessian
+      Eigen::MatrixXd _Bk;
 
       /// \brief Line-search class
       LineSearch _linesearch;

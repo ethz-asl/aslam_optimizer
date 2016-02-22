@@ -454,7 +454,8 @@ void LineSearch::setSearchDirection(const RowVectorType& searchDirection) {
   _derrorOutdated = false;
   SM_VERBOSE_STREAM_NAMED("optimization", setprecision(20) << "LineSearch: set search direction to " << _searchDirection.format(IOFormat(15, DontAlignCols, ", ", ", ", "", "", "[", "]")));
   SM_VERBOSE_STREAM_NAMED("optimization", setprecision(20) << "LineSearch: computed error derivative " << _derror);
-  SM_ASSERT_LE(Exception, _derror, 0.0, "Wrong search direction supplied"); // Check the input arguments for errors.
+  SM_ASSERT_LE(Exception, _derror, 0.0, "Wrong search direction supplied! In case approximate Hessian information is used, "
+      "this could mean your Hessian estimate became negative");
 }
 
 

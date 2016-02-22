@@ -97,6 +97,18 @@ std::ostream& operator<<(std::ostream& out, const RpropReturnValue::ConvergenceC
   return out;
 }
 
+std::ostream& operator<<(std::ostream& out, const RpropReturnValue& ret) {
+  out << "RPropReturnValue: " << std::endl;
+  out << "\tconvergence: " << ret.convergence << std::endl;
+  out << "\titerations: " << ret.nIterations << std::endl;
+  out << "\tgradient norm: " << ret.gradientNorm << std::endl;
+  out << "\tobjective: " << ret.error << std::endl;
+  out << "\tdobjective: " << ret.derror << std::endl;
+  out << "\tmax dx: " << ret.maxDx << std::endl;
+  out << "\tevals objective: " << ret.nObjectiveEvaluations << std::endl;
+  out << "\tevals gradient: " << ret.nObjectiveEvaluations;
+  return out;
+}
 
 OptimizerRprop::OptimizerRprop() :
     _options(OptimizerRpropOptions())
@@ -281,14 +293,9 @@ const RpropReturnValue& OptimizerRprop::optimize()
       }
     }
 
-    SM_FINE_STREAM_NAMED("optimization", "Number of iterations: " << _returnValue.nIterations);
-    SM_FINE_STREAM_NAMED("optimization", "\tgradient: " << gradient.format(IOFormat(StreamPrecision, DontAlignCols, ", ", ", ", "", "", "[", "]")));
-    SM_FINE_STREAM_NAMED("optimization", "\tdx: " << _dx.format(IOFormat(StreamPrecision, DontAlignCols, ", ", ", ", "", "", "[", "]")) );
-    SM_FINE_STREAM_NAMED("optimization", "\tdelta: " << _delta.format(IOFormat(StreamPrecision, DontAlignCols, ", ", ", ", "", "", "[", "]")) );
-    SM_FINE_STREAM_NAMED("optimization", "\tgradient norm: " << _returnValue.gradientNorm);
-    SM_FINE_STREAM_NAMED("optimization", "\tmax dx: " << _returnValue.maxDx);
-    SM_FINE_STREAM_NAMED("optimization", "\tobjective: " << _returnValue.error);
-    SM_FINE_STREAM_NAMED("optimization", "\tdelta objective: " << _returnValue.derror);
+    SM_FINE_STREAM_NAMED("optimization", _returnValue << std::endl <<
+                         "\tdx: " << _dx << std::endl <<
+                         "\tdelta: " << _delta);
 
     timeStep.stop();
 
@@ -298,8 +305,7 @@ const RpropReturnValue& OptimizerRprop::optimize()
 
   }
 
-  SM_DEBUG_STREAM_NAMED("optimization", "RPROP: Convergence " << _returnValue.convergence <<
-                        " (iterations: " << _returnValue.nIterations << ", gradient norm: " << _returnValue.gradientNorm << ")");
+  SM_DEBUG_STREAM_NAMED("optimization", _returnValue);
 
   return _returnValue;
 }
