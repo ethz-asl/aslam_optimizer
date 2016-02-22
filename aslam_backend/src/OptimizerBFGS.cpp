@@ -206,9 +206,8 @@ const BFGSReturnValue& OptimizerBFGS::optimize()
       }
 
       MatrixXd C = sk.transpose() * yk * rhok;
-      MatrixXd A1 = I - C;
-      MatrixXd A2 = I - C.transpose();
-      _Bk = A1 * (_Bk * A2.transpose()) + (rhok * sk.transpose() * sk); // Sherman-Morrison formula
+      MatrixXd A = I - C;
+      _Bk = A * (_Bk * A.transpose()) + (rhok * sk.transpose() * sk); // Sherman-Morrison formula
 
       timeUpdateHessian.stop();
 
