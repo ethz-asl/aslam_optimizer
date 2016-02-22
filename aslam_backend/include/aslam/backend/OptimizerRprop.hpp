@@ -50,6 +50,7 @@ namespace aslam {
       double derror = std::numeric_limits<double>::signaling_NaN(); /// \brief last change of the error
     };
     std::ostream& operator<<(std::ostream& out, const RpropReturnValue::ConvergenceCriterion& convergence);
+    std::ostream& operator<<(std::ostream& out, const RpropReturnValue& ret);
 
     /**
      * \class OptimizerRprop
