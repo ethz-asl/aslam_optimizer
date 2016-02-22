@@ -137,7 +137,7 @@ void OptimizerBFGS::initialize()
 
 void OptimizerBFGS::reset() {
   _returnValue.reset();
-  _Hk = Eigen::MatrixXd::Identity(numOptParameters(), numOptParameters());
+  _Bk = Eigen::MatrixXd::Identity(numOptParameters(), numOptParameters());
   _linesearch.initialize();
 }
 
@@ -169,7 +169,7 @@ const BFGSReturnValue& OptimizerBFGS::optimize()
       _returnValue.nIterations++;
 
       // compute search direction
-      RowVectorType pk = -_Hk*gfk.transpose();
+      RowVectorType pk = -_Bk*gfk.transpose();
       _linesearch.setSearchDirection(pk);
 
       // store last design variables
@@ -208,7 +208,7 @@ const BFGSReturnValue& OptimizerBFGS::optimize()
       MatrixXd C = sk.transpose() * yk * rhok;
       MatrixXd A1 = I - C;
       MatrixXd A2 = I - C.transpose();
-      _Hk = A1 * (_Hk * A2) + (rhok * sk.transpose() * sk);
+      _Bk = A1 * (_Bk * A2.transpose()) + (rhok * sk.transpose() * sk); // Sherman-Morrison formula
 
       timeUpdateHessian.stop();
 

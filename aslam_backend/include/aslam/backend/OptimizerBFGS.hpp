@@ -105,8 +105,8 @@ namespace aslam {
       /// \brief the current set of options
       Options _options;
 
-      /// \brief The current estimate of the Hessian
-      Eigen::MatrixXd _Hk;
+      /// \brief The current estimate of the inverse Hessian
+      Eigen::MatrixXd _Bk;
 
       /// \brief Line-search class
       LineSearch _linesearch;
