@@ -169,8 +169,25 @@ const BFGSReturnValue& OptimizerBFGS::optimize()
       _returnValue.nIterations++;
 
       // compute search direction
-      RowVectorType pk = -_Bk*gfk.transpose();
-      _linesearch.setSearchDirection(pk);
+      // Note: this could fail due to numerical issues making the inverse Hessian approximation negative definite
+      // and resulting in an ascent direction where the eigenvalues become negative. We rely on the line search to detect
+      // that here, and reset the inverse Hessian to the identity matrix. This will be done only once, if it fails the exception
+      // is re-thrown. Instead of resetting to identity we could of course do something smarter.
+      RowVectorType pk;
+      for(std::size_t j=0; j<2; ++j) {
+        try {
+          pk = -_Bk*gfk.transpose();
+          _linesearch.setSearchDirection(pk);
+        } catch (const std::exception& e) {
+          if (j == 0) {
+            SM_WARN("Inverse Hessian approximation became negative, resetting to identity matrix. "
+                "Check your problem setup anyways and potentially re-scale your parameters.");
+            _Bk = I;
+          } else {
+            throw;
+          }
+        }
+      }
 
       // store last design variables
       const Eigen::VectorXd dv = this->getFlattenedDesignVariableParameters();
