@@ -21,6 +21,13 @@ Eigen::VectorXd rhs(const aslam::backend::Optimizer * o)
 	return o->rhs();
 }
 
+template <typename T>
+std::string toString(const T& t) {
+  std::ostringstream os;
+  os << t;
+  return os.str();
+}
+
 void exportOptimizer()
 {
     using namespace boost::python;
@@ -217,6 +224,7 @@ void exportOptimizer()
         .def_readwrite("derror",&RpropReturnValue::derror)
         .def("success", &RpropReturnValue::success)
         .def("failure", &RpropReturnValue::failure)
+        .def("__str__", &toString<RpropReturnValue>)
         ;
 
     class_<OptimizerRprop, boost::shared_ptr<OptimizerRprop> >("OptimizerRprop", init<>("OptimizerRprop(): Constructor with default options"))
@@ -294,6 +302,7 @@ void exportOptimizer()
         .def("reset", &BFGSReturnValue::reset)
         .def("success", &BFGSReturnValue::success)
         .def("failure", &BFGSReturnValue::failure)
+        .def("__str__", &toString<BFGSReturnValue>)
         ;
 
     class_<OptimizerBFGS, boost::shared_ptr<OptimizerBFGS> >("OptimizerBFGS", init<>("OptimizerBFGS(): Constructor with default options"))
