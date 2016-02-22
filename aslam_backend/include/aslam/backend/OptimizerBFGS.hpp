@@ -72,6 +72,9 @@ namespace aslam {
       /// \brief Run the optimization
       const BFGSReturnValue& optimize();
 
+      /// \brief Return the status
+      const BFGSReturnValue& getStatus() const { return _returnValue; }
+
       /// \brief Get the optimizer options.
       const Options& getOptions() const { return _options; }
 

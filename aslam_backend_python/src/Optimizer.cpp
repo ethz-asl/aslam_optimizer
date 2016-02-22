@@ -312,6 +312,8 @@ void exportOptimizer()
 
         .def("optimize", make_function(&OptimizerBFGS::optimize, return_internal_reference<>()),
              "Run the optimization")
+        .add_property("status", make_function(&OptimizerBFGS::getStatus, return_internal_reference<>()),
+                      "Return the status")
         .add_property("options", make_function(&OptimizerBFGS::getOptions, return_internal_reference<>()), &OptimizerBFGS::setOptions,
                       "The optimizer options.")
 
