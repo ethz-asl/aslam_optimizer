@@ -236,22 +236,22 @@ void SamplerHybridMcmc::step(bool& accepted, double& acceptanceProbability) {
         SM_WARN_STREAM("Leap-Frog method diverged, reducing step length to " << _stepLength << " and repeating sample...");
       }
 
-      if (sm::random::randLU(0., 1.0) < acceptanceProbability) { // sample accepted, we keep the new design variables
-        SM_FINEST_STREAM_NAMED("sampling", "Sample accepted");
-        accepted = true;
-      } else { // sample rejected, we revert the update
-        revertUpdateDesignVariables();
-        _u = u0;
-        _gradient = gradient0;
-        SM_FINEST_STREAM_NAMED("sampling", "Sample rejected");
-        accepted = false;
-      }
+    if (sm::random::randLU(0., 1.0) < acceptanceProbability) { // sample accepted, we keep the new design variables
+      SM_FINEST_STREAM_NAMED("sampling", "Sample accepted");
+      accepted = true;
+    } else { // sample rejected, we revert the update
+      revertUpdateDesignVariables();
+      _u = u0;
+      _gradient = gradient0;
+      SM_FINEST_STREAM_NAMED("sampling", "Sample rejected");
+      accepted = false;
+    }
 
-      if (diverged && _stepLength - _options.minLeapFrogStepSize < 1e-12) {
-        SM_ERROR("Leap-Frog method diverged and current step length reached minimum. "
-            "Cannot generate sample. Consider reducing minimum step length!");
-        break;
-      }
+    if (diverged && _stepLength - _options.minLeapFrogStepSize < 1e-12) {
+      SM_ERROR("Leap-Frog method diverged and current step length reached minimum. "
+          "Cannot generate sample. Consider reducing minimum step length!");
+      break;
+    }
   }
 
 }
