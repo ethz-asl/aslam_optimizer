@@ -67,10 +67,10 @@ std::ostream& operator<<(std::ostream& out, const BFGSReturnValue& ret) {
   out << "\tconvergence: " << ret.convergence << std::endl;
   out << "\titerations: " << ret.nIterations << std::endl;
   out << "\tgradient norm: " << ret.gradientNorm << std::endl;
-  out << "\terror: " << ret.error << std::endl;
-  out << "\tderror: " << ret.derror << std::endl;
+  out << "\tobjective: " << ret.error << std::endl;
+  out << "\tdobjective: " << ret.derror << std::endl;
   out << "\tmax dx: " << ret.maxDx << std::endl;
-  out << "\tevals error: " << ret.nObjectiveEvaluations << std::endl;
+  out << "\tevals objective: " << ret.nObjectiveEvaluations << std::endl;
   out << "\tevals gradient: " << ret.nObjectiveEvaluations;
   return out;
 }
