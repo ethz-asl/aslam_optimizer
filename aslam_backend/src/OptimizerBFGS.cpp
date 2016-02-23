@@ -206,8 +206,8 @@ const BFGSReturnValue& OptimizerBFGS::optimize()
       if (_returnValue.success() || _returnValue.failure())
         break;
 
-      SM_FINE_STREAM_NAMED("optimization", std::setprecision(20) << _returnValue);
-      SM_FINE_STREAM_NAMED("optimization", std::setprecision(20) << "\tsteplength: " << alpha_k);
+      SM_FINE_STREAM_NAMED("optimization", std::setprecision(20) << _returnValue << std::endl <<
+                           "\tsteplength: " << alpha_k);
 
       // Update Hessian
       timeUpdateHessian.start();
