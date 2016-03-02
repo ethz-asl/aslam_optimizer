@@ -242,8 +242,7 @@ void SamplerHybridMcmc::step(bool& accepted, double& acceptanceProbability) {
     } else {
       _stepLength *= _options.decFactorLeapFrogStepSize;
       _stepLength = max(_stepLength, _options.minLeapFrogStepSize); // clip
-      SM_WARN_STREAM("Leap-Frog method diverged, reducing step length to " << _stepLength <<
-                     ", increasing number of leap-frog steps to " << _options.nLeapFrogSteps << " and repeating sample...");
+      SM_WARN_STREAM("Leap-Frog method diverged, reducing step length to " << _stepLength << " and repeating sample...");
     }
 
     if (sm::random::randLU(0., 1.0) < acceptanceProbability) { // sample accepted, we keep the new design variables
