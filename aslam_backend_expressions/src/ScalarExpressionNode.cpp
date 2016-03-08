@@ -18,7 +18,7 @@ namespace aslam {
         /// \brief Evaluate the scalar matrix.
         double ScalarExpressionNode::toScalar() const
         {
-            return toScalarImplementation();
+            return evaluateImplementation();
         }
 
       
@@ -54,7 +54,7 @@ namespace aslam {
         {
 
         }
-        double ScalarExpressionNodeMultiply::toScalarImplementation() const
+        double ScalarExpressionNodeMultiply::evaluateImplementation() const
         {
             return _lhs->toScalar() * _rhs->toScalar();
         }
@@ -94,7 +94,7 @@ namespace aslam {
         {
 
         }
-        double ScalarExpressionNodeDivide::toScalarImplementation() const
+        double ScalarExpressionNodeDivide::evaluateImplementation() const
         {
             return _lhs->toScalar() / _rhs->toScalar();
         }
@@ -139,7 +139,7 @@ namespace aslam {
 
         }
 
-        double ScalarExpressionNodeAdd::toScalarImplementation() const
+        double ScalarExpressionNodeAdd::evaluateImplementation() const
         {
             return _lhs->toScalar() + _multiplyRhs * _rhs->toScalar();
         }
@@ -176,7 +176,7 @@ namespace aslam {
 
         }
 
-        double ScalarExpressionNodeSqrt::toScalarImplementation() const
+        double ScalarExpressionNodeSqrt::evaluateImplementation() const
         {
             SM_ASSERT_GT(std::runtime_error, _lhs->toScalar(), 0.0, "");
             return sqrt(_lhs->toScalar());
@@ -212,7 +212,7 @@ namespace aslam {
 
         }
 
-        double ScalarExpressionNodeLog::toScalarImplementation() const
+        double ScalarExpressionNodeLog::evaluateImplementation() const
         {
             SM_ASSERT_GT(std::runtime_error, _lhs->toScalar(), 0.0, "");
             return log(_lhs->toScalar());
@@ -249,7 +249,7 @@ namespace aslam {
 
         }
 
-        double ScalarExpressionNodeExp::toScalarImplementation() const
+        double ScalarExpressionNodeExp::evaluateImplementation() const
         {
             return exp(_lhs->toScalar());
         }
@@ -285,7 +285,7 @@ namespace aslam {
 
         }
 
-        double ScalarExpressionNodeAtan::toScalarImplementation() const
+        double ScalarExpressionNodeAtan::evaluateImplementation() const
         {
             return atan(_lhs->toScalar());
         }
@@ -323,7 +323,7 @@ namespace aslam {
 
         }
 
-        double ScalarExpressionNodeAtan2::toScalarImplementation() const
+        double ScalarExpressionNodeAtan2::evaluateImplementation() const
         {
             return atan2(_lhs->toScalar(), _rhs->toScalar());
         }
@@ -369,7 +369,7 @@ namespace aslam {
 
         }
 
-        double ScalarExpressionNodeAcos::toScalarImplementation() const
+        double ScalarExpressionNodeAcos::evaluateImplementation() const
         {
             auto lhss = _lhs->toScalar();
             SM_ASSERT_LE(Exception, lhss, 1.0, "");
@@ -412,7 +412,7 @@ namespace aslam {
 
         }
 
-        double ScalarExpressionNodeAcosSquared::toScalarImplementation() const
+        double ScalarExpressionNodeAcosSquared::evaluateImplementation() const
         {
             const auto lhss = _lhs->toScalar();
             SM_ASSERT_LE(Exception, lhss, 1.0, "");
@@ -479,7 +479,7 @@ namespace aslam {
 
         }
 
-        double ScalarExpressionNodeInverseSigmoid::toScalarImplementation() const
+        double ScalarExpressionNodeInverseSigmoid::evaluateImplementation() const
         {
             const auto lhss = _lhs->toScalar();
             return _height / (exp((lhss - _shift) * _scale) + 1.0);
@@ -549,7 +549,7 @@ namespace aslam {
 
         }
 
-        double ScalarExpressionNodePower::toScalarImplementation() const
+        double ScalarExpressionNodePower::evaluateImplementation() const
         {
             const auto lhss = _lhs->toScalar();
             return pow(lhss, _power);
@@ -590,7 +590,7 @@ namespace aslam {
 
         }
 
-        double ScalarExpressionPiecewiseExpression::toScalarImplementation() const
+        double ScalarExpressionPiecewiseExpression::evaluateImplementation() const
         {
           if (_useFirst()) {
             return _e1->toScalar();
@@ -643,7 +643,7 @@ namespace aslam {
         {
         }
 
-        double ScalarExpressionNodeNegated::toScalarImplementation() const
+        double ScalarExpressionNodeNegated::evaluateImplementation() const
         {
             return -_rhs->toScalar();
         }

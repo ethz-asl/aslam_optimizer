@@ -42,7 +42,7 @@ namespace aslam {
       void getDesignVariables(DesignVariable::set_t & designVariables) const;
     protected:
       // These functions must be implemented by child classes.
-      virtual double toScalarImplementation() const = 0;
+      virtual double evaluateImplementation() const = 0;
       virtual void evaluateJacobiansImplementation(JacobianContainer & outJacobians) const = 0;
       virtual void evaluateJacobiansImplementation(JacobianContainer & outJacobians, const Eigen::MatrixXd & applyChainRule) const = 0;
       virtual void getDesignVariablesImplementation(DesignVariable::set_t & designVariables) const = 0;
@@ -59,7 +59,7 @@ namespace aslam {
           virtual ~ScalarExpressionNodeMultiply();
       protected:
           // These functions must be implemented by child classes.
-          virtual double toScalarImplementation() const;
+          virtual double evaluateImplementation() const;
           virtual void evaluateJacobiansImplementation(JacobianContainer & outJacobians) const;
           virtual void evaluateJacobiansImplementation(JacobianContainer & outJacobians, const Eigen::MatrixXd & applyChainRule) const;
           virtual void getDesignVariablesImplementation(DesignVariable::set_t & designVariables) const;
@@ -79,7 +79,7 @@ namespace aslam {
           virtual ~ScalarExpressionNodeDivide();
       protected:
           // These functions must be implemented by child classes.
-          virtual double toScalarImplementation() const;
+          virtual double evaluateImplementation() const;
           virtual void evaluateJacobiansImplementation(JacobianContainer & outJacobians) const;
           virtual void evaluateJacobiansImplementation(JacobianContainer & outJacobians, const Eigen::MatrixXd & applyChainRule) const;
           virtual void getDesignVariablesImplementation(DesignVariable::set_t & designVariables) const;
@@ -99,7 +99,7 @@ namespace aslam {
 
        protected:
           // These functions must be implemented by child classes.
-          virtual double toScalarImplementation() const;
+          virtual double evaluateImplementation() const;
           virtual void evaluateJacobiansImplementation(JacobianContainer & outJacobians) const;
           virtual void evaluateJacobiansImplementation(JacobianContainer & outJacobians, const Eigen::MatrixXd & applyChainRule) const;
           virtual void getDesignVariablesImplementation(DesignVariable::set_t & designVariables) const;
@@ -119,7 +119,7 @@ namespace aslam {
 
        protected:
           // These functions must be implemented by child classes.
-          virtual double toScalarImplementation() const;
+          virtual double evaluateImplementation() const;
           virtual void evaluateJacobiansImplementation(JacobianContainer & outJacobians) const;
           virtual void evaluateJacobiansImplementation(JacobianContainer & outJacobians, const Eigen::MatrixXd & applyChainRule) const;
           virtual void getDesignVariablesImplementation(DesignVariable::set_t & designVariables) const;
@@ -140,7 +140,7 @@ namespace aslam {
 
       protected:
           // These functions must be implemented by child classes.
-          virtual double toScalarImplementation() const{return _s;}
+          virtual double evaluateImplementation() const{return _s;}
           virtual void evaluateJacobiansImplementation(JacobianContainer & /* outJacobians */) const{}
           virtual void evaluateJacobiansImplementation(JacobianContainer & /* outJacobians */, const Eigen::MatrixXd & /* applyChainRule */) const{}
           virtual void getDesignVariablesImplementation(DesignVariable::set_t & /* designVariables */) const{}
@@ -158,7 +158,7 @@ namespace aslam {
 
        protected:
           // These functions must be implemented by child classes.
-          virtual double toScalarImplementation() const override;
+          virtual double evaluateImplementation() const override;
           virtual void evaluateJacobiansImplementation(JacobianContainer & outJacobians) const override;
           virtual void evaluateJacobiansImplementation(JacobianContainer & outJacobians, const Eigen::MatrixXd & applyChainRule) const override;
           virtual void getDesignVariablesImplementation(DesignVariable::set_t & designVariables) const override;
@@ -176,7 +176,7 @@ namespace aslam {
 
        protected:
           // These functions must be implemented by child classes.
-          virtual double toScalarImplementation() const override;
+          virtual double evaluateImplementation() const override;
           virtual void evaluateJacobiansImplementation(JacobianContainer & outJacobians) const override;
           virtual void evaluateJacobiansImplementation(JacobianContainer & outJacobians, const Eigen::MatrixXd & applyChainRule) const override;
           virtual void getDesignVariablesImplementation(DesignVariable::set_t & designVariables) const override;
@@ -194,7 +194,7 @@ namespace aslam {
 
        protected:
           // These functions must be implemented by child classes.
-          virtual double toScalarImplementation() const override;
+          virtual double evaluateImplementation() const override;
           virtual void evaluateJacobiansImplementation(JacobianContainer & outJacobians) const override;
           virtual void evaluateJacobiansImplementation(JacobianContainer & outJacobians, const Eigen::MatrixXd & applyChainRule) const override;
           virtual void getDesignVariablesImplementation(DesignVariable::set_t & designVariables) const override;
@@ -212,7 +212,7 @@ namespace aslam {
 
        protected:
           // These functions must be implemented by child classes.
-          virtual double toScalarImplementation() const override;
+          virtual double evaluateImplementation() const override;
           virtual void evaluateJacobiansImplementation(JacobianContainer & outJacobians) const override;
           virtual void evaluateJacobiansImplementation(JacobianContainer & outJacobians, const Eigen::MatrixXd & applyChainRule) const override;
           virtual void getDesignVariablesImplementation(DesignVariable::set_t & designVariables) const override;
@@ -230,7 +230,7 @@ namespace aslam {
 
        protected:
           // These functions must be implemented by child classes.
-          virtual double toScalarImplementation() const override;
+          virtual double evaluateImplementation() const override;
           virtual void evaluateJacobiansImplementation(JacobianContainer & outJacobians) const override;
           virtual void evaluateJacobiansImplementation(JacobianContainer & outJacobians, const Eigen::MatrixXd & applyChainRule) const override;
           virtual void getDesignVariablesImplementation(DesignVariable::set_t & designVariables) const override;
@@ -249,7 +249,7 @@ namespace aslam {
 
        protected:
           // These functions must be implemented by child classes.
-          virtual double toScalarImplementation() const override;
+          virtual double evaluateImplementation() const override;
           virtual void evaluateJacobiansImplementation(JacobianContainer & outJacobians) const override;
           virtual void evaluateJacobiansImplementation(JacobianContainer & outJacobians, const Eigen::MatrixXd & applyChainRule) const override;
           virtual void getDesignVariablesImplementation(DesignVariable::set_t & designVariables) const override;
@@ -267,7 +267,7 @@ namespace aslam {
 
        protected:
           // These functions must be implemented by child classes.
-          virtual double toScalarImplementation() const override;
+          virtual double evaluateImplementation() const override;
           virtual void evaluateJacobiansImplementation(JacobianContainer & outJacobians) const override;
           virtual void evaluateJacobiansImplementation(JacobianContainer & outJacobians, const Eigen::MatrixXd & applyChainRule) const override;
           virtual void getDesignVariablesImplementation(DesignVariable::set_t & designVariables) const override;
@@ -286,7 +286,7 @@ namespace aslam {
 
        protected:
           // These functions must be implemented by child classes.
-          virtual double toScalarImplementation() const override;
+          virtual double evaluateImplementation() const override;
           virtual void evaluateJacobiansImplementation(JacobianContainer & outJacobians) const override;
           virtual void evaluateJacobiansImplementation(JacobianContainer & outJacobians, const Eigen::MatrixXd & applyChainRule) const override;
           virtual void getDesignVariablesImplementation(DesignVariable::set_t & designVariables) const override;
@@ -307,7 +307,7 @@ namespace aslam {
 
        protected:
           // These functions must be implemented by child classes.
-          virtual double toScalarImplementation() const override;
+          virtual double evaluateImplementation() const override;
           virtual void evaluateJacobiansImplementation(JacobianContainer & outJacobians) const override;
           virtual void evaluateJacobiansImplementation(JacobianContainer & outJacobians, const Eigen::MatrixXd & applyChainRule) const override;
           virtual void getDesignVariablesImplementation(DesignVariable::set_t & designVariables) const override;
@@ -327,7 +327,7 @@ namespace aslam {
 
        protected:
           // These functions must be implemented by child classes.
-          virtual double toScalarImplementation() const override;
+          virtual double evaluateImplementation() const override;
           virtual void evaluateJacobiansImplementation(JacobianContainer & outJacobians) const override;
           virtual void evaluateJacobiansImplementation(JacobianContainer & outJacobians, const Eigen::MatrixXd & applyChainRule) const override;
           virtual void getDesignVariablesImplementation(DesignVariable::set_t & designVariables) const override;
@@ -350,7 +350,7 @@ namespace aslam {
 
        protected:
           // These functions must be implemented by child classes.
-          virtual double toScalarImplementation() const;
+          virtual double evaluateImplementation() const;
           virtual void evaluateJacobiansImplementation(JacobianContainer & outJacobians) const;
           virtual void evaluateJacobiansImplementation(JacobianContainer & outJacobians, const Eigen::MatrixXd & applyChainRule) const;
           virtual void getDesignVariablesImplementation(DesignVariable::set_t & designVariables) const;
@@ -359,7 +359,7 @@ namespace aslam {
       };
 
     template <int VectorDim, int ComponentIndex>
-    double ScalarExpressionNodeFromVectorExpression<VectorDim, ComponentIndex>::toScalarImplementation() const
+    double ScalarExpressionNodeFromVectorExpression<VectorDim, ComponentIndex>::evaluateImplementation() const
     {
         return _lhs->evaluate()(ComponentIndex);
     }

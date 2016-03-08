@@ -94,7 +94,7 @@ ScalarExpression _CLASS::toScalarExpression() const {
 
     virtual ~ResultNode() {}
 
-    double toScalarImplementation() const override {
+    double evaluateImplementation() const override {
       return this->getOperandNode().evaluate()(RowIndex, ColIndex);
     }
 
@@ -122,7 +122,7 @@ ScalarExpression _CLASS::toScalarExpression(int rowIndex, int colIndex) const {
 
     virtual ~ResultNode() {}
 
-    double toScalarImplementation() const override {
+    double evaluateImplementation() const override {
       return this->getOperandNode().evaluate()(rowIndex, colIndex);
     }
 

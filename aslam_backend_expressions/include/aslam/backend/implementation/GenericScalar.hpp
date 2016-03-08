@@ -26,7 +26,7 @@ MEMBER(void, updateImplementation(const double * dp, int /* size */)) {
 }
 
 
-MEMBER(Scalar_, toScalarImplementation()) const {
+MEMBER(Scalar_, evaluateImplementation()) const {
   return _p;
 }
 

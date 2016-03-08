@@ -17,12 +17,13 @@ template<typename Scalar_>
 class GenericScalarExpressionNode {
  public:
   typedef Scalar_ Scalar;
+  typedef Scalar value_t;
   typedef boost::shared_ptr<GenericScalarExpressionNode> SharedNodePointer;
 
   virtual ~GenericScalarExpressionNode(){}
 
   /// \brief Evaluate the scalar matrix.
-  inline Scalar toScalar() const { return toScalarImplementation(); }
+  inline Scalar toScalar() const { return evaluateImplementation(); }
 
   /// \brief Evaluate the Jacobians
   void evaluateJacobians(JacobianContainer & outJacobians) const { evaluateJacobiansImplementation(outJacobians, nullptr); }
@@ -32,7 +33,7 @@ class GenericScalarExpressionNode {
   void getDesignVariables(DesignVariable::set_t & designVariables) const { getDesignVariablesImplementation(designVariables); }
  protected:
   // These functions must be implemented by child classes.
-  virtual Scalar toScalarImplementation() const = 0;
+  virtual Scalar evaluateImplementation() const = 0;
   virtual void evaluateJacobiansImplementation(JacobianContainer & outJacobians, const Eigen::MatrixXd * applyChainRule) const = 0;
   virtual void getDesignVariablesImplementation(DesignVariable::set_t & designVariables) const = 0;
 };
