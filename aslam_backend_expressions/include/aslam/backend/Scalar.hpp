@@ -34,7 +34,7 @@ class Scalar : public ScalarExpressionNode, public DesignVariable {
   double getValue() const { return _p; }
   void setValue(double p) { _p = p; }
  private:
-  virtual double toScalarImplementation() const;
+  virtual double evaluateImplementation() const;
 
   virtual void evaluateJacobiansImplementation(JacobianContainer & outJacobians) const;
 

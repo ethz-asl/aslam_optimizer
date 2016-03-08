@@ -67,7 +67,7 @@ class GenericScalarExpressionNodeCasted : public GSEUnRes<Scalar_, GenericScalar
   virtual ~GenericScalarExpressionNodeCasted() {}
  protected:
 
-  Scalar_ toScalarImplementation() const {
+  Scalar_ evaluateImplementation() const {
     return Scalar_(this->_lhs->toScalar());
   }
 
@@ -89,7 +89,7 @@ class GenericScalarExpressionNodeConstant : public GenericScalarExpressionNode<S
   GenericScalarExpressionNodeConstant(Scalar s) : _s(s) {}
   virtual ~GenericScalarExpressionNodeConstant() {}
  protected:
-  virtual Scalar toScalarImplementation() const { return _s; }
+  virtual Scalar evaluateImplementation() const { return _s; }
   virtual void evaluateJacobiansImplementation(JacobianContainer & /* outJacobians */, const Eigen::MatrixXd * /* applyChainRule */) const {}
   virtual void getDesignVariablesImplementation(DesignVariable::set_t & /* designVariables */) const {}
 
@@ -104,7 +104,7 @@ class GenericScalarExpressionNodeMultiply : public GSEBinRes<Scalar_> {
   GenericScalarExpressionNodeMultiply(SharedNodePointer lhs, SharedNodePointer rhs) : Base(lhs, rhs) {}
   virtual ~GenericScalarExpressionNodeMultiply(){}
  protected:
-  Scalar_ toScalarImplementation() const {
+  Scalar_ evaluateImplementation() const {
     return this->_lhs->toScalar() * this->_rhs->toScalar();
   }
 
@@ -126,7 +126,7 @@ class GenericScalarExpressionNodeDivide : public GSEBinRes<Scalar_> {
   virtual ~GenericScalarExpressionNodeDivide() {}
  protected:
 
-  Scalar_ toScalarImplementation() const {
+  Scalar_ evaluateImplementation() const {
     return this->_lhs->toScalar() / this->_rhs->toScalar();
   }
 
@@ -148,7 +148,7 @@ class GenericScalarExpressionNodeAdd : public GSEBinRes<Scalar_> {
   virtual ~GenericScalarExpressionNodeAdd() {}
  protected:
 
-  Scalar_ toScalarImplementation() const {
+  Scalar_ evaluateImplementation() const {
     return this->_lhs->toScalar() + this->_rhs->toScalar();
   }
 
@@ -172,7 +172,7 @@ class GenericScalarExpressionNodeSub : public GSEBinRes<Scalar_> {
   virtual ~GenericScalarExpressionNodeSub() {}
  protected:
 
-  Scalar_ toScalarImplementation() const {
+  Scalar_ evaluateImplementation() const {
     return this->_lhs->toScalar() - this->_rhs->toScalar();
   }
 
@@ -196,7 +196,7 @@ class GenericScalarExpressionNodeNegated : public GSEUnRes<Scalar_, GenericScala
   virtual ~GenericScalarExpressionNodeNegated() {}
  protected:
 
-  Scalar_ toScalarImplementation() const {
+  Scalar_ evaluateImplementation() const {
     return -this->_lhs->toScalar();
   }
 
@@ -219,7 +219,7 @@ class GenericScalarExpressionNodeFromVectorExpression : public GSEUnRes<Scalar_,
 
  protected:
   // These functions must be implemented by child classes.
-  double toScalarImplementation() const {
+  double evaluateImplementation() const {
     return this->_lhs->evaluate()(0);
   }
 

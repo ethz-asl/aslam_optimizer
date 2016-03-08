@@ -34,7 +34,7 @@ namespace aslam {
             return 1;
         }
     
-        double Scalar::toScalarImplementation() const
+        double Scalar::evaluateImplementation() const
         {
             return _p;
         }
