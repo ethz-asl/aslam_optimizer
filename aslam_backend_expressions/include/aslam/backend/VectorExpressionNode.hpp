@@ -10,8 +10,9 @@ namespace aslam {
     class VectorExpressionNode
     {
     public:
-        EIGEN_MAKE_ALIGNED_OPERATOR_NEW
+      EIGEN_MAKE_ALIGNED_OPERATOR_NEW
       typedef Eigen::Matrix<double,D,1> vector_t;
+      typedef vector_t value_t;
       typedef Differential<vector_t, double> differential_t;
 
       VectorExpressionNode();
