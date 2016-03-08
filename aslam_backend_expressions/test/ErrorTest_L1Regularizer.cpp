@@ -109,8 +109,6 @@ TEST(AslamVChargeBackendTestSuite, testL1RegularizerRprop)
     }
 
     // Now let's optimize.
-    sm::logging::setLevel(sm::logging::Level::Verbose);
-    sm::logging::enableNamedStream("optimization");
     OptimizerRpropOptions options;
     options.maxIterations = 500;
     options.nThreads = 1;
