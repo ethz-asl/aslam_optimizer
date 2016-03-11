@@ -224,7 +224,7 @@ TYPED_TEST(GenericScalarExpressionNodeTestSuites, testOpsFailure)
     typename TestFixture::TestGenericScalar ldDv(ld);
     // In [15]: lineDelayDvExpression = cC.eC.lineDelayDv.toExpression()
     typename TestFixture::TestGenericScalarExpression ldExp = ldDv.toExpression();
-    ASSERT_EQ(ldDv.toScalar(), ld);
+    ASSERT_EQ(ld, ldDv.toScalar());
 
     // In [16]: lineDelayDvExpression.toScalar()
     // Out[16]: 4.23659880956014e-05  
