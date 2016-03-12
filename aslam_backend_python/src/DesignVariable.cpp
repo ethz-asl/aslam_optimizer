@@ -47,8 +47,14 @@ void exportDesignVariable()
     /// \brief get the block index used in the optimization routine. -1 if not being optimized.
     .def("blockIndex", &DesignVariable::blockIndex)
 
+    /// \brief The column base of this block in the Jacobian matrix
+    .def("columnBase", &DesignVariable::columnBase)
+
     /// \brief set the block index used in the optimization routine.
     .def("setBlockIndex", &DesignVariable::setBlockIndex)
+
+    /// \brief Set the column base of this block in the Jacobian matrix
+    .def("setColumnBase", &DesignVariable::setColumnBase)
 
     .def("setScaling", &DesignVariable::setScaling)
 

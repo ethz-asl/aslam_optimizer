@@ -39,14 +39,14 @@ RowVectorType computeGradientForErrorTerm(boost::shared_ptr<OptimizationProblemB
   return J;
 }
 
-RowVectorType computeGradient(boost::shared_ptr<OptimizationProblemBase> problem, std::size_t nThreads = 2, bool useMEstimator = true) {
+RowVectorType computeGradient(boost::shared_ptr<OptimizationProblemBase> problem, std::size_t nThreads = 2, bool useMEstimator = true, bool applyDvScaling = true) {
 
   ProblemManager pm;
   pm.setProblem(problem);
   pm.initialize();
 
   RowVectorType J = RowVectorType::Zero(1, pm.numOptParameters());
-  pm.computeGradient(J, nThreads, useMEstimator);
+  pm.computeGradient(J, nThreads, useMEstimator, applyDvScaling);
   return J;
 }
 
@@ -59,7 +59,7 @@ double evaluateError(boost::shared_ptr<OptimizationProblemBase> problem, std::si
 
 BOOST_PYTHON_FUNCTION_OVERLOADS(computeGradientForErrorTerm_overloads, computeGradientForErrorTerm<ErrorTerm>, 2, 3);
 BOOST_PYTHON_FUNCTION_OVERLOADS(computeGradientForScalarNonSquaredErrorTerm_overloads, computeGradientForErrorTerm<ScalarNonSquaredErrorTerm>, 2, 3);
-BOOST_PYTHON_FUNCTION_OVERLOADS(computeGradient_overloads, computeGradient, 1, 3);
+BOOST_PYTHON_FUNCTION_OVERLOADS(computeGradient_overloads, computeGradient, 1, 4);
 BOOST_PYTHON_FUNCTION_OVERLOADS(evaluateError_overloads, evaluateError, 1, 2);
 
 void exportOptimizationProblem()
@@ -85,7 +85,7 @@ void exportOptimizationProblem()
     .def("computeGradientForErrorTerm", &computeGradientForErrorTerm<ErrorTerm>,
          computeGradientForErrorTerm_overloads("computeGradientForErrorTerm(ErrorTerm e, int nThreads, bool useMEstimator)"))
     /// \brief compute the full gradient
-    .def("computeGradient", &computeGradient, computeGradient_overloads("computeGradient(int nThreads, bool useMEstimator)"))
+    .def("computeGradient", &computeGradient, computeGradient_overloads("computeGradient(int nThreads, bool useMEstimator, bool applyDvScaling)"))
     /// \brief Evaluates the full error
     .def("evaluateError", &evaluateError, evaluateError_overloads("evaluateError(int nThreads)"))
     ;
