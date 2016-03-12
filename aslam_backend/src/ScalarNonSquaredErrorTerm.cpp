@@ -22,7 +22,6 @@ double ScalarNonSquaredErrorTerm::updateRawError()
 
 void ScalarNonSquaredErrorTerm::evaluateRawJacobians(JacobianContainer& outJ) {
   Timer t("ScalarNonSquaredErrorTerm: evaluateRawJacobians", false);
-  outJ.clear();
   evaluateJacobiansImplementation(outJ);
   Eigen::Matrix<double, 1, 1> w;
   w << _w;
@@ -32,14 +31,11 @@ void ScalarNonSquaredErrorTerm::evaluateRawJacobians(JacobianContainer& outJ) {
 void ScalarNonSquaredErrorTerm::evaluateWeightedJacobians(JacobianContainer& outJ)
 {
   Timer t("ScalarNonSquaredErrorTerm: evaluateWeightedJacobians", false);
-  outJ.clear();
+  double w = _w;
+  if (_mEstimatorPolicy != nullptr)
+    w *= _mEstimatorPolicy->getWeight(getRawError());
+  outJ.setScale(w);
   evaluateJacobiansImplementation(outJ);
-  double w = _w * _mEstimatorPolicy->getWeight(getRawError());
-
-  JacobianContainer::map_t::iterator it = outJ.begin();
-  for (; it != outJ.end(); ++it) {
-    it->second *=  w * it->first->scaling();
-  }
 }
 
 /// \brief set the M-Estimator policy. This function takes a squared error
@@ -185,7 +181,6 @@ struct ScalarNonSquaredErrorTermFunctor {
 // unit testing and prototyping in any case.
 void ScalarNonSquaredErrorTerm::evaluateJacobiansFiniteDifference(JacobianContainer & outJacobians)
 {
-  outJacobians.clear();
   detail::ScalarNonSquaredErrorTermFunctor functor(*this);
   sm::eigen::NumericalDiff< detail::ScalarNonSquaredErrorTermFunctor > numdiff(functor, 1e-6);
   int inputSize = 0;
@@ -194,7 +189,7 @@ void ScalarNonSquaredErrorTerm::evaluateJacobiansFiniteDifference(JacobianContai
 
   Eigen::MatrixXd J = numdiff.estimateJacobian(Eigen::VectorXd::Zero(inputSize));
   // Now pack the jacobian container.
-  outJacobians.clear();
+//  outJacobians.clear(); // TODO: This is dangerous, let's remove this call and hope it does not screw up things somewhere
   int offset = 0;
   for (size_t i = 0; i < numDesignVariables(); i++) {
     DesignVariable* d = designVariable(i);

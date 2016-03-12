@@ -28,6 +28,8 @@ namespace aslam {
       std::size_t nThreads = 4; /// \brief The number of threads to use
       boost::shared_ptr<ScalarNonSquaredErrorTerm> regularizer = NULL; /// \brief Regularizer
       Method method = RPROP_PLUS; /// \brief the RProp method used
+      bool useMEstimator = true; /// \brief Use M-Estimator
+      bool applyDvScaling = true; /// \brief Apply design variable scaling
 
       void check() const;
     };

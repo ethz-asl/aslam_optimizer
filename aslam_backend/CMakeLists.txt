@@ -19,7 +19,8 @@ endif()
 
 cs_add_library(${PROJECT_NAME}
   src/MEstimatorPolicies.cpp
-  src/JacobianContainer.cpp
+  src/JacobianContainerSparse.cpp
+  src/JacobianContainerDense.cpp
   src/DesignVariable.cpp
   src/ErrorTerm.cpp
   src/ScalarNonSquaredErrorTerm.cpp

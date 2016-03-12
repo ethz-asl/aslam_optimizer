@@ -14,12 +14,6 @@ namespace aslam {
 namespace backend {
 namespace utils {
 
-inline bool isFinite(const JacobianContainer& jc, const DesignVariable& dv) {
-  if (!dv.isActive())
-    return true;
-  return jc.Jacobian(&dv).allFinite();
-}
-
 /** branchless signum method */
 template <typename T>
 inline int sign(const T& val) {

@@ -38,6 +38,8 @@ TEST(LineSearchTestSuite, testLineSearch)
   try {
     using namespace aslam::backend;
 
+    const bool useMEstimator = true, applyDvScaling = true;
+
     double x = sm::random::randLU(-10.0, 10.0); // initial abscissa
     Scalar dv( (Scalar::Vector1d() << x).finished() );
     dv.setActive(true);
@@ -65,7 +67,7 @@ TEST(LineSearchTestSuite, testLineSearch)
 
     // Compute search direction
     RowVectorType grad0 = RowVectorType::Zero(1);
-    pm.computeGradient(grad0, 1, true);
+    pm.computeGradient(grad0, 1, useMEstimator, applyDvScaling);
     RowVectorType searchDirection = -grad0;
 
     {
@@ -81,7 +83,7 @@ TEST(LineSearchTestSuite, testLineSearch)
       EXPECT_DOUBLE_EQ(0.0, ls.getError());
       EXPECT_TRUE(ls.getGradient().isApprox(grad0));
 
-      RowVectorType testGrad = RowVectorType::Random(1);
+      RowVectorType testGrad = 0.5*grad0;
       ls.initialize(searchDirection, 0.0, testGrad);
       EXPECT_DOUBLE_EQ(0.0, ls.getError());
       EXPECT_TRUE(ls.getGradient().isApprox(testGrad));
@@ -126,8 +128,8 @@ TEST(LineSearchTestSuite, testLineSearch)
 
           // Check that information is consistent
           RowVectorType grad1;
-          pm.computeGradient(grad1, 1, true);
-          EXPECT_TRUE(grad1.isApprox(ls.getGradient()));
+          pm.computeGradient(grad1, 1, useMEstimator, applyDvScaling);
+          sm::eigen::assertEqual(grad1, ls.getGradient(), SM_SOURCE_FILE_POS);
           EXPECT_DOUBLE_EQ(ls.getErrorDerivative(), ls.computeErrorDerivative());
 
           // Check strong Wolfe conditions

@@ -21,6 +21,7 @@ namespace aslam {
       std::size_t nThreads = 4; /// \brief The number of threads to use
       LineSearchOptions linesearch;
       boost::shared_ptr<ScalarNonSquaredErrorTerm> regularizer = NULL; /// \brief Regularizer
+      bool useDenseJacobianContainer = true;
 
       void check() const;
     };

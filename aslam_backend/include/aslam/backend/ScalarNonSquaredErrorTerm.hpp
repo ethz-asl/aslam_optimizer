@@ -5,6 +5,7 @@
 #include <boost/shared_ptr.hpp>
 #include "backend.hpp"
 #include "JacobianContainer.hpp"
+#include "util/CommonDefinitions.hpp"
 #include <aslam/Exceptions.hpp>
 #include <sm/eigen/NumericalDiff.hpp>
 #include <sm/timing/Timer.hpp>
@@ -27,11 +28,6 @@ namespace aslam {
       EIGEN_MAKE_ALIGNED_OPERATOR_NEW;
 
       typedef boost::shared_ptr<aslam::backend::ScalarNonSquaredErrorTerm> Ptr;
-#ifdef aslam_backend_ENABLE_TIMING
-      typedef sm::timing::Timer Timer;
-#else
-      typedef sm::timing::DummyTimer Timer;
-#endif
 
       ScalarNonSquaredErrorTerm();
       virtual ~ScalarNonSquaredErrorTerm();

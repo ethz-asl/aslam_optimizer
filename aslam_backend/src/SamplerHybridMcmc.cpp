@@ -162,13 +162,13 @@ void SamplerHybridMcmc::step(bool& accepted, double& acceptanceProbability) {
     // first half step of momentum
     if (doRecompute) { // we can avoid recomputing the gradient if the last sample was accepted
       Timer timer("SamplerHybridMcmc: Compute---Gradient", false);
-      getProblemManager().computeGradient(_gradient, _options.nThreads, false /*TODO: useMEstimator*/);
+      getProblemManager().computeGradient(_gradient, _options.nThreads, false /*TODO: useMEstimator*/, false /*TODO: use scaling*/);
       timer.stop();
     }
 #ifndef NDEBUG
     else {
       RowVectorType grad;
-      getProblemManager().computeGradient(grad, _options.nThreads, false);
+      getProblemManager().computeGradient(grad, _options.nThreads, false /*TODO: useMEstimator*/, false /*TODO: use scaling*/);
       SM_ASSERT_TRUE(Exception, _gradient.isApprox(grad), ""); // check that caching works
     }
 #endif
@@ -188,7 +188,7 @@ void SamplerHybridMcmc::step(bool& accepted, double& acceptanceProbability) {
       try {
         // momentum
         Timer timer("SamplerHybridMcmc: Compute---Gradient", false);
-        getProblemManager().computeGradient(_gradient, _options.nThreads, false /*TODO: useMEstimator*/);
+        getProblemManager().computeGradient(_gradient, _options.nThreads, false /*TODO: useMEstimator*/, false /*TODO: use scaling*/);
         timer.stop();
 
         pStar -= _stepLength*_gradient;
@@ -213,7 +213,7 @@ void SamplerHybridMcmc::step(bool& accepted, double& acceptanceProbability) {
       try {
         // last half step
         Timer timer("SamplerHybridMcmc: Compute---Gradient", false);
-        getProblemManager().computeGradient(_gradient, _options.nThreads, false /*TODO: useMEstimator*/);
+        getProblemManager().computeGradient(_gradient, _options.nThreads, false /*TODO: useMEstimator*/, false /*TODO: use scaling*/);
         timer.stop();
         pStar -= deltaHalf*_gradient;
 
