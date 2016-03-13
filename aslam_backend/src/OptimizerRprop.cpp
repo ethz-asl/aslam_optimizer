@@ -294,8 +294,8 @@ const RpropReturnValue& OptimizerRprop::optimize()
     }
 
     SM_FINE_STREAM_NAMED("optimization", _returnValue << std::endl <<
-                         "\tdx: " << _dx << std::endl <<
-                         "\tdelta: " << _delta);
+                         "\tdx: " << _dx.transpose() << std::endl <<
+                         "\tdelta: " << _delta.transpose());
 
     timeStep.stop();
 
