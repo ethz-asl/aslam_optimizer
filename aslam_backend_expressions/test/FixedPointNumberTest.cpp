@@ -1,6 +1,6 @@
-#include <gtest/gtest.h>
-#include <sm/random.hpp>
 #include <aslam/backend/FixedPointNumber.hpp>
+#include <sm/random.hpp>
+#include <gtest/gtest.h>
 
 using namespace aslam::backend;
 
