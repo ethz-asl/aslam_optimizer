@@ -10,7 +10,7 @@
 
 #include <sm/eigen/gtest.hpp>
 #include <sm/eigen/NumericalDiff.hpp>
-#include <aslam/backend/JacobianContainer.hpp>
+#include <aslam/backend/JacobianContainerSparse.hpp>
 
 namespace aslam {
 namespace backend {
@@ -156,7 +156,7 @@ class ExpressionTester {
     const TExpression & expression = getExp();
     auto val = ExpressionEvaluationTraits<TExpression>::evaluate(expression);
     const size_t rows = val.rows();
-    JacobianContainer Jc(rows);
+    JacobianContainerSparse Jc(rows);
     Jc.clear();
     expression.evaluateJacobians(Jc);
     return getJacobian(Jc);
@@ -167,7 +167,7 @@ class ExpressionTester {
   double getEps() const { return _eps; }
   double getTolerance() const { return _tolerance; }
   const std::vector<DesignVariable *> & getDesignVariables() const { return _dvs; }
-  inline Eigen::MatrixXd getJacobian(const JacobianContainer & jc) const { return jc.asDenseMatrix(_colIndices);}
+  inline Eigen::MatrixXd getJacobian(const JacobianContainerSparse & jc) const { return jc.asDenseMatrix(_colIndices);}
  private:
   TExpression _exp;
   int _expectedNumberOfDesignVariables;
@@ -189,8 +189,8 @@ class ExpressionJacobianTestTraits {
     auto val = ExpressionEvaluationTraits<TExpression>::evaluate(expression);
     const size_t rows = val.rows();
 
-    JacobianContainer Jc(rows);
-    JacobianContainer Jccr(rows);
+    JacobianContainerSparse Jc(rows);
+    JacobianContainerSparse Jccr(rows);
     expression.evaluateJacobians(Jc);
     expression.evaluateJacobians(Jccr, Eigen::MatrixXd::Identity(rows, rows));
 

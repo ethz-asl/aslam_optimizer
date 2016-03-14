@@ -1,84 +1,37 @@
-#include <aslam/backend/JacobianContainer.hpp>
+#include <aslam/backend/JacobianContainerSparse.hpp>
 #include <sm/assert_macros.hpp>
 
 namespace aslam {
   namespace backend {
 
 
-
-    JacobianContainer::JacobianContainer(int rows) : _rows(rows)
+    JacobianContainerSparse::~JacobianContainerSparse()
     {
-    }
-
-    JacobianContainer::~JacobianContainer()
-    {
-    }
-
-
-
-    /// \brief Add the rhs container to this one.
-    void JacobianContainer::add(const JacobianContainer& rhs)
-    {
-      SM_ASSERT_EQ(Exception, _rows, rhs._rows, "The JacobianContainers cannot be added. They don't have the same number of rows.");
-      // Merge the two maps.
-      // They are sorted by block it->first->blockIndex() so we can be smart about this.
-      map_t::iterator lt = _jacobianMap.begin();
-      const map_t::iterator lt_end = _jacobianMap.end();
-      map_t::const_iterator rt = rhs._jacobianMap.begin();
-      map_t::const_iterator rt_end = rhs._jacobianMap.end();
-      bool done = rt == rt_end;
-      for (; lt != lt_end && !done; ++lt) {
-        // The maps are sorted by block index. FFWD the rhs map
-        // inserting elements until we find the next possible
-        // equal element.
-        while (!done && rt->first->blockIndex() < lt->first->blockIndex()) {
-          _jacobianMap.insert(lt, *rt);
-          ++rt;
-          done = (rt == rt_end);
-        }
-        // If these keys match the Jacobians add
-        if (!done && rt->first->blockIndex() == lt->first->blockIndex()) {
-          SM_ASSERT_TRUE_DBG(Exception, rt->first == lt->first, "Two design variables had the same block index but different pointer values");
-          // add the Jacobians.
-          lt->second += rt->second;
-        }
-      }
-      // Now the lhs list is done...add the remaining elements of the rhs list.
-      for (; rt != rt_end; rt++) {
-        _jacobianMap.insert(lt, *rt);
-      }
     }
 
     /// \brief how many design variables does this jacobian container represent.
-    size_t JacobianContainer::numDesignVariables() const
+    size_t JacobianContainerSparse::numDesignVariables() const
     {
       return _jacobianMap.size();
     }
 
 
-
-    /// \brief How many rows does this set of Jacobians have?
-    int JacobianContainer::rows() const
-    {
-      return _rows;
-    }
-
-    JacobianContainer::map_t::const_iterator JacobianContainer::begin() const
+    JacobianContainerSparse::map_t::const_iterator JacobianContainerSparse::begin() const
     {
       return _jacobianMap.begin();
     }
 
-    JacobianContainer::map_t::const_iterator JacobianContainer::end() const
+    JacobianContainerSparse::map_t::const_iterator JacobianContainerSparse::end() const
     {
       return _jacobianMap.end();
     }
 
-    JacobianContainer::map_t::iterator JacobianContainer::begin()
+    JacobianContainerSparse::map_t::iterator JacobianContainerSparse::begin()
     {
       return _jacobianMap.begin();
     }
 
-    JacobianContainer::map_t::iterator JacobianContainer::end()
+    JacobianContainerSparse::map_t::iterator JacobianContainerSparse::end()
     {
       return _jacobianMap.end();
     }
@@ -87,7 +40,7 @@ namespace aslam {
     /// \brief Apply the chain rule to the set of Jacobians.
     /// This may change the number of rows of this set of Jacobians
     /// by multiplying through by df_dx on the left.
-    void JacobianContainer::applyChainRule(const Eigen::MatrixXd& df_dx)
+    void JacobianContainerSparse::applyChainRule(const Eigen::MatrixXd& df_dx)
     {
       SM_ASSERT_EQ(Exception, df_dx.cols(), _rows, "Invalid matrix multiplication");
       map_t::iterator it = _jacobianMap.begin(),
@@ -100,7 +53,7 @@ namespace aslam {
 
 
 
-    void JacobianContainer::buildCorrelatedHessianBlock(const Eigen::VectorXd& e,
+    void JacobianContainerSparse::buildCorrelatedHessianBlock(const Eigen::VectorXd& e,
                                                         const Eigen::MatrixXd& J1, int j1_block,
                                                         SparseBlockMatrix& outHessian,
                                                         map_t::const_iterator it, map_t::const_iterator it_end) const
@@ -129,7 +82,7 @@ namespace aslam {
     }
 
 
-    void JacobianContainer::buildHessianBlock(const Eigen::VectorXd& e,
+    void JacobianContainerSparse::buildHessianBlock(const Eigen::VectorXd& e,
                                               SparseBlockMatrix& outHessian,
                                               Eigen::VectorXd& outRhs,
                                               map_t::const_iterator it, map_t::const_iterator it_end) const
@@ -148,7 +101,7 @@ namespace aslam {
       buildHessianBlock(e, outHessian, outRhs, ++it, it_end);
     }
 
-    void JacobianContainer::evaluateHessian(const Eigen::VectorXd& e, const Eigen::MatrixXd& sqrtInvR, SparseBlockMatrix& outHessian, Eigen::VectorXd& outRhs) const
+    void JacobianContainerSparse::evaluateHessian(const Eigen::VectorXd& e, const Eigen::MatrixXd& sqrtInvR, SparseBlockMatrix& outHessian, Eigen::VectorXd& outRhs) const
     {
       SM_ASSERT_EQ_DBG(Exception, e.size(), _rows, "The error and this Jacobian container should have the same size");
       SM_ASSERT_EQ_DBG(Exception, e.size(), sqrtInvR.rows(), "The error and the covariance matrix don't have compatible sizes");
@@ -166,7 +119,14 @@ namespace aslam {
       buildHessianBlock(sqrtInvR.transpose() * e, outHessian, outRhs, it, it_end);
     }
 
-    const Eigen::MatrixXd& JacobianContainer::Jacobian(const DesignVariable* dv) const
+    bool JacobianContainerSparse::isFinite(const DesignVariable& dv) const
+    {
+      map_t::const_iterator it = _jacobianMap.find(const_cast<DesignVariable*>(&dv));
+      SM_ASSERT_TRUE(Exception, it != _jacobianMap.end(), "The design variable does not exist in the container");
+      return it->second.allFinite();
+    }
+
+    const Eigen::MatrixXd& JacobianContainerSparse::Jacobian(const DesignVariable* dv) const
     {
       map_t::const_iterator it = _jacobianMap.find(const_cast<DesignVariable* >(dv));
       SM_ASSERT_TRUE(Exception, it != _jacobianMap.end(), "The design variable does not exist in the container");
@@ -174,7 +134,7 @@ namespace aslam {
     }
 
     /// \brief Get design variable i.
-    DesignVariable* JacobianContainer::designVariable(size_t i)
+    DesignVariable* JacobianContainerSparse::designVariable(size_t i)
     {
       SM_ASSERT_LT(Exception, i, numDesignVariables(), "Index out of range");
       map_t::iterator it = _jacobianMap.begin();
@@ -184,7 +144,7 @@ namespace aslam {
     }
 
     /// \brief Get design variable i.
-    const DesignVariable* JacobianContainer::designVariable(size_t i) const
+    const DesignVariable* JacobianContainerSparse::designVariable(size_t i) const
     {
       SM_ASSERT_LT(Exception, i, numDesignVariables(), "Index out of range");
       map_t::const_iterator it = _jacobianMap.begin();
@@ -193,30 +153,30 @@ namespace aslam {
       return it->first;
     }
 
-  void JacobianContainer::reset(int rows) {
+  void JacobianContainerSparse::reset(int rows) {
     clear();
     _rows = rows;
   }
   
     /// \brief Clear the contents of this container
-    void JacobianContainer::clear()
+    void JacobianContainerSparse::clear()
     {
       _jacobianMap.clear();
     }
 
-    Eigen::MatrixXd JacobianContainer::asDenseMatrix() const
+    Eigen::MatrixXd JacobianContainerSparse::asDenseMatrix() const
     {
       // \todo make efficient
       return asSparseMatrix().toDense();
     }
 
-    Eigen::MatrixXd JacobianContainer::asDenseMatrix(const std::vector<int>& colBlockIndices) const
+    Eigen::MatrixXd JacobianContainerSparse::asDenseMatrix(const std::vector<int>& colBlockIndices) const
     {
       // \todo make efficient...however, these are only for debugging and unit testing.
       return asSparseMatrix(colBlockIndices).toDense();
     }
 
-    SparseBlockMatrix JacobianContainer::asSparseMatrix(const std::vector<int>& colBlockIndices) const
+    SparseBlockMatrix JacobianContainerSparse::asSparseMatrix(const std::vector<int>& colBlockIndices) const
     {
       // \todo error checking.
       std::vector<int> rows(1);
@@ -233,7 +193,7 @@ namespace aslam {
       return J;
     }
 
-    SparseBlockMatrix JacobianContainer::asSparseMatrix() const
+    SparseBlockMatrix JacobianContainerSparse::asSparseMatrix() const
     {
       /// Step 1: Determine the block structure of the Jacobian.
       std::vector<int> rows(1);
@@ -257,7 +217,7 @@ namespace aslam {
     }
 
 
-    int JacobianContainer::cols() const
+    int JacobianContainerSparse::cols() const
     {
       int sum = 0;
       map_t::const_iterator it = _jacobianMap.begin();

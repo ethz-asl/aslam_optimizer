@@ -104,6 +104,7 @@ OptimizerBFGS::OptimizerBFGS() :
   _options.check();
   _linesearch.setEvaluateErrorCallback( boost::bind(&OptimizerBFGS::increaseEvaluateErrorCounter, this) );
   _linesearch.setEvaluateGradientCallback(boost::bind(&OptimizerBFGS::increaseEvaluateGradientCounter, this));
+  this->useDenseJacobianContainer(_options.useDenseJacobianContainer);
 }
 
 OptimizerBFGS::OptimizerBFGS(const OptimizerBFGSOptions& options) :
@@ -113,6 +114,7 @@ OptimizerBFGS::OptimizerBFGS(const OptimizerBFGSOptions& options) :
   _options.check();
   _linesearch.setEvaluateErrorCallback( boost::bind(&OptimizerBFGS::increaseEvaluateErrorCounter, this) );
   _linesearch.setEvaluateGradientCallback(boost::bind(&OptimizerBFGS::increaseEvaluateGradientCounter, this));
+  this->useDenseJacobianContainer(_options.useDenseJacobianContainer);
 }
 
 OptimizerBFGS::OptimizerBFGS(const sm::PropertyTree& config) :
@@ -122,6 +124,7 @@ OptimizerBFGS::OptimizerBFGS(const sm::PropertyTree& config) :
   _options.check();
   _linesearch.setEvaluateErrorCallback( boost::bind(&OptimizerBFGS::increaseEvaluateErrorCounter, this) );
   _linesearch.setEvaluateGradientCallback(boost::bind(&OptimizerBFGS::increaseEvaluateGradientCounter, this));
+  this->useDenseJacobianContainer(_options.useDenseJacobianContainer);
 }
 
 OptimizerBFGS::~OptimizerBFGS()

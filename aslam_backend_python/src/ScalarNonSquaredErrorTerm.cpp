@@ -1,13 +1,14 @@
 #include <numpy_eigen/boost_python_headers.hpp>
 #include <aslam/backend/ScalarNonSquaredErrorTerm.hpp>
 #include <aslam/backend/DesignVariable.hpp>
+#include <aslam/backend/JacobianContainerSparse.hpp>
 #include <boost/shared_ptr.hpp>
 
 using namespace boost::python;
 using namespace aslam::backend;
 
 Eigen::VectorXd evaluateJacobians(ScalarNonSquaredErrorTerm& e, bool useMEstimator) {
-  JacobianContainer jc(1);
+  JacobianContainerSparse jc(1);
   e.evaluateJacobians(jc, useMEstimator);
   return jc.asDenseMatrix();
 }

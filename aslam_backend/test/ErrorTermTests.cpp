@@ -36,7 +36,7 @@ TEST(ErrorTermTestSuite, testInvR)
       errs[i]->setMEstimatorPolicy(me);
     }
     for (size_t i = 0; i < errs.size(); ++i) {
-      JacobianContainer jc(errs[i]->dimension());
+      JacobianContainerSparse jc(errs[i]->dimension());
       ErrorTerm* e = errs[i];
       Eigen::MatrixXd invR = sm::eigen::randomCovarianceXd(e->dimension());
       e->vsSetInvR(invR);
@@ -61,7 +61,7 @@ TEST(ErrorTermTestSuite, testInvR)
       // with M-estimator.
       wrse = we.dot(we);
       ASSERT_NEAR(wrse, trueWRse, 1e-6);
-      JacobianContainer jcRaw(e->dimension());
+      JacobianContainerSparse jcRaw(e->dimension());
       e->evaluateJacobians(jcRaw);
       {
         // No M-Estimator
@@ -133,7 +133,7 @@ TEST(ErrorTermTestSuite, testNonSquaredErrorTerm) {
         grad.resize(1,2); grad << 4., 8.;
         grad *= w;
 
-        JacobianContainer jc(1);
+        JacobianContainerSparse jc(1);
 
         // raw Jacobian
         jc.clear();

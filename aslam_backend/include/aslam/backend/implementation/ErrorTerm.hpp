@@ -102,7 +102,7 @@ namespace aslam {
     void ErrorTermFs<C>::buildHessianImplementation(SparseBlockMatrix& outHessian, Eigen::VectorXd& outRhs, bool useMEstimator)
     {
       _evalJacobianTimer.start();
-      JacobianContainer J(C);
+      JacobianContainerSparse J(C);
       evaluateJacobians(J);
       _evalJacobianTimer.stop();
       _buildHessianTimer.start();
@@ -174,16 +174,11 @@ namespace aslam {
     template<int C>
     void ErrorTermFs<C>::getWeightedJacobians(JacobianContainer& outJc, bool useMEstimator) 
     {
-      // take a copy. \todo Don't take a copy.
       evaluateJacobians(outJc);
-      outJc.applyChainRule(_sqrtInvR.transpose());
-      JacobianContainer::map_t::iterator it = outJc.begin();
       double sqrtWeight = 1.0;
       if (useMEstimator)
         sqrtWeight = sqrt(_mEstimatorPolicy->getWeight(getRawSquaredError()));
-      for (; it != outJc.end(); ++it) {
-        it->second *=  sqrtWeight * it->first->scaling();
-      }
+      outJc.applyChainRule(sqrtWeight*_sqrtInvR.transpose());
     }
 
 
@@ -198,9 +193,9 @@ namespace aslam {
 
     template<int C>
     void ErrorTermFs<C>::checkJacobiansFinite() const {
-      JacobianContainer J(C);
+      JacobianContainerSparse J(C);
       evaluateJacobians(J);
-      for (JacobianContainer::map_t::iterator it = J.begin(); it != J.end(); ++it) {      
+      for (JacobianContainerSparse::map_t::iterator it = J.begin(); it != J.end(); ++it) {
         SM_ASSERT_MAT_IS_FINITE(Exception, it->second,
                                 "Jacobian is not finite!");
       }
@@ -209,7 +204,7 @@ namespace aslam {
     template<int C>
     void ErrorTermFs<C>::checkJacobiansNumerical(double tolerance) {
 
-      JacobianContainer J(C);
+      JacobianContainerSparse J(C);
       evaluateJacobians(J);
       
       

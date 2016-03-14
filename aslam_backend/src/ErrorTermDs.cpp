@@ -76,7 +76,7 @@ namespace aslam {
 
     void ErrorTermDs::buildHessianImplementation(SparseBlockMatrix& outHessian, Eigen::VectorXd& outRhs, bool useMEstimator)
     {
-      JacobianContainer J(dimension());
+      JacobianContainerSparse J(dimension());
       _evalJacobianTimer.start();
       evaluateJacobians(J);
       _evalJacobianTimer.stop();
@@ -143,15 +143,9 @@ namespace aslam {
 
     void ErrorTermDs::getWeightedJacobians(JacobianContainer& outJc, bool useMEstimator)
     {
-      evaluateJacobians(outJc);
+      outJc.setScale(useMEstimator &&  _mEstimatorPolicy != nullptr ? sqrt(_mEstimatorPolicy->getWeight(getRawSquaredError())) : 1.0);
       outJc.applyChainRule(_sqrtInvR.transpose());
-      JacobianContainer::map_t::iterator it = outJc.begin();
-      double sqrtWeight = 1.0;
-      if (useMEstimator)
-        sqrtWeight = sqrt(_mEstimatorPolicy->getWeight(getRawSquaredError()));
-      for (; it != outJc.end(); ++it) {
-        it->second *=  sqrtWeight * it->first->scaling();
-      }
+      evaluateJacobians(outJc);
     }
 
     void ErrorTermDs::getWeightedError(Eigen::VectorXd& e, bool useMEstimator) const
@@ -201,7 +195,7 @@ namespace aslam {
 
     void ErrorTermDs::resizeJacobianContainer(int nrows)
     {
-    	_jacobians = JacobianContainer(nrows);
+    	_jacobians = JacobianContainerSparse(nrows);
     }
 
   } // namespace backend

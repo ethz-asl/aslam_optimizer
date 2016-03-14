@@ -4,6 +4,45 @@ import numpy as np
 
 import unittest
 
+class TestJacobianContainerSparse(unittest.TestCase):
+  def test_add(self):
+    point = ab.Point2d(np.array([1,1]))
+    point.setBlockIndex(0)
+    point.setActive(True)
+    jc = ab.JacobianContainerSparse(2)
+    self.assertEqual(jc.rows(), 2)
+    J = np.array([[1,1], [1,1]])
+    jc.add(point, J) # With design variable
+    self.assertTrue(jc.isFinite(point))
+    self.assertTrue( (jc.asDenseMatrix() == J).all() )
+    jc2 = ab.JacobianContainerSparse(2)
+    jc2.add(point, J) # With design variable
+    jc.add(jc2) # Without chain rule
+    self.assertTrue( (jc.asDenseMatrix() == 2.*J).all() )
+    jc2 = ab.JacobianContainerSparse(2)
+    jc2.add(point, J) # With design variable
+    jc.add(jc2, np.eye(2,2)) # With chain rule
+    self.assertTrue( (jc.asDenseMatrix() == 3.*J).all() )
+  def test_scale(self):
+    jc = ab.JacobianContainerSparse(2)
+    jc.setScale(2.0)
+    
+class TestJacobianContainerDense(unittest.TestCase):
+  def test_add(self):
+    point = ab.Point2d(np.array([1,1]))
+    point.setBlockIndex(0)
+    point.setColumnBase(0)
+    point.setActive(True)
+    jc = ab.JacobianContainerDense(2, point.minimalDimensions())
+    self.assertEqual(jc.rows(), 2)
+    J = np.array([[1,1], [1,1]])
+    jc.add(point, J) # With design variable
+    self.assertTrue(jc.isFinite(point))
+    self.assertTrue( (jc.asDenseMatrix() == J).all() )
+  def test_scale(self):
+    jc = ab.JacobianContainerDense(2, 2)
+    jc.setScale(2.0)
+
 class TestRprop(unittest.TestCase):
     def test_simple_optimization(self):
         options = ab.OptimizerRpropOptions()

@@ -70,7 +70,7 @@ namespace aslam {
 
       // This probably has to have a jacobian container...
       // \todo make this fixed sized.
-      JacobianContainer _jacobians;
+      JacobianContainerSparse _jacobians;
 
       /// \brief set the error vector.
       //void setError(const Eigen::MatrixBase<double> & e);

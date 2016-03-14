@@ -35,6 +35,9 @@ class ProblemManager {
 
   /// \brief Constructor with default options
   ProblemManager();
+  /// \brief Constructor
+  ProblemManager(bool useDenseJacobianContainer);
+
   /// \brief Destructor
   virtual ~ProblemManager();
 
@@ -43,6 +46,9 @@ class ProblemManager {
 
   /// \brief initialize the class
   virtual void initialize();
+
+  /// \brief Set the Jacobian container type
+  void useDenseJacobianContainer(const bool useDense) { _useDenseJacobianContainer = useDense; }
 
   /// \brief Is everything initialized?
   bool isInitialized() const { return _isInitialized; }
@@ -91,7 +97,9 @@ class ProblemManager {
   Eigen::VectorXd getFlattenedDesignVariableParameters() const;
 
   /// \brief compute the current gradient of the objective function
-  void computeGradient(RowVectorType& outGrad, size_t nThreads, bool useMEstimator);
+  void computeGradient(RowVectorType& outGrad, size_t nThreads, bool useMEstimator, bool applyDvScaling);
+
+  void applyDesignVariableScaling(RowVectorType& outGrad);
 
   /// \brief computes the gradient of a specific error term
   void addGradientForErrorTerm(RowVectorType& J, ErrorTerm* e, bool useMEstimator);
@@ -124,13 +132,16 @@ class ProblemManager {
   std::vector<ScalarNonSquaredErrorTerm*> _errorTermsNS;
 
   /// \brief the total number of parameters of this problem, given by number of design variables and their dimensionality
-  std::size_t _numOptParameters;
+  std::size_t _numOptParameters = 0;
 
   /// \brief the total number of error terms as the sum of squared and non-squared error terms
-  std::size_t _numErrorTerms;
+  std::size_t _numErrorTerms = 0;
 
   /// \brief Whether the optimizer is correctly initialized
-  bool _isInitialized;
+  bool _isInitialized = false;
+
+  /// \brief Whether or not to use a dense Jacobian container
+  bool _useDenseJacobianContainer = true;
 
 };
 

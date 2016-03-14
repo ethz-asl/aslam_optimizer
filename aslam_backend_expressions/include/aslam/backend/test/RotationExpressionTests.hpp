@@ -45,7 +45,7 @@ class ExpressionJacobianTestTraits<RotationExpression> {
     Eigen::VectorXd operator()(const Eigen::VectorXd & dr) {
 
       Eigen::Matrix3d C = _dv.toRotationMatrix();
-      JacobianContainer J(3);
+      JacobianContainerSparse J(3);
       _dv.evaluateJacobians(J);
 
       int offset = 0;
@@ -79,7 +79,7 @@ class ExpressionJacobianTestTraits<RotationExpression> {
 
       /// Discern the size of the jacobian container
       Eigen::Matrix3d C = rotExp.toRotationMatrix();
-      JacobianContainer Jc(3);
+      JacobianContainerSparse Jc(3);
       rotExp.evaluateJacobians(Jc);
       Eigen::Matrix3d Cp_cross = sm::kinematics::crossMx(C * p);
       Jc.applyChainRule(Cp_cross);

@@ -163,11 +163,11 @@ const RpropReturnValue& OptimizerRprop::optimize()
 
     RowVectorType gradient;
     timeGrad.start();
-    this->computeGradient(gradient, _options.nThreads, false /*TODO: useMEstimator*/);
+    this->computeGradient(gradient, _options.nThreads, false /*TODO: useMEstimator*/, false /*TODO: use scaling */);
 
     // optionally add regularizer
     if (_options.regularizer) {
-      JacobianContainer jc(1);
+      JacobianContainerSparse jc(1);
       _options.regularizer->evaluateJacobians(jc);
       SM_FINER_STREAM_NAMED("optimization", "RPROP: Regularization term gradient: " << jc.asDenseMatrix());
       gradient += jc.asDenseMatrix();

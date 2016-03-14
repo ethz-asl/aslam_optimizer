@@ -94,7 +94,7 @@ namespace aslam {
     {
       Eigen::VectorXd ee;
       for (int i = startIdx; i < endIdx; ++i) {
-        JacobianContainer jc(_jacobianPointers[i].errorTerm->dimension());
+        JacobianContainerSparse jc(_jacobianPointers[i].errorTerm->dimension());
         _jacobianPointers[i].errorTerm->getWeightedJacobians(jc, useMEstimator);
         _J_transpose.writeJacobians(jc, _jacobianPointers[i].jcp);
       }

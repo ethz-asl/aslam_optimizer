@@ -1,5 +1,6 @@
 #include <gtest/gtest.h>
 
+#include <aslam/backend/JacobianContainerSparse.hpp>
 #include <aslam/backend/OptimizerRprop.hpp>
 #include <aslam/backend/OptimizationProblem.hpp>
 #include <aslam/backend/ErrorTerm.hpp>
@@ -61,7 +62,7 @@ TEST(AslamVChargeBackendTestSuite, testL1Regularizer)
 
     Eigen::MatrixXd Jexp(1,3);
     Jexp << -3.0, 3.0, 0.0;
-    JacobianContainer jc(1);
+    JacobianContainerSparse jc(1);
     reg.evaluateJacobians(jc);
     Eigen::MatrixXd J = jc.asDenseMatrix();
     EXPECT_TRUE(J.isApprox(Jexp)) << "Computed: " << J << std::endl <<

@@ -4,7 +4,7 @@
 #include <sparse_block_matrix/sparse_block_matrix.h>
 #include <boost/shared_ptr.hpp>
 #include "backend.hpp"
-#include "JacobianContainer.hpp"
+#include "JacobianContainerSparse.hpp"
 #include <aslam/Exceptions.hpp>
 #include <sm/eigen/NumericalDiff.hpp>
 #include <sm/timing/Timer.hpp>

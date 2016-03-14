@@ -2,6 +2,8 @@
 #include <aslam/backend/OptimizationProblemBase.hpp>
 #include <aslam/backend/ErrorTerm.hpp>
 #include <aslam/backend/ScalarNonSquaredErrorTerm.hpp>
+#include <aslam/backend/JacobianContainerSparse.hpp>
+#include <aslam/backend/JacobianContainerDense.hpp>
 
 #include <aslam/backend/util/ThreadedRangeProcessor.hpp>
 
@@ -11,10 +13,13 @@
 namespace aslam {
 namespace backend {
 
-ProblemManager::ProblemManager() :
-  _numOptParameters(0),
-  _numErrorTerms(0),
-  _isInitialized(false)
+ProblemManager::ProblemManager()
+{
+
+}
+
+ProblemManager::ProblemManager(bool useDenseJacobianContainer) :
+  _useDenseJacobianContainer(useDenseJacobianContainer)
 {
 
 }
@@ -109,7 +114,7 @@ void ProblemManager::checkProblemSetup() const
  * @param nThreads How many threads to use
  * @param useMEstimator Whether to use an MEstimator
  */
-void ProblemManager::computeGradient(RowVectorType& outGrad, size_t nThreads, bool useMEstimator)
+void ProblemManager::computeGradient(RowVectorType& outGrad, size_t nThreads, bool useMEstimator, bool applyDvScaling)
 {
   SM_ASSERT_GT(Exception, nThreads, 0, "");
   Timer t("ProblemManager: Compute gradient", false);
@@ -120,26 +125,47 @@ void ProblemManager::computeGradient(RowVectorType& outGrad, size_t nThreads, bo
   outGrad = gradients[0];
   for (std::size_t i = 1; i<gradients.size(); i++)
     outGrad += gradients[i];
+  if (applyDvScaling)
+    applyDesignVariableScaling(outGrad);
+}
+
+void ProblemManager::applyDesignVariableScaling(RowVectorType& outGrad) {
+  for (const auto dv : _designVariables)
+    outGrad.block(0, dv->columnBase(), outGrad.rows(), dv->minimalDimensions()) *= dv->scaling();
 }
 
 void ProblemManager::addGradientForErrorTerm(RowVectorType& J, ErrorTerm* e, bool useMEstimator) {
-  JacobianContainer jc(e->dimension());
-  e->getWeightedJacobians(jc, useMEstimator);
-  ColumnVectorType ev;
   e->updateRawSquaredError();
+  ColumnVectorType ev;
   e->getWeightedError(ev, useMEstimator);
   ev *= 2.0;
-  for (JacobianContainer::map_t::iterator it = jc.begin(); it != jc.end(); ++it) {// iterate over design variables of this error term
-    RowVectorType grad = ev.transpose()*it->second;
-    J.block(0 /*e->rowBase()*/, it->first->columnBase(), grad.rows(), grad.cols()) += grad;
+
+  if (_useDenseJacobianContainer) {
+    Eigen::MatrixXd J2(e->dimension(), J.cols());
+    JacobianContainerDense<Eigen::MatrixXd&> jc(J2);
+    e->getWeightedJacobians(jc, useMEstimator);
+    J += ev.transpose() * J2;
+  } else {
+    JacobianContainerSparse jc(e->dimension());
+    e->getWeightedJacobians(jc, useMEstimator);
+    for (JacobianContainerSparse::map_t::iterator it = jc.begin(); it != jc.end(); ++it) {// iterate over design variables of this error term
+      RowVectorType grad = ev.transpose()*it->second;
+      J.block(0 /*e->rowBase()*/, it->first->columnBase(), grad.rows(), grad.cols()) += grad;
+    }
   }
 }
 
 void ProblemManager::addGradientForErrorTerm(RowVectorType& J, ScalarNonSquaredErrorTerm* e, bool useMEstimator) {
-    JacobianContainer jc(1 /* dimension */);
+  if (_useDenseJacobianContainer) {
+    JacobianContainerDense<RowVectorType&> jc(J);
     e->evaluateJacobians(jc, useMEstimator);
-    for (JacobianContainer::map_t::iterator it = jc.begin(); it != jc.end(); ++it) // iterate over design variables of this error term
+  } else {
+    JacobianContainerSparse jc(e->dimension());
+    // TODO: We have to ensure that updateRawError() is called before the M-Estimator is evaluated!
+    e->evaluateJacobians(jc, useMEstimator);
+    for (JacobianContainerSparse::map_t::iterator it = jc.begin(); it != jc.end(); ++it) // iterate over design variables of this error term
       J.block(0 /*e->rowBase()*/, it->first->columnBase(), it->second.rows(), it->second.cols()) += it->second;
+  }
 }
 
 

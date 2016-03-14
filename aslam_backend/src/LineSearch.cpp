@@ -494,7 +494,7 @@ void LineSearch::updateError() {
 }
 
 void LineSearch::updateGradient() {
-  _problemManager->computeGradient(_gradient, _options.nThreadsGradient, false /*TODO*/);
+  _problemManager->computeGradient(_gradient, _options.nThreadsGradient, false /*TODO*/, false /*TODO*/);
   if (_evalGradCallback) _evalGradCallback();
 }
 
