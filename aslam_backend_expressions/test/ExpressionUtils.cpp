@@ -8,6 +8,7 @@
 #include <sm/eigen/gtest.hpp>
 
 #include <aslam/backend/Scalar.hpp>
+#include <aslam/backend/JacobianContainerSparse.hpp>
 #include <aslam/backend/ScalarExpression.hpp>
 #include <aslam/backend/GenericMatrixExpression.hpp>
 #include <aslam/backend/VectorExpression.hpp>
@@ -26,7 +27,7 @@ TEST(GenericMatrixExpressionNodeTestSuites, testExpressionUtils) {
     s.setBlockIndex(0);
     s.setActive(true);
     ScalarExpression se = s.toExpression()*s.toExpression();
-    JacobianContainer jc(1);
+    JacobianContainerSparse jc(1);
 
     // test isFinite
     {

@@ -19,7 +19,7 @@ inline bool isFinite(const JacobianContainer& jc, const T& expr) {
   DesignVariable::set_t dvs;
   expr.getDesignVariables(dvs);
   for (auto& dv : dvs) {
-    if (!utils::isFinite(jc, *dv))
+    if (!jc.isFinite(*dv))
       return false;
   }
   return true;
