@@ -4,6 +4,7 @@
 #include <cstdint>
 #include <limits>
 #include <type_traits>
+#include <iosfwd>
 
 namespace aslam {
 namespace backend {
@@ -121,7 +122,10 @@ class FixedPointNumber{
     return _p != other._p;
   }
 
-
+  friend std::ostream & operator << (std::ostream & o, const FixedPointNumber & v){
+    o << "[" << v.getNumerator() << " / " << v.getDenominator() << "]";
+    return o;
+  }
  private:
   Integer _p;
   template<typename OtherInteger_, std::uintmax_t OtherDivider>
