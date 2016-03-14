@@ -122,9 +122,8 @@ class FixedPointNumber{
     return _p != other._p;
   }
 
-  template <typename = void>
   friend std::ostream & operator << (std::ostream & o, const FixedPointNumber & v){
-    o << "[" << v.getNumerator() << " / " << v.getDenominator() << "]";
+    o << typename std::enable_if<(sizeof(v) > 0), char>::type('[') << v.getNumerator() << " / " << v.getDenominator() << ']';
     return o;
   }
  private:
