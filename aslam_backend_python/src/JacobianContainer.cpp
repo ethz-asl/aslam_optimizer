@@ -45,12 +45,9 @@ void exportJacobianContainer()
 
   class_<JacobianContainer, boost::shared_ptr<JacobianContainer>, boost::noncopyable>("JacobianContainer", no_init)
     .def("add", pure_virtual(&addWrapper))
-    .def("applyChainRule", pure_virtual(&JacobianContainer::applyChainRule))
     .def("asDenseMatrix", pure_virtual(&JacobianContainer::asDenseMatrix))
-    .def("clear", pure_virtual(&JacobianContainer::clear))
     .def("isFinite", pure_virtual(&JacobianContainer::isFinite))
     .def("rows", &JacobianContainer::rows)
-    .def("setScale", &JacobianContainer::setScale)
   ;
 
   typedef JacobianContainerDense<Eigen::MatrixXd> JCDense;
@@ -73,6 +70,10 @@ void exportJacobianContainer()
       
     /// Get the Jacobian associated with a particular design variable.
     .def("Jacobian", &JacobianContainerSparse::Jacobian, return_value_policy<copy_const_reference>())
+
+    .def("applyChainRule", &JacobianContainerSparse::applyChainRule)
+
+    .def("clear", &JacobianContainerSparse::clear)
       
     /// \brief How many rows does this set of Jacobians have?
     .def("rows", &JacobianContainerSparse::rows)

@@ -28,7 +28,6 @@ namespace aslam {
     /// \brief evaluate the Jacobians.
     void ErrorTerm::evaluateJacobians(JacobianContainer & outJ)
     {
-      outJ.clear();
       evaluateJacobiansImplementation(outJ);
     }
 
@@ -236,7 +235,6 @@ namespace aslam {
     // unit testing and prototyping in any case.
     void ErrorTerm::evaluateJacobiansFiniteDifference(JacobianContainer & outJacobians)
     {
-      outJacobians.clear();
       detail::ErrorTermFunctor functor(*this);
       sm::eigen::NumericalDiff< detail::ErrorTermFunctor > numdiff(functor, 1e-6);
       int inputSize = 0;
@@ -245,7 +243,6 @@ namespace aslam {
       }
       Eigen::MatrixXd J = numdiff.estimateJacobian(Eigen::VectorXd::Zero(inputSize));
       // Now pack the jacobian container.
-      outJacobians.clear();
       int offset = 0;
       for (size_t i = 0; i < numDesignVariables(); i++) {
         DesignVariable* d = designVariable(i);

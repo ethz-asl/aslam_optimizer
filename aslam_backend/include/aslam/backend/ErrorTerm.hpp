@@ -157,7 +157,7 @@ namespace aslam {
 
       virtual Eigen::VectorXd vsErrorImplementation() const = 0;
 
-      /// \brief child classes should set the set of design variables usign this function.
+      /// \brief child classes should set the set of design variables using this function.
       void setDesignVariables(const std::vector<DesignVariable*> & designVariables);
 
       void setDesignVariables(DesignVariable* dv1);
@@ -168,6 +168,24 @@ namespace aslam {
 
       template<typename ITERATOR_T>
       void setDesignVariablesIterator(ITERATOR_T start, ITERATOR_T end);
+
+      template <typename DERIVED>
+      void evaluateWeightedJacobian(JacobianContainer& outJc, bool useMEstimator, const Eigen::MatrixBase<DERIVED>& weight)
+      {
+        auto jc = getJacobianContainerFunctor(
+            outJc,
+            outJc.rows(),
+            [&] (const Eigen::Ref<const Eigen::MatrixXd>& Jacobian) -> Eigen::MatrixXd
+            {
+              double sqrtWeight = 1.0;
+              if (useMEstimator) {
+                sqrtWeight = sqrt(_mEstimatorPolicy->getWeight(getRawSquaredError()));
+              }
+              return sqrtWeight*weight.transpose()*Jacobian;
+            }
+        );
+        evaluateJacobians(jc);
+      }
 
 
       /// \brief the MEstimator policy for this error term

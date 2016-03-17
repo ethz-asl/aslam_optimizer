@@ -37,6 +37,11 @@ TEST(OptimizationProblemTestSuite, testProblemManager)
     const bool applyDvScaling = bits[1];
     const bool useDenseJacobianContainer = bits[2];
 
+    SCOPED_TRACE(testing::Message() <<
+                 "useMEstimator: " << useMEstimator << ", " <<
+                 "applyDvScaling: " << applyDvScaling << ", " <<
+                 "useDenseJacobianContainer: "  << useDenseJacobianContainer);
+
     dv0.setActive(false);
     dv1.setActive(true);
 

@@ -11,16 +11,6 @@ JacobianContainerDense<Container>::JacobianContainerDense(int rows, int cols)
   clear();
 }
 
-/// \brief Apply the chain rule to the set of Jacobians.
-/// This may change the number of rows of this set of Jacobians
-/// by multiplying through by df_dx on the left.
-template <typename Container>
-void JacobianContainerDense<Container>::applyChainRule(const Eigen::MatrixXd& df_dx)
-{
-  SM_ASSERT_EQ(Exception, df_dx.cols(), _jacobian.rows(), "Invalid matrix product");
-  _jacobian = df_dx * _jacobian;
-}
-
 template <typename Container>
 bool JacobianContainerDense<Container>::isFinite(const DesignVariable& dv) const
 {
@@ -50,7 +40,7 @@ inline void JacobianContainerDense<Container>::add(DesignVariable* dv, const Eig
     return;
   SM_ASSERT_GE_LE(Exception, dv->columnBase(), 0, _jacobian.cols() - Jacobian.cols(), "");
   SM_ASSERT_EQ(Exception, _jacobian.rows(), Jacobian.rows(), "");
-  _jacobian.block( 0, dv->columnBase(), Jacobian.rows(), Jacobian.cols() ) += _scale*Jacobian;
+  _jacobian.block( 0, dv->columnBase(), Jacobian.rows(), Jacobian.cols() ) += Jacobian;
 }
 
 template <typename Container>
@@ -64,7 +54,6 @@ void JacobianContainerDense<Container>::add(const JacobianContainerDense& rhs, c
 // Explicit template instantiation
 extern template void JacobianContainerDense<Eigen::MatrixXd&>::add(DesignVariable* designVariable, const Eigen::Ref<const Eigen::MatrixXd>& Jacobian);
 extern template bool JacobianContainerDense<Eigen::MatrixXd&>::isFinite(const DesignVariable& dv) const;
-extern template void JacobianContainerDense<Eigen::MatrixXd&>::applyChainRule(const Eigen::MatrixXd& df_dx);
 extern template void JacobianContainerDense<Eigen::MatrixXd&>::clear();
 
 } // namespace backend
