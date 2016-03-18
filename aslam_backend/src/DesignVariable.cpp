@@ -28,79 +28,11 @@ namespace aslam {
       revertUpdateImplementation();
     }
 
-
-    /// \brief is this design variable active in the optimization.
-    bool DesignVariable::isActive() const
-    {
-      return _isActive;
-    }
-
-
-    /// \brief set the active state of this design variable.
-    void DesignVariable::setActive(bool active)
-    {
-      _isActive = active;
-    }
-
-
-    /// \brief should this variable be marginalized in the schur-complement step?
-    bool DesignVariable::isMarginalized() const
-    {
-      return _isMarginalized;
-    }
-
-
-    /// \brief should this variable be marginalized in the schur-complement step?
-    void DesignVariable::setMarginalized(bool marginalized)
-    {
-      _isMarginalized = marginalized;
-    }
-
-
-
-    /// \brief get the block index used in the optimization routine. -1 if not being optimized.
-    int DesignVariable::blockIndex() const
-    {
-      return _blockIndex;
-    }
-
-
-    /// \brief set the block index used in the optimization routine.
-    void DesignVariable::setBlockIndex(int blockIndex)
-    {
-      _blockIndex = blockIndex;
-    }
-
     /// \brief what is the number of dimensions of the perturbation variable.
     int DesignVariable::minimalDimensions() const
     {
       return minimalDimensionsImplementation();
     }
-
-    /// \brief set the scaling of this design variable used in the optimizaiton.
-    void DesignVariable::setScaling(double scaling)
-    {
-      _scaling = scaling;
-    }
-
-    /// \brief get the scaling of this design variable used in the optimizaiton.
-    double DesignVariable::scaling() const
-    {
-      return _scaling;
-    }
-
-    /// \brief The column base of this block in the Jacobian matrix
-    int DesignVariable::columnBase() const
-    {
-      return _columnBase;
-    }
-
-    /// \brief Set the column base of this block in the Jacobian matrix
-    void DesignVariable::setColumnBase(int columnBase)
-    {
-      _columnBase = columnBase;
-    }
-
 
     void DesignVariable::getParameters(Eigen::MatrixXd& value) const {
       getParametersImplementation(value);

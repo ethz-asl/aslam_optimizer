@@ -59,34 +59,34 @@ namespace aslam {
       void revertUpdate();
 
       /// \brief is this design variable active in the optimization.
-      bool isActive() const;
+      bool isActive() const { return _isActive; }
 
       /// \brief set the active state of this design variable.
-      void setActive(bool active);
+      void setActive(bool active) { _isActive = active; }
 
       /// \brief should this variable be marginalized in the Schur-complement step?
-      bool isMarginalized() const;
+      bool isMarginalized() const { return _isMarginalized; }
 
       /// \brief should this variable be marginalized in the Schur-complement step?
-      void setMarginalized(bool marginalized);
+      void setMarginalized(bool marginalized) { _isMarginalized = marginalized; }
 
       /// \brief get the block index used in the optimization routine. -1 if not being optimized.
-      int blockIndex() const;
+      int blockIndex() const { return _blockIndex; }
 
       /// \brief set the block index used in the optimization routine.
-      void setBlockIndex(int blockIndex);
+      void setBlockIndex(int blockIndex) { _blockIndex = blockIndex; }
 
       /// \brief set the scaling of this design variable used in the optimization.
-      void setScaling(double scaling);
+      void setScaling(double scaling) { _scaling = scaling; }
 
       /// \brief get the scaling of this design variable used in the optimization.
-      double scaling() const;
+      double scaling() const { return _scaling; }
 
       /// \brief The column base of this block in the Jacobian matrix
-      int columnBase() const;
+      int columnBase() const { return _columnBase; }
 
       /// \brief Set the column base of this block in the Jacobian matrix
-      void setColumnBase(int columnBase);
+      void setColumnBase(int columnBase) { _columnBase = columnBase; }
 
       /// Returns the content of the design variable
       void getParameters(Eigen::MatrixXd& value) const;
