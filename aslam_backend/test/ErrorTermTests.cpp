@@ -31,8 +31,8 @@ TEST(ErrorTermTestSuite, testInvR)
   try {
     buildSystem(D, E, dvs, errs);
     for (size_t i = 0; i < errs.size(); ++i) {
-      boost::shared_ptr<GemanMcClureMEstimator> 
-          me(new GemanMcClureMEstimator(errs[i]->getRawSquaredError()));
+      boost::shared_ptr<GemanMcClureMEstimator>
+          me(new GemanMcClureMEstimator(0.321 * i)); // just some sigma2 value
       errs[i]->setMEstimatorPolicy(me);
     }
     for (size_t i = 0; i < errs.size(); ++i) {
