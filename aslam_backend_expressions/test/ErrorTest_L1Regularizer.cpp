@@ -34,7 +34,7 @@ class TestError : public ScalarNonSquaredErrorTerm {
   double _val;
 };
 
-TEST(AslamVChargeBackendTestSuite, testL1Regularizer)
+TEST(RegularizerTestSuite, testL1Regularizer)
 {
   try {
 
