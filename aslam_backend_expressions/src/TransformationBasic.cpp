@@ -8,20 +8,20 @@ namespace aslam {
     TransformationBasic::TransformationBasic(RotationExpression C_0_1, EuclideanExpression t_0_1_0) :
       _rotation(C_0_1.root()), _translation(t_0_1_0.root())
     {
-
     }
 
     TransformationBasic::~TransformationBasic()
     {
-      
     }
 
     Eigen::Matrix4d TransformationBasic::toTransformationMatrixImplementation()
     {
       Eigen::Matrix4d T;
       T.setIdentity();
-      T.topLeftCorner<3,3>() = _rotation->toRotationMatrix();
-      T.topRightCorner<3,1>() = _translation->toEuclidean();
+      if(_rotation)
+        T.topLeftCorner<3,3>() = _rotation->toRotationMatrix();
+      if(_translation)
+        T.topRightCorner<3,1>() = _translation->toEuclidean();
       return T;
     }
 
@@ -30,46 +30,54 @@ namespace aslam {
       //S(x) = [ 1    - r^\times S(theta) ]
       //       [ 0         S(theta)       ]
       // Eigen::Matrix3d C = _rotation->toRotationMatrix();
-      Eigen::Vector3d r = _translation->toEuclidean();
+      if(_rotation){
+        Eigen::Matrix<double,6,3> crRotation;
+        if(_translation){
+          crRotation.topLeftCorner<3,3>() = -sm::kinematics::crossMx(_translation->toEuclidean());
+        } else {
+          crRotation.topLeftCorner<3,3>().setZero();
+        }
+        _rotation->evaluateJacobians(outJacobians, crRotation);
+      }
 
-      Eigen::Matrix<double,6,3> crRotation;
-      crRotation.topLeftCorner<3,3>() = -sm::kinematics::crossMx(r);
-      crRotation.bottomLeftCorner<3,3>().setIdentity();
-      
-      _rotation->evaluateJacobians(outJacobians, crRotation);
-      
-      Eigen::Matrix<double,6,3> crTranslation;
-      crTranslation.topLeftCorner<3,3>().setIdentity();
-      crTranslation.bottomLeftCorner<3,3>().setZero();
-      _translation->evaluateJacobians(outJacobians, crTranslation);
-      
-
+      if(_translation) {
+        Eigen::Matrix<double,6,3> crTranslation;
+        crTranslation.topLeftCorner<3,3>().setIdentity();
+        crTranslation.bottomLeftCorner<3,3>().setZero();
+        _translation->evaluateJacobians(outJacobians, crTranslation);
+      }
     }
+
     void TransformationBasic::evaluateJacobiansImplementation(JacobianContainer & outJacobians, const Eigen::MatrixXd & applyChainRule) const
     {
-
       //S(x) = [ 1    - r^\times S(theta) ]
       //       [ 0         S(theta)       ]
       // Eigen::Matrix3d C = _rotation->toRotationMatrix();
-      Eigen::Vector3d r = _translation->toEuclidean();
-
-      Eigen::Matrix<double,6,3> crRotation;
-      crRotation.topLeftCorner<3,3>() = -sm::kinematics::crossMx(r);
-      crRotation.bottomLeftCorner<3,3>().setIdentity();
+      if(_rotation){
+        Eigen::Matrix<double,6,3> crRotation;
+        if(_translation){
+          crRotation.topLeftCorner<3,3>() = -sm::kinematics::crossMx(_translation->toEuclidean());
+        } else {
+          crRotation.topLeftCorner<3,3>().setZero();
+        }
+        crRotation.bottomLeftCorner<3,3>().setIdentity();
+        _rotation->evaluateJacobians(outJacobians, applyChainRule * crRotation);
+      }
       
-      _rotation->evaluateJacobians(outJacobians, applyChainRule * crRotation);
-      
-      Eigen::Matrix<double,6,3> crTranslation;
-      crTranslation.topLeftCorner<3,3>().setIdentity();
-      crTranslation.bottomLeftCorner<3,3>().setZero();
-      _translation->evaluateJacobians(outJacobians, applyChainRule * crTranslation);
-      
+      if(_translation) {
+        Eigen::Matrix<double,6,3> crTranslation;
+        crTranslation.topLeftCorner<3,3>().setIdentity();
+        crTranslation.bottomLeftCorner<3,3>().setZero();
+        _translation->evaluateJacobians(outJacobians, applyChainRule * crTranslation);
+      }
     }
 
     void TransformationBasic::getDesignVariablesImplementation(DesignVariable::set_t & designVariables) const
     {
-      _rotation->getDesignVariables(designVariables);
-      _translation->getDesignVariables(designVariables);
+      if(_rotation)
+        _rotation->getDesignVariables(designVariables);
+      if(_translation)
+        _translation->getDesignVariables(designVariables);
     }
 
 
