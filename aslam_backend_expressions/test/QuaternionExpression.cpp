@@ -115,7 +115,7 @@ TEST(QuaternionExpressionNodeTestSuites, testQuaternionBasic_##SCALAR##_##MODE) 
 
 #define TESTBASIC(MODE)\
 TESTBASIC_(double, MODE)
-//TESTBASIC_(float, MODE)\
+//TESTBASIC_(float, MODE) TODO (HannesSommer) support float-QuaternionExpressions
 
 TESTBASIC(FIRST_IS_REAL_AND_TRADITIONAL_MULT_ORDER)
 TESTBASIC(FIRST_IS_REAL_AND_OPPOSITE_MULT_ORDER)
