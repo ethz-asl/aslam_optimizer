@@ -11,7 +11,7 @@ catkin_simple(ALL_DEPS_REQUIRED)
 
 include_directories(${EIGEN_INCLUDE_DIRS})
 
-find_package(Boost REQUIRED COMPONENTS system)
+find_package(Boost REQUIRED COMPONENTS system program_options)
 
 cs_add_library(${PROJECT_NAME}
   src/RotationExpression.cpp 
@@ -53,6 +53,11 @@ cs_add_library(${PROJECT_NAME}
   )
 
 target_link_libraries(${PROJECT_NAME} ${Boost_LIBRARIES})
+
+cs_add_executable(${PROJECT_NAME}-profiling
+  test/Profiling.cpp
+)
+target_link_libraries(${PROJECT_NAME}-profiling ${PROJECT_NAME} ${Boost_LIBRARIES})
 
 # Avoid clash with tr1::tuple: https://code.google.com/p/googletest/source/browse/trunk/README?r=589#257
 add_definitions(-DGTEST_USE_OWN_TR1_TUPLE=0)
