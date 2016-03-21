@@ -1,6 +1,7 @@
 #include <sm/eigen/assert_macros.hpp>
 
 #include <aslam/backend/ErrorTermDs.hpp>
+#include <aslam/backend/JacobianContainerPrescale.hpp>
 
 namespace aslam {
   namespace backend {
@@ -143,9 +144,7 @@ namespace aslam {
 
     void ErrorTermDs::getWeightedJacobians(JacobianContainer& outJc, bool useMEstimator)
     {
-      outJc.setScale(useMEstimator &&  _mEstimatorPolicy != nullptr ? sqrt(_mEstimatorPolicy->getWeight(getRawSquaredError())) : 1.0);
-      outJc.applyChainRule(_sqrtInvR.transpose());
-      evaluateJacobians(outJc);
+      evaluateWeightedJacobian(outJc, useMEstimator, _sqrtInvR);
     }
 
     void ErrorTermDs::getWeightedError(Eigen::VectorXd& e, bool useMEstimator) const

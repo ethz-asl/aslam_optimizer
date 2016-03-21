@@ -141,7 +141,7 @@ void ProblemManager::addGradientForErrorTerm(RowVectorType& J, ErrorTerm* e, boo
   ev *= 2.0;
 
   if (_useDenseJacobianContainer) {
-    Eigen::MatrixXd J2(e->dimension(), J.cols());
+    Eigen::MatrixXd J2 = Eigen::MatrixXd::Zero(e->dimension(), J.cols());
     JacobianContainerDense<Eigen::MatrixXd&> jc(J2);
     e->getWeightedJacobians(jc, useMEstimator);
     J += ev.transpose() * J2;

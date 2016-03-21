@@ -35,13 +35,8 @@ namespace aslam {
       /// Get the Jacobian associated with a particular design variable \p dv
       Eigen::MatrixXd Jacobian(const DesignVariable* dv) const;
 
-      /// \brief Apply the chain rule to the set of Jacobians.
-      /// This may change the number of rows of this set of Jacobians
-      /// by multiplying through by df_dx on the left.
-      virtual void applyChainRule(const Eigen::MatrixXd& df_dx) override;
-
       /// \brief Clear the contents of this container
-      virtual void clear() override;
+      void clear();
 
       /// \brief Gets a dense matrix with the Jacobians. The Jacobian ordering matches the sort order.
       virtual Eigen::MatrixXd asDenseMatrix() const override { return _jacobian; }

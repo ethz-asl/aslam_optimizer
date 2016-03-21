@@ -23,9 +23,6 @@ class TestJacobianContainerSparse(unittest.TestCase):
     jc2.add(point, J) # With design variable
     jc.add(jc2, np.eye(2,2)) # With chain rule
     self.assertTrue( (jc.asDenseMatrix() == 3.*J).all() )
-  def test_scale(self):
-    jc = ab.JacobianContainerSparse(2)
-    jc.setScale(2.0)
     
 class TestJacobianContainerDense(unittest.TestCase):
   def test_add(self):
@@ -39,9 +36,6 @@ class TestJacobianContainerDense(unittest.TestCase):
     jc.add(point, J) # With design variable
     self.assertTrue(jc.isFinite(point))
     self.assertTrue( (jc.asDenseMatrix() == J).all() )
-  def test_scale(self):
-    jc = ab.JacobianContainerDense(2, 2)
-    jc.setScale(2.0)
 
 class TestRprop(unittest.TestCase):
     def test_simple_optimization(self):

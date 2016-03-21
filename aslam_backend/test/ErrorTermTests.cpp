@@ -36,7 +36,6 @@ TEST(ErrorTermTestSuite, testInvR)
       errs[i]->setMEstimatorPolicy(me);
     }
     for (size_t i = 0; i < errs.size(); ++i) {
-      JacobianContainerSparse jc(errs[i]->dimension());
       ErrorTerm* e = errs[i];
       Eigen::MatrixXd invR = sm::eigen::randomCovarianceXd(e->dimension());
       e->vsSetInvR(invR);
@@ -65,6 +64,7 @@ TEST(ErrorTermTestSuite, testInvR)
       e->evaluateJacobians(jcRaw);
       {
         // No M-Estimator
+        JacobianContainerSparse jc(errs[i]->dimension());
         e->getWeightedJacobians(jc, false);
         e->getWeightedError(we, false);
         Eigen::MatrixXd J = jcRaw.asDenseMatrix();
@@ -80,6 +80,7 @@ TEST(ErrorTermTestSuite, testInvR)
       }
       {
         // with M-Estimator
+        JacobianContainerSparse jc(errs[i]->dimension());
         e->getWeightedJacobians(jc, true);
         e->getWeightedError(we, true);
         w = e->getMEstimatorWeight(trueRse);

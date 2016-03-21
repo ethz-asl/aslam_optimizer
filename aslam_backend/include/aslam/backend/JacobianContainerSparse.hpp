@@ -76,10 +76,10 @@ namespace aslam {
       /// \brief Apply the chain rule to the set of Jacobians.
       /// This may change the number of rows of this set of Jacobians
       /// by multiplying through by df_dx on the left.
-      virtual void applyChainRule(const Eigen::MatrixXd& df_dx) override;
+      void applyChainRule(const Eigen::MatrixXd& df_dx);
 
       /// \brief Clear the contents of this container
-      virtual void clear() override;
+      void clear();
 
       /// \brief Clean and set the number of rows
       void reset(int rows);
@@ -132,10 +132,10 @@ namespace aslam {
       SM_ASSERT_GE_DBG(Exception, dv->blockIndex(), 0, "The design variable is active but the block index is less than zero.");
       map_t::iterator it = _jacobianMap.find(dv);
       if (it == _jacobianMap.end()) {
-        _jacobianMap.insert(_jacobianMap.end(), std::make_pair(dv, Eigen::MatrixXd(_scale*Jacobian.template cast<double>())));
+        _jacobianMap.insert(_jacobianMap.end(), std::make_pair(dv, Eigen::MatrixXd(Jacobian.template cast<double>())));
       } else {
         SM_ASSERT_TRUE_DBG(Exception, it->first == dv, "Two design variables had the same block index but different pointer values");
-        it->second += _scale*Jacobian.template cast<double>();
+        it->second += Jacobian.template cast<double>();
       }
     }
 
