@@ -35,7 +35,7 @@ struct ScalarExpressionNodeFunctor
     
             Vector1d p;
             p(0,0) = _dv.toScalar();
-            JacobianContainerSparse J(1);
+            JacobianContainerSparse<1> J(1);
             _dv.evaluateJacobians(J);
 
             int offset = 0;
@@ -446,7 +446,7 @@ TEST(ScalarExpressionNodeTestSuites, testAcosSquaredPole)
 
         SCOPED_TRACE("");
         const size_t rows = 1;
-        JacobianContainerSparse Jc(rows);
+        JacobianContainerSparse<rows> Jc(rows);
         pExprAcosSquared.evaluateJacobians(Jc);
         ASSERT_DOUBLE_EQ(-2.0, Jc.asDenseMatrix()(0,0));
     }
@@ -473,7 +473,7 @@ TEST(ScalarExpressionNodeTestSuites, testAcosSquaredLimits)
 
         SCOPED_TRACE("");
         const size_t rows = 1;
-        JacobianContainerSparse Jc(rows);
+        JacobianContainerSparse<rows> Jc(rows);
         pExprAcosSquared.evaluateJacobians(Jc);
 
         double pow1 =  p.toScalar() - 1.0;
@@ -532,7 +532,7 @@ TEST(ScalarExpressionNodeTestSuites, testSigmoidLimits)
 
         SCOPED_TRACE("");
         const size_t rows = 1;
-        JacobianContainerSparse Jc(rows);
+        JacobianContainerSparse<rows> Jc(rows);
         pExprSigmoid.evaluateJacobians(Jc);
         testExpression(pExprSigmoid, 1);
 

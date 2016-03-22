@@ -73,7 +73,7 @@ struct HomogeneousExpressionNodeFunctor
   {
     
     Eigen::Vector4d p = _dv.toHomogeneous();
-    JacobianContainerSparse J(4);
+    JacobianContainerSparse<4> J(4);
     _dv.evaluateJacobians(J);
 
     int offset = 0;
@@ -152,7 +152,7 @@ void testJacobian(HomogeneousExpression dv)
   
   /// Discern the size of the jacobian container
 //  Eigen::Vector4d p = dv.toHomogeneous();
-  JacobianContainerSparse Jc(4);
+  JacobianContainerSparse<4> Jc(4);
   dv.evaluateJacobians(Jc);
    
   Eigen::VectorXd dp(Jc.cols());
@@ -171,7 +171,7 @@ void testJacobian(HomogeneousExpression dv)
 //
 //  /// Discern the size of the jacobian container
 ////  Eigen::Vector4d p = dv.toHomogeneous();
-//  JacobianContainerSparse Jc(3);
+//  JacobianContainerSparse<3> Jc(3);
 //  dv.evaluateJacobians(Jc);
 //
 //  Eigen::Vector3d dp(Jc.cols());
@@ -206,11 +206,11 @@ TEST(HomogeneousExpressionNodeTestSuites, testSimpleError)
       //SCOPED_TRACE("");
       //testJacobian(qr);
 
-      JacobianContainerSparse estJ( e.dimension() );
+      JacobianContainerSparse<> estJ( e.dimension() );
       e.evaluateJacobiansFiniteDifference(estJ);
 
       
-      JacobianContainerSparse J(e.dimension());
+      JacobianContainerSparse<> J(e.dimension());
       e.evaluateJacobians(J);
 
 

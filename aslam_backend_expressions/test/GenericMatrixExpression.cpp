@@ -51,7 +51,7 @@ TEST(GenericMatrixExpressionNodeTestSuites, testGenericMatrixBasicOperations) {
 
     {
       SCOPED_TRACE("");
-      JacobianContainerSparse jc(vec.rows());
+      JacobianContainerSparse<VEC_ROWS> jc(vec.rows());
       sm::eigen::assertEqual(dv.value(), vec, SM_SOURCE_FILE_POS,"Testing evaluation fits initialization.");
       sm::eigen::assertEqual(vecExp.evaluate(), vec, SM_SOURCE_FILE_POS, "Testing evaluation fits initialization.");
       vecExp.evaluateJacobians(jc);
@@ -60,7 +60,7 @@ TEST(GenericMatrixExpressionNodeTestSuites, testGenericMatrixBasicOperations) {
 
     {
       SCOPED_TRACE("");
-      JacobianContainerSparse jc(vec.rows());
+      JacobianContainerSparse<VEC_ROWS> jc(vec.rows());
       auto exp = identityExp * vecExp;
       exp.evaluateJacobians(jc);
       sm::eigen::assertNear(exp.evaluate(), vec, 1e-14, SM_SOURCE_FILE_POS, "Testing the transposed design variable matrix product.");
@@ -69,7 +69,7 @@ TEST(GenericMatrixExpressionNodeTestSuites, testGenericMatrixBasicOperations) {
 
     {
       SCOPED_TRACE("");
-      JacobianContainerSparse jc(VEC_ROWS);
+      JacobianContainerSparse<VEC_ROWS> jc(VEC_ROWS);
       auto exp = -vecExp;
       (exp).evaluateJacobians(jc);
       sm::eigen::assertNear(exp.evaluate(), -(vecExp.evaluate()), 1e-14, SM_SOURCE_FILE_POS, "Testing the negated design variable.");
@@ -77,7 +77,7 @@ TEST(GenericMatrixExpressionNodeTestSuites, testGenericMatrixBasicOperations) {
     }
     {
       SCOPED_TRACE("");
-      JacobianContainerSparse jc(mat2.rows());
+      JacobianContainerSparse<GMAT2::matrix_t::RowsAtCompileTime> jc(mat2.rows());
       auto exp = matExp2 * vecExp;
       (exp).evaluateJacobians(jc);
       sm::eigen::assertNear(exp.evaluate(), matExp2.evaluate() * vecExp.evaluate(), 1e-14, SM_SOURCE_FILE_POS, "Testing the design variable matrix product.");
@@ -85,7 +85,7 @@ TEST(GenericMatrixExpressionNodeTestSuites, testGenericMatrixBasicOperations) {
     }
     {
       SCOPED_TRACE("");
-      JacobianContainerSparse jc(mat2.rows());
+      JacobianContainerSparse<GMAT2::matrix_t::RowsAtCompileTime> jc(mat2.rows());
       auto exp = (vecExp.transpose() * matExp2.transpose()).transpose();
       exp.evaluateJacobians(jc);
       sm::eigen::assertNear(exp.evaluate(), matExp2.evaluate() * vecExp.evaluate(), 1e-14, SM_SOURCE_FILE_POS, "Testing the transposed design variable matrix product.");
@@ -94,7 +94,7 @@ TEST(GenericMatrixExpressionNodeTestSuites, testGenericMatrixBasicOperations) {
 
     {
       SCOPED_TRACE("");
-      JacobianContainerSparse jc(1);
+      JacobianContainerSparse<1> jc(1);
       auto exp = (vecExp.transpose() * vecExp);
       exp.evaluateJacobians(jc);
       sm::eigen::assertNear(exp.evaluate(), vecExp.transpose().evaluate() * vecExp.evaluate(), 1e-14, SM_SOURCE_FILE_POS, "Testing the design variable vector square.");
@@ -102,7 +102,7 @@ TEST(GenericMatrixExpressionNodeTestSuites, testGenericMatrixBasicOperations) {
     }
 
     {
-      JacobianContainerSparse jc(1);
+      JacobianContainerSparse<1> jc(1);
       auto exp = (vecExp.transpose() * vecExp).inverse();
       Eigen::Matrix<double, 1, 1> val;
       val(0, 0) = 1/vec.dot(vec);
@@ -116,7 +116,7 @@ TEST(GenericMatrixExpressionNodeTestSuites, testGenericMatrixBasicOperations) {
       auto invValue = (vec * vec.transpose()).eval();
       sm::eigen::assertNear(inv.evaluate(), invValue, 1e-14, SM_SOURCE_FILE_POS, "Testing the dyadic product.");
 
-      JacobianContainerSparse jc(VEC_ROWS);
+      JacobianContainerSparse<VEC_ROWS> jc(VEC_ROWS);
       for( int i = 0; i < VEC_ROWS; i++){
         jc.clear();
         GV::matrix_t testVectorValue = GV::matrix_t::Zero();
@@ -135,7 +135,7 @@ TEST(GenericMatrixExpressionNodeTestSuites, testGenericMatrixBasicOperations) {
       auto invValue = (identity + vec * vec.transpose()).inverse().eval();
       sm::eigen::assertNear(inv.evaluate(), invValue, 1e-14, SM_SOURCE_FILE_POS, "Testing the inverse operation.");
 
-      JacobianContainerSparse jc(VEC_ROWS);
+      JacobianContainerSparse<VEC_ROWS> jc(VEC_ROWS);
       for( int i = 0; i < VEC_ROWS; i++){
         jc.clear();
         GV::matrix_t testVectorValue = GV::matrix_t::Zero();
@@ -151,7 +151,7 @@ TEST(GenericMatrixExpressionNodeTestSuites, testGenericMatrixBasicOperations) {
 
     {
       SCOPED_TRACE("");
-      JacobianContainerSparse jc(VEC_ROWS);
+      JacobianContainerSparse<VEC_ROWS> jc(VEC_ROWS);
       auto exp = vecExp * 3;
       GV exp2 = exp;
       exp2.evaluateJacobians(jc);
@@ -164,7 +164,7 @@ TEST(GenericMatrixExpressionNodeTestSuites, testGenericMatrixBasicOperations) {
     GM3 matExp3(mat3);
     {
       SCOPED_TRACE("");
-      JacobianContainerSparse jc(1);
+      JacobianContainerSparse<1> jc(1);
       (vecExp.transpose() * matExp3 * vecExp).evaluateJacobians(jc);
       sm::eigen::assertNear(jc.asDenseMatrix(), vec.transpose() * (mat3 + mat3.transpose()), 1e-14, SM_SOURCE_FILE_POS, "Testing evaluationJacobian fits theoretical value.");
     }
@@ -178,7 +178,7 @@ TEST(GenericMatrixExpressionNodeTestSuites, testGenericMatrixBasicOperations) {
 
     {
       SCOPED_TRACE("");
-      JacobianContainerSparse jc(1);
+      JacobianContainerSparse<1> jc(1);
       (vecExp2.transpose() * matExp3 * vecExp).evaluateJacobians(jc);
 
       Eigen::Matrix<double, 1, VEC_ROWS * 2> result;
@@ -190,7 +190,7 @@ TEST(GenericMatrixExpressionNodeTestSuites, testGenericMatrixBasicOperations) {
 
     {
       SCOPED_TRACE("");
-      JacobianContainerSparse jc(VEC_ROWS);
+      JacobianContainerSparse<VEC_ROWS> jc(VEC_ROWS);
       (vecExp + vecExp2).evaluateJacobians(jc);
       Eigen::Matrix<double, VEC_ROWS, 2 * VEC_ROWS> result;
       result.block<VEC_ROWS, VEC_ROWS>(0, 0).setIdentity();
@@ -201,7 +201,7 @@ TEST(GenericMatrixExpressionNodeTestSuites, testGenericMatrixBasicOperations) {
 
     {
       SCOPED_TRACE("");
-      JacobianContainerSparse jc(VEC_ROWS);
+      JacobianContainerSparse<VEC_ROWS> jc(VEC_ROWS);
       (vecExp - vecExp2).evaluateJacobians(jc);
       Eigen::Matrix<double, VEC_ROWS, 2 * VEC_ROWS> result;
       result.block<VEC_ROWS, VEC_ROWS>(0, 0).setIdentity();
@@ -237,7 +237,7 @@ TEST(GenericMatrixExpressionNodeTestSuites, testVectorExpressionToGenericMatrixE
     GV gVec(vec);
     {
       SCOPED_TRACE("");
-      JacobianContainerSparse jc(1);
+      JacobianContainerSparse<1> jc(1);
       auto exp = (gVecExp.transpose() * gVecExp);
       sm::eigen::assertNear(exp.evaluate(), (vec.transpose() * vec).eval(), 1e-14, SM_SOURCE_FILE_POS, "Testing the design variable matrix square.");
       exp.evaluateJacobians(jc);
@@ -249,7 +249,7 @@ TEST(GenericMatrixExpressionNodeTestSuites, testVectorExpressionToGenericMatrixE
 
     {
       SCOPED_TRACE("");
-      JacobianContainerSparse jc(VEC_ROWS);
+      JacobianContainerSparse<VEC_ROWS> jc(VEC_ROWS);
       auto exp = (identityExp * gVecExp);
       sm::eigen::assertNear(exp.evaluate(), vec.eval(), 1e-14, SM_SOURCE_FILE_POS, "Testing the identity times the converted vector expression.");
       exp.evaluateJacobians(jc);
@@ -257,7 +257,7 @@ TEST(GenericMatrixExpressionNodeTestSuites, testVectorExpressionToGenericMatrixE
     }
     {
       SCOPED_TRACE("");
-      JacobianContainerSparse jc(VEC_ROWS);
+      JacobianContainerSparse<VEC_ROWS> jc(VEC_ROWS);
       auto exp = (gVecExp.transpose() * identityExp).transpose();
       sm::eigen::assertNear(exp.evaluate(), vec.eval(), 1e-14, SM_SOURCE_FILE_POS, "Testing the identity times the converted vector expression.");
       exp.evaluateJacobians(jc);
@@ -265,7 +265,7 @@ TEST(GenericMatrixExpressionNodeTestSuites, testVectorExpressionToGenericMatrixE
     }
     {
       SCOPED_TRACE("");
-      JacobianContainerSparse jc(VEC_ROWS);
+      JacobianContainerSparse<VEC_ROWS> jc(VEC_ROWS);
       auto exp = gVecExp.transpose().transpose();
       sm::eigen::assertNear(exp.evaluate(), vec.eval(), 1e-14, SM_SOURCE_FILE_POS, "Testing the identity times the converted vector expression.");
       exp.evaluateJacobians(jc);
@@ -312,7 +312,7 @@ TEST(GenericMatrixExpressionNodeTestSuites, testCrossProduct) {
       SCOPED_TRACE("");
       auto exp = (gVecExp.cross(gVec2Exp));
       sm::eigen::assertNear(exp.evaluate(), vec.cross(vec2), 1e-14, SM_SOURCE_FILE_POS, "Testing cross product evaluation.");
-      JacobianContainerSparse jc(VEC_ROWS);
+      JacobianContainerSparse<VEC_ROWS> jc(VEC_ROWS);
       exp.evaluateJacobians(jc);
       Eigen::Matrix<double, VEC_ROWS, 2 * VEC_ROWS> result;
       result.block<VEC_ROWS, VEC_ROWS>(0, 0) = sm::kinematics::crossMx(-vec2);
@@ -323,7 +323,7 @@ TEST(GenericMatrixExpressionNodeTestSuites, testCrossProduct) {
       SCOPED_TRACE("");
       auto exp = (gVecExp.cross(gMat) * GenericMatrixExpression<2, 1>(Eigen::Matrix<double, 2, 1>::Ones()));
       sm::eigen::assertNear(exp.evaluate(), vec.cross(mat.col(0)) + vec.cross(mat.col(1)), 1e-14, SM_SOURCE_FILE_POS, "Testing cross product evaluation.");
-      JacobianContainerSparse jc(VEC_ROWS);
+      JacobianContainerSparse<VEC_ROWS> jc(VEC_ROWS);
       exp.evaluateJacobians(jc);
       Eigen::Matrix<double, VEC_ROWS, VEC_ROWS> result;
       result = sm::kinematics::crossMx(-mat.col(0)) + sm::kinematics::crossMx(-mat.col(1));

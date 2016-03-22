@@ -27,7 +27,7 @@ TEST(GenericMatrixExpressionNodeTestSuites, testExpressionUtils) {
     s.setBlockIndex(0);
     s.setActive(true);
     ScalarExpression se = s.toExpression()*s.toExpression();
-    JacobianContainerSparse jc(1);
+    JacobianContainerSparse<1> jc(1);
 
     // test isFinite
     {

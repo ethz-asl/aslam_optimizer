@@ -219,10 +219,10 @@ TEST(RotationExpressionNodeTestSuites, testQuatMultiply3a)
     
     sm::eigen::assertNear( dvMultiply02Left.toRotationMatrix(), dvMultiply02Right.toRotationMatrix(), 1e-14, SM_SOURCE_FILE_POS, "Test multiplications");
     
-    JacobianContainerSparse JcLeft(3);
+    JacobianContainerSparse<3> JcLeft(3);
     dvMultiply02Left.evaluateJacobians(JcLeft);
 
-    JacobianContainerSparse JcRight(3);
+    JacobianContainerSparse<3> JcRight(3);
     dvMultiply02Right.evaluateJacobians(JcRight);
     
     sm::eigen::assertNear( JcLeft.asSparseMatrix(), JcRight.asSparseMatrix(), 1e-14, SM_SOURCE_FILE_POS, "Test multiplications");
