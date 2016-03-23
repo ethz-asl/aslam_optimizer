@@ -2,6 +2,7 @@
 #include <vector>
 #include <aslam/backend/JacobianContainerSparse.hpp>
 #include <aslam/backend/JacobianContainerDense.hpp>
+#include <aslam/backend/JacobianContainerPrescale.hpp>
 #include <aslam/backend/util/utils.hpp>
 #include <numeric> // std::partial_sum
 #include "DummyDesignVariable.hpp"
@@ -29,98 +30,190 @@ typedef ::testing::Types<
 
 TYPED_TEST_CASE(JacobianContainerTests, JacobianContainerTypes);
 
-TEST(JacobianContainerTests, testAddJacobianSparse)
+template <int Dim>
+std::vector< DummyDesignVariable<Dim> > createDesignVariables(const std::size_t num, const bool setActive = false)
 {
-  try {
+  std::vector< DummyDesignVariable<Dim> > dvs(num);
+  std::size_t blockIndex = 0, columnBase = 0;
+  for (auto& dv : dvs) {
+    dv.setBlockIndex(blockIndex);
+    dv.setColumnBase(columnBase);
+    dv.setActive(setActive);
+    blockIndex += 1;
+    columnBase += dv.minimalDimensions();
+  }
+  return dvs;
+}
+
+TEST(JacobianContainerTests, testAddSpecificForJacobianSparse)
+{
+  using namespace aslam::backend;
+  // Create a container with three rows.
+  const int rows = 3;
+  const int dim = 2;
+  JacobianContainerSparse jc(rows);
+
+  std::vector< DummyDesignVariable<2> > dvs = createDesignVariables<dim>(2, false);
+  const auto J = Eigen::Matrix<double, rows, dim>::Random().eval();
+  ASSERT_THROW(jc.Jacobian(&(dvs[0])), JacobianContainerSparse::Exception);
+  ASSERT_EQ(jc.numDesignVariables(), 0u);
+  // The container should skip inactive design variables.
+  jc.add(&(dvs[0]), J);
+  ASSERT_EQ(0u, jc.numDesignVariables());
+  ASSERT_THROW(jc.Jacobian(&(dvs[0])), JacobianContainerSparse::Exception);
+  dvs[0].setActive(true);
+  jc.add(&(dvs[0]), J);
+  ASSERT_EQ(1u, jc.numDesignVariables());
+
+  ASSERT_THROW(jc.Jacobian(&(dvs[1])), JacobianContainerSparse::Exception);
+  // The container should skip inactive design variables.
+  jc.add(&(dvs[1]), J);
+  ASSERT_EQ(1u, jc.numDesignVariables());
+  dvs[1].setActive(true);
+  jc.add(&(dvs[1]), J);
+  ASSERT_EQ(2u, jc.numDesignVariables());
+}
+
+TEST(JacobianContainerTests, testAddSpecificForJacobianDense)
+{
+  try
+  {
     using namespace aslam::backend;
-    // Create a container with three rows.
-    JacobianContainerSparse jc(3);
-    DummyDesignVariable<2> dv;
-    dv.setBlockIndex(0);
-    Eigen::Matrix<double, 3, 2> J1, J2;
-    J1.setRandom();
-    ASSERT_THROW(jc.Jacobian(&dv), JacobianContainerSparse::Exception);
-    ASSERT_EQ(jc.numDesignVariables(), 0u);
-    // The container should skip inactive design variables.
-    dv.setActive(false);
-    jc.add(&dv, J1);
-    ASSERT_EQ(0u, jc.numDesignVariables());
-    dv.setActive(true);
-    jc.add(&dv, J1);
-    ASSERT_EQ(1u, jc.numDesignVariables());
-    Eigen::MatrixXd J1b = jc.Jacobian(&dv);
-    sm::eigen::assertEqual(J1b, J1, SM_SOURCE_FILE_POS, "Recover the Jacobian");
-    /// Adding again should end up adding the two Jacobians.
-    jc.add(&dv, J1);
-    ASSERT_EQ(1u, jc.numDesignVariables());
-    J1b = jc.Jacobian(&dv);
-    sm::eigen::assertEqual(J1b, J1 + J1, SM_SOURCE_FILE_POS, "Recover the Jacobian");
-    //////////////////////////
-    // Add a second variable.
-    /////////////////////////
-    DummyDesignVariable<2> dv2;
-    dv2.setBlockIndex(1);
-    J2.setRandom();
-    ASSERT_THROW(jc.Jacobian(&dv2), JacobianContainerSparse::Exception);
-    // The container should skip inactive design variables.
-    dv2.setActive(false);
-    jc.add(&dv2, J2);
-    ASSERT_EQ(1u, jc.numDesignVariables());
-    dv2.setActive(true);
-    jc.add(&dv2, J2);
-    ASSERT_EQ(2u, jc.numDesignVariables());
-    Eigen::MatrixXd J2b = jc.Jacobian(&dv2);
-    sm::eigen::assertEqual(J2b, J2, SM_SOURCE_FILE_POS, "Recover the Jacobian");
-    /// Adding again should end up adding the two Jacobians.
-    jc.add(&dv2, J2);
-    ASSERT_EQ(2u, jc.numDesignVariables());
-    J2b = jc.Jacobian(&dv2);
-    sm::eigen::assertEqual(J2b, J2 + J2, SM_SOURCE_FILE_POS, "Recover the Jacobian");
-  } catch (const std::exception& e) {
+    typedef JacobianContainerDense<Eigen::MatrixXd> JCDense;
+    const int dimensionDv = 2;
+    const int dimensionError = 3;
+
+    auto dvs = createDesignVariables<dimensionDv>(2, false);
+    std::size_t numDvParameters = dvs.back().columnBase() + dvs.back().minimalDimensions();
+    JCDense jc(dimensionError, numDvParameters);
+    sm::eigen::assertEqual(jc.asDenseMatrix(), Eigen::MatrixXd::Zero(dimensionError, numDvParameters), SM_SOURCE_FILE_POS);
+
+    const auto J0 = Eigen::Matrix<double, dimensionError, dimensionDv>::Random().eval();
+
+    // The container should skip inactive design variables and return the zero matrix Jacobian in that case
+    jc.add(&dvs[0], J0);
+    sm::eigen::assertEqual(Eigen::MatrixXd::Zero(dimensionError, dimensionDv), jc.Jacobian(&(dvs[0])), SM_SOURCE_FILE_POS);
+    sm::eigen::assertEqual(Eigen::MatrixXd::Zero(dimensionError, numDvParameters), jc.asDenseMatrix(), SM_SOURCE_FILE_POS);
+
+    // One design variable active, other inactive
+    dvs[0].setActive(true);
+    jc.add(&dvs[0], J0);
+    jc.add(&dvs[1], J0);
+    sm::eigen::assertEqual(J0, jc.Jacobian(&(dvs[0])), SM_SOURCE_FILE_POS);
+    sm::eigen::assertEqual(Eigen::MatrixXd::Zero(dimensionError, dimensionDv), jc.Jacobian(&(dvs[1])), SM_SOURCE_FILE_POS);
+    auto expected = Eigen::Matrix<double, dimensionError, 2*dimensionDv>();
+    expected.leftCols(dimensionDv) = J0;
+    expected.rightCols(dimensionDv) = Eigen::MatrixXd::Zero(dimensionError, dimensionDv);
+    sm::eigen::assertEqual(expected, jc.asDenseMatrix(), SM_SOURCE_FILE_POS);
+
+    // Clearing the container should yield zero matrix
+    jc.clear();
+    sm::eigen::assertEqual(Eigen::MatrixXd::Zero(dimensionError, numDvParameters), jc.asDenseMatrix(), SM_SOURCE_FILE_POS);
+  }
+  catch (const std::exception& e)
+  {
     FAIL() << "Exception: " << e.what();
   }
 }
 
-TEST(JacobianContainerTests, testAddJacobianDense)
+TYPED_TEST(JacobianContainerTests, testAddJacobian)
 {
-  try {
+  try
+  {
     using namespace aslam::backend;
-    typedef JacobianContainerDense<Eigen::MatrixXd> JCDense;
-    std::vector< DummyDesignVariable<2> > dvs(2);
-    std::size_t blockIndex = 0, columnBase = 0;
-    for (auto& dv : dvs) {
-      dv.setBlockIndex(blockIndex);
-      dv.setColumnBase(columnBase);
-      dv.setActive(false);
-      blockIndex += 1;
-      columnBase += dv.minimalDimensions();
-    }
-    std::size_t numDvParameters = columnBase;
-    JCDense jc(3, numDvParameters);
-    sm::eigen::assertEqual(jc.asDenseMatrix(), Eigen::MatrixXd::Zero(3, numDvParameters), SM_SOURCE_FILE_POS);
+    const int dimensionDv = 2;
+    const int dimensionError = 3;
 
-    Eigen::Matrix<double, 3, 2> J0 = Eigen::Matrix<double, 3, 2>::Random();
-    Eigen::Matrix<double, 3, 2> J1 = Eigen::Matrix<double, 3, 2>::Random();
+    auto dvs = createDesignVariables<dimensionDv>(2, true);
+    std::size_t numDvParameters = dvs.back().columnBase() + dvs.back().minimalDimensions();
+    boost::shared_ptr<TypeParam> jcPtr = this->getJacobianContainer(dimensionError, numDvParameters);
+    TypeParam& jc = *jcPtr;
 
-    // The container should skip inactive design variables.
+    const auto J0 = Eigen::Matrix<double, dimensionError, dimensionDv>::Random().eval();
+    const auto J1 = Eigen::Matrix<double, dimensionError, dimensionDv>::Random().eval();
+
+    // The container should add identity if add() is called without 2nd argument
+    jc.add(&dvs[0]);
+    sm::eigen::assertEqual(Eigen::MatrixXd::Identity(dimensionError, dimensionDv), jc.Jacobian(&dvs[0]), SM_SOURCE_FILE_POS);
+
+    // Reset to zero
+    jc.clear();
+
+    // The container should add J0 to dv0
     jc.add(&dvs[0], J0);
-    sm::eigen::assertEqual(jc.asDenseMatrix(), Eigen::MatrixXd::Zero(3, numDvParameters), SM_SOURCE_FILE_POS);
+    sm::eigen::assertEqual(J0, jc.Jacobian(&dvs[0]), SM_SOURCE_FILE_POS, "Recover the Jacobian");
 
-    dvs[0].setActive(true);
+    // Adding J0 to dv0 again should yield J0 + J0.
     jc.add(&dvs[0], J0);
-    sm::eigen::assertEqual(jc.Jacobian(&dvs[0]), J0, SM_SOURCE_FILE_POS, "Recover the Jacobian");
-    // Adding again should end up adding the two Jacobians.
-    jc.add(&dvs[0], J0);
-    sm::eigen::assertEqual(jc.Jacobian(&dvs[0]), J0 + J0, SM_SOURCE_FILE_POS, "Recover the Jacobian");
+    sm::eigen::assertEqual(J0 + J0, jc.Jacobian(&dvs[0]), SM_SOURCE_FILE_POS, "Recover the Jacobian");
 
-    // A second variable.
-    dvs[1].setActive(true);
+
+    // Add J1 to dv1
     jc.add(&dvs[1], J1);
-    sm::eigen::assertEqual(jc.Jacobian(&dvs[1]), J1, SM_SOURCE_FILE_POS, "Recover the Jacobian");
-    // Adding again should end up adding the two Jacobians.
+    Eigen::MatrixXd expected = J1;
+    sm::eigen::assertEqual(expected, jc.Jacobian(&dvs[1]), SM_SOURCE_FILE_POS, "Recover the Jacobian");
+
+    // Adding J1 to dv1 again should yield J1 + J1.
     jc.add(&dvs[1], J1);
-    sm::eigen::assertEqual(jc.Jacobian(&dvs[1]), J1 + J1, SM_SOURCE_FILE_POS, "Recover the Jacobian");
-  } catch (const std::exception& e) {
+    expected += J1;
+    sm::eigen::assertEqual(expected, jc.Jacobian(&dvs[1]), SM_SOURCE_FILE_POS, "Recover the Jacobian");
+
+    // Test apply() method.
+    // We add M*J1 to the existing content J1 + J1
+    const auto M = Eigen::Matrix<double, dimensionError, dimensionError>::Random().eval();
+    static_cast<JacobianContainer&>(jc.apply(M)).add(&dvs[1], J1);
+    expected += M*J1;
+    sm::eigen::assertEqual(expected, jc.Jacobian(&dvs[1]), SM_SOURCE_FILE_POS, "Recover the Jacobian");
+
+    // Test application of multiple chain rule matrices
+    static_cast<JacobianContainer&>(static_cast<JacobianContainer&>(jc.apply(M)).apply(M)).add(&dvs[1], J1);
+    expected += M*M*J1;
+    sm::eigen::assertEqual(expected, jc.Jacobian(&dvs[1]), SM_SOURCE_FILE_POS, "Recover the Jacobian");
+
+    // Test that chain rule matrix is indeed popped from the stack and does not influence further add() calls
+    jc.add(&dvs[1], J1);
+    expected += J1;
+    sm::eigen::assertEqual(expected, jc.Jacobian(&dvs[1]), SM_SOURCE_FILE_POS, "Recover the Jacobian");
+
+    // Test apply() method with identity.
+    // We apply N as chain rule, this should add N to the existing content J1 + J1 + M*J1
+    const auto N = Eigen::Matrix<double, dimensionError, dimensionDv>::Random().eval();
+    static_cast<JacobianContainer&>(jc.apply(N)).add(&dvs[1]);
+    expected += N;
+    sm::eigen::assertEqual(expected, jc.Jacobian(&dvs[1]), SM_SOURCE_FILE_POS, "Recover the Jacobian");
+  }
+  catch (const std::exception& e)
+  {
+    FAIL() << "Exception: " << e.what();
+  }
+}
+
+TEST(JacobianContainerTests, testAddJacobianPrescaled)
+{
+  try
+  {
+    using namespace aslam::backend;
+    const int dimensionDv = 2;
+    const int dimensionError = 3;
+    const double scale = 2.0;
+    auto dv = createDesignVariables<dimensionDv>(1, true)[0];
+
+    const auto J0 = Eigen::Matrix<double, dimensionError, dimensionDv>::Random().eval();
+
+    JacobianContainerSparse jcs(dimensionError);
+    JacobianContainerPrescaled jc(jcs, scale);
+
+    jc.add(&dv, J0);
+    Eigen::MatrixXd expected = scale*J0;
+    sm::eigen::assertEqual(expected, jcs.Jacobian(&dv), SM_SOURCE_FILE_POS, "Recover the Jacobian");
+
+    jc.add(&dv);
+    expected += scale*Eigen::MatrixXd::Identity(dimensionError, dimensionDv);
+    sm::eigen::assertEqual(expected, jcs.Jacobian(&dv), SM_SOURCE_FILE_POS, "Recover the Jacobian");
+
+  }
+  catch (const std::exception& e)
+  {
     FAIL() << "Exception: " << e.what();
   }
 }
