@@ -1,18 +1,15 @@
-#include <vector>
-
-#include <vector>
-
 #include <aslam/backend/JacobianContainerDense.hpp>
-#include <sm/assert_macros.hpp>
 
 namespace aslam {
 namespace backend {
 
 // Explicit template instantiation
-template void JacobianContainerDense<Eigen::MatrixXd&>::add(DesignVariable* designVariable, const Eigen::Ref<const Eigen::MatrixXd>& Jacobian);
-template void JacobianContainerDense<Eigen::MatrixXd&>::add(DesignVariable* designVariable);
-template bool JacobianContainerDense<Eigen::MatrixXd&>::isFinite(const DesignVariable& dv) const;
-template void JacobianContainerDense<Eigen::MatrixXd&>::clear();
+template class JacobianContainerDense<Eigen::MatrixXd, Eigen::Dynamic>;
+template class JacobianContainerDense<Eigen::MatrixXd, 1>;
+template class JacobianContainerDense<Eigen::MatrixXd, 2>;
+template class JacobianContainerDense<Eigen::MatrixXd&, Eigen::Dynamic>;
+template class JacobianContainerDense<Eigen::MatrixXd&, 1>;
+template class JacobianContainerDense<Eigen::MatrixXd&, 2>;
 
 } // namespace backend
 } // namespace aslam

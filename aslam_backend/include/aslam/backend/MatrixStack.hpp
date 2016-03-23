@@ -32,8 +32,10 @@ namespace backend {
   {
    public:
     typedef double Scalar;
-    typedef Eigen::Map<Eigen::MatrixXd, Eigen::Aligned> Map;
-    typedef Eigen::Map<const Eigen::MatrixXd, Eigen::Aligned> ConstMap;
+    template <int Rows, int Cols>
+    using Map = Eigen::Map<Eigen::Matrix<Scalar, Rows, Cols>, Eigen::Aligned>;
+    template <int Rows, int Cols>
+    using ConstMap = Eigen::Map<const Eigen::Matrix<Scalar, Rows, Cols>, Eigen::Aligned>;
 
     /**
      * \class Header
@@ -151,23 +153,26 @@ namespace backend {
     }
 
     /// \brief Const getter for the top matrix in the stack
-    ConstMap top() const {
+    template<int Rows = Eigen::Dynamic, int Cols = Eigen::Dynamic>
+    ConstMap<Rows, Cols> top() const {
       SM_ASSERT_FALSE(Exception, this->empty(), "");
-      return ConstMap( &(_data[_headers.back().dataIndex]), _headers.back().rows, _headers.back().cols );
+      return ConstMap<Rows, Cols>( &(_data[_headers.back().dataIndex]), _headers.back().rows, _headers.back().cols );
     }
 
     /// \brief Mutable getter for the top matrix in the stack
-    Map top() {
+    template<int Rows = Eigen::Dynamic, int Cols = Eigen::Dynamic>
+    Map<Rows, Cols> top() {
       SM_ASSERT_FALSE(Exception, this->empty(), "");
-      return Map( &(_data[_headers.back().dataIndex]), _headers.back().rows, _headers.back().cols );
+      return Map<Rows, Cols>( &(_data[_headers.back().dataIndex]), _headers.back().rows, _headers.back().cols );
     }
 
    private:
 
     /// \brief Const getter for the \p i-th matrix in the stack
-    ConstMap matrix(const std::size_t i) const {
+    template<int Rows = Eigen::Dynamic, int Cols = Eigen::Dynamic>
+    ConstMap<Rows, Cols> matrix(const std::size_t i) const {
       SM_ASSERT_LT(IndexOutOfBoundsException, i, this->numMatrices(), "");
-      return ConstMap( &(_data[_headers[i].dataIndex]), _headers[i].rows, _headers[i].cols );
+      return ConstMap<Rows, Cols>( &(_data[_headers[i].dataIndex]), _headers[i].rows, _headers[i].cols );
     }
 
     /// \brief Allocates memory and metadata for an element of size \p rows x \p cols.

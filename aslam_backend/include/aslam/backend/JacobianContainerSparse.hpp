@@ -13,6 +13,7 @@
 namespace aslam {
   namespace backend {
 
+    template<int Rows = Eigen::Dynamic>
     class JacobianContainerSparse : public JacobianContainer {
     public:
       SM_DEFINE_EXCEPTION(Exception, aslam::Exception);
@@ -22,7 +23,11 @@ namespace aslam {
       typedef std::map<DesignVariable*, Eigen::MatrixXd, DesignVariable::BlockIndexOrdering> map_t;
       typedef DesignVariable::set_t set_t;
 
-      using JacobianContainer::JacobianContainer;
+      JacobianContainerSparse(int rows, const std::size_t maxNumMatrices = 100)
+          : aslam::backend::JacobianContainer(rows, maxNumMatrices)
+      {
+        SM_ASSERT_TRUE(Exception, Rows == Eigen::Dynamic || rows == Rows, "");
+      }
       virtual ~JacobianContainerSparse();
 
       /**
@@ -122,52 +127,11 @@ namespace aslam {
       map_t _jacobianMap;
     };
 
-
-    template<typename DERIVED>
-    void JacobianContainerSparse::add(const JacobianContainerSparse& rhs, const Eigen::MatrixBase<DERIVED>* applyChainRule /*= nullptr*/)
-    {
-      SM_ASSERT_EQ(Exception, _rows, rhs._rows, "The JacobianContainers cannot be added. They don't have the same number of rows.");
-      if (applyChainRule != nullptr)
-        SM_ASSERT_EQ(Exception, applyChainRule->cols(), rhs._rows, "Wrong dimension of chain rule matrix");
-      // Merge the two maps.
-      // They are sorted by block it->first->blockIndex() so we can be smart about this.
-      map_t::iterator lt = _jacobianMap.begin();
-      const map_t::iterator lt_end = _jacobianMap.end();
-      map_t::const_iterator rt = rhs._jacobianMap.begin();
-      map_t::const_iterator rt_end = rhs._jacobianMap.end();
-      bool done = rt == rt_end;
-      for (; lt != lt_end && !done; ++lt) {
-        // The maps are sorted by block index. FFWD the rhs map
-        // inserting elements until we find the next possible
-        // equal element.
-        while (!done && rt->first->blockIndex() < lt->first->blockIndex()) {
-          _jacobianMap.insert(lt, std::make_pair(rt->first, applyChainRule == nullptr ? rt->second : (*applyChainRule)*rt->second));
-          ++rt;
-          done = (rt == rt_end);
-        }
-        // If these keys match the Jacobians add
-        if (!done && rt->first->blockIndex() == lt->first->blockIndex()) {
-          SM_ASSERT_TRUE_DBG(Exception, rt->first == lt->first, "Two design variables had the same block index but different pointer values");
-          // add the Jacobians.
-          lt->second += applyChainRule == nullptr ? rt->second : (*applyChainRule)*rt->second;
-        }
-      }
-      // Now the lhs list is done...add the remaining elements of the rhs list.
-      for (; rt != rt_end; rt++) {
-        map_t::iterator it = _jacobianMap.insert(lt, std::make_pair(rt->first, applyChainRule == nullptr ? rt->second : (*applyChainRule)*rt->second));
-      }
-    }
-
-    template<typename DERIVED>
-    void JacobianContainerSparse::addLargeLhs(const JacobianContainerSparse& rhs, const Eigen::MatrixBase<DERIVED>* applyChainRule /*= nullptr*/)
-    {
-      for (auto dvJacPair : rhs)
-        add(dvJacPair.first, applyChainRule == nullptr ? dvJacPair.second : (*applyChainRule)*dvJacPair.second);
-    }
-
-
   } // namespace backend
 } // namespace aslam
+
+
+#include "implementation/JacobianContainerSparseImpl.hpp"
 
 
 #endif /* ASLAM_JACOBIAN_CONTAINER_SPARSE_HPP */

@@ -18,14 +18,14 @@ struct JacobianContainerTests : public ::testing::Test  {
 };
 
 template <>
-boost::shared_ptr<aslam::backend::JacobianContainerSparse>
-JacobianContainerTests<aslam::backend::JacobianContainerSparse>::getJacobianContainer(int rows, int /*cols*/) {
-  return boost::shared_ptr<aslam::backend::JacobianContainerSparse>(new aslam::backend::JacobianContainerSparse(rows));
+boost::shared_ptr< aslam::backend::JacobianContainerSparse<Eigen::Dynamic> >
+JacobianContainerTests<aslam::backend::JacobianContainerSparse<Eigen::Dynamic> >::getJacobianContainer(int rows, int /*cols*/) {
+  return boost::shared_ptr< aslam::backend::JacobianContainerSparse<Eigen::Dynamic> >(new aslam::backend::JacobianContainerSparse<Eigen::Dynamic>(rows));
 }
 
 typedef ::testing::Types<
-    aslam::backend::JacobianContainerSparse,
-    aslam::backend::JacobianContainerDense<Eigen::MatrixXd>
+    aslam::backend::JacobianContainerSparse<Eigen::Dynamic>,
+    aslam::backend::JacobianContainerDense<Eigen::MatrixXd, Eigen::Dynamic>
 > JacobianContainerTypes;
 
 TYPED_TEST_CASE(JacobianContainerTests, JacobianContainerTypes);
@@ -51,21 +51,21 @@ TEST(JacobianContainerTests, testAddSpecificForJacobianSparse)
   // Create a container with three rows.
   const int rows = 3;
   const int dim = 2;
-  JacobianContainerSparse jc(rows);
+  JacobianContainerSparse<rows> jc(rows);
 
   std::vector< DummyDesignVariable<2> > dvs = createDesignVariables<dim>(2, false);
   const auto J = Eigen::Matrix<double, rows, dim>::Random().eval();
-  ASSERT_THROW(jc.Jacobian(&(dvs[0])), JacobianContainerSparse::Exception);
+  ASSERT_THROW(jc.Jacobian(&(dvs[0])), JacobianContainerSparse<rows>::Exception);
   ASSERT_EQ(jc.numDesignVariables(), 0u);
   // The container should skip inactive design variables.
   jc.add(&(dvs[0]), J);
   ASSERT_EQ(0u, jc.numDesignVariables());
-  ASSERT_THROW(jc.Jacobian(&(dvs[0])), JacobianContainerSparse::Exception);
+  ASSERT_THROW(jc.Jacobian(&(dvs[0])), JacobianContainerSparse<rows>::Exception);
   dvs[0].setActive(true);
   jc.add(&(dvs[0]), J);
   ASSERT_EQ(1u, jc.numDesignVariables());
 
-  ASSERT_THROW(jc.Jacobian(&(dvs[1])), JacobianContainerSparse::Exception);
+  ASSERT_THROW(jc.Jacobian(&(dvs[1])), JacobianContainerSparse<rows>::Exception);
   // The container should skip inactive design variables.
   jc.add(&(dvs[1]), J);
   ASSERT_EQ(1u, jc.numDesignVariables());
@@ -200,7 +200,7 @@ TEST(JacobianContainerTests, testAddJacobianPrescaled)
 
     const auto J0 = Eigen::Matrix<double, dimensionError, dimensionDv>::Random().eval();
 
-    JacobianContainerSparse jcs(dimensionError);
+    JacobianContainerSparse<dimensionError> jcs(dimensionError);
     JacobianContainerPrescaled jc(jcs, scale);
 
     jc.add(&dv, J0);
@@ -222,7 +222,7 @@ TEST(JacobianContainerTests, testOrdering)
 {
   using namespace aslam::backend;
   Eigen::Matrix2d J;
-  JacobianContainerSparse jc(2);
+  JacobianContainerSparse<> jc(2);
   DummyDesignVariable<2> dv4;
   dv4.setBlockIndex(4);
   dv4.setActive(true);
@@ -243,7 +243,7 @@ TEST(JacobianContainerTests, testOrdering)
   // Now check if the ordering is correct.
   // Jacobians should stored in ascending order
   // by block index
-  JacobianContainerSparse::map_t::const_iterator itk = jc.begin(),
+  JacobianContainerSparse<>::map_t::const_iterator itk = jc.begin(),
                                            itkm1 = jc.begin(),
                                            it_end = jc.end();
   itk++;
@@ -255,7 +255,7 @@ TEST(JacobianContainerTests, testChainRule)
 {
   try {
     using namespace aslam::backend;
-    JacobianContainerSparse jc(2);
+    JacobianContainerSparse<> jc(2);
     DummyDesignVariable<1> dv1;
     dv1.setBlockIndex(1);
     dv1.setActive(true);
@@ -291,8 +291,8 @@ TEST(JacobianContainerTests, testChainRule)
     sm::eigen::assertEqual(H * J3, jc.Jacobian(&dv3), SM_SOURCE_FILE_POS, "Checking for correct application of the chain rule");
     sm::eigen::assertEqual(H * J4, jc.Jacobian(&dv4), SM_SOURCE_FILE_POS, "Checking for correct application of the chain rule");
 
-    JacobianContainerSparse jc1(2);
-    JacobianContainerSparse jc2(2);
+    JacobianContainerSparse<> jc1(2);
+    JacobianContainerSparse<> jc2(2);
     jc1.add(&dv1, J1);
     jc1.add(&dv2, J2);
     Eigen::Matrix<double, 2, 2> C;
@@ -309,10 +309,10 @@ TEST(JacobianContainerTests, testAddContainers)
 {
   try {
     using namespace aslam::backend;
-    JacobianContainerSparse jc1(2);
-    JacobianContainerSparse jc2(2);
+    JacobianContainerSparse<> jc1(2);
+    JacobianContainerSparse<> jc2(2);
     // jc3 is the odd man out.
-    JacobianContainerSparse jc3(3);
+    JacobianContainerSparse<> jc3(3);
     DummyDesignVariable<1> dv1;
     dv1.setBlockIndex(1);
     dv1.setActive(true);
@@ -345,14 +345,14 @@ TEST(JacobianContainerTests, testAddContainers)
     Eigen::Matrix<double, 3, 5> J5;
     J5.setRandom();
     jc3.add(&dv5, J5);
-    ASSERT_THROW(jc1.add(jc3), JacobianContainerSparse::Exception) << "Incompatible row sizes";
-    ASSERT_THROW(jc2.add(jc3), JacobianContainerSparse::Exception) << "Incompatible row sizes";
-    ASSERT_THROW(jc3.add(jc1), JacobianContainerSparse::Exception) << "Incompatible row sizes";
-    ASSERT_THROW(jc3.add(jc2), JacobianContainerSparse::Exception) << "Incompatible row sizes";
+    ASSERT_THROW(jc1.add(jc3), JacobianContainerSparse<>::Exception) << "Incompatible row sizes";
+    ASSERT_THROW(jc2.add(jc3), JacobianContainerSparse<>::Exception) << "Incompatible row sizes";
+    ASSERT_THROW(jc3.add(jc1), JacobianContainerSparse<>::Exception) << "Incompatible row sizes";
+    ASSERT_THROW(jc3.add(jc2), JacobianContainerSparse<>::Exception) << "Incompatible row sizes";
     ASSERT_EQ(2u, jc1.numDesignVariables());
     ASSERT_EQ(3u, jc2.numDesignVariables());
     /// After adding, jc1 should have 4 design variables because jc2 is in both containers.
-    JacobianContainerSparse jc1PlusJc2 = jc1;
+    JacobianContainerSparse<> jc1PlusJc2 = jc1;
     jc1PlusJc2.add(jc2);
     ASSERT_EQ(4u, jc1PlusJc2.numDesignVariables());
     sm::eigen::assertEqual(jc1PlusJc2.Jacobian(&dv1), J1, SM_SOURCE_FILE_POS, "Checking for correct Jacobians after add");
@@ -360,7 +360,7 @@ TEST(JacobianContainerTests, testAddContainers)
     sm::eigen::assertEqual(jc1PlusJc2.Jacobian(&dv3), J3, SM_SOURCE_FILE_POS, "Checking for correct Jacobians after add");
     sm::eigen::assertEqual(jc1PlusJc2.Jacobian(&dv4), J4, SM_SOURCE_FILE_POS, "Checking for correct Jacobians after add");
     /// Check that addition is symmetric
-    JacobianContainerSparse jc2PlusJc1 = jc2;
+    JacobianContainerSparse<> jc2PlusJc1 = jc2;
     jc2PlusJc1.add(jc1);
     ASSERT_EQ(4u, jc2PlusJc1.numDesignVariables());
     sm::eigen::assertEqual(jc2PlusJc1.Jacobian(&dv1), J1, SM_SOURCE_FILE_POS, "Checking for correct Jacobians after add");
@@ -376,8 +376,8 @@ TEST(JacobianContainerTests, testBuildHessian)
 {
   try {
     using namespace aslam::backend;
-    JacobianContainerSparse jc1(2);
-    JacobianContainerSparse jc2(2);
+    JacobianContainerSparse<> jc1(2);
+    JacobianContainerSparse<> jc2(2);
     DummyDesignVariable<3> dv1;
     dv1.setBlockIndex(0);
     dv1.setActive(true);
@@ -433,7 +433,7 @@ TEST(JacobianContainerTests, testBuildHessian2)
 {
   try {
     using namespace aslam::backend;
-    JacobianContainerSparse jc1(2);
+    JacobianContainerSparse<> jc1(2);
     DummyDesignVariable<3> dv1;
     dv1.setBlockIndex(0);
     dv1.setActive(true);

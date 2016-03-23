@@ -77,7 +77,7 @@ namespace aslam {
 
     void ErrorTermDs::buildHessianImplementation(SparseBlockMatrix& outHessian, Eigen::VectorXd& outRhs, bool useMEstimator)
     {
-      JacobianContainerSparse J(dimension());
+      JacobianContainerSparse<Eigen::Dynamic> J(dimension());
       _evalJacobianTimer.start();
       evaluateJacobians(J);
       _evalJacobianTimer.stop();
@@ -194,7 +194,7 @@ namespace aslam {
 
     void ErrorTermDs::resizeJacobianContainer(int nrows)
     {
-    	_jacobians = JacobianContainerSparse(nrows);
+    	_jacobians = JacobianContainerSparse<Eigen::Dynamic>(nrows);
     }
 
   } // namespace backend

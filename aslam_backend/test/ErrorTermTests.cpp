@@ -60,11 +60,11 @@ TEST(ErrorTermTestSuite, testInvR)
       // with M-estimator.
       wrse = we.dot(we);
       ASSERT_NEAR(wrse, trueWRse, 1e-6);
-      JacobianContainerSparse jcRaw(e->dimension());
+      JacobianContainerSparse<> jcRaw(e->dimension());
       e->evaluateJacobians(jcRaw);
       {
         // No M-Estimator
-        JacobianContainerSparse jc(errs[i]->dimension());
+        JacobianContainerSparse<> jc(errs[i]->dimension());
         e->getWeightedJacobians(jc, false);
         e->getWeightedError(we, false);
         Eigen::MatrixXd J = jcRaw.asDenseMatrix();
@@ -80,7 +80,7 @@ TEST(ErrorTermTestSuite, testInvR)
       }
       {
         // with M-Estimator
-        JacobianContainerSparse jc(errs[i]->dimension());
+        JacobianContainerSparse<> jc(errs[i]->dimension());
         e->getWeightedJacobians(jc, true);
         e->getWeightedError(we, true);
         w = e->getMEstimatorWeight(trueRse);
@@ -134,7 +134,7 @@ TEST(ErrorTermTestSuite, testNonSquaredErrorTerm) {
         grad.resize(1,2); grad << 4., 8.;
         grad *= w;
 
-        JacobianContainerSparse jc(1);
+        JacobianContainerSparse<> jc(1);
 
         // raw Jacobian
         jc.clear();

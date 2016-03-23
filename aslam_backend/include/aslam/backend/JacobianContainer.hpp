@@ -13,17 +13,26 @@
 namespace aslam {
   namespace backend {
 
+    /**
+     * \struct JacobianContainerChainRuleApplied
+     * \brief Helper return value struct for MatrixStack::PopGuard
+     */
     struct JacobianContainerChainRuleApplied {
       JacobianContainerChainRuleApplied(MatrixStack::PopGuard&& pg)
           : _guard(std::move(pg))
       {
 
       }
+      /// \brief Cast operator
       inline operator JacobianContainer&();
      private:
       MatrixStack::PopGuard _guard;
     };
 
+    /**
+     * \class JacobianContainer
+     * \brief Interface for all Jacobian containers
+     */
     class JacobianContainer : private MatrixStack {
 
      public:
@@ -31,7 +40,11 @@ namespace aslam {
 
      public:
 
+      /// \brief Constructor for a container with \p rows rows.
+      ///        The chain rule matrix stack will reserve memory for \p maxNumMatrices matrices with 9 elements each
       JacobianContainer(int rows, const std::size_t maxNumMatrices = 100) : MatrixStack(maxNumMatrices, 9), _rows(rows) { }
+
+      /// \brief Destructor
       virtual ~JacobianContainer() { }
 
       /// \brief Add a jacobian to the list. If the design variable is not active, discard the value.
@@ -66,13 +79,15 @@ namespace aslam {
       }
 
       /// \brief Const getter for the chain rule matrix
-      MatrixStack::ConstMap chainRuleMatrix() const {
-        return this->top();
+      template<int Rows = Eigen::Dynamic, int Cols = Eigen::Dynamic>
+      MatrixStack::ConstMap<Rows, Cols> chainRuleMatrix() const {
+        return this->top<Rows, Cols>();
       }
 
       /// \brief Mutable getter for the chain rule matrix
-      MatrixStack::Map chainRuleMatrix() {
-        return this->top();
+      template<int Rows = Eigen::Dynamic, int Cols = Eigen::Dynamic>
+      MatrixStack::Map<Rows, Cols> chainRuleMatrix() {
+        return this->top<Rows, Cols>();
       }
 
     protected:

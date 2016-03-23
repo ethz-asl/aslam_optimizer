@@ -104,7 +104,7 @@ namespace aslam {
     void ErrorTermFs<C>::buildHessianImplementation(SparseBlockMatrix& outHessian, Eigen::VectorXd& outRhs, bool useMEstimator)
     {
       _evalJacobianTimer.start();
-      JacobianContainerSparse J(C);
+      JacobianContainerSparse<Dimension> J(C);
       evaluateJacobians(J);
       _evalJacobianTimer.stop();
       _buildHessianTimer.start();
@@ -191,9 +191,9 @@ namespace aslam {
 
     template<int C>
     void ErrorTermFs<C>::checkJacobiansFinite() const {
-      JacobianContainerSparse J(C);
+      JacobianContainerSparse<Dimension> J(C);
       evaluateJacobians(J);
-      for (JacobianContainerSparse::map_t::iterator it = J.begin(); it != J.end(); ++it) {
+      for (auto it = J.begin(); it != J.end(); ++it) {
         SM_ASSERT_MAT_IS_FINITE(Exception, it->second,
                                 "Jacobian is not finite!");
       }
@@ -202,7 +202,7 @@ namespace aslam {
     template<int C>
     void ErrorTermFs<C>::checkJacobiansNumerical(double tolerance) {
 
-      JacobianContainerSparse J(C);
+      JacobianContainerSparse<Dimension> J(C);
       evaluateJacobians(J);
       
       

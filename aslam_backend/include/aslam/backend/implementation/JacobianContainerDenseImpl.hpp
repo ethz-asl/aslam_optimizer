@@ -1,41 +1,63 @@
+#include <type_traits>
+
 #include <aslam/backend/JacobianContainerDense.hpp>
 #include <sm/assert_macros.hpp>
+
+#define JACOBIAN_CONTAINER_DENSE_TEMPLATE template <typename Container, int Rows>
+#define JACOBIAN_CONTAINER_DENSE_CLASS_TEMPLATE JacobianContainerDense<Container, Rows>
 
 namespace aslam {
 namespace backend {
 
-template <typename Container>
-JacobianContainerDense<Container>::JacobianContainerDense(int rows, int cols)
+JACOBIAN_CONTAINER_DENSE_TEMPLATE
+template<typename dummy>
+JACOBIAN_CONTAINER_DENSE_CLASS_TEMPLATE::JacobianContainerDense(int rows, int cols, dummy)
     : JacobianContainer(rows), _jacobian(rows, cols)
 {
+  SM_ASSERT_TRUE(Exception, Rows == Eigen::Dynamic || _jacobian.rows() == Rows, "");
   clear();
 }
 
-template <typename Container>
-bool JacobianContainerDense<Container>::isFinite(const DesignVariable& dv) const
+JACOBIAN_CONTAINER_DENSE_TEMPLATE
+bool JACOBIAN_CONTAINER_DENSE_CLASS_TEMPLATE::isFinite(const DesignVariable& dv) const
 {
   SM_ASSERT_GE_LE(Exception, dv.columnBase(), 0, _jacobian.cols() - dv.minimalDimensions(), "");
   return _jacobian.block(0, dv.columnBase(), _jacobian.rows(), dv.minimalDimensions()).allFinite();
 }
 
-template <typename Container>
-Eigen::MatrixXd JacobianContainerDense<Container>::Jacobian(const DesignVariable* dv) const
+JACOBIAN_CONTAINER_DENSE_TEMPLATE
+Eigen::MatrixXd JACOBIAN_CONTAINER_DENSE_CLASS_TEMPLATE::Jacobian(const DesignVariable* dv) const
 {
   SM_ASSERT_GE_LE(Exception, dv->columnBase(), 0, _jacobian.cols() - dv->minimalDimensions(), "");
   return _jacobian.block(0, dv->columnBase(), _jacobian.rows(), dv->minimalDimensions());
 }
 
 /// \brief Clear the contents of this container
-template <typename Container>
-void JacobianContainerDense<Container>::clear()
+JACOBIAN_CONTAINER_DENSE_TEMPLATE
+void JACOBIAN_CONTAINER_DENSE_CLASS_TEMPLATE::clear()
 {
   _jacobian.setZero();
 }
 
+/// \brief Hack to prevent Eigen assertion "YOU_ARE_TRYING_TO_USE_AN_INDEX_BASED_ACCESSOR_ON_AN_EXPRESSION_THAT_DOES_NOT_SUPPORT_THAT"
+///        with fixed-row r1 and Identity functor r2.
+///        This method is called for non-identity r2
+template <typename L, typename R1, typename R2>
+void multiplyRhsAndAddToLhs(L&& l, R1& r1, R2& r2, std::false_type /*isIdentity*/)
+{
+  SM_ASSERT_EQ_DBG(Exception, r1.cols(), r2.rows(), "Invalid matrix product of chain rule matrix and Jacobian");
+  l.noalias() += r1*r2;
+}
+/// \brief This method is called for identity r2
+template <typename L, typename R1, typename R2>
+void multiplyRhsAndAddToLhs(L&& l, R1& r1, R2& /*r2*/, std::true_type /*isIdentity*/)
+{
+  l += r1.leftCols(l.cols());
+}
 
-template <typename Container>
-template<typename DERIVED>
-inline void JacobianContainerDense<Container>::addImpl(DesignVariable* dv, const Eigen::MatrixBase<DERIVED>& Jacobian, const bool isIdentity)
+JACOBIAN_CONTAINER_DENSE_TEMPLATE
+template<bool IS_IDENTITY, typename DERIVED>
+inline void JACOBIAN_CONTAINER_DENSE_CLASS_TEMPLATE::addImpl(DesignVariable* dv, const Eigen::MatrixBase<DERIVED>& Jacobian)
 {
   if (!dv->isActive())
     return;
@@ -49,42 +71,42 @@ inline void JacobianContainerDense<Container>::addImpl(DesignVariable* dv, const
   }
   else
   {
-    auto CR = this->chainRuleMatrix();
+    const auto CR = this->chainRuleMatrix<Rows>();
     SM_ASSERT_EQ_DBG(Exception, _jacobian.rows(), CR.rows(), ""); // This is very unlikely since the chain rule size is checked in JacobianContainer::apply()
-
-    if (!isIdentity) {// TODO: cleanup
-      SM_ASSERT_EQ_DBG(Exception, CR.cols(), Jacobian.rows(), "Invalid matrix product of chain rule matrix and Jacobian");
-      _jacobian.block( 0, dv->columnBase(), CR.rows(), Jacobian.cols() ).noalias() += CR*Jacobian.template cast<double>();
-    }else
-      _jacobian.block( 0, dv->columnBase(), CR.rows(), CR.cols() ) += CR;
+    multiplyRhsAndAddToLhs(_jacobian.block( 0, dv->columnBase(), CR.rows(), Jacobian.cols() ), CR, Jacobian.template cast<double>(), std::integral_constant<bool, IS_IDENTITY>());
   }
 }
 
-template <typename Container>
+JACOBIAN_CONTAINER_DENSE_TEMPLATE
 template<typename DERIVED>
-void JacobianContainerDense<Container>::add(const JacobianContainerDense& rhs, const Eigen::MatrixBase<DERIVED>* applyChainRule /*= nullptr*/)
+void JACOBIAN_CONTAINER_DENSE_CLASS_TEMPLATE::add(const JacobianContainerDense& rhs, const Eigen::MatrixBase<DERIVED>* applyChainRule /*= nullptr*/)
 {
   SM_THROW(NotImplementedException, __PRETTY_FUNCTION__ << " not implemented");
 }
 
-template <typename Container>
-void JacobianContainerDense<Container>::add(DesignVariable* dv, const Eigen::Ref<const Eigen::MatrixXd>& Jacobian)
+JACOBIAN_CONTAINER_DENSE_TEMPLATE
+void JACOBIAN_CONTAINER_DENSE_CLASS_TEMPLATE::add(DesignVariable* dv, const Eigen::Ref<const Eigen::MatrixXd>& Jacobian)
 {
-  this->addImpl(dv, Jacobian, false);
+  this->addImpl<false>(dv, Jacobian);
 }
 
-template <typename Container>
-void JacobianContainerDense<Container>::add(DesignVariable* designVariable)
+JACOBIAN_CONTAINER_DENSE_TEMPLATE
+void JACOBIAN_CONTAINER_DENSE_CLASS_TEMPLATE::add(DesignVariable* designVariable)
 {
-  this->addImpl(designVariable, Eigen::MatrixXd::Identity(this->rows(), designVariable->minimalDimensions()), true);
+  this->addImpl<true>(designVariable, Eigen::MatrixXd::Identity(this->rows(), designVariable->minimalDimensions()));
 }
 
 
 // Explicit template instantiation
-extern template void JacobianContainerDense<Eigen::MatrixXd&>::add(DesignVariable* designVariable, const Eigen::Ref<const Eigen::MatrixXd>& Jacobian);
-extern template void JacobianContainerDense<Eigen::MatrixXd&>::add(DesignVariable* designVariable);
-extern template bool JacobianContainerDense<Eigen::MatrixXd&>::isFinite(const DesignVariable& dv) const;
-extern template void JacobianContainerDense<Eigen::MatrixXd&>::clear();
+extern template class JacobianContainerDense<Eigen::MatrixXd, Eigen::Dynamic>;
+extern template class JacobianContainerDense<Eigen::MatrixXd, 1>;
+extern template class JacobianContainerDense<Eigen::MatrixXd, 2>;
+extern template class JacobianContainerDense<Eigen::MatrixXd&, Eigen::Dynamic>;
+extern template class JacobianContainerDense<Eigen::MatrixXd&, 1>;
+extern template class JacobianContainerDense<Eigen::MatrixXd&, 2>;
+
+#undef JACOBIAN_CONTAINER_DENSE_TEMPLATE
+#undef JACOBIAN_CONTAINER_DENSE_CLASS_TEMPLATE
 
 } // namespace backend
 } // namespace aslam
