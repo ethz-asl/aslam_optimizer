@@ -10,6 +10,7 @@ namespace backend {
 
 // Explicit template instantiation
 template void JacobianContainerDense<Eigen::MatrixXd&>::add(DesignVariable* designVariable, const Eigen::Ref<const Eigen::MatrixXd>& Jacobian);
+template void JacobianContainerDense<Eigen::MatrixXd&>::add(DesignVariable* designVariable);
 template bool JacobianContainerDense<Eigen::MatrixXd&>::isFinite(const DesignVariable& dv) const;
 template void JacobianContainerDense<Eigen::MatrixXd&>::clear();
 

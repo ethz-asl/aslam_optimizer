@@ -47,9 +47,10 @@ namespace aslam {
       template<typename DERIVED = Eigen::MatrixXd>
       void addLargeLhs(const JacobianContainerSparse& rhs, const Eigen::MatrixBase<DERIVED>* applyChainRule = nullptr);
 
-      /// \brief Add a jacobian to the list. If the design variable is not active,
-      /// discard the value.
+      /// \brief Add a jacobian to the list. If the design variable is not active, discard the value.
       virtual void add(DesignVariable* designVariable, const Eigen::Ref<const Eigen::MatrixXd>& Jacobian) override;
+      /// \brief Add a jacobian to the list with identity chain rule. If the design variable is not active, discard the value.
+      virtual void add(DesignVariable* designVariable) override;
 
       /// \brief how many design variables does this jacobian container represent.
       size_t numDesignVariables() const;
@@ -113,31 +114,14 @@ namespace aslam {
                              Eigen::VectorXd& outRhs,
                              map_t::const_iterator it, map_t::const_iterator it_end) const;
 
+
+      template <typename Matrix>
+      void addImpl(DesignVariable* designVariable, const Matrix& Jacobian, const bool isIdentity);
+
       /// \brief The list of design variables.
       map_t _jacobianMap;
     };
 
-
-    inline void JacobianContainerSparse::add(DesignVariable* dv, const Eigen::Ref<const Eigen::MatrixXd>& Jacobian)
-    {
-//
-//      static Eigen::MatrixXd var;
-//      var = Jacobian;
-      sm::timing::DummyTimer timer("JacobianContainer::add", false);
-      SM_ASSERT_EQ(Exception, Jacobian.rows(), _rows, "The Jacobian must have the same number of rows as this container");
-      SM_ASSERT_EQ(Exception, Jacobian.cols(), dv->minimalDimensions(), "The Jacobian must have the same number of cols as dv->minimalDimensions()");
-      // If the designe variable isn't active. Don't bother adding it.
-      if (! dv->isActive())
-        return;
-      SM_ASSERT_GE_DBG(Exception, dv->blockIndex(), 0, "The design variable is active but the block index is less than zero.");
-      map_t::iterator it = _jacobianMap.find(dv);
-      if (it == _jacobianMap.end()) {
-        _jacobianMap.insert(_jacobianMap.end(), std::make_pair(dv, Eigen::MatrixXd(Jacobian.template cast<double>())));
-      } else {
-        SM_ASSERT_TRUE_DBG(Exception, it->first == dv, "Two design variables had the same block index but different pointer values");
-        it->second += Jacobian.template cast<double>();
-      }
-    }
 
     template<typename DERIVED>
     void JacobianContainerSparse::add(const JacobianContainerSparse& rhs, const Eigen::MatrixBase<DERIVED>* applyChainRule /*= nullptr*/)

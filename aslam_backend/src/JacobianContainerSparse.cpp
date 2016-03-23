@@ -226,5 +226,47 @@ namespace aslam {
       }
       return sum;
     }
+
+    template <typename Matrix>
+    void JacobianContainerSparse::addImpl(DesignVariable* dv, const Matrix& Jacobian, const bool isIdentity)
+    {
+      SM_ASSERT_EQ(Exception, Jacobian.rows(), _rows, "The Jacobian must have the same number of rows as this container");
+      SM_ASSERT_EQ(Exception, Jacobian.cols(), dv->minimalDimensions(), "The Jacobian must have the same number of cols as dv->minimalDimensions()");
+      // If the design variable isn't active, don't bother adding it.
+      if (! dv->isActive())
+        return;
+      SM_ASSERT_GE_DBG(Exception, dv->blockIndex(), 0, "The design variable is active but the block index is less than zero.");
+      map_t::iterator it = _jacobianMap.find(dv);
+      if (it == _jacobianMap.end()) {
+        if (this->chainRuleEmpty()) // stack empty
+          _jacobianMap.emplace(dv, Jacobian.template cast<double>());
+        else
+          if (!isIdentity) // TODO: cleanup
+            _jacobianMap.emplace(dv, this->chainRuleMatrix()*Jacobian.template cast<double>());
+          else
+            _jacobianMap.emplace(dv, this->chainRuleMatrix());
+      } else {
+        SM_ASSERT_TRUE_DBG(Exception, it->first == dv, "Two design variables had the same block index but different pointer values");
+        if (this->chainRuleEmpty()) // stack empty
+          it->second.noalias() += Jacobian.template cast<double>();
+        else {
+          if (!isIdentity) // TODO: cleanup
+            it->second.noalias() += this->chainRuleMatrix()*Jacobian.template cast<double>();
+          else
+            it->second.noalias() += this->chainRuleMatrix();
+        }
+      }
+    }
+
+    void JacobianContainerSparse::add(DesignVariable* dv, const Eigen::Ref<const Eigen::MatrixXd>& Jacobian)
+    {
+      this->addImpl(dv, Jacobian, false);
+    }
+
+    void JacobianContainerSparse::add(DesignVariable* designVariable)
+    {
+      this->addImpl(designVariable, Eigen::MatrixXd::Identity(this->rows(), designVariable->minimalDimensions()), true);
+    }
+
   } // namespace backend
 } // namespace aslam

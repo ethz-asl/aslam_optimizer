@@ -28,6 +28,7 @@ namespace aslam {
       /// \brief Add a jacobian to the list. If the design variable is not active,
       /// discard the value.
       virtual void add(DesignVariable* designVariable, const Eigen::Ref<const Eigen::MatrixXd>& Jacobian) override;
+      virtual void add(DesignVariable* designVariable) override;
 
       /// Check whether the entries corresponding to design variable \p dv are finite
       virtual bool isFinite(const DesignVariable& dv) const override;
@@ -40,6 +41,11 @@ namespace aslam {
 
       /// \brief Gets a dense matrix with the Jacobians. The Jacobian ordering matches the sort order.
       virtual Eigen::MatrixXd asDenseMatrix() const override { return _jacobian; }
+
+    private:
+
+      template <typename DERIVED>
+      void addImpl(DesignVariable* designVariable, const Eigen::MatrixBase<DERIVED>& Jacobian, const bool isIdentity);
 
     private:
 
