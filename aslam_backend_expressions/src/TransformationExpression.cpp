@@ -25,10 +25,10 @@ namespace aslam {
 
     }
 
-      TransformationExpression::TransformationExpression(const Eigen::Matrix4d & T)
-      {
-          _root.reset(new TransformationExpressionNodeConstant(T));
-      }
+    TransformationExpression::TransformationExpression(const Eigen::Matrix4d & T)
+    {
+      _root.reset(new TransformationExpressionNodeConstant(T));
+    }
 
     TransformationExpression::TransformationExpression(const RotationExpression & rotation, const EuclideanExpression & translation)
     {
@@ -38,65 +38,82 @@ namespace aslam {
 
     TransformationExpression::~TransformationExpression()
     {
-      
     }
 
     void TransformationExpression::getDesignVariables(DesignVariable::set_t & designVariables) const
     {
-      _root->getDesignVariables(designVariables);
+      if(_root)
+        _root->getDesignVariables(designVariables);
     }
 
 
     Eigen::Matrix4d TransformationExpression::toTransformationMatrix() const
     {
-      return _root->toTransformationMatrix();
+      if(_root){
+        return _root->toTransformationMatrix();
+      } else {
+        return Eigen::Matrix4d::Identity();
+      }
     }
   
   RotationExpression TransformationExpression::toRotationExpression() const {
-    boost::shared_ptr< RotationExpressionNode > een( new RotationExpressionNodeTransformation( _root ) );
-    return RotationExpression(een);
+    if(_root){
+      boost::shared_ptr< RotationExpressionNode > een( new RotationExpressionNodeTransformation( _root ) );
+      return RotationExpression(een);
+    } else {
+      return RotationExpression();
+    }
   }
   // HomogeneousExpression toHomogeneousExpression() const;
   EuclideanExpression TransformationExpression::toEuclideanExpression() const {
-    boost::shared_ptr< EuclideanExpressionNode > een( new EuclideanExpressionNodeTranslation( _root ) );
-    return EuclideanExpression(een);
+    if(_root){
+      boost::shared_ptr< EuclideanExpressionNode > een( new EuclideanExpressionNodeTranslation( _root ) );
+      return EuclideanExpression(een);
+    } else {
+      return EuclideanExpression();
+    }
   }
 
 
     void TransformationExpression::evaluateJacobians(JacobianContainer & outJacobians) const
     {
-      return _root->evaluateJacobians(outJacobians);
+      if(_root)
+        _root->evaluateJacobians(outJacobians);
     }
 
 
     void TransformationExpression::evaluateJacobians(JacobianContainer & outJacobians, const Eigen::MatrixXd & applyChainRule) const
     {
-      return _root->evaluateJacobians(outJacobians, applyChainRule);
+      if(_root)
+        _root->evaluateJacobians(outJacobians, applyChainRule);
     }
 
 
     EuclideanExpression TransformationExpression::operator*(const EuclideanExpression & rhs) const{
+      if(!_root) return rhs;
       return (*this * rhs.toHomogeneousExpression()).toEuclideanExpression();
     }
-
     HomogeneousExpression TransformationExpression::operator*(const HomogeneousExpression & rhs) const
     {
+      if(!_root) return rhs;
       boost::shared_ptr<HomogeneousExpressionNode> newRoot( new HomogeneousExpressionNodeMultiply(_root, rhs._root));
       return HomogeneousExpression(newRoot);
     }
     
     TransformationExpression TransformationExpression::operator*(const TransformationExpression & rhs) const
     {
+      if(!_root) return rhs;
+      if(!rhs._root) return *this;
       boost::shared_ptr<TransformationExpressionNode> newRoot( new TransformationExpressionNodeMultiply(_root, rhs._root));
       return TransformationExpression(newRoot);
     }
 
     TransformationExpression TransformationExpression::inverse() const
     {
+      if(!_root) return *this;
       boost::shared_ptr<TransformationExpressionNode> newRoot( new TransformationExpressionNodeInverse(_root));
       return TransformationExpression(newRoot);
     }
-  
 
   } // namespace backend
 } // namespace aslam

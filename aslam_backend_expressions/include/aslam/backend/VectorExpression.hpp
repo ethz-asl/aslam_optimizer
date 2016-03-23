@@ -19,12 +19,13 @@ namespace aslam {
       typedef Eigen::Matrix<double,D,1> vector_t;
       typedef Eigen::Matrix<double,D,1> value_t;
 
+      VectorExpression() = default;
       VectorExpression(boost::shared_ptr< VectorExpressionNode<D> > root);
       VectorExpression(VectorExpressionNode<D> * root);
-      virtual ~VectorExpression();
+      VectorExpression(const vector_t & v);
       
       vector_t evaluate() const;
-      vector_t toValue() const;
+      vector_t toValue() const { return evaluate(); }
       
       void evaluateJacobians(JacobianContainer & outJacobians) const;
       void evaluateJacobians(JacobianContainer & outJacobians, const Eigen::MatrixXd & applyChainRule) const;
@@ -37,7 +38,8 @@ namespace aslam {
 
       boost::shared_ptr< VectorExpressionNode<D> > root() const { return _root; }
 
-    private:
+      bool isEmpty() const { return !_root; }
+    protected:
       boost::shared_ptr< VectorExpressionNode<D> > _root;
     };
 

@@ -362,24 +362,29 @@ namespace aslam {
     template <int VectorDim, int ComponentIndex>
     double ScalarExpressionNodeFromVectorExpression<VectorDim, ComponentIndex>::evaluateImplementation() const
     {
-        return _lhs->evaluate()(ComponentIndex);
+      if(!_lhs)
+        return 0;
+      return _lhs->evaluate()(ComponentIndex);
     }
 
     template <int VectorDim, int ComponentIndex>
     void ScalarExpressionNodeFromVectorExpression<VectorDim, ComponentIndex>::evaluateJacobiansImplementation(JacobianContainer & outJacobians) const
     {
+      if(_lhs)
         _lhs->evaluateJacobians(outJacobians, Eigen::Matrix<double, 1, VectorDim>::Unit(ComponentIndex));
     }
 
     template <int VectorDim, int ComponentIndex>
     void ScalarExpressionNodeFromVectorExpression<VectorDim, ComponentIndex>::evaluateJacobiansImplementation(JacobianContainer & outJacobians, const Eigen::MatrixXd & applyChainRule) const
     {
+      if(_lhs)
         _lhs->evaluateJacobians(outJacobians, applyChainRule * Eigen::Matrix<double, 1, VectorDim>::Unit(ComponentIndex));
     }
 
     template <int VectorDim, int ComponentIndex>
     void ScalarExpressionNodeFromVectorExpression<VectorDim, ComponentIndex>::getDesignVariablesImplementation(DesignVariable::set_t & designVariables) const
     {
+      if(_lhs)
         _lhs->getDesignVariables(designVariables);
     }
 

@@ -28,9 +28,10 @@ namespace aslam {
             /// \brief the size of an update step
             virtual int minimalDimensionsImplementation() const;
 
+            vector_t toEuclidean() { return evaluate(); }
             EuclideanExpression toExpression();
         private:
-            virtual Eigen::Vector3d toEuclideanImplementation() const;
+            virtual Eigen::Vector3d evaluateImplementation() const;
 
             virtual void evaluateJacobiansImplementation(JacobianContainer & outJacobians) const;
 

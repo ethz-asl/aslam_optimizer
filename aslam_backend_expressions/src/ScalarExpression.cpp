@@ -10,17 +10,14 @@ ScalarExpression::ScalarExpression() {
 
 ScalarExpression::ScalarExpression(double value)
     : _root(new ScalarExpressionNodeConstant(value)) {
-
 }
 
 ScalarExpression::ScalarExpression(ScalarExpressionNode * designVariable)
     : _root(designVariable, sm::null_deleter()) {
-
 }
 
 ScalarExpression::ScalarExpression(boost::shared_ptr<ScalarExpressionNode> root)
     : _root(root) {
-
 }
 
 ScalarExpression::~ScalarExpression() {

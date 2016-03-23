@@ -31,35 +31,7 @@ struct GenericMatrixNodeTraits<VectorExpressionNode<D> > {
   typedef typename node_t::vector_t tangent_vector_t;
   typedef Differential<tangent_vector_t, double> differential_t;
 
-  class Constant : VectorExpressionNode<D> {
-   public:
-    EIGEN_MAKE_ALIGNED_OPERATOR_NEW
-    typedef typename VectorExpressionNode<D>::vector_t vector_t;
-
-    Constant(int rows = D, int cols = 1) {
-      if (D != Eigen::Dynamic){
-        SM_ASSERT_EQ_DBG(std::runtime_error, rows, D, "dynamic size has to equal static size");
-      }
-      SM_ASSERT_EQ_DBG(std::runtime_error, cols, 1, "there is only one column supported as vector expression.");
-    }
-    Constant(const value_t & value) : value(value) {}
-   private:
-    virtual vector_t evaluateImplementation() const {
-      return value;
-    }
-    virtual void evaluateJacobiansImplementation(JacobianContainer & outJacobians) const {
-    }
-    virtual void evaluateJacobiansImplementation(JacobianContainer & outJacobians, const Eigen::MatrixXd & applyChainRule) const {
-    }
-    virtual void evaluateJacobiansImplementationWithDifferential(JacobianContainer & outJacobians, const differential_t & chainRuleDifferentail) const {
-    }
-    virtual void getDesignVariablesImplementation(DesignVariable::set_t & designVariables) const {
-    }
-   private:
-    vector_t value;
-  };
-
-  typedef Constant constant_t;
+  typedef ConstantVectorExpressionNode<D> constant_t;
 };
 
 template<int D>

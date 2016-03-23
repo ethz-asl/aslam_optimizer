@@ -146,7 +146,7 @@ void exportBackendExpressions()
   class_<EuclideanPoint, boost::shared_ptr<EuclideanPoint>, bases<DesignVariable> >("EuclideanPointDv", init<const Eigen::Vector3d>())
       .def("toExpression", &EuclideanPoint::toExpression)
       .def("toHomogeneousExpression", &EuclideanPoint::toHomogeneousExpression)
-      .def("toEuclidean", &EuclideanPoint::toEuclidean)
+      .def("toEuclidean", &EuclideanPoint::toEuclidean, return_value_policy<copy_const_reference>())
       .def("getDesignVariables", &getDesignVariables<EuclideanPoint>)
      ;
 
