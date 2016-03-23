@@ -10,16 +10,15 @@ namespace aslam {
     class VectorExpressionNode
     {
     public:
-      EIGEN_MAKE_ALIGNED_OPERATOR_NEW
       typedef Eigen::Matrix<double,D,1> vector_t;
       typedef vector_t value_t;
       typedef Differential<vector_t, double> differential_t;
 
-      VectorExpressionNode();
-      virtual ~VectorExpressionNode();
+      VectorExpressionNode() = default;
+      virtual ~VectorExpressionNode() = default;
       
-      vector_t evaluate() const;
-      vector_t toVector() const;
+      vector_t evaluate() const { return evaluateImplementation(); }
+      vector_t toVector() const { return evaluate(); }
       
       void evaluateJacobians(JacobianContainer & outJacobians) const;
       void evaluateJacobians(JacobianContainer & outJacobians, const Eigen::MatrixXd & applyChainRule) const;
@@ -34,6 +33,31 @@ namespace aslam {
       virtual void getDesignVariablesImplementation(DesignVariable::set_t & designVariables) const = 0;
     };
 
+    template <int D>
+    class ConstantVectorExpressionNode : public VectorExpressionNode<D> {
+     public:
+      EIGEN_MAKE_ALIGNED_OPERATOR_NEW
+      typedef typename VectorExpressionNode<D>::vector_t vector_t;
+      typedef typename VectorExpressionNode<D>::differential_t differential_t;
+
+      ConstantVectorExpressionNode(int rows = D, int cols = 1) {
+        if (D != Eigen::Dynamic){
+          SM_ASSERT_EQ_DBG(std::runtime_error, rows, D, "dynamic size has to equal static size");
+        }
+        SM_ASSERT_EQ_DBG(std::runtime_error, cols, 1, "there is only one column supported as vector expression.");
+      }
+      ConstantVectorExpressionNode(const vector_t & value) : value(value) {}
+
+      virtual ~ConstantVectorExpressionNode() = default;
+     private:
+      virtual vector_t evaluateImplementation() const override { return value; }
+      virtual void evaluateJacobiansImplementation(JacobianContainer &) const override {}
+      virtual void evaluateJacobiansImplementation(JacobianContainer &, const Eigen::MatrixXd &) const override {}
+      virtual void evaluateJacobiansImplementationWithDifferential(JacobianContainer &, const differential_t &) const override {}
+      virtual void getDesignVariablesImplementation(DesignVariable::set_t &) const override {}
+     private:
+      vector_t value;
+    };
   } // namespace backend
 } // namespace aslam
 

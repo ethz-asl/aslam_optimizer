@@ -5,57 +5,17 @@
 #include <aslam/backend/HomogeneousExpressionNode.hpp>
 namespace aslam {
   namespace backend {
-    
-    EuclideanExpressionNode::EuclideanExpressionNode()
-    {
-
-    }
-
-    EuclideanExpressionNode::~EuclideanExpressionNode()
-    {
-
-    }
-
-
-    /// \brief Evaluate the euclidean matrix.
-    Eigen::Vector3d EuclideanExpressionNode::toEuclidean() const
-    {
-      return toEuclideanImplementation();
-    }
-
       
-    /// \brief Evaluate the Jacobians
-    void EuclideanExpressionNode::evaluateJacobians(JacobianContainer & outJacobians) const
-    {
-      evaluateJacobiansImplementation(outJacobians);
-    }
-   
-    
-    /// \brief Evaluate the Jacobians and apply the chain rule.
-    void EuclideanExpressionNode::evaluateJacobians(JacobianContainer & outJacobians, const Eigen::MatrixXd & applyChainRule) const
-    {
-      SM_ASSERT_EQ_DBG(Exception, applyChainRule.cols(), 3, "The chain rule matrix must have three columns");
-      evaluateJacobiansImplementation(outJacobians, applyChainRule);
-    }
+  EuclideanExpressionNodeMultiply::EuclideanExpressionNodeMultiply(boost::shared_ptr<RotationExpressionNode> lhs, boost::shared_ptr<EuclideanExpressionNode> rhs) :
+    _lhs(lhs), _rhs(rhs)
+  {
+    _C_lhs = _lhs->toRotationMatrix();
+    _p_rhs = _rhs->evaluate();
+  }
 
-    void EuclideanExpressionNode::getDesignVariables(DesignVariable::set_t & designVariables) const
-    {
-      getDesignVariablesImplementation(designVariables);
-    }
-
-
-    EuclideanExpressionNodeMultiply::EuclideanExpressionNodeMultiply(boost::shared_ptr<RotationExpressionNode> lhs, boost::shared_ptr<EuclideanExpressionNode> rhs) :
-         _lhs(lhs), _rhs(rhs)
-       {
-
-    	_C_lhs = _lhs->toRotationMatrix();
-         _p_rhs = _rhs->toEuclidean();
-       }
-
-    EuclideanExpressionNodeMultiply::~EuclideanExpressionNodeMultiply()
-    {
-
-    }
+  EuclideanExpressionNodeMultiply::~EuclideanExpressionNodeMultiply()
+  {
+  }
 
 
     void EuclideanExpressionNodeMultiply::getDesignVariablesImplementation(DesignVariable::set_t & designVariables) const
@@ -65,10 +25,10 @@ namespace aslam {
     }
 
 
-    Eigen::Vector3d EuclideanExpressionNodeMultiply::toEuclideanImplementation() const
+    Eigen::Vector3d EuclideanExpressionNodeMultiply::evaluateImplementation() const
     {
       _C_lhs = _lhs->toRotationMatrix();
-      _p_rhs = _rhs->toEuclidean();
+      _p_rhs = _rhs->evaluate();
 
       return _C_lhs * _p_rhs;
     }
@@ -88,11 +48,10 @@ namespace aslam {
     // ## New Class for rotations with MatrixExpressions
     EuclideanExpressionNodeMatrixMultiply::EuclideanExpressionNodeMatrixMultiply(boost::shared_ptr<MatrixExpressionNode> lhs, boost::shared_ptr<EuclideanExpressionNode> rhs) :
          _lhs(lhs), _rhs(rhs)
-       {
-
-    	 _A_lhs = _lhs->toFullMatrix();
-         _p_rhs = _rhs->toEuclidean();
-       }
+    {
+      _A_lhs = _lhs->toFullMatrix();
+      _p_rhs = _rhs->evaluate();
+    }
 
     EuclideanExpressionNodeMatrixMultiply::~EuclideanExpressionNodeMatrixMultiply()
     {
@@ -107,10 +66,10 @@ namespace aslam {
     }
 
     
-    Eigen::Vector3d EuclideanExpressionNodeMatrixMultiply::toEuclideanImplementation() const
+    Eigen::Vector3d EuclideanExpressionNodeMatrixMultiply::evaluateImplementation() const
     {
       _A_lhs = _lhs->toFullMatrix();
-      _p_rhs = _rhs->toEuclidean();
+      _p_rhs = _rhs->evaluate();
 
       return _A_lhs * _p_rhs;
     }
@@ -161,21 +120,21 @@ namespace aslam {
     }
 
 
-    Eigen::Vector3d EuclideanExpressionNodeCrossEuclidean::toEuclideanImplementation() const
+    Eigen::Vector3d EuclideanExpressionNodeCrossEuclidean::evaluateImplementation() const
     {
-      return sm::kinematics::crossMx(_lhs->toEuclidean()) * _rhs->toEuclidean();;
+      return sm::kinematics::crossMx(_lhs->evaluate()) * _rhs->evaluate();;
     }
 
     void EuclideanExpressionNodeCrossEuclidean::evaluateJacobiansImplementation(JacobianContainer & outJacobians) const
     {
-      _lhs->evaluateJacobians(outJacobians, - sm::kinematics::crossMx(_rhs->toEuclidean()));
-      _rhs->evaluateJacobians(outJacobians, sm::kinematics::crossMx(_lhs->toEuclidean()));
+      _lhs->evaluateJacobians(outJacobians, - sm::kinematics::crossMx(_rhs->evaluate()));
+      _rhs->evaluateJacobians(outJacobians, sm::kinematics::crossMx(_lhs->evaluate()));
     }
 
     void EuclideanExpressionNodeCrossEuclidean::evaluateJacobiansImplementation(JacobianContainer & outJacobians, const Eigen::MatrixXd & applyChainRule) const
     {
-      _lhs->evaluateJacobians(outJacobians, - applyChainRule * sm::kinematics::crossMx(_rhs->toEuclidean()));
-      _rhs->evaluateJacobians(outJacobians, applyChainRule * sm::kinematics::crossMx(_lhs->toEuclidean()));
+      _lhs->evaluateJacobians(outJacobians, - applyChainRule * sm::kinematics::crossMx(_rhs->evaluate()));
+      _rhs->evaluateJacobians(outJacobians, applyChainRule * sm::kinematics::crossMx(_lhs->evaluate()));
     }
 
 
@@ -201,9 +160,9 @@ namespace aslam {
     }
 
 
-    Eigen::Vector3d EuclideanExpressionNodeAddEuclidean::toEuclideanImplementation() const
+    Eigen::Vector3d EuclideanExpressionNodeAddEuclidean::evaluateImplementation() const
     {
-      return _lhs->toEuclidean() + _rhs->toEuclidean();
+      return _lhs->evaluate() + _rhs->evaluate();
     }
 
     void EuclideanExpressionNodeAddEuclidean::evaluateJacobiansImplementation(JacobianContainer & outJacobians) const
@@ -241,9 +200,9 @@ namespace aslam {
     }
 
 
-    Eigen::Vector3d EuclideanExpressionNodeSubtractEuclidean::toEuclideanImplementation() const
+    Eigen::Vector3d EuclideanExpressionNodeSubtractEuclidean::evaluateImplementation() const
     {
-      return _lhs->toEuclidean() - _rhs->toEuclidean();
+      return _lhs->evaluate() - _rhs->evaluate();
     }
 
     void EuclideanExpressionNodeSubtractEuclidean::evaluateJacobiansImplementation(JacobianContainer & outJacobians) const
@@ -273,7 +232,7 @@ namespace aslam {
     {
     }
 
-    Eigen::Vector3d EuclideanExpressionNodeConstant::toEuclideanImplementation() const
+    Eigen::Vector3d EuclideanExpressionNodeConstant::evaluateImplementation() const
     {
       return _p;
     }
@@ -304,9 +263,9 @@ namespace aslam {
       _lhs->getDesignVariables(designVariables);
     }
 
-    Eigen::Vector3d EuclideanExpressionNodeSubtractVector::toEuclideanImplementation() const
+    Eigen::Vector3d EuclideanExpressionNodeSubtractVector::evaluateImplementation() const
     {
-      return _lhs->toEuclidean() - _rhs;
+      return _lhs->evaluate() - _rhs;
     }
 
     void EuclideanExpressionNodeSubtractVector::evaluateJacobiansImplementation(JacobianContainer & outJacobians) const
@@ -336,9 +295,9 @@ namespace aslam {
       _operand->getDesignVariables(designVariables);
     }
 
-    Eigen::Vector3d EuclideanExpressionNodeNegated::toEuclideanImplementation() const
+    Eigen::Vector3d EuclideanExpressionNodeNegated::evaluateImplementation() const
     {
-      return - _operand->toEuclidean();
+      return - _operand->evaluate();
     }
 
     void EuclideanExpressionNodeNegated::evaluateJacobiansImplementation(JacobianContainer & outJacobians) const
@@ -369,21 +328,21 @@ namespace aslam {
       _s->getDesignVariables(designVariables);
     }
 
-    Eigen::Vector3d EuclideanExpressionNodeScalarMultiply::toEuclideanImplementation() const
+    Eigen::Vector3d EuclideanExpressionNodeScalarMultiply::evaluateImplementation() const
     {
-      return _p->toEuclidean() * _s->toScalar();
+      return _p->evaluate() * _s->toScalar();
     }
 
     void EuclideanExpressionNodeScalarMultiply::evaluateJacobiansImplementation(JacobianContainer & outJacobians) const
     {
       _p->evaluateJacobians(outJacobians, Eigen::Matrix3d::Identity() * _s->toScalar());
-      _s->evaluateJacobians(outJacobians, _p->toEuclidean());
+      _s->evaluateJacobians(outJacobians, _p->evaluate());
     }
 
     void EuclideanExpressionNodeScalarMultiply::evaluateJacobiansImplementation(JacobianContainer & outJacobians, const Eigen::MatrixXd & applyChainRule) const
     {
       _p->evaluateJacobians(outJacobians, applyChainRule * _s->toScalar());
-      _s->evaluateJacobians(outJacobians, applyChainRule * _p->toEuclidean());
+      _s->evaluateJacobians(outJacobians, applyChainRule * _p->evaluate());
     }
 
 
@@ -402,7 +361,7 @@ namespace aslam {
       _vectorExpressionNode->getDesignVariables(designVariables);
     }
 
-    Eigen::Vector3d VectorExpression2EuclideanExpressionAdapter::toEuclideanImplementation() const
+    Eigen::Vector3d VectorExpression2EuclideanExpressionAdapter::evaluateImplementation() const
     {
       return _vectorExpressionNode->toVector();
     }
@@ -428,7 +387,7 @@ namespace aslam {
   }
 
 
-  Eigen::Vector3d EuclideanExpressionNodeTranslation::toEuclideanImplementation() const {
+  Eigen::Vector3d EuclideanExpressionNodeTranslation::evaluateImplementation() const {
     return _operand->toTransformationMatrix().topRightCorner<3,1>();
   }
 
@@ -462,7 +421,7 @@ namespace aslam {
   }
 
 
-  Eigen::Vector3d EuclideanExpressionNodeRotationParameters::toEuclideanImplementation() const {
+  Eigen::Vector3d EuclideanExpressionNodeRotationParameters::evaluateImplementation() const {
     return _rk->rotationMatrixToParameters(_operand->toRotationMatrix());
   }
 
@@ -493,7 +452,7 @@ namespace aslam {
   }
 
 
-  Eigen::Vector3d EuclideanExpressionNodeFromHomogeneous::toEuclideanImplementation() const {
+  Eigen::Vector3d EuclideanExpressionNodeFromHomogeneous::evaluateImplementation() const {
     return sm::kinematics::fromHomogeneous( _root->toHomogeneous() );
   }
 

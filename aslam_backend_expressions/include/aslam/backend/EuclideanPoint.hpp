@@ -32,8 +32,9 @@ namespace aslam {
       void set(const Eigen::Vector3d & p){ _p = p; _p_p = _p; }
 
       const Eigen::Vector3d & getValue() const { return _p; }
+      const Eigen::Vector3d & toEuclidean() const { return getValue() ; }
     private:
-      virtual Eigen::Vector3d toEuclideanImplementation() const;
+      virtual Eigen::Vector3d evaluateImplementation() const;
 
       virtual void evaluateJacobiansImplementation(JacobianContainer & outJacobians) const;
 

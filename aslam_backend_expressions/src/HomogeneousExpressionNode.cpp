@@ -111,7 +111,7 @@ namespace aslam {
 
 
   Eigen::Vector4d HomogeneousExpressionNodeEuclidean::toHomogeneousImplementation() const {
-    return sm::kinematics::toHomogeneous(_p->toEuclidean());
+    return sm::kinematics::toHomogeneous(_p->evaluate());
   }
 
   void HomogeneousExpressionNodeEuclidean::evaluateJacobiansImplementation(JacobianContainer & outJacobians) const {

@@ -21,7 +21,7 @@ namespace aslam {
       if(_rotation)
         T.topLeftCorner<3,3>() = _rotation->toRotationMatrix();
       if(_translation)
-        T.topRightCorner<3,1>() = _translation->toEuclidean();
+        T.topRightCorner<3,1>() = _translation->evaluate();
       return T;
     }
 
@@ -33,7 +33,7 @@ namespace aslam {
       if(_rotation){
         Eigen::Matrix<double,6,3> crRotation;
         if(_translation){
-          crRotation.topLeftCorner<3,3>() = -sm::kinematics::crossMx(_translation->toEuclidean());
+          crRotation.topLeftCorner<3,3>() = -sm::kinematics::crossMx(_translation->evaluate());
         } else {
           crRotation.topLeftCorner<3,3>().setZero();
         }
@@ -56,7 +56,7 @@ namespace aslam {
       if(_rotation){
         Eigen::Matrix<double,6,3> crRotation;
         if(_translation){
-          crRotation.topLeftCorner<3,3>() = -sm::kinematics::crossMx(_translation->toEuclidean());
+          crRotation.topLeftCorner<3,3>() = -sm::kinematics::crossMx(_translation->evaluate());
         } else {
           crRotation.topLeftCorner<3,3>().setZero();
         }

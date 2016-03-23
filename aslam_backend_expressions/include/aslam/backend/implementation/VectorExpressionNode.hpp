@@ -1,25 +1,6 @@
 
 namespace aslam {
 namespace backend {
-template<int D>
-VectorExpressionNode<D>::VectorExpressionNode() {
-
-}
-
-template<int D>
-VectorExpressionNode<D>::~VectorExpressionNode() {
-
-}
-
-template<int D>
-typename VectorExpressionNode<D>::vector_t VectorExpressionNode<D>::evaluate() const {
-  return evaluateImplementation();
-}
-
-template<int D>
-typename VectorExpressionNode<D>::vector_t VectorExpressionNode<D>::toVector() const {
-  return evaluateImplementation();
-}
 
 template<int D>
 void VectorExpressionNode<D>::evaluateJacobians(JacobianContainer & outJacobians) const {

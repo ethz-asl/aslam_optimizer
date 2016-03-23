@@ -10,44 +10,6 @@
 
 namespace aslam {
   namespace backend {
-    EuclideanExpression::EuclideanExpression()
-    {
-    }
-
-    EuclideanExpression::EuclideanExpression(EuclideanExpressionNode * designVariable) :
-      _root( designVariable, sm::null_deleter() )
-    {
-      
-    }
-
-    EuclideanExpression::EuclideanExpression(boost::shared_ptr<EuclideanExpressionNode> root) :
-      _root(root)
-    {
-
-    }
-
-    EuclideanExpression::EuclideanExpression(const VectorExpression<3> & vectorExpression) :
-      _root(new VectorExpression2EuclideanExpressionAdapter(vectorExpression.root()))
-    {
-
-    }
-
-    EuclideanExpression::EuclideanExpression(const Eigen::Vector3d & p) :
-      _root(new EuclideanExpressionNodeConstant(p))
-    {
-    }
-
-
-    EuclideanExpression::~EuclideanExpression()
-    {
-    }
-  
-    Eigen::Vector3d EuclideanExpression::toEuclidean() const
-    {
-      if(isEmpty()) return Eigen::Vector3d::Zero();
-      return _root->toEuclidean();
-    }
-
     HomogeneousExpression EuclideanExpression::toHomogeneousExpression() const
     {
       assert(!isEmpty());
@@ -117,12 +79,6 @@ namespace aslam {
         return EuclideanExpression();
       boost::shared_ptr<EuclideanExpressionNode> newRoot(new EuclideanExpressionNodeScalarMultiply(_root, s._root));
       return EuclideanExpression(newRoot);
-    }
-
-    void EuclideanExpression::getDesignVariables(DesignVariable::set_t & designVariables) const
-    {
-      if(!isEmpty())
-        _root->getDesignVariables(designVariables);
     }
 
   

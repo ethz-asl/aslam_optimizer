@@ -2,7 +2,7 @@
 
 namespace aslam {
     namespace backend {
-        EuclideanDirection::EuclideanDirection(const Eigen::Vector3d & direction)             
+        EuclideanDirection::EuclideanDirection(const Eigen::Vector3d & direction)
         {
             _magnitude = direction.norm();
             SM_ASSERT_GT(Exception, _magnitude, 0.0, "The pointing vector must have a magnitude greater than zero");
@@ -10,7 +10,7 @@ namespace aslam {
             // Decompose the pointing vector into a rotation matrix.
             Eigen::Vector3d unit = direction / _magnitude;
             double y = asin(-unit[0]);
-            double x = atan2(unit[1], unit[2]);
+            double x = ::atan2(unit[1], unit[2]);
             Eigen::Vector3d parameters(0.0, y, x);
             _C = _ypr.parametersToRotationMatrix(parameters).transpose();
             _p_C = _C;
@@ -51,7 +51,7 @@ namespace aslam {
         }
 
     
-        Eigen::Vector3d EuclideanDirection::toEuclideanImplementation() const
+        Eigen::Vector3d EuclideanDirection::evaluateImplementation() const
         {
             return _magnitude * _C.col(2);
         }

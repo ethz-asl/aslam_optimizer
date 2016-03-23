@@ -6,52 +6,47 @@ namespace aslam {
     VectorExpression<D>::VectorExpression(boost::shared_ptr< VectorExpressionNode<D> > root) :
       _root(root)
     {
-
     }
 
     template<int D>
     VectorExpression<D>::VectorExpression(VectorExpressionNode<D> * root) :
       _root(root, sm::null_deleter() )
     {
-      
     }
-
     template<int D>
-    VectorExpression<D>::~VectorExpression()
+    VectorExpression<D>::VectorExpression(const vector_t & v) :
+      _root(new ConstantVectorExpressionNode<D>(v))
     {
-
     }
-
       
     template<int D>
     typename VectorExpression<D>::vector_t VectorExpression<D>::evaluate() const
     {
+      if(isEmpty()){
+        return VectorExpression<D>::vector_t::Zero(D);
+      }
       return _root->evaluate();
     }
 
-    template<int D>
-    typename VectorExpression<D>::vector_t VectorExpression<D>::toValue() const
-    {
-      return _root->evaluate();
-    }
-
-      
     template<int D>
     void VectorExpression<D>::evaluateJacobians(JacobianContainer & outJacobians) const
     {
-      return _root->evaluateJacobians(outJacobians);
+      if(!isEmpty())
+        _root->evaluateJacobians(outJacobians);
     }
 
     template<int D>
     void VectorExpression<D>::evaluateJacobians(JacobianContainer & outJacobians, const Eigen::MatrixXd & applyChainRule) const
     {
-      return _root->evaluateJacobians(outJacobians, applyChainRule);
+      if(!isEmpty())
+        _root->evaluateJacobians(outJacobians, applyChainRule);
     }
 
     template<int D>
     void VectorExpression<D>::getDesignVariables(DesignVariable::set_t & designVariables) const
     {
-      return _root->getDesignVariables(designVariables);
+      if(!isEmpty())
+        _root->getDesignVariables(designVariables);
     }
 
     template<int D>
