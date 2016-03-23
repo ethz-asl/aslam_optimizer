@@ -23,7 +23,7 @@ namespace aslam {
 
       
         /// \brief Evaluate the Jacobians
-        void ScalarExpressionNode::evaluateJacobians(JacobianContainer & outJacobians) const
+        void ScalarExpressionNode::evaluateJacobians(JacobianContainer & outJacobians) const // TODO: inline this method!!!!!!!!! (and everywhere else)
         {
             evaluateJacobiansImplementation(outJacobians);
         }
@@ -61,16 +61,17 @@ namespace aslam {
 
         void ScalarExpressionNodeMultiply::evaluateJacobiansImplementation(JacobianContainer & outJacobians) const
         {
-            Eigen::MatrixXd L(1,1), R(1,1);
+            Eigen::Matrix<double, 1, 1> L(1,1), R(1,1);
             L(0,0) = _lhs->toScalar();
             R(0,0) = _rhs->toScalar();
-            _lhs->evaluateJacobians(outJacobians, R);
-            _rhs->evaluateJacobians(outJacobians, L);
+
+            _lhs->evaluateJacobians(outJacobians.apply(R));
+            _rhs->evaluateJacobians(outJacobians.apply(L));
         }
 
         void ScalarExpressionNodeMultiply::evaluateJacobiansImplementation(JacobianContainer & outJacobians, const Eigen::MatrixXd & applyChainRule) const
         {
-            Eigen::MatrixXd L(1,1), R(1,1);
+            Eigen::Matrix<double, 1, 1> L(1,1), R(1,1);
             L(0,0) = _lhs->toScalar();
             R(0,0) = _rhs->toScalar();
             _lhs->evaluateJacobians(outJacobians, applyChainRule * R);
