@@ -48,6 +48,13 @@ std::vector< DummyDesignVariable<Dim> > createDesignVariables(const std::size_t 
 TEST(JacobianContainerTests, testAddSpecificForJacobianSparse)
 {
   using namespace aslam::backend;
+
+  // Test template argument check upon construction
+  try {
+    JacobianContainerSparse<1> jc(2, 3);
+    FAIL() << "Construction with invalid number of rows did not fail";
+  } catch (...) { }
+
   // Create a container with three rows.
   const int rows = 3;
   const int dim = 2;
@@ -79,13 +86,26 @@ TEST(JacobianContainerTests, testAddSpecificForJacobianDense)
   try
   {
     using namespace aslam::backend;
-    typedef JacobianContainerDense<Eigen::MatrixXd> JCDense;
+
+    // Test template argument check upon construction
+    try {
+      JacobianContainerDense<Eigen::MatrixXd, 1> jc(2, 3);
+      FAIL() << "Construction with invalid number of rows did not fail";
+    } catch (...) { }
+    try {
+      auto J0 = Eigen::Matrix<double, 2, 3>::Random().eval();
+      JacobianContainerDense<Eigen::Matrix<double, 2, 3>&, 1> jc(J0);
+      FAIL() << "Construction with invalid number of rows did not fail";
+    } catch (...) { }
+
     const int dimensionDv = 2;
     const int dimensionError = 3;
 
     auto dvs = createDesignVariables<dimensionDv>(2, false);
     std::size_t numDvParameters = dvs.back().columnBase() + dvs.back().minimalDimensions();
-    JCDense jc(dimensionError, numDvParameters);
+
+    // Test construction
+    JacobianContainerDense<Eigen::MatrixXd> jc(dimensionError, numDvParameters);
     sm::eigen::assertEqual(jc.asDenseMatrix(), Eigen::MatrixXd::Zero(dimensionError, numDvParameters), SM_SOURCE_FILE_POS);
 
     const auto J0 = Eigen::Matrix<double, dimensionError, dimensionDv>::Random().eval();
