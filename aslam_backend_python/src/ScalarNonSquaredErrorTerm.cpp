@@ -8,7 +8,7 @@ using namespace boost::python;
 using namespace aslam::backend;
 
 Eigen::VectorXd evaluateJacobians(ScalarNonSquaredErrorTerm& e, bool useMEstimator) {
-  JacobianContainerSparse jc(1);
+  JacobianContainerSparse<1> jc(1);
   e.evaluateJacobians(jc, useMEstimator);
   return jc.asDenseMatrix();
 }
