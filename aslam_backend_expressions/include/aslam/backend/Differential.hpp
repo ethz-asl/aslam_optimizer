@@ -5,6 +5,7 @@
 
 namespace aslam {
 namespace backend {
+
 template<typename TDomain, typename TScalar>
 class Differential {
  public:
@@ -28,11 +29,42 @@ class Differential {
 
   virtual void applyBasisVectorInto(int index, result_vector_t & result) const = 0;
   virtual void applyInto(const domain_t & tangent_vector, result_vector_t & result) const = 0;
-  virtual void convertIntoMatrix(int rows, int cols, dyn_matrix_t & result) const = 0;
 
   virtual void addToJacobianContainer(JacobianContainer & jc, const DesignVariable * dv) const = 0;
   virtual void addToJacobianContainer(JacobianContainer & jc, const DesignVariable * dv, const dyn_matrix_t & jacobian) const = 0;
+
+ protected:
+  typedef Eigen::Map<const dyn_matrix_t, Eigen::Aligned> const_map_t;
+  typedef Eigen::Map<dyn_matrix_t, Eigen::Aligned> map_t;
+
+ protected:
+  template<typename DIFFERENTIAL>
+  friend JacobianContainerChainRuleApplied applyDifferentialToJacobianContainer(JacobianContainer&, const DIFFERENTIAL&);
+  virtual void convertIntoMatrix(int rows, int cols, const_map_t* chainRule, map_t result) const = 0;
+
 };
+
+template<typename DIFFERENTIAL>
+JacobianContainerChainRuleApplied applyDifferentialToJacobianContainer(JacobianContainer& jc, const DIFFERENTIAL& diff)
+{
+  static_assert(DIFFERENTIAL::domain_t::RowsAtCompileTime != Eigen::Dynamic, "dynamic dimension is not supported yet");
+
+  MatrixStack::PopGuard pg(jc);
+
+  if (!jc.chainRuleEmpty())
+  {
+    auto CR = ((const JacobianContainer&)jc).chainRuleMatrix();
+    jc.allocate(DIFFERENTIAL::domain_t::RowsAtCompileTime);
+    diff.convertIntoMatrix(jc.rows(), DIFFERENTIAL::domain_t::RowsAtCompileTime, &CR, jc.chainRuleMatrix());
+  }
+  else
+  {
+    jc.allocate(DIFFERENTIAL::domain_t::RowsAtCompileTime);
+    diff.convertIntoMatrix(jc.rows(), DIFFERENTIAL::domain_t::RowsAtCompileTime, nullptr, jc.chainRuleMatrix());
+  }
+
+  return JacobianContainerChainRuleApplied(std::move(pg));
+}
 
 template<typename TDomain, typename TScalar>
 class NullDifferential : public Differential<TDomain, TScalar> {
@@ -56,8 +88,10 @@ class NullDifferential : public Differential<TDomain, TScalar> {
   virtual void addToJacobianContainer(JacobianContainer & /* jc */, const DesignVariable * /* dv */, const typename base_t::dyn_matrix_t & /* jacobian */) const {
   }
 
-  virtual void convertIntoMatrix(int rows, int cols, typename base_t::dyn_matrix_t & result) const {
-    result.setZero(rows, cols);
+  virtual void convertIntoMatrix(int rows, int cols, typename base_t::const_map_t* /*chainRule*/, typename base_t::map_t result) const {
+    SM_ASSERT_EQ(Exception, result.rows(), rows, ""); // TODO: make debug
+    SM_ASSERT_EQ(Exception, result.cols(), cols, ""); // TODO: make debug
+    result.setZero();
   }
 };
 
@@ -79,15 +113,18 @@ class IdentityDifferential : public Differential<TDomain, TScalar> {
   }
 
   virtual void addToJacobianContainer(JacobianContainer & jc, const DesignVariable * dv) const {
-    jc.add(const_cast<DesignVariable *>(dv), base_t::matrix_t::Identity(jc.rows(), jc.rows()));
+    jc.add(const_cast<DesignVariable *>(dv));
   }
 
   virtual void addToJacobianContainer(JacobianContainer & jc, const DesignVariable * dv, const typename base_t::dyn_matrix_t & jacobian) const {
     jc.add(const_cast<DesignVariable *>(dv), jacobian);
   }
 
-  virtual void convertIntoMatrix(int rows, int cols, typename base_t::dyn_matrix_t & result) const {
-    result.setIdentity(rows, cols);
+  virtual void convertIntoMatrix(int rows, int cols, typename base_t::const_map_t* chainRule, typename base_t::map_t result) const {
+    if (chainRule != nullptr) // TODO(hannes): something nicer
+      result = (*chainRule);
+    else
+      result.setIdentity(rows, cols);
   }
 };
 
@@ -219,8 +256,16 @@ class ComposedDifferential : public Differential<TDomain, TScalar> {
     getDerived().compose(jacobian).addToJacobianContainer(jc, dv);
   }
 
-  virtual void convertIntoMatrix(int rows, int cols, dyn_matrix_t & result) const {
-    result = internal::DifferentialCalculator<DERIVED>::calcJacobianByApplication(rows, cols, getDerived());
+  virtual void convertIntoMatrix(typename base_t::const_map_t* chainRule, typename base_t::map_t result) const {
+    if (chainRule != nullptr) 
+    {
+      SM_ASSERT_EQ_DBG(Exception, chainRule->rows(), result.rows(), "");
+      result = (*chainRule) * internal::DifferentialCalculator<DERIVED>::calcJacobianByApplication(chainRule->cols(), result.cols(), getDerived());
+    } 
+    else 
+    {
+      result = internal::DifferentialCalculator<DERIVED>::calcJacobianByApplication(result.rows(), result.cols(), getDerived());
+    }
   }
 
  protected:
@@ -232,6 +277,7 @@ class MatrixDifferential : public Differential<Eigen::Matrix<TScalar, ICols, 1>,
  protected:
   TMatrix _mat;
  public:
+  EIGEN_MAKE_ALIGNED_OPERATOR_NEW_IF(std::remove_reference<TMatrix>::type::RowsAtCompileTime != Eigen::Dynamic && std::remove_reference<TMatrix>::type::ColsAtCompileTime != Eigen::Dynamic);
   typedef Differential<Eigen::Matrix<TScalar, ICols, 1>, TScalar> base_t;
   typedef MatrixDifferential self_t;
 
@@ -258,9 +304,12 @@ class MatrixDifferential : public Differential<Eigen::Matrix<TScalar, ICols, 1>,
     jc.add(const_cast<DesignVariable *>(dv), (_mat * jacobian).template cast<double>());
   }
 
-  virtual void convertIntoMatrix(int /* rows */, int /* cols */, typename base_t::dyn_matrix_t & result) const {
+  virtual void convertIntoMatrix(int /* rows */, int /* cols */, typename base_t::const_map_t* chainRule, typename base_t::map_t result) const {
     //TODO assertions
-    result = _mat;
+    if (chainRule != nullptr)
+      result = (*chainRule) * _mat; // TODO: noalias() ???
+    else
+      result = _mat;
   }
 };
 
@@ -272,6 +321,7 @@ class ComposedMatrixDifferential : public ComposedDifferential<Eigen::Matrix<TSc
  protected:
   TMatrix _mat;
  public:
+  EIGEN_MAKE_ALIGNED_OPERATOR_NEW_IF(std::remove_reference<TMatrix>::type::RowsAtCompileTime != Eigen::Dynamic && std::remove_reference<TMatrix>::type::ColsAtCompileTime != Eigen::Dynamic);
   typedef ComposedMatrixDifferential<TNextDomain, TScalar, TMatrix, IDomainRows> self_t;
   typedef ComposedDifferential<Eigen::Matrix<TScalar, IDomainRows, 1>, TNextDomain, TScalar, self_t> base_t;
   typedef typename base_t::matrix_t matrix_t;
@@ -299,9 +349,12 @@ class ComposedMatrixDifferential : public ComposedDifferential<Eigen::Matrix<TSc
     return _mat.col(index);
   }
 
-  virtual void convertIntoMatrix(int /* rows */, int /* cols */, dyn_matrix_t & result) const {
+  virtual void convertIntoMatrix(int /* rows */, int /* cols */, typename base_t::const_map_t* chainRule, typename base_t::map_t result) const {
     //TODO assertions
-    result = _mat;
+    if (chainRule != nullptr)
+      result = (*chainRule) * _mat; // TODO: noalias() ???
+    else
+      result = _mat;
   }
 };
 

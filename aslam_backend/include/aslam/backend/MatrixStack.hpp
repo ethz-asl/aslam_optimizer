@@ -187,6 +187,8 @@ namespace backend {
 
       _dataSize = newSize;
       _headers.emplace_back(cols, start);
+
+      SM_ASSERT_TRUE_DBG(Exception, (uintptr_t)(&(_data[_headers.back().dataIndex])) % 16 == 0, "Memory is not properly aligned");
     }
 
    private:

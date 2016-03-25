@@ -37,6 +37,8 @@ namespace aslam {
 
      public:
       friend class JacobianContainerChainRuleApplied;
+      template<typename DIFFERENTIAL>
+      friend JacobianContainerChainRuleApplied applyDifferentialToJacobianContainer(JacobianContainer&, const DIFFERENTIAL&);
 
      public:
 
@@ -70,8 +72,6 @@ namespace aslam {
           SM_ASSERT_EQ(Exception, this->rows(), mat.rows(), "");
         return JacobianContainerChainRuleApplied(this->pushWithGuard(mat));
       }
-
-    protected:
 
       /// \brief Is the stack empty?
       bool chainRuleEmpty() const {

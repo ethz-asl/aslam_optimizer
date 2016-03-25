@@ -62,14 +62,12 @@ namespace aslam {
     template<int D>
     void DesignVariableVector<D>::evaluateJacobiansImplementation(JacobianContainer & outJacobians) const
     {
-      SM_ASSERT_EQ_DBG(aslam::InvalidArgumentException, outJacobians.rows(), D, "The Jacobian container dimension doesn't match the state. Are you missing a chain rule?");
-      outJacobians.add(const_cast<DesignVariableVector<D>*>(this), Eigen::Matrix<double,D,D>::Identity());
+      outJacobians.add(const_cast<DesignVariableVector<D>*>(this));
     }
 
     template<int D>
     void DesignVariableVector<D>::evaluateJacobiansImplementation(JacobianContainer & outJacobians, const Eigen::MatrixXd & applyChainRule) const
     {
-      SM_ASSERT_EQ_DBG(aslam::InvalidArgumentException, applyChainRule.cols(), D, "The chain rule matrix dimension doesn't match the state.");
       outJacobians.add(const_cast<DesignVariableVector<D>*>(this), applyChainRule);
     }
 
