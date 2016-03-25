@@ -42,7 +42,7 @@ namespace aslam {
 
       /// \brief Constructor for a container with \p rows rows.
       ///        The chain rule matrix stack will reserve memory for \p maxNumMatrices matrices with 9 elements each
-      JacobianContainer(int rows, const std::size_t maxNumMatrices = 100) : MatrixStack(maxNumMatrices, 9), _rows(rows) { }
+      JacobianContainer(int rows, const std::size_t maxNumMatrices = 100) : MatrixStack(rows, maxNumMatrices, 9), _rows(rows) { }
 
       /// \brief Destructor
       virtual ~JacobianContainer() { }
@@ -64,7 +64,7 @@ namespace aslam {
 
       /// \brief Push a matrix \p mat to the top of the stack
       template <typename DERIVED>
-      JacobianContainerChainRuleApplied apply(const Eigen::MatrixBase<DERIVED>& mat)
+      EIGEN_ALWAYS_INLINE JacobianContainerChainRuleApplied apply(const Eigen::MatrixBase<DERIVED>& mat)
       {
         if (this->chainRuleEmpty())
           SM_ASSERT_EQ(Exception, this->rows(), mat.rows(), "");
@@ -80,13 +80,13 @@ namespace aslam {
 
       /// \brief Const getter for the chain rule matrix
       template<int Rows = Eigen::Dynamic, int Cols = Eigen::Dynamic>
-      MatrixStack::ConstMap<Rows, Cols> chainRuleMatrix() const {
+      EIGEN_ALWAYS_INLINE MatrixStack::ConstMap<Rows, Cols> chainRuleMatrix() const {
         return this->top<Rows, Cols>();
       }
 
       /// \brief Mutable getter for the chain rule matrix
       template<int Rows = Eigen::Dynamic, int Cols = Eigen::Dynamic>
-      MatrixStack::Map<Rows, Cols> chainRuleMatrix() {
+      EIGEN_ALWAYS_INLINE MatrixStack::Map<Rows, Cols> chainRuleMatrix() {
         return this->top<Rows, Cols>();
       }
 

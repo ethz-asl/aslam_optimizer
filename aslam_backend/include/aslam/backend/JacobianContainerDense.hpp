@@ -53,8 +53,8 @@ namespace aslam {
 
     private:
 
-      template <bool IS_IDENTITY, typename DERIVED>
-      void addImpl(DesignVariable* designVariable, const Eigen::MatrixBase<DERIVED>& Jacobian);
+      template <bool IS_IDENTITY, typename MATRIX>
+      void addImpl(DesignVariable* designVariable, const MATRIX& Jacobian);
 
     private:
 

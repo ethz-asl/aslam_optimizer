@@ -43,21 +43,21 @@ void JACOBIAN_CONTAINER_DENSE_CLASS_TEMPLATE::clear()
 ///        with fixed-row r1 and Identity functor r2.
 ///        This method is called for non-identity r2
 template <typename L, typename R1, typename R2>
-void multiplyRhsAndAddToLhs(L&& l, R1& r1, R2& r2, std::false_type /*isIdentity*/)
+EIGEN_ALWAYS_INLINE void multiplyRhsAndAddToLhs(L&& l, R1& r1, R2& r2, std::false_type /*isIdentity*/)
 {
   SM_ASSERT_EQ_DBG(Exception, r1.cols(), r2.rows(), "Invalid matrix product of chain rule matrix and Jacobian");
   l.noalias() += r1*r2;
 }
 /// \brief This method is called for identity r2
 template <typename L, typename R1, typename R2>
-void multiplyRhsAndAddToLhs(L&& l, R1& r1, R2& /*r2*/, std::true_type /*isIdentity*/)
+EIGEN_ALWAYS_INLINE void multiplyRhsAndAddToLhs(L&& l, R1& r1, R2& /*r2*/, std::true_type /*isIdentity*/)
 {
   l += r1.leftCols(l.cols());
 }
 
 JACOBIAN_CONTAINER_DENSE_TEMPLATE
-template<bool IS_IDENTITY, typename DERIVED>
-inline void JACOBIAN_CONTAINER_DENSE_CLASS_TEMPLATE::addImpl(DesignVariable* dv, const Eigen::MatrixBase<DERIVED>& Jacobian)
+template<bool IS_IDENTITY, typename MATRIX>
+EIGEN_ALWAYS_INLINE void JACOBIAN_CONTAINER_DENSE_CLASS_TEMPLATE::addImpl(DesignVariable* dv, const MATRIX& Jacobian)
 {
   if (!dv->isActive())
     return;
