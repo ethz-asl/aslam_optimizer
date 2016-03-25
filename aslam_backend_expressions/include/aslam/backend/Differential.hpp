@@ -39,28 +39,26 @@ class Differential {
 
  protected:
   template<typename DIFFERENTIAL>
-  friend JacobianContainerChainRuleApplied applyDifferentialToJacobianContainer(JacobianContainer&, const DIFFERENTIAL&);
-  virtual void convertIntoMatrix(int rows, int cols, const_map_t* chainRule, map_t result) const = 0;
+  friend JacobianContainerChainRuleApplied applyDifferentialToJacobianContainer(JacobianContainer&, const DIFFERENTIAL&, int);
+  virtual void convertIntoMatrix(const_map_t* chainRule, map_t result) const = 0;
 
 };
 
 template<typename DIFFERENTIAL>
-JacobianContainerChainRuleApplied applyDifferentialToJacobianContainer(JacobianContainer& jc, const DIFFERENTIAL& diff)
+JacobianContainerChainRuleApplied applyDifferentialToJacobianContainer(JacobianContainer& jc, const DIFFERENTIAL& diff, int domainDimension)
 {
-  static_assert(DIFFERENTIAL::domain_t::RowsAtCompileTime != Eigen::Dynamic, "dynamic dimension is not supported yet");
-
   MatrixStack::PopGuard pg(jc);
 
   if (!jc.chainRuleEmpty())
   {
     auto CR = ((const JacobianContainer&)jc).chainRuleMatrix();
-    jc.allocate(DIFFERENTIAL::domain_t::RowsAtCompileTime);
-    diff.convertIntoMatrix(jc.rows(), DIFFERENTIAL::domain_t::RowsAtCompileTime, &CR, jc.chainRuleMatrix());
+    jc.allocate(domainDimension);
+    diff.convertIntoMatrix(&CR, jc.chainRuleMatrix());
   }
   else
   {
-    jc.allocate(DIFFERENTIAL::domain_t::RowsAtCompileTime);
-    diff.convertIntoMatrix(jc.rows(), DIFFERENTIAL::domain_t::RowsAtCompileTime, nullptr, jc.chainRuleMatrix());
+    jc.allocate(domainDimension);
+    diff.convertIntoMatrix(nullptr, jc.chainRuleMatrix());
   }
 
   return JacobianContainerChainRuleApplied(std::move(pg));
@@ -88,9 +86,7 @@ class NullDifferential : public Differential<TDomain, TScalar> {
   virtual void addToJacobianContainer(JacobianContainer & /* jc */, const DesignVariable * /* dv */, const typename base_t::dyn_matrix_t & /* jacobian */) const {
   }
 
-  virtual void convertIntoMatrix(int rows, int cols, typename base_t::const_map_t* /*chainRule*/, typename base_t::map_t result) const {
-    SM_ASSERT_EQ(Exception, result.rows(), rows, ""); // TODO: make debug
-    SM_ASSERT_EQ(Exception, result.cols(), cols, ""); // TODO: make debug
+  virtual void convertIntoMatrix(typename base_t::const_map_t* /*chainRule*/, typename base_t::map_t result) const {
     result.setZero();
   }
 };
@@ -120,11 +116,11 @@ class IdentityDifferential : public Differential<TDomain, TScalar> {
     jc.add(const_cast<DesignVariable *>(dv), jacobian);
   }
 
-  virtual void convertIntoMatrix(int rows, int cols, typename base_t::const_map_t* chainRule, typename base_t::map_t result) const {
+  virtual void convertIntoMatrix(typename base_t::const_map_t* chainRule, typename base_t::map_t result) const {
     if (chainRule != nullptr) // TODO(hannes): something nicer
       result = (*chainRule);
     else
-      result.setIdentity(rows, cols);
+      result.setIdentity(result.rows(), result.cols());
   }
 };
 
@@ -304,7 +300,7 @@ class MatrixDifferential : public Differential<Eigen::Matrix<TScalar, ICols, 1>,
     jc.add(const_cast<DesignVariable *>(dv), (_mat * jacobian).template cast<double>());
   }
 
-  virtual void convertIntoMatrix(int /* rows */, int /* cols */, typename base_t::const_map_t* chainRule, typename base_t::map_t result) const {
+  virtual void convertIntoMatrix(typename base_t::const_map_t* chainRule, typename base_t::map_t result) const {
     //TODO assertions
     if (chainRule != nullptr)
       result = (*chainRule) * _mat; // TODO: noalias() ???
@@ -349,7 +345,7 @@ class ComposedMatrixDifferential : public ComposedDifferential<Eigen::Matrix<TSc
     return _mat.col(index);
   }
 
-  virtual void convertIntoMatrix(int /* rows */, int /* cols */, typename base_t::const_map_t* chainRule, typename base_t::map_t result) const {
+  virtual void convertIntoMatrix(typename base_t::const_map_t* chainRule, typename base_t::map_t result) const {
     //TODO assertions
     if (chainRule != nullptr)
       result = (*chainRule) * _mat; // TODO: noalias() ???

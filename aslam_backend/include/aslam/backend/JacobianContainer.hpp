@@ -38,7 +38,7 @@ namespace aslam {
      public:
       friend class JacobianContainerChainRuleApplied;
       template<typename DIFFERENTIAL>
-      friend JacobianContainerChainRuleApplied applyDifferentialToJacobianContainer(JacobianContainer&, const DIFFERENTIAL&);
+      friend JacobianContainerChainRuleApplied applyDifferentialToJacobianContainer(JacobianContainer&, const DIFFERENTIAL&, int);
 
      public:
 

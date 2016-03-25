@@ -19,7 +19,7 @@ void VectorExpressionNode<D>::evaluateJacobians(JacobianContainer & outJacobians
 
 template<int D>
 void VectorExpressionNode<D>::evaluateJacobiansImplementationWithDifferential(JacobianContainer & outJacobians, const differential_t & chainRuleDifferentail) const {
-  evaluateJacobiansImplementation(applyDifferentialToJacobianContainer(outJacobians, chainRuleDifferentail));
+  evaluateJacobiansImplementation(applyDifferentialToJacobianContainer(outJacobians, chainRuleDifferentail, getSize()));
 }
 
 template<int D>
