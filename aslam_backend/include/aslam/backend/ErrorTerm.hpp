@@ -172,19 +172,24 @@ namespace aslam {
       template <typename DERIVED>
       void evaluateWeightedJacobian(JacobianContainer& outJc, bool useMEstimator, const Eigen::MatrixBase<DERIVED>& weight)
       {
-        auto jc = getJacobianContainerFunctor(
-            outJc,
-            outJc.rows(),
-            [&] (const Eigen::Ref<const Eigen::MatrixXd>& Jacobian) -> Eigen::MatrixXd
-            {
-              double sqrtWeight = 1.0;
-              if (useMEstimator) {
-                sqrtWeight = sqrt(_mEstimatorPolicy->getWeight(getRawSquaredError()));
+        if (useMEstimator) {
+          const double sqrtWeight = sqrt(_mEstimatorPolicy->getWeight(getRawSquaredError()));
+          auto jc = getJacobianContainerFunctor(outJc, outJc.rows(),
+              [&] (const Eigen::Ref<const Eigen::MatrixXd>& Jacobian)
+              {
+                return (sqrtWeight*weight.transpose()*Jacobian).eval();
               }
-              return sqrtWeight*weight.transpose()*Jacobian;
-            }
-        );
-        evaluateJacobians(jc);
+          );
+          evaluateJacobians(jc);
+        } else {
+          auto jc = getJacobianContainerFunctor(outJc, outJc.rows(),
+              [&] (const Eigen::Ref<const Eigen::MatrixXd>& Jacobian)
+              {
+                return (weight.transpose()*Jacobian).eval();
+              }
+          );
+          evaluateJacobians(jc);
+        }
       }
 
 
