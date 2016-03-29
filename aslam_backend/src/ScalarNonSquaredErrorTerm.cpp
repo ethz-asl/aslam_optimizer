@@ -2,7 +2,6 @@
 #include <boost/make_shared.hpp>
 #include <sm/logging.hpp>
 #include <aslam/backend/ScalarNonSquaredErrorTerm.hpp>
-#include <aslam/backend/JacobianContainerPrescale.hpp>
 
 namespace aslam {
 namespace backend {
@@ -23,15 +22,13 @@ double ScalarNonSquaredErrorTerm::updateRawError()
 
 void ScalarNonSquaredErrorTerm::evaluateRawJacobians(JacobianContainer& outJ) {
   Timer t("ScalarNonSquaredErrorTerm: evaluateRawJacobians", false);
-  JacobianContainerPrescaled jc(outJ, _w);
-  evaluateJacobiansImplementation(jc);
+  evaluateJacobiansImplementation(outJ.apply(_w));
 }
 
 void ScalarNonSquaredErrorTerm::evaluateWeightedJacobians(JacobianContainer& outJ)
 {
   Timer t("ScalarNonSquaredErrorTerm: evaluateWeightedJacobians", false);
-  JacobianContainerPrescaled jc(outJ, _w * _mEstimatorPolicy->getWeight(getRawError()));
-  evaluateJacobiansImplementation(jc);
+  evaluateJacobiansImplementation(outJ.apply(_w * _mEstimatorPolicy->getWeight(getRawError())));
 }
 
 /// \brief set the M-Estimator policy. This function takes a squared error

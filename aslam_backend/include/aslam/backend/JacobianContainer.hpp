@@ -73,6 +73,12 @@ namespace aslam {
         return JacobianContainerChainRuleApplied(this->pushWithGuard(mat));
       }
 
+      /// \brief Push a scalar \p scalar to the top of the stack
+      EIGEN_ALWAYS_INLINE JacobianContainerChainRuleApplied apply(const double scalar)
+      {
+        return JacobianContainerChainRuleApplied(this->pushWithGuard(scalar));
+      }
+
       /// \brief Is the stack empty?
       bool chainRuleEmpty() const {
         return this->empty();

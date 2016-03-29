@@ -36,6 +36,17 @@ TEST(MatrixStackTestSuites, testMatrixStack)
       EXPECT_ANY_THROW(stack.push(M));
     }
 
+    // Test push scalar and pop guard
+    {
+      SCOPED_TRACE("Testing push() with scalar");
+      const double scalar = 0.1;
+      const auto pg = stack.pushWithGuard(scalar);
+      sm::eigen::assertEqual(scalar*Eigen::MatrixXd::Identity(numRows, numRows), stack.top(), SM_SOURCE_FILE_POS, "Testing push() with scalar");
+    }
+
+    // Destructor of pop guard should have popped scalar
+    EXPECT_TRUE(stack.empty());
+
     // Push() and top() should return the same matrix again
     {
       SCOPED_TRACE("Testing push() and top() after initial construction");

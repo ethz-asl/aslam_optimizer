@@ -135,11 +135,33 @@ namespace backend {
       }
     }
 
-    /// \brief Push a matrix \p mat to the top of the stack
+    /// \brief Push a scalar factor \p scalar to the top of the stack
+    EIGEN_ALWAYS_INLINE void push(const double scalar)
+    {
+      if (LIKELY(!this->empty()))
+      {
+        this->allocate(this->numTopCols()); // We allocate space for 1 more matrix. Stack wasn't empty before, so now we have at least 2.
+        this->top() = this->matrix(this->numMatrices()-2)*scalar;
+      }
+      else
+      {
+        this->allocate(this->numRows());
+        this->top() = Eigen::MatrixXd::Identity(this->numRows(), this->numRows())*scalar;
+      }
+    }
+
+    /// \brief Push a matrix \p mat to the top of the stack and return a pop guard to ensure the matrix is popped again
     template <typename DERIVED>
     EIGEN_ALWAYS_INLINE PopGuard pushWithGuard(const Eigen::MatrixBase<DERIVED>& mat)
     {
       this->push(mat);
+      return PopGuard(*this);
+    }
+
+    /// \brief Push a scalar \p scalar to the top of the stack and return a pop guard to ensure the matrix is popped again
+    EIGEN_ALWAYS_INLINE PopGuard pushWithGuard(const double scalar)
+    {
+      this->push(scalar);
       return PopGuard(*this);
     }
 
