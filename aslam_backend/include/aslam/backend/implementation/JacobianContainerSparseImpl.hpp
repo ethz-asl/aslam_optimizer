@@ -252,30 +252,46 @@ namespace aslam {
     template <typename Matrix>
     void JACOBIAN_CONTAINER_SPARSE_CLASS_TEMPLATE::addImpl(DesignVariable* dv, const Matrix& Jacobian, const bool isIdentity)
     {
-      SM_ASSERT_EQ(Exception, Jacobian.rows(), _rows, "The Jacobian must have the same number of rows as this container");
       SM_ASSERT_EQ(Exception, Jacobian.cols(), dv->minimalDimensions(), "The Jacobian must have the same number of cols as dv->minimalDimensions()");
       // If the design variable isn't active, don't bother adding it.
       if (! dv->isActive())
         return;
       SM_ASSERT_GE_DBG(Exception, dv->blockIndex(), 0, "The design variable is active but the block index is less than zero.");
       map_t::iterator it = _jacobianMap.find(dv);
-      if (it == _jacobianMap.end()) {
+      if (it == _jacobianMap.end())
+      {
         if (this->chainRuleEmpty()) // stack empty
+        {
+          SM_ASSERT_EQ(Exception, Jacobian.rows(), _rows, "The Jacobian must have the same number of rows as this container");
           _jacobianMap.emplace(dv, Jacobian.template cast<double>());
+        }
         else
+        {
+          const auto CR = this->chainRuleMatrix();
+          SM_ASSERT_EQ(Exception, CR.rows(), _rows, "The chain rule matrix must have the same number of rows as this container");
           if (!isIdentity) // TODO: cleanup
-            _jacobianMap.emplace(dv, this->chainRuleMatrix()*Jacobian.template cast<double>());
+            _jacobianMap.emplace(dv, CR*Jacobian.template cast<double>());
           else
-            _jacobianMap.emplace(dv, this->chainRuleMatrix());
-      } else {
+            _jacobianMap.emplace(dv, CR);
+        }
+
+      }
+      else
+      {
         SM_ASSERT_TRUE_DBG(Exception, it->first == dv, "Two design variables had the same block index but different pointer values");
         if (this->chainRuleEmpty()) // stack empty
+        {
+          SM_ASSERT_EQ(Exception, Jacobian.rows(), _rows, "The Jacobian must have the same number of rows as this container");
           it->second.noalias() += Jacobian.template cast<double>();
-        else {
+        }
+        else
+        {
+          const auto CR = this->chainRuleMatrix();
+          SM_ASSERT_EQ(Exception, CR.rows(), _rows, "The chain rule matrix must have the same number of rows as this container");
           if (!isIdentity) // TODO: cleanup
-            it->second.noalias() += this->chainRuleMatrix()*Jacobian.template cast<double>();
+            it->second.noalias() += CR*Jacobian.template cast<double>();
           else
-            it->second.noalias() += this->chainRuleMatrix();
+            it->second.noalias() += CR;
         }
       }
     }
