@@ -17,6 +17,7 @@ namespace aslam {
     class JacobianContainerSparse : public JacobianContainer {
     public:
       SM_DEFINE_EXCEPTION(Exception, aslam::Exception);
+      static constexpr const int RowsAtCompileTime = Rows;
 
       /// \brief The map type for storing Jacobians. Sorting the list by block index
       ///        simplifies computing the upper-diagonal of the Hessian matrix.
@@ -120,8 +121,10 @@ namespace aslam {
                              map_t::const_iterator it, map_t::const_iterator it_end) const;
 
 
-      template <typename Matrix>
-      void addImpl(DesignVariable* designVariable, const Matrix& Jacobian, const bool isIdentity);
+      template <typename MATRIX>
+      void addJacobian(DesignVariable * dv, const MATRIX & jacobian);
+
+      friend class internal::JacobianContainerImplHelper;
 
       /// \brief The list of design variables.
       map_t _jacobianMap;

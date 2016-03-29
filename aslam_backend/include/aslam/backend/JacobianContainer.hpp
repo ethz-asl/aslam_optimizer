@@ -12,6 +12,9 @@
 
 namespace aslam {
   namespace backend {
+  namespace internal {
+    class JacobianContainerImplHelper;
+  }
 
     /**
      * \struct JacobianContainerChainRuleApplied

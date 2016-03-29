@@ -16,6 +16,7 @@ namespace aslam {
     public:
       SM_DEFINE_EXCEPTION(Exception, aslam::Exception);
       typedef Container container_t;
+      static constexpr const int RowsAtCompileTime = Rows;
 
       /// \brief Constructs the Jacobian container using \p jacobian as underlying data storage
       JacobianContainerDense(Container jacobian) : JacobianContainer(jacobian.rows()), _jacobian(jacobian)
@@ -53,9 +54,10 @@ namespace aslam {
 
     private:
 
-      template <bool IS_IDENTITY, typename MATRIX>
-      void addImpl(DesignVariable* designVariable, const MATRIX& Jacobian);
+      template <typename MATRIX>
+      void addJacobian(DesignVariable * dv, const MATRIX & jacobian);
 
+      friend class internal::JacobianContainerImplHelper;
     private:
 
       /// \brief The data
