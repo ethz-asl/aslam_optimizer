@@ -213,8 +213,6 @@ namespace backend {
       SM_ASSERT_TRUE_DBG(Exception, (uintptr_t)(&(_data[_headers.back().dataIndex])) % 16 == 0, "Memory is not properly aligned");
     }
 
-   private:
-
     /// \brief Const getter for the \p i-th matrix in the stack
     template<int Rows = Eigen::Dynamic, int Cols = Eigen::Dynamic>
     EIGEN_ALWAYS_INLINE ConstMap<Rows, Cols> matrix(const std::size_t i) const
@@ -222,6 +220,8 @@ namespace backend {
       SM_ASSERT_LT(IndexOutOfBoundsException, i, this->numMatrices(), "");
       return ConstMap<Rows, Cols>( &(_data[_headers[i].dataIndex]), this->numRows(), _headers[i].cols );
     }
+
+   private:
 
     /// \brief Number of columns of the matrix on top of the stack
     int numTopCols() const

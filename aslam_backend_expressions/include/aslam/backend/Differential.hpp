@@ -51,8 +51,8 @@ JacobianContainerChainRuleApplied applyDifferentialToJacobianContainer(JacobianC
 
   if (!jc.chainRuleEmpty())
   {
-    auto CR = ((const JacobianContainer&)jc).chainRuleMatrix();
     jc.allocate(domainDimension);
+    auto CR = ((const JacobianContainer&)jc).chainRuleMatrix(-1);
     diff.convertIntoMatrix(&CR, jc.chainRuleMatrix());
   }
   else

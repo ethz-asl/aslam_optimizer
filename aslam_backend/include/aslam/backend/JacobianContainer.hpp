@@ -96,6 +96,20 @@ namespace aslam {
         return this->top<Rows, Cols>();
       }
 
+      /// \brief Const getter for the \p i-th chain rule matrix in the history (0 is top matrix, -1 is previous and so on)
+      ///        \p i has to be smaller or equal to zero!
+      template<int Rows = Eigen::Dynamic, int Cols = Eigen::Dynamic>
+      EIGEN_ALWAYS_INLINE MatrixStack::ConstMap<Rows, Cols> chainRuleMatrix(int i) const {
+        return this->matrix<Rows, Cols>(static_cast<int>(this->numMatrices()) - 1 + i);
+      }
+
+      /// \brief Mutable getter for the \p i-th chain rule matrix in the history (0 is top matrix, -1 is previous and so on)
+      ///        \p i has to be smaller or equal to zero!
+      template<int Rows = Eigen::Dynamic, int Cols = Eigen::Dynamic>
+      EIGEN_ALWAYS_INLINE MatrixStack::Map<Rows, Cols> chainRuleMatrix(const int i) {
+        return this->matrix<Rows, Cols>(static_cast<int>(this->numMatrices()) - 1 + i);
+      }
+
     protected:
       /// \brief The number of rows for this set of Jacobians
       int _rows;
