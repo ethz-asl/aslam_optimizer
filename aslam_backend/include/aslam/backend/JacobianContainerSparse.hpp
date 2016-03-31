@@ -88,6 +88,9 @@ namespace aslam {
       /// \brief Clear the contents of this container
       void clear();
 
+      /// \brief Set all entries to zero
+      inline void setZero();
+
       /// \brief Clean and set the number of rows
       void reset(int rows);
       
