@@ -44,6 +44,7 @@ int main(int argc, char** argv)
     vector<string> enableNamedStreams;
     bool disableDefaultStream = false;
     size_t nIterations = 100000;
+    size_t updateDvEach = 1;
     bool useSparseJacobianContainer = false;
     bool useCaching = false, noUpdateDv = false;
     bool noDense = false, noSparse = false, noScalar = false,
@@ -60,6 +61,7 @@ int main(int argc, char** argv)
       ("num-iterations", po::value(&nIterations)->default_value(nIterations), "Number of iterations")
       ("use-sparse-jacobian-container", po::bool_switch(&useSparseJacobianContainer), "Use dense/sparse Jacobian container")
       ("use-caching", po::bool_switch(&useCaching), "Use caching expressions")
+      ("update-dv-each", po::value(&updateDvEach), "Call update on the design variables each n-th time")
       ("no-dense", po::bool_switch(&noDense), "Don't profile dense Jacobian containers")
       ("no-sparse", po::bool_switch(&noSparse), "Don't profile sparse Jacobian containers")
       ("no-scalar", po::bool_switch(&noScalar), "Don't profile scalar expressions")
@@ -88,14 +90,13 @@ int main(int argc, char** argv)
     // ********************** //
 
     {
-      Scalar dv(0.0);
+      Scalar dv(1.0);
       dv.setBlockIndex(0);
       dv.setColumnBase(0);
       dv.setActive(true);
       ScalarExpression expr = dv.toExpression();
-      ScalarExpression cexpr = toCacheExpression(expr);
-      ScalarExpression expr2 = expr*expr;
-      ScalarExpression cexpr2 = cexpr*cexpr;
+      ScalarExpression expr2 = log(expr*expr);
+      ScalarExpression cexpr2 = toCacheExpression(expr2);
 
       Eigen::MatrixXd J = Eigen::MatrixXd::Zero(ScalarExpression::Dimension, dv.minimalDimensions());
       JacobianContainerDense<Eigen::MatrixXd&, ScalarExpression::Dimension> jcDense(J);
@@ -107,7 +108,7 @@ int main(int argc, char** argv)
         sm::timing::Timer timer("ScalarExpression -- NoCache: Error", false);
         for (size_t i=0; i<nIterations; ++i) {
           expr2.evaluate();
-          if (!noUpdateDv) dv.update(&dx, 1);
+          if (!noUpdateDv && i % updateDvEach == 0) dv.update(&dx, 1);
         }
       }
 
@@ -116,7 +117,7 @@ int main(int argc, char** argv)
         sm::timing::Timer timer("ScalarExpression -- Cached: Error", false);
         for (size_t i=0; i<nIterations; ++i) {
           cexpr2.evaluate();
-          if (!noUpdateDv) dv.update(&dx, 1);
+          if (!noUpdateDv && i % updateDvEach == 0) dv.update(&dx, 1);
         }
       }
 
@@ -125,7 +126,7 @@ int main(int argc, char** argv)
         sm::timing::Timer timer("ScalarExpression -- NoCache/Sparse: Jacobian", false);
         for (size_t i=0; i<nIterations; ++i) {
           evaluateJacobian(expr2, jcSparse);
-          if (!noUpdateDv) dv.update(&dx, 1);
+          if (!noUpdateDv && i % updateDvEach == 0) dv.update(&dx, 1);
         }
       }
 
@@ -134,7 +135,7 @@ int main(int argc, char** argv)
         sm::timing::Timer timer("ScalarExpression -- Cached/Sparse: Jacobian", false);
         for (size_t i=0; i<nIterations; ++i) {
           evaluateJacobian(cexpr2, jcSparse);
-          if (!noUpdateDv) dv.update(&dx, 1);
+          if (!noUpdateDv && i % updateDvEach == 0) dv.update(&dx, 1);
         }
       }
 
@@ -143,7 +144,7 @@ int main(int argc, char** argv)
         sm::timing::Timer timer("ScalarExpression -- NoCache/Dense: Jacobian", false);
         for (size_t i=0; i<nIterations; ++i) {
           evaluateJacobian(expr2, jcDense);
-          if (!noUpdateDv) dv.update(&dx, 1);
+          if (!noUpdateDv && i % updateDvEach == 0) dv.update(&dx, 1);
         }
       }
 
@@ -152,7 +153,7 @@ int main(int argc, char** argv)
         sm::timing::Timer timer("ScalarExpression -- Cached/Dense: Jacobian", false);
         for (size_t i=0; i<nIterations; ++i) {
           evaluateJacobian(cexpr2, jcDense);
-          if (!noUpdateDv) dv.update(&dx, 1);
+          if (!noUpdateDv && i % updateDvEach == 0) dv.update(&dx, 1);
         }
       }
     } // ScalarExpression
@@ -184,7 +185,7 @@ int main(int argc, char** argv)
         sm::timing::Timer timer("GenericMatrixExpression -- No cache: Error", false);
         for (size_t i=0; i<nIterations; ++i) {
           matExp2.evaluate();
-          if (!noUpdateDv) dv.update(dx.data(), dx.size());
+          if (!noUpdateDv && i % updateDvEach == 0) dv.update(dx.data(), dx.size());
         }
       }
 
@@ -193,7 +194,7 @@ int main(int argc, char** argv)
         sm::timing::Timer timer("GenericMatrixExpression -- Cached: Error", false);
         for (size_t i=0; i<nIterations; ++i) {
           cMatExp2.evaluate();
-          if (!noUpdateDv) dv.update(dx.data(), dx.size());
+          if (!noUpdateDv && i % updateDvEach == 0) dv.update(dx.data(), dx.size());
         }
       }
 
@@ -203,7 +204,7 @@ int main(int argc, char** argv)
         sm::timing::Timer timer("GenericMatrixExpression -- NoCache/Sparse: Jacobian", false);
         for (size_t i=0; i<nIterations; ++i) {
           evaluateJacobian(matExp2, jcSparse);
-          if (!noUpdateDv) dv.update(dx.data(), dx.size());
+          if (!noUpdateDv && i % updateDvEach == 0) dv.update(dx.data(), dx.size());
         }
       }
 
@@ -212,7 +213,7 @@ int main(int argc, char** argv)
         sm::timing::Timer timer("GenericMatrixExpression -- Cached/Sparse: Jacobian", false);
         for (size_t i=0; i<nIterations; ++i) {
           evaluateJacobian(cMatExp2, jcSparse);
-          if (!noUpdateDv) dv.update(dx.data(), dx.size());
+          if (!noUpdateDv && i % updateDvEach == 0) dv.update(dx.data(), dx.size());
         }
       }
 
@@ -221,7 +222,7 @@ int main(int argc, char** argv)
         sm::timing::Timer timer("GenericMatrixExpression -- NoCache/Dense: Jacobian", false);
         for (size_t i=0; i<nIterations; ++i) {
           evaluateJacobian(matExp2, jcDense);
-          if (!noUpdateDv) dv.update(dx.data(), dx.size());
+          if (!noUpdateDv && i % updateDvEach == 0) dv.update(dx.data(), dx.size());
         }
       }
 
@@ -230,7 +231,7 @@ int main(int argc, char** argv)
         sm::timing::Timer timer("GenericMatrixExpression -- Cached/Dense: Jacobian", false);
         for (size_t i=0; i<nIterations; ++i) {
           evaluateJacobian(cMatExp2, jcDense);
-          if (!noUpdateDv) dv.update(dx.data(), dx.size());
+          if (!noUpdateDv && i % updateDvEach == 0) dv.update(dx.data(), dx.size());
         }
       }
     } // GenericMatrixExpression
