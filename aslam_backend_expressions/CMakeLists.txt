@@ -72,6 +72,7 @@ catkin_add_gtest(${PROJECT_NAME}_test
   test/GenericScalarExpressionTest.cpp
   test/GenericMatrixExpression.cpp
   test/QuaternionExpression.cpp
+  test/CacheExpression.cpp
   test/ScalarExpression.cpp
   test/ExpressionUtils.cpp
   test/ErrorTest_Transformation.cpp
