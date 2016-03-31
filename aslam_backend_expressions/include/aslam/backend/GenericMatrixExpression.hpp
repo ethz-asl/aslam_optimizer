@@ -31,6 +31,7 @@ struct GenericMatrixNodeTraits {
 template<int IRows, int ICols, typename TScalar = double, typename TNode = GenericMatrixExpressionNode<IRows, ICols, TScalar> >
 class GenericMatrixExpression {
  public:
+  enum { Dimension = IRows*ICols };
   typedef GenericMatrixExpression self_t;
   typedef GenericMatrixExpressionNode<IRows, ICols, TScalar> default_node_t;
   typedef TNode node_t;
