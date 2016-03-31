@@ -27,8 +27,19 @@ void (SimpleOptimizationProblem::*saet)( const boost::shared_ptr<ErrorTerm> &) =
 
 void (SimpleOptimizationProblem::*sasnset)( const boost::shared_ptr<ScalarNonSquaredErrorTerm> &) = &SimpleOptimizationProblem::addErrorTerm;
 
-template <typename E>
-RowVectorType computeGradientForErrorTerm(boost::shared_ptr<OptimizationProblemBase> problem, E* errorTerm, bool useMEstimator = true) {
+RowVectorType computeGradientForScalarNonSquaredErrorTerm(boost::shared_ptr<OptimizationProblemBase> problem, ScalarNonSquaredErrorTerm* errorTerm, bool useMEstimator = true) {
+
+  ProblemManager pm;
+  pm.setProblem(problem);
+  pm.initialize();
+
+  RowVectorType J = RowVectorType::Zero(1, pm.numOptParameters());
+  JacobianContainerDense<RowVectorType&, 1> jc(J);
+  pm.addGradientForErrorTerm(jc, errorTerm, useMEstimator);
+  return jc.asDenseMatrix();
+}
+
+RowVectorType computeGradientForErrorTerm(boost::shared_ptr<OptimizationProblemBase> problem, ErrorTerm* errorTerm, bool useMEstimator = true) {
 
   ProblemManager pm;
   pm.setProblem(problem);
@@ -57,8 +68,8 @@ double evaluateError(boost::shared_ptr<OptimizationProblemBase> problem, std::si
   return pm.evaluateError(nThreads);
 }
 
-BOOST_PYTHON_FUNCTION_OVERLOADS(computeGradientForErrorTerm_overloads, computeGradientForErrorTerm<ErrorTerm>, 2, 3);
-BOOST_PYTHON_FUNCTION_OVERLOADS(computeGradientForScalarNonSquaredErrorTerm_overloads, computeGradientForErrorTerm<ScalarNonSquaredErrorTerm>, 2, 3);
+BOOST_PYTHON_FUNCTION_OVERLOADS(computeGradientForErrorTerm_overloads, computeGradientForErrorTerm, 2, 3);
+BOOST_PYTHON_FUNCTION_OVERLOADS(computeGradientForScalarNonSquaredErrorTerm_overloads, computeGradientForScalarNonSquaredErrorTerm, 2, 3);
 BOOST_PYTHON_FUNCTION_OVERLOADS(computeGradient_overloads, computeGradient, 1, 4);
 BOOST_PYTHON_FUNCTION_OVERLOADS(evaluateError_overloads, evaluateError, 1, 2);
 
@@ -79,10 +90,10 @@ void exportOptimizationProblem()
     /// \brief get scalar non squared error term i
     .def("scalarNonSquaredErrorTerm", nsetptr, return_internal_reference<>())
     /// \brief get the gradient contribution of the scalar non squared error term i
-    .def("computeGradientForScalarNonSquaredErrorTerm", &computeGradientForErrorTerm<ScalarNonSquaredErrorTerm>,
+    .def("computeGradientForScalarNonSquaredErrorTerm", &computeGradientForScalarNonSquaredErrorTerm,
          computeGradientForScalarNonSquaredErrorTerm_overloads("computeGradientForScalarNonSquaredErrorTerm(ScalarNonSquaredErrorTerm e, bool useMEstimator)"))
     /// \brief get the gradient contribution of the scalar non squared error term i
-    .def("computeGradientForErrorTerm", &computeGradientForErrorTerm<ErrorTerm>,
+    .def("computeGradientForErrorTerm", &computeGradientForErrorTerm,
          computeGradientForErrorTerm_overloads("computeGradientForErrorTerm(ErrorTerm e, int nThreads, bool useMEstimator)"))
     /// \brief compute the full gradient
     .def("computeGradient", &computeGradient, computeGradient_overloads("computeGradient(int nThreads, bool useMEstimator, bool applyDvScaling)"))
