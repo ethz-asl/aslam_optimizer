@@ -155,17 +155,14 @@ void ProblemManager::addGradientForErrorTerm(RowVectorType& J, ErrorTerm* e, boo
   }
 }
 
-void ProblemManager::addGradientForErrorTerm(RowVectorType& J, ScalarNonSquaredErrorTerm* e, bool useMEstimator) {
-  if (_useDenseJacobianContainer) {
-    JacobianContainerDense<RowVectorType&, 1> jc(J);
-    e->evaluateJacobians(jc, useMEstimator);
-  } else {
-    JacobianContainerSparse<1> jc(e->dimension());
-    // TODO: We have to ensure that updateRawError() is called before the M-Estimator is evaluated!
-    e->evaluateJacobians(jc, useMEstimator);
-    for (const auto& dvJacPair : jc) // iterate over design variables of this error term
-      J.block(0 /*e->rowBase()*/, dvJacPair.first->columnBase(), dvJacPair.second.rows(), dvJacPair.second.cols()) += dvJacPair.second;
-  }
+void ProblemManager::addGradientForErrorTerm(JacobianContainerSparse<1>& jc, RowVectorType& J, ScalarNonSquaredErrorTerm* e, bool useMEstimator) {
+  e->evaluateJacobians(jc, useMEstimator);
+  for (const auto& dvJacPair : jc) // iterate over design variables of this error term
+    J.block(0 /*e->rowBase()*/, dvJacPair.first->columnBase(), dvJacPair.second.rows(), dvJacPair.second.cols()) += dvJacPair.second;
+}
+
+void ProblemManager::addGradientForErrorTerm(JacobianContainerDense<RowVectorType&, 1>& jc, ScalarNonSquaredErrorTerm* e, bool useMEstimator) {
+  e->evaluateJacobians(jc, useMEstimator);
 }
 
 
@@ -269,12 +266,30 @@ void ProblemManager::sumErrorTerms(size_t /* threadId */, size_t startIdx, size_
 void ProblemManager::evaluateGradients(size_t /* threadId */, size_t startIdx, size_t endIdx, bool useMEstimator, RowVectorType& J)
 {
   SM_ASSERT_LE_DBG(Exception, endIdx, _numErrorTerms, "");
-  for (size_t i = startIdx; i < endIdx; ++i) { // iterate through error terms
-    if (i < _errorTermsNS.size())
-      addGradientForErrorTerm(J, _errorTermsNS[i], useMEstimator);
-    else
-      addGradientForErrorTerm(J, _errorTermsS[i - _errorTermsNS.size()], useMEstimator);
+
+  boost::shared_ptr<JacobianContainer> jc;
+
+  // process non-squared error terms
+  if (_useDenseJacobianContainer)
+  {
+    JacobianContainerDense<RowVectorType&, 1> jc(J);
+    for (size_t i = startIdx; i < endIdx && i < _errorTermsNS.size(); ++i)
+      addGradientForErrorTerm(jc, _errorTermsNS[i], useMEstimator);
   }
+  else
+  {
+    JacobianContainerSparse<1> jc(1);
+    for (size_t i = startIdx; i < endIdx && i < _errorTermsNS.size(); ++i)
+      addGradientForErrorTerm(jc, J, _errorTermsNS[i], useMEstimator);
+  }
+
+  // process squared error terms
+  for (size_t i = _errorTermsNS.size(); i < endIdx; ++i)
+  {
+    auto e = _errorTermsS[i - _errorTermsNS.size()];
+    addGradientForErrorTerm(J, e, useMEstimator);
+  }
+
 }
 
 } // namespace backend

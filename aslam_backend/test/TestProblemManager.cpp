@@ -2,6 +2,8 @@
 #include <string>
 #include <bitset>
 #include <aslam/backend/util/ProblemManager.hpp>
+#include <aslam/backend/JacobianContainerDense.hpp>
+#include <aslam/backend/JacobianContainerSparse.hpp>
 #include "SampleDvAndError.hpp"
 
 using namespace std;
@@ -61,6 +63,7 @@ TEST(OptimizationProblemTestSuite, testProblemManager)
     RowVectorType grad1 = jc1.asDenseMatrix();
 
     RowVectorType grad = RowVectorType::Zero(pm.numOptParameters());
+    JacobianContainerDense<RowVectorType&, 1> jcDense(grad);
 
     // Gradient should be zero, design variable is not activated
     pm.addGradientForErrorTerm(grad, &err0, useMEstimator);
@@ -68,9 +71,9 @@ TEST(OptimizationProblemTestSuite, testProblemManager)
 
     // Gradient should be equal to the one of the scalar error term
     grad.setZero();
-    pm.addGradientForErrorTerm(grad, &err1, useMEstimator);
+    pm.addGradientForErrorTerm(jcDense, &err1, useMEstimator);
     sm::eigen::assertEqual(grad, grad1, SM_SOURCE_FILE_POS, MSG_STRING(useMEstimator, applyDvScaling, useDenseJacobianContainer));
-    pm.addGradientForErrorTerm(grad, &err1, useMEstimator); // test that nothing gets cleared
+    pm.addGradientForErrorTerm(jcDense, &err1, useMEstimator); // test that nothing gets cleared
     sm::eigen::assertEqual(grad, grad1 + grad1, SM_SOURCE_FILE_POS, MSG_STRING(useMEstimator, applyDvScaling, useDenseJacobianContainer));
 
     // Full gradient should be equal to the one of the scalar error term
