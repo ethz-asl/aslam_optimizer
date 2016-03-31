@@ -325,8 +325,12 @@ namespace aslam {
         add(dvJacPair.first, applyChainRule == nullptr ? dvJacPair.second : (*applyChainRule)*dvJacPair.second);
     }
 
-
-
+    JACOBIAN_CONTAINER_SPARSE_TEMPLATE
+    inline void JACOBIAN_CONTAINER_SPARSE_CLASS_TEMPLATE::addTo(JacobianContainer& jc)
+    {
+      for (auto& dvJacPair : _jacobianMap)
+        jc.add(dvJacPair.first, dvJacPair.second);
+    }
 
     // Explicit template instantiation
     extern template class JacobianContainerSparse<Eigen::Dynamic>;
