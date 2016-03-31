@@ -1,4 +1,5 @@
 #include <aslam/backend/DesignVariable.hpp>
+#include <aslam/backend/CacheInterface.hpp>
 
 namespace aslam {
   namespace backend {
@@ -17,7 +18,9 @@ namespace aslam {
     /// \brief update the design variable.
     void DesignVariable::update(const double* dp, int size)
     {
-      // scale the design variable:
+      invalidateCache();
+
+      // update the design variable:
       updateImplementation(dp, size);
     }
 
@@ -25,6 +28,7 @@ namespace aslam {
     /// \brief Revert the last state update
     void DesignVariable::revertUpdate()
     {
+      invalidateCache();
       revertUpdateImplementation();
     }
 
@@ -39,6 +43,7 @@ namespace aslam {
     }
 
     void DesignVariable::setParameters(const Eigen::MatrixXd& value) {
+      invalidateCache();
       setParametersImplementation(value);
     }
 
@@ -65,6 +70,19 @@ namespace aslam {
     	SM_THROW(aslam::Exception, "Calling default dummy implementation of minimalDifferenceAndJacobian(). If you want to use the marginalizer with this design variable, implement a specialization of this function first!");
 
     }
+
+  void DesignVariable::registerCacheExpressionNode(const boost::shared_ptr<CacheInterface>& cn) {
+    _cacheNodes.push_back(cn);
+  }
+
+  void DesignVariable::invalidateCache() {
+    // reset the cache
+    for (const auto cn : _cacheNodes) {
+      const auto pt = cn.lock();
+      if (pt != nullptr) // TODO: Can this happen at all? Do we have to clean up here?
+        pt->invalidate();
+    }
+  }
 
   } // namespace backend
 } // namespace aslam
