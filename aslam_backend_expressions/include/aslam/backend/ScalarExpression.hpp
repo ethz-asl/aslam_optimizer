@@ -24,7 +24,7 @@ namespace aslam {
       typedef double value_t;
       typedef ScalarExpressionNode node_t;
 
-      ScalarExpression( double value );
+      explicit ScalarExpression( double value );
       ScalarExpression(ScalarExpressionNode * designVariable);
       ScalarExpression(boost::shared_ptr<ScalarExpressionNode> designVariable);
       ~ScalarExpression();
@@ -55,6 +55,12 @@ namespace aslam {
       bool operator >= (const ScalarExpression & s) const { return this->toValue() >= s.toValue(); }
       bool operator == (const ScalarExpression & s) const { return this->toValue() == s.toValue(); }
       bool operator != (const ScalarExpression & s) const { return this->toValue() != s.toValue(); }
+      bool operator < (const double s) const { return this->toValue() < s; }
+      bool operator > (const double s) const { return this->toValue() > s; }
+      bool operator <= (const double s) const { return this->toValue() <= s; }
+      bool operator >= (const double s) const { return this->toValue() >= s; }
+      bool operator == (const double s) const { return this->toValue() == s; }
+      bool operator != (const double s) const { return this->toValue() != s; }
 
     private:
       /// \todo make the default constructor private.
