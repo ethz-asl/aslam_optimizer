@@ -36,7 +36,7 @@ RowVectorType computeGradientForScalarNonSquaredErrorTerm(boost::shared_ptr<Opti
   RowVectorType J = RowVectorType::Zero(1, pm.numOptParameters());
   JacobianContainerDense<RowVectorType&, 1> jc(J);
   pm.addGradientForErrorTerm(jc, errorTerm, useMEstimator);
-  return jc.asDenseMatrix();
+  return J;
 }
 
 RowVectorType computeGradientForErrorTerm(boost::shared_ptr<OptimizationProblemBase> problem, ErrorTerm* errorTerm, bool useMEstimator = true) {

@@ -267,27 +267,29 @@ void ProblemManager::evaluateGradients(size_t /* threadId */, size_t startIdx, s
 {
   SM_ASSERT_LE_DBG(Exception, endIdx, _numErrorTerms, "");
 
-  boost::shared_ptr<JacobianContainer> jc;
+  size_t cnt = startIdx;
 
   // process non-squared error terms
   if (_useDenseJacobianContainer)
   {
     JacobianContainerDense<RowVectorType&, 1> jc(J);
-    for (size_t i = startIdx; i < endIdx && i < _errorTermsNS.size(); ++i)
-      addGradientForErrorTerm(jc, _errorTermsNS[i], useMEstimator);
+    for (; cnt < endIdx && cnt < _errorTermsNS.size(); ++cnt)
+      addGradientForErrorTerm(jc, _errorTermsNS[cnt], useMEstimator);
   }
   else
   {
     JacobianContainerSparse<1> jc(1);
-    for (size_t i = startIdx; i < endIdx && i < _errorTermsNS.size(); ++i)
-      addGradientForErrorTerm(jc, J, _errorTermsNS[i], useMEstimator);
+    for (; cnt < endIdx && cnt < _errorTermsNS.size(); ++cnt)
+    {
+      jc.clear();
+      addGradientForErrorTerm(jc, J, _errorTermsNS[cnt], useMEstimator);
+    }
   }
 
   // process squared error terms
-  for (size_t i = _errorTermsNS.size(); i < endIdx; ++i)
+  for (; cnt < endIdx; ++cnt)
   {
-    auto e = _errorTermsS[i - _errorTermsNS.size()];
-    addGradientForErrorTerm(J, e, useMEstimator);
+    addGradientForErrorTerm(J, _errorTermsS[cnt - _errorTermsNS.size()], useMEstimator);
   }
 
 }
