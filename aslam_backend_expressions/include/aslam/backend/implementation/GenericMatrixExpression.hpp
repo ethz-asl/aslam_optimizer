@@ -69,7 +69,7 @@ void _CLASS::evaluateJacobians(JacobianContainer & outJacobians) const
 _TEMPLATE
 void _CLASS::evaluateJacobians(JacobianContainer & outJacobians, const Eigen::MatrixXd & applyChainRule) const
 {
-  _root->evaluateJacobians(outJacobians, MatrixDifferential<TScalar, Eigen::Matrix<TScalar, Eigen::Dynamic, IRows> >(applyChainRule.cast<TScalar>()));
+  evaluateJacobians(outJacobians.apply(applyChainRule));
 }
 
 _TEMPLATE
@@ -104,7 +104,7 @@ ScalarExpression _CLASS::toScalarExpression() const {
     virtual void evaluateJacobiansImplementation(JacobianContainer & outJacobians) const { base_t::evaluateJacobiansImplementation(outJacobians, IdentityDifferential<Eigen::Matrix<double, 1,1>, double>()); };
     virtual void evaluateJacobiansImplementation(JacobianContainer & outJacobians, const Eigen::MatrixXd & applyChainRule) const {
       assert(applyChainRule.cols() == 1);
-      base_t::evaluateJacobiansImplementation(outJacobians, MatrixDifferential<double, Eigen::MatrixXd, 1>(applyChainRule));
+      evaluateJacobians(outJacobians.apply(applyChainRule));
     };
   };
 
@@ -132,7 +132,7 @@ ScalarExpression _CLASS::toScalarExpression(int rowIndex, int colIndex) const {
     virtual void evaluateJacobiansImplementation(JacobianContainer & outJacobians) const { base_t::evaluateJacobiansImplementation(outJacobians, IdentityDifferential<Eigen::Matrix<double, 1,1>, double>()); };
     virtual void evaluateJacobiansImplementation(JacobianContainer & outJacobians, const Eigen::MatrixXd & applyChainRule) const {
       assert(applyChainRule.cols() == 1);
-      base_t::evaluateJacobiansImplementation(outJacobians, MatrixDifferential<double, Eigen::MatrixXd, 1>(applyChainRule));
+      evaluateJacobians(outJacobians.apply(applyChainRule));
     };
   private:
     int rowIndex;

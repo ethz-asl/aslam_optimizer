@@ -214,10 +214,10 @@ namespace aslam {
     }
 
     template<typename I>
-    void CompressedColumnMatrix<I>::appendJacobians(const JacobianContainerSparse& jc)
+    void CompressedColumnMatrix<I>::appendJacobians(const JacobianContainerSparse<Eigen::Dynamic>& jc)
     {
       std::vector<DesignVariable*> dvs;
-      JacobianContainerSparse::map_t::const_iterator it = jc.begin();
+      auto it = jc.begin();
       for (; it != jc.end(); ++it) {
         dvs.push_back(it->first);
       }
@@ -285,9 +285,9 @@ namespace aslam {
     }
 
     template<typename I>
-    void CompressedColumnMatrix<I>::writeJacobians(const JacobianContainerSparse& jc, const JacobianColumnPointer& cp)
+    void CompressedColumnMatrix<I>::writeJacobians(const JacobianContainerSparse<Eigen::Dynamic>& jc, const JacobianColumnPointer& cp)
     {
-      JacobianContainerSparse::map_t::const_iterator it = jc.begin();
+      auto it = jc.begin();
       SM_ASSERT_EQ(Exception, jc.numDesignVariables(), cp.numActiveDesignVariables, "The number of design variables in the Jacobian container should match the number of active design variables found at initialization!");
       int rowOffset = 0;
       for (; it != jc.end(); ++it) {

@@ -89,7 +89,7 @@ TEST(OptimizerTestSuite, testOptimizerMatrices)
     Eigen::VectorXd ei;
     for (unsigned i = 0; i < problem.numErrorTerms(); ++i) {
       int ridx = 2 * i;
-      JacobianContainerSparse jc(problem.errorTerm(i)->dimension());
+      JacobianContainerSparse<> jc(problem.errorTerm(i)->dimension());
       problem.errorTerm(i)->evaluateError();
       problem.errorTerm(i)->getWeightedJacobians(jc, false);
       J.block<2, P * 2>(ridx, 0) = jc.asDenseMatrix(optimizer.H().colBlockIndices());
@@ -107,7 +107,7 @@ TEST(OptimizerTestSuite, testOptimizerMatrices)
       J.setZero();
       int ridx = 2 * i;
       problem.errorTerm(i)->evaluateError();
-      JacobianContainerSparse Jc(problem.errorTerm(i)->dimension());
+      JacobianContainerSparse<> Jc(problem.errorTerm(i)->dimension());
       problem.errorTerm(i)->evaluateJacobians(Jc);
       J = Jc.asDenseMatrix(optimizer.H().colBlockIndices());
       e.segment<2>(ridx) = dynamic_cast<ErrorTermFs<2>*>(problem.errorTerm(i))->error();

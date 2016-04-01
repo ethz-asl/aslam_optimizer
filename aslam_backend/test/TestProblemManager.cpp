@@ -56,7 +56,7 @@ TEST(OptimizationProblemTestSuite, testProblemManager)
     ASSERT_EQ(2, pm.numOptParameters()); // one active two-dimensional
     ASSERT_EQ(2, pm.numErrorTerms());
 
-    JacobianContainerSparse jc1(err1.dimension());
+    JacobianContainerSparse<> jc1(err1.dimension());
     err1.evaluateWeightedJacobians(jc1);
     RowVectorType grad1 = jc1.asDenseMatrix();
 
@@ -86,7 +86,7 @@ TEST(OptimizationProblemTestSuite, testProblemManager)
     grad = RowVectorType::Zero(pm.numOptParameters());
 
     // Compute expected gradient for squared error
-    JacobianContainerSparse jc0(err0.dimension());
+    JacobianContainerSparse<> jc0(err0.dimension());
     err0.getWeightedJacobians(jc0, useMEstimator);
     ColumnVectorType ev;
     err0.updateRawSquaredError();

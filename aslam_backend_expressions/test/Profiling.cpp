@@ -91,7 +91,8 @@ int main(int argc, char** argv)
       ScalarExpression expr2 = expr*expr;
 
       Eigen::MatrixXd J = Eigen::MatrixXd::Zero(ScalarExpression::Dimension, dv.minimalDimensions());
-      JacobianContainerDense<Eigen::MatrixXd&> jcDense(J);
+      JacobianContainerDense<Eigen::MatrixXd&, ScalarExpression::Dimension> jcDense(J);
+      JacobianContainerSparse<ScalarExpression::Dimension> jcSparse(ScalarExpression::Dimension);
       const double dx = 1.0;
 
       // Test error evaluation non-cached
@@ -107,8 +108,7 @@ int main(int argc, char** argv)
       if (!noJacobian && !noSparse && !noScalar) {
         sm::timing::Timer timer("ScalarExpression -- NoCache/Sparse: Jacobian", false);
         for (size_t i=0; i<nIterations; ++i) {
-          JacobianContainerSparse jc(ScalarExpression::Dimension);
-          evaluateJacobian(expr2, jc);
+          evaluateJacobian(expr2, jcSparse);
           if (!noUpdateDv) dv.update(&dx, 1);
         }
       }
@@ -139,8 +139,9 @@ int main(int argc, char** argv)
       GME matExp(&dv);
       const auto matExp2 = matExp.transpose()*matExp;
 
-      Eigen::MatrixXd J = Eigen::MatrixXd::Zero(VEC_ROWS, dv.minimalDimensions());
-      JacobianContainerDense<Eigen::MatrixXd&> jcDense(J);
+      Eigen::MatrixXd J = Eigen::MatrixXd::Zero(1, dv.minimalDimensions());
+      JacobianContainerDense<Eigen::MatrixXd&, 1> jcDense(J);
+      JacobianContainerSparse<1> jcSparse(1);
       const GME::matrix_t dx = GME::matrix_t::Ones(dv.minimalDimensions(), 1);
 
       // Test error evaluation non-cached
@@ -156,8 +157,7 @@ int main(int argc, char** argv)
       if (!noJacobian && !noSparse && !noMatrix) {
         sm::timing::Timer timer("GenericMatrixExpression -- NoCache/Sparse: Jacobian", false);
         for (size_t i=0; i<nIterations; ++i) {
-          JacobianContainerSparse jc(VEC_ROWS);
-          evaluateJacobian(matExp2, jc);
+          evaluateJacobian(matExp2, jcSparse);
           if (!noUpdateDv) dv.update(dx.data(), dx.size());
         }
       }

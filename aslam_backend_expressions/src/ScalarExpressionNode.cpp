@@ -23,7 +23,7 @@ namespace aslam {
 
       
         /// \brief Evaluate the Jacobians
-        void ScalarExpressionNode::evaluateJacobians(JacobianContainer & outJacobians) const
+        void ScalarExpressionNode::evaluateJacobians(JacobianContainer & outJacobians) const // TODO: inline this method!!!!!!!!! (and everywhere else)
         {
             evaluateJacobiansImplementation(outJacobians);
         }
@@ -61,20 +61,17 @@ namespace aslam {
 
         void ScalarExpressionNodeMultiply::evaluateJacobiansImplementation(JacobianContainer & outJacobians) const
         {
-            Eigen::MatrixXd L(1,1), R(1,1);
+            Eigen::Matrix<double, 1, 1> L(1,1), R(1,1);
             L(0,0) = _lhs->toScalar();
             R(0,0) = _rhs->toScalar();
-            _lhs->evaluateJacobians(outJacobians, R);
-            _rhs->evaluateJacobians(outJacobians, L);
+
+            _lhs->evaluateJacobians(outJacobians.apply(R));
+            _rhs->evaluateJacobians(outJacobians.apply(L));
         }
 
         void ScalarExpressionNodeMultiply::evaluateJacobiansImplementation(JacobianContainer & outJacobians, const Eigen::MatrixXd & applyChainRule) const
         {
-            Eigen::MatrixXd L(1,1), R(1,1);
-            L(0,0) = _lhs->toScalar();
-            R(0,0) = _rhs->toScalar();
-            _lhs->evaluateJacobians(outJacobians, applyChainRule * R);
-            _rhs->evaluateJacobians(outJacobians, applyChainRule * L);
+            evaluateJacobiansImplementation(outJacobians.apply(applyChainRule));
         }
 
         void ScalarExpressionNodeMultiply::getDesignVariablesImplementation(DesignVariable::set_t & designVariables) const
@@ -101,22 +98,17 @@ namespace aslam {
 
         void ScalarExpressionNodeDivide::evaluateJacobiansImplementation(JacobianContainer & outJacobians) const
         {
-            Eigen::MatrixXd L(1,1), R(1,1);
+            Eigen::Matrix<double, 1, 1> L(1,1), R(1,1);
             const auto rhs_rec = 1./_rhs->toScalar();
             L(0,0) = rhs_rec;
             R(0,0) = -_lhs->toScalar() * rhs_rec * rhs_rec;
-            _lhs->evaluateJacobians(outJacobians, L);
-            _rhs->evaluateJacobians(outJacobians, R);
+            _lhs->evaluateJacobians(outJacobians.apply(L));
+            _rhs->evaluateJacobians(outJacobians.apply(R));
         }
 
         void ScalarExpressionNodeDivide::evaluateJacobiansImplementation(JacobianContainer & outJacobians, const Eigen::MatrixXd & applyChainRule) const
         {
-            Eigen::MatrixXd L(1,1), R(1,1);
-            const auto rhs_rec = 1./_rhs->toScalar();
-            L(0,0) = rhs_rec;
-            R(0,0) = -_lhs->toScalar() * rhs_rec * rhs_rec;
-            _lhs->evaluateJacobians(outJacobians, applyChainRule * L);
-            _rhs->evaluateJacobians(outJacobians, applyChainRule * R);
+            evaluateJacobiansImplementation(outJacobians.apply(applyChainRule));
         }
 
         void ScalarExpressionNodeDivide::getDesignVariablesImplementation(DesignVariable::set_t & designVariables) const
@@ -146,16 +138,15 @@ namespace aslam {
 
         void ScalarExpressionNodeAdd::evaluateJacobiansImplementation(JacobianContainer & outJacobians) const
         {
-            Eigen::MatrixXd R(1,1);
+            Eigen::Matrix<double, 1, 1> R(1,1);
             R(0,0) = _multiplyRhs;
             _lhs->evaluateJacobians(outJacobians);
-            _rhs->evaluateJacobians(outJacobians, R);
+            _rhs->evaluateJacobians(outJacobians.apply(R));
         }
 
         void ScalarExpressionNodeAdd::evaluateJacobiansImplementation(JacobianContainer & outJacobians, const Eigen::MatrixXd & applyChainRule) const
         {
-            _lhs->evaluateJacobians(outJacobians, applyChainRule);
-            _rhs->evaluateJacobians(outJacobians, applyChainRule * _multiplyRhs);
+            evaluateJacobiansImplementation(outJacobians.apply(applyChainRule));
         }
 
         void ScalarExpressionNodeAdd::getDesignVariablesImplementation(DesignVariable::set_t & designVariables) const
@@ -178,22 +169,21 @@ namespace aslam {
 
         double ScalarExpressionNodeSqrt::evaluateImplementation() const
         {
-            SM_ASSERT_GT(std::runtime_error, _lhs->toScalar(), 0.0, "");
-            return sqrt(_lhs->toScalar());
+            const auto lhs = _lhs->toScalar();
+            SM_ASSERT_GT(std::runtime_error, lhs, 0.0, "");
+            return sqrt(lhs);
         }
 
         void ScalarExpressionNodeSqrt::evaluateJacobiansImplementation(JacobianContainer & outJacobians) const
         {
             Eigen::Matrix<double, 1, 1> R(1,1);
             R(0,0) = 1./(2.*sqrt(_lhs->toScalar()));
-            _lhs->evaluateJacobians(outJacobians, R);
+            _lhs->evaluateJacobians(outJacobians.apply(R));
         }
 
         void ScalarExpressionNodeSqrt::evaluateJacobiansImplementation(JacobianContainer & outJacobians, const Eigen::MatrixXd & applyChainRule) const
         {
-            Eigen::Matrix<double, 1, 1> R(1,1);
-            R(0,0) = 1./(2.*sqrt(_lhs->toScalar()));
-            _lhs->evaluateJacobians(outJacobians, applyChainRule * R);
+            evaluateJacobiansImplementation(outJacobians.apply(applyChainRule));
         }
 
         void ScalarExpressionNodeSqrt::getDesignVariablesImplementation(DesignVariable::set_t & designVariables) const
@@ -214,22 +204,21 @@ namespace aslam {
 
         double ScalarExpressionNodeLog::evaluateImplementation() const
         {
-            SM_ASSERT_GT(std::runtime_error, _lhs->toScalar(), 0.0, "");
-            return log(_lhs->toScalar());
+            const auto lhs = _lhs->toScalar();
+            SM_ASSERT_GT(std::runtime_error, lhs, 0.0, "");
+            return log(lhs);
         }
 
         void ScalarExpressionNodeLog::evaluateJacobiansImplementation(JacobianContainer & outJacobians) const
         {
             Eigen::Matrix<double, 1, 1> R(1,1);
             R(0,0) = 1./(_lhs->toScalar());
-            _lhs->evaluateJacobians(outJacobians, R);
+            _lhs->evaluateJacobians(outJacobians.apply(R));
         }
 
         void ScalarExpressionNodeLog::evaluateJacobiansImplementation(JacobianContainer & outJacobians, const Eigen::MatrixXd & applyChainRule) const
         {
-            Eigen::Matrix<double, 1, 1> R(1,1);
-            R(0,0) = 1./(_lhs->toScalar());
-            _lhs->evaluateJacobians(outJacobians, applyChainRule * R);
+            evaluateJacobiansImplementation(outJacobians.apply(applyChainRule));
         }
 
         void ScalarExpressionNodeLog::getDesignVariablesImplementation(DesignVariable::set_t & designVariables) const
@@ -258,14 +247,12 @@ namespace aslam {
         {
             Eigen::Matrix<double, 1, 1> R(1,1);
             R(0,0) = exp(_lhs->toScalar());
-            _lhs->evaluateJacobians(outJacobians, R);
+            _lhs->evaluateJacobians(outJacobians.apply(R));
         }
 
         void ScalarExpressionNodeExp::evaluateJacobiansImplementation(JacobianContainer & outJacobians, const Eigen::MatrixXd & applyChainRule) const
         {
-            Eigen::Matrix<double, 1, 1> R(1,1);
-            R(0,0) = exp(_lhs->toScalar());
-            _lhs->evaluateJacobians(outJacobians, applyChainRule * R);
+            evaluateJacobiansImplementation(outJacobians.apply(applyChainRule));
         }
 
         void ScalarExpressionNodeExp::getDesignVariablesImplementation(DesignVariable::set_t & designVariables) const
@@ -295,15 +282,12 @@ namespace aslam {
             Eigen::Matrix<double, 1, 1> R(1,1);
             const auto lhss = _lhs->toScalar();
             R(0,0) = 1./(1. + lhss * lhss);
-            _lhs->evaluateJacobians(outJacobians, R);
+            _lhs->evaluateJacobians(outJacobians.apply(R));
         }
 
         void ScalarExpressionNodeAtan::evaluateJacobiansImplementation(JacobianContainer & outJacobians, const Eigen::MatrixXd & applyChainRule) const
         {
-            Eigen::Matrix<double, 1, 1> R(1,1);
-            const auto lhss = _lhs->toScalar();
-            R(0,0) = 1./(1. + lhss*lhss);
-            _lhs->evaluateJacobians(outJacobians, applyChainRule * R);
+            evaluateJacobiansImplementation(outJacobians.apply(applyChainRule));
         }
 
         void ScalarExpressionNodeAtan::getDesignVariablesImplementation(DesignVariable::set_t & designVariables) const
@@ -333,23 +317,18 @@ namespace aslam {
             // _rhs corresponds to x, _lhs to y
             Eigen::Matrix<double, 1, 1> R(1,1);
             Eigen::Matrix<double, 1, 1> L(1,1);
-            const double factor = 1./(_lhs->toScalar()*_lhs->toScalar() + _rhs->toScalar()*_rhs->toScalar());
-            R(0,0) = -_lhs->toScalar()*factor;
-            L(0,0) = _rhs->toScalar()*factor;
-            _lhs->evaluateJacobians(outJacobians, L);
-            _rhs->evaluateJacobians(outJacobians, R);
+            const auto lhs = _lhs->toScalar();
+            const auto rhs = _rhs->toScalar();
+            const double factor = 1./(lhs*lhs + rhs*rhs);
+            R(0,0) = -lhs*factor;
+            L(0,0) = rhs*factor;
+            _lhs->evaluateJacobians(outJacobians.apply(L));
+            _rhs->evaluateJacobians(outJacobians.apply(R));
         }
 
         void ScalarExpressionNodeAtan2::evaluateJacobiansImplementation(JacobianContainer & outJacobians, const Eigen::MatrixXd & applyChainRule) const
         {
-            // _rhs corresponds to x, _lhs to y
-            Eigen::Matrix<double, 1, 1> R(1,1);
-            Eigen::Matrix<double, 1, 1> L(1,1);
-            const double factor = 1./(_lhs->toScalar()*_lhs->toScalar() + _rhs->toScalar()*_rhs->toScalar());
-            R(0,0) = -_lhs->toScalar()*factor;
-            L(0,0) = _rhs->toScalar()*factor;
-            _lhs->evaluateJacobians(outJacobians, applyChainRule*L);
-            _rhs->evaluateJacobians(outJacobians, applyChainRule*R);
+            evaluateJacobiansImplementation(outJacobians.apply(applyChainRule));
         }
 
         void ScalarExpressionNodeAtan2::getDesignVariablesImplementation(DesignVariable::set_t & designVariables) const
@@ -383,16 +362,12 @@ namespace aslam {
             const auto lhss = _lhs->toScalar();
             SM_ASSERT_LE(std::runtime_error, lhss, 1.0, "");
             R(0,0) = -1./sqrt(1. - lhss*lhss);
-            _lhs->evaluateJacobians(outJacobians, R);
+            _lhs->evaluateJacobians(outJacobians.apply(R));
         }
 
         void ScalarExpressionNodeAcos::evaluateJacobiansImplementation(JacobianContainer & outJacobians, const Eigen::MatrixXd & applyChainRule) const
         {
-            Eigen::Matrix<double, 1, 1> R(1,1);
-            const auto lhss = _lhs->toScalar();
-            SM_ASSERT_LE(std::runtime_error, lhss, 1.0, "");
-            R(0,0) = -1./sqrt(1. - lhss*lhss);
-            _lhs->evaluateJacobians(outJacobians, applyChainRule * R);
+            evaluateJacobiansImplementation(outJacobians.apply(applyChainRule));
         }
 
         void ScalarExpressionNodeAcos::getDesignVariablesImplementation(DesignVariable::set_t & designVariables) const
@@ -437,27 +412,12 @@ namespace aslam {
                 R(0,0) = -2.0*acos(lhss)/sqrt(1.0 - lhss*lhss);
             }
             SM_ASSERT_FALSE(Exception, std::isnan(R(0,0)), "");
-            _lhs->evaluateJacobians(outJacobians, R);
+            _lhs->evaluateJacobians(outJacobians.apply(R));
         }
 
         void ScalarExpressionNodeAcosSquared::evaluateJacobiansImplementation(JacobianContainer & outJacobians, const Eigen::MatrixXd & applyChainRule) const
         {
-            Eigen::Matrix<double, 1, 1> R(1,1);
-            const auto lhss = _lhs->toScalar();
-            auto pow1 = lhss - 1.0;
-            auto pow2 = pow1 * pow1;
-
-            if (pow2 < std::numeric_limits<double>::epsilon())   // series expansion at x = 1
-            {
-                R(0,0) = -2.0 + 2.0/3.0*pow1;
-            }
-            else
-            {
-                R(0,0) = -2.0*acos(lhss)/sqrt(1.0 - lhss*lhss);
-            }
-            SM_ASSERT_FALSE(Exception, std::isnan(R(0,0)), "");
-            _lhs->evaluateJacobians(outJacobians, applyChainRule * R);
-
+          evaluateJacobiansImplementation(outJacobians.apply(applyChainRule));
         }
 
         void ScalarExpressionNodeAcosSquared::getDesignVariablesImplementation(DesignVariable::set_t & designVariables) const
@@ -505,31 +465,12 @@ namespace aslam {
             }
 
             SM_ASSERT_FALSE(Exception, std::isnan(R(0,0)), "");
-            _lhs->evaluateJacobians(outJacobians, R);
+            _lhs->evaluateJacobians(outJacobians.apply(R));
         }
 
         void ScalarExpressionNodeInverseSigmoid::evaluateJacobiansImplementation(JacobianContainer & outJacobians, const Eigen::MatrixXd & applyChainRule) const
         {
-          Eigen::Matrix<double, 1, 1> R(1,1);
-          const auto lhss = _lhs->toScalar();
-          const double threshold = 50;
-
-          if (lhss > threshold) {
-            // approximate with Taylor expansion since exponents become too big otherwise
-            auto den = exp(_scale*_shift) + exp(_scale*threshold);
-            auto denSq = den*den;
-            R(0,0) = - _height*_scale*exp(_scale*(threshold+_shift)) / denSq +
-                     _height*_scale*_scale*(lhss-threshold)*exp(_scale*(_shift+threshold))
-                     *(exp(threshold*_scale) - exp(_scale*_shift)) / (denSq*den);
-          }
-          else {
-            auto den = 1 + exp(_scale*(lhss-_shift));
-            R(0,0) = - _height*_scale*exp(_scale*(lhss-_shift)) / (den * den);
-          }
-
-            SM_ASSERT_FALSE(Exception, std::isnan(R(0,0)), "");
-            _lhs->evaluateJacobians(outJacobians, applyChainRule * R);
-
+          evaluateJacobiansImplementation(outJacobians.apply(applyChainRule));
         }
 
         void ScalarExpressionNodeInverseSigmoid::getDesignVariablesImplementation(DesignVariable::set_t & designVariables) const
@@ -561,16 +502,12 @@ namespace aslam {
             const auto lhss = _lhs->toScalar();
             R(0,0) = _power * pow(lhss, _power-1);
             SM_ASSERT_FALSE(Exception, std::isnan(R(0,0)), "");
-            _lhs->evaluateJacobians(outJacobians, R);
+            _lhs->evaluateJacobians(outJacobians.apply(R));
         }
 
         void ScalarExpressionNodePower::evaluateJacobiansImplementation(JacobianContainer & outJacobians, const Eigen::MatrixXd & applyChainRule) const
         {
-            Eigen::Matrix<double, 1, 1> R(1,1);
-            const auto lhss = _lhs->toScalar();
-            R(0,0) = _power * pow(lhss, _power-1);
-            SM_ASSERT_FALSE(Exception, std::isnan(R(0,0)), "");
-            _lhs->evaluateJacobians(outJacobians, applyChainRule * R);
+            evaluateJacobiansImplementation(outJacobians.apply(applyChainRule));
         }
 
         void ScalarExpressionNodePower::getDesignVariablesImplementation(DesignVariable::set_t & designVariables) const
@@ -610,11 +547,7 @@ namespace aslam {
 
         void ScalarExpressionPiecewiseExpression::evaluateJacobiansImplementation(JacobianContainer & outJacobians, const Eigen::MatrixXd & applyChainRule) const
         {
-          if (_useFirst()) {
-            return _e1->evaluateJacobians(outJacobians, applyChainRule);
-          } else {
-            return _e2->evaluateJacobians(outJacobians, applyChainRule);
-          }
+          evaluateJacobiansImplementation(outJacobians.apply(applyChainRule));
         }
 
         void ScalarExpressionPiecewiseExpression::getDesignVariablesImplementation(DesignVariable::set_t & designVariables) const
@@ -650,14 +583,14 @@ namespace aslam {
 
         void ScalarExpressionNodeNegated::evaluateJacobiansImplementation(JacobianContainer & outJacobians) const
         {
-            Eigen::MatrixXd R(1,1);
+            Eigen::Matrix<double, 1, 1> R(1,1);
             R(0,0) = -1;
-            _rhs->evaluateJacobians(outJacobians, R);
+            _rhs->evaluateJacobians(outJacobians.apply(R));
         }
 
         void ScalarExpressionNodeNegated::evaluateJacobiansImplementation(JacobianContainer & outJacobians, const Eigen::MatrixXd & applyChainRule) const
         {
-            _rhs->evaluateJacobians(outJacobians, -applyChainRule);
+            evaluateJacobiansImplementation(outJacobians.apply(applyChainRule));
         }
 
         void ScalarExpressionNodeNegated::getDesignVariablesImplementation(DesignVariable::set_t & designVariables) const

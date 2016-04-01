@@ -21,7 +21,19 @@ class JacobianContainerFunctor : public JacobianContainer {
   virtual ~JacobianContainerFunctor() { }
 
   virtual void add(DesignVariable* designVariable, const Eigen::Ref<const Eigen::MatrixXd>& Jacobian) override {
-    _jc.add(designVariable, _functor(Jacobian));
+    if (this->chainRuleEmpty())
+      _jc.add(designVariable, _functor(Jacobian));
+    else
+      _jc.add(designVariable, _functor(this->chainRuleMatrix()*Jacobian));
+  }
+
+  virtual void add(DesignVariable* designVariable) override {
+    if (this->chainRuleEmpty()) {
+      _jc.add(designVariable, _functor(Eigen::MatrixXd::Identity(this->rows(), designVariable->minimalDimensions())));
+    } else {
+      auto CR = this->chainRuleMatrix();
+      _jc.add(designVariable, _functor(CR*Eigen::MatrixXd::Identity(CR.cols(), designVariable->minimalDimensions())));
+    }
   }
 
   virtual Eigen::MatrixXd asDenseMatrix() const override {

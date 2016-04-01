@@ -38,6 +38,8 @@ namespace aslam {
 
       boost::shared_ptr< VectorExpressionNode<D> > root() const { return _root; }
 
+      int getSize() const;
+
       bool isEmpty() const { return !_root; }
     protected:
       boost::shared_ptr< VectorExpressionNode<D> > _root;

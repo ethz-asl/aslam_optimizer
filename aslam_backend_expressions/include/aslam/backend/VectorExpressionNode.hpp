@@ -25,6 +25,7 @@ namespace aslam {
       void evaluateJacobians(JacobianContainer & outJacobians, const differential_t & chainRuleDifferentail) const;
       void getDesignVariables(DesignVariable::set_t & designVariables) const;
 
+      virtual int getSize() const { assert(D != Eigen::Dynamic); return D; }
     private:
       virtual vector_t evaluateImplementation() const = 0;
       virtual void evaluateJacobiansImplementation(JacobianContainer & outJacobians) const = 0;
@@ -49,6 +50,7 @@ namespace aslam {
       ConstantVectorExpressionNode(const vector_t & value) : value(value) {}
 
       virtual ~ConstantVectorExpressionNode() = default;
+      virtual int getSize() const override { return value.rows(); }
      private:
       virtual vector_t evaluateImplementation() const override { return value; }
       virtual void evaluateJacobiansImplementation(JacobianContainer &) const override {}

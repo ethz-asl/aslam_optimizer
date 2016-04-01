@@ -13,10 +13,10 @@ using namespace boost::python;
 template<typename ExpressionType>
 boost::python::list getDesignVariables(const ExpressionType * et)
 {
-  JacobianContainerSparse::set_t dv;
+  DesignVariable::set_t dv;
   et->getDesignVariables(dv);
 
-  JacobianContainerSparse::set_t::iterator it = dv.begin();
+  DesignVariable::set_t::iterator it = dv.begin();
   boost::python::list dvlist;
   for( ; it != dv.end(); ++it)
   {

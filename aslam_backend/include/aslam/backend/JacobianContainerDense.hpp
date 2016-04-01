@@ -11,14 +11,24 @@
 namespace aslam {
   namespace backend {
 
-    template <typename Container>
+    template <typename Container, int Rows = Eigen::Dynamic>
     class JacobianContainerDense : public JacobianContainer {
     public:
       SM_DEFINE_EXCEPTION(Exception, aslam::Exception);
       typedef Container container_t;
+      static constexpr const int RowsAtCompileTime = Rows;
 
-      JacobianContainerDense(int rows, int cols);
-      JacobianContainerDense(Container jacobian) : JacobianContainer(jacobian.rows()), _jacobian(jacobian) { }
+      /// \brief Constructs the Jacobian container using \p jacobian as underlying data storage
+      JacobianContainerDense(Container jacobian) : JacobianContainer(jacobian.rows()), _jacobian(jacobian)
+      {
+        SM_ASSERT_TRUE(Exception, Rows == Eigen::Dynamic || jacobian.rows() == Rows, "");
+      }
+
+      /// \brief Constructor with specified sizes \p rows and \p cols. Only enabled for non-reference type containers
+      template<typename dummy = int>
+      JacobianContainerDense(int rows, int cols, dummy = typename std::enable_if<!std::is_reference<Container>::value, int>::type(0));
+
+      /// \brief Destructor
       virtual ~JacobianContainerDense() { }
 
       /// \brief Add the rhs container to this one.
@@ -28,6 +38,7 @@ namespace aslam {
       /// \brief Add a jacobian to the list. If the design variable is not active,
       /// discard the value.
       virtual void add(DesignVariable* designVariable, const Eigen::Ref<const Eigen::MatrixXd>& Jacobian) override;
+      virtual void add(DesignVariable* designVariable) override;
 
       /// Check whether the entries corresponding to design variable \p dv are finite
       virtual bool isFinite(const DesignVariable& dv) const override;
@@ -41,6 +52,12 @@ namespace aslam {
       /// \brief Gets a dense matrix with the Jacobians. The Jacobian ordering matches the sort order.
       virtual Eigen::MatrixXd asDenseMatrix() const override { return _jacobian; }
 
+    private:
+
+      template <typename MATRIX>
+      void addJacobian(DesignVariable * dv, const MATRIX & jacobian);
+
+      friend class internal::JacobianContainerImplHelper;
     private:
 
       /// \brief The data

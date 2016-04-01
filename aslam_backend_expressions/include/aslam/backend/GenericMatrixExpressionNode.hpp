@@ -11,6 +11,7 @@ template<int IRows, int ICols, typename TScalar> class ConstantGenericMatrixExpr
 template<int IRows, int ICols, typename TScalar>
 class GenericMatrixExpressionNode {
  public:
+  typedef TScalar scalar_t;
   typedef GenericMatrixExpressionNode<IRows, ICols, TScalar> self_t;
   typedef Eigen::Matrix<TScalar, IRows, ICols> matrix_t;
   typedef matrix_t value_t;

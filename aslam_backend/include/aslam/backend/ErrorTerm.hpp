@@ -172,26 +172,12 @@ namespace aslam {
       template <typename DERIVED>
       void evaluateWeightedJacobian(JacobianContainer& outJc, bool useMEstimator, const Eigen::MatrixBase<DERIVED>& weight)
       {
+        double sqrtWeight = 1.0;
         if (useMEstimator) {
-          const double sqrtWeight = sqrt(_mEstimatorPolicy->getWeight(getRawSquaredError()));
-          auto jc = getJacobianContainerFunctor(outJc, outJc.rows(),
-              [&] (const Eigen::Ref<const Eigen::MatrixXd>& Jacobian)
-              {
-                return (sqrtWeight*weight.transpose()*Jacobian).eval();
-              }
-          );
-          evaluateJacobians(jc);
-        } else {
-          auto jc = getJacobianContainerFunctor(outJc, outJc.rows(),
-              [&] (const Eigen::Ref<const Eigen::MatrixXd>& Jacobian)
-              {
-                return (weight.transpose()*Jacobian).eval();
-              }
-          );
-          evaluateJacobians(jc);
+          sqrtWeight = sqrt(_mEstimatorPolicy->getWeight(getRawSquaredError()));
         }
+        evaluateJacobians(outJc.apply(sqrtWeight*weight.transpose()));
       }
-
 
       /// \brief the MEstimator policy for this error term
       boost::shared_ptr<MEstimator> _mEstimatorPolicy;

@@ -27,9 +27,9 @@ namespace aslam {
           dv->setActive(true);
           dv->setBlockIndex(i);
         }
-        JacobianContainerSparse estJ(_error.dimension());
+        JacobianContainerSparse<> estJ(_error.dimension());
         _error.evaluateJacobiansFiniteDifference(estJ);
-        JacobianContainerSparse J(_error.dimension());
+        JacobianContainerSparse<> J(_error.dimension());
         _error.evaluateJacobians(J);
 
         sm::eigen::assertNear(J.asSparseMatrix(), estJ.asSparseMatrix(), tolerance, SM_SOURCE_FILE_POS, "Testing jacobians vs. finite differences (Matrix A are the analytical Jacobians, Matrix B is from finite differences)");

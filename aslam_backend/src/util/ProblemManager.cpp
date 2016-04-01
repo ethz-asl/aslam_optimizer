@@ -142,29 +142,29 @@ void ProblemManager::addGradientForErrorTerm(RowVectorType& J, ErrorTerm* e, boo
 
   if (_useDenseJacobianContainer) {
     Eigen::MatrixXd J2 = Eigen::MatrixXd::Zero(e->dimension(), J.cols());
-    JacobianContainerDense<Eigen::MatrixXd&> jc(J2);
+    JacobianContainerDense<Eigen::MatrixXd&, Eigen::Dynamic> jc(J2);
     e->getWeightedJacobians(jc, useMEstimator);
     J += ev.transpose() * J2;
   } else {
-    JacobianContainerSparse jc(e->dimension());
+    JacobianContainerSparse<Eigen::Dynamic> jc(e->dimension());
     e->getWeightedJacobians(jc, useMEstimator);
-    for (JacobianContainerSparse::map_t::iterator it = jc.begin(); it != jc.end(); ++it) {// iterate over design variables of this error term
-      RowVectorType grad = ev.transpose()*it->second;
-      J.block(0 /*e->rowBase()*/, it->first->columnBase(), grad.rows(), grad.cols()) += grad;
+    for (const auto& dvJacPair : jc) { // iterate over design variables of this error term
+      RowVectorType grad = ev.transpose()*dvJacPair.second;
+      J.block(0 /*e->rowBase()*/, dvJacPair.first->columnBase(), grad.rows(), grad.cols()) += grad;
     }
   }
 }
 
 void ProblemManager::addGradientForErrorTerm(RowVectorType& J, ScalarNonSquaredErrorTerm* e, bool useMEstimator) {
   if (_useDenseJacobianContainer) {
-    JacobianContainerDense<RowVectorType&> jc(J);
+    JacobianContainerDense<RowVectorType&, 1> jc(J);
     e->evaluateJacobians(jc, useMEstimator);
   } else {
-    JacobianContainerSparse jc(e->dimension());
+    JacobianContainerSparse<1> jc(e->dimension());
     // TODO: We have to ensure that updateRawError() is called before the M-Estimator is evaluated!
     e->evaluateJacobians(jc, useMEstimator);
-    for (JacobianContainerSparse::map_t::iterator it = jc.begin(); it != jc.end(); ++it) // iterate over design variables of this error term
-      J.block(0 /*e->rowBase()*/, it->first->columnBase(), it->second.rows(), it->second.cols()) += it->second;
+    for (const auto& dvJacPair : jc) // iterate over design variables of this error term
+      J.block(0 /*e->rowBase()*/, dvJacPair.first->columnBase(), dvJacPair.second.rows(), dvJacPair.second.cols()) += dvJacPair.second;
   }
 }
 

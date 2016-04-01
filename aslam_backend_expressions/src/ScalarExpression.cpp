@@ -33,7 +33,7 @@ void ScalarExpression::evaluateJacobians(JacobianContainer & outJacobians) const
 }
 
 void ScalarExpression::evaluateJacobians(JacobianContainer & outJacobians, const Eigen::MatrixXd & applyChainRule) const {
-  _root->evaluateJacobians(outJacobians, applyChainRule);
+  _root->evaluateJacobians( outJacobians.apply(applyChainRule) );
 }
 
 void ScalarExpression::getDesignVariables(DesignVariable::set_t & designVariables) const {

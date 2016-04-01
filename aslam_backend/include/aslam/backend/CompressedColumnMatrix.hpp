@@ -101,10 +101,10 @@ namespace aslam {
       JacobianColumnPointer appendJacobiansSymbolic(int Jrows, const std::vector<DesignVariable*>& dvs);
 
       /// \brief Write the Jacobian values to the matrix using the pointer provided by appendJacobiansSymbolic()
-      void writeJacobians(const JacobianContainerSparse& jc, const JacobianColumnPointer& cp);
+      void writeJacobians(const JacobianContainerSparse<Eigen::Dynamic>& jc, const JacobianColumnPointer& cp);
 
       /// \brief A convenience function that calls appendJacobiansSymbolic() and then writeJacobians()
-      void appendJacobians(const JacobianContainerSparse& jc);
+      void appendJacobians(const JacobianContainerSparse<Eigen::Dynamic>& jc);
 
       /// \brief Push a constant diagonal block on to the end of the matrix.
       void pushConstantDiagonalBlock(double constant);

@@ -20,6 +20,16 @@ namespace aslam {
     }
       
     template<int D>
+    int VectorExpression<D>::getSize() const {
+      if(D != Eigen::Dynamic){
+        return D;
+      } else {
+        assert(_root);
+        return _root->getSize();
+      }
+    }
+
+    template<int D>
     typename VectorExpression<D>::vector_t VectorExpression<D>::evaluate() const
     {
       if(isEmpty()){

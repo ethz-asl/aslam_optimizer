@@ -47,7 +47,7 @@ TEST(CompressColumnMatrixTestSuite, testJcBuild)
   std::vector<int> cbi = blocks;
   std::partial_sum(cbi.begin(), cbi.end(), cbi.begin());
   CompressedColumnMatrix<> mat(cbi.back(), 0, 0, 0);
-  JacobianContainerSparse jc0(Jrows);
+  JacobianContainerSparse<> jc0(Jrows);
   jc0.add(dvs[0], Js[0]);
   jc0.add(dvs[4], Js[4]);
   ASSERT_EQ(dvs[0]->blockIndex(), 0);
@@ -60,7 +60,7 @@ TEST(CompressColumnMatrixTestSuite, testJcBuild)
   ASSERT_EQ((int)mat.nnz(), Js[0].rows() * Js[0].cols() + Js[4].rows() * Js[4].cols());
   Eigen::MatrixXd sb = jc0.asDenseMatrix(cbi).transpose();
   ASSERT_DOUBLE_MX_EQ(sb, mat, 1e-6, "");
-  JacobianContainerSparse jc1(Jrows);
+  JacobianContainerSparse<> jc1(Jrows);
   jc1.add(dvs[1], Js[1]);
   jc1.add(dvs[3], Js[3]);
   jc1.add(dvs[4], Js[4]);
@@ -121,7 +121,7 @@ TEST(CompressColumnMatrixTestSuite, testJcBuilder)
       Eigen::MatrixXd J = ccjtb.J_transpose().toDense().transpose();
       int rowStart = 0;
       for (unsigned i = 0; i < errs.size(); ++i) {
-        JacobianContainerSparse jc(errs[i]->dimension());
+        JacobianContainerSparse<> jc(errs[i]->dimension());
         Eigen::MatrixXd Jrow = J.block(rowStart, 0, errs[i]->dimension(), J.cols());
         errs[i]->getWeightedJacobians(jc, false);
         Eigen::MatrixXd JrowFromError = jc.asDenseMatrix(blocks);

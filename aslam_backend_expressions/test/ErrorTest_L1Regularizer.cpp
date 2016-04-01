@@ -62,7 +62,7 @@ TEST(RegularizerTestSuite, testL1Regularizer)
 
     Eigen::MatrixXd Jexp(1,3);
     Jexp << -3.0, 3.0, 0.0;
-    JacobianContainerSparse jc(1);
+    JacobianContainerSparse<1> jc(1);
     reg.evaluateJacobians(jc);
     Eigen::MatrixXd J = jc.asDenseMatrix();
     EXPECT_TRUE(J.isApprox(Jexp)) << "Computed: " << J << std::endl <<

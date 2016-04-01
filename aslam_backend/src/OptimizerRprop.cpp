@@ -167,7 +167,7 @@ const RpropReturnValue& OptimizerRprop::optimize()
 
     // optionally add regularizer
     if (_options.regularizer) {
-      JacobianContainerSparse jc(1);
+      JacobianContainerSparse<1> jc(1);
       _options.regularizer->evaluateJacobians(jc);
       SM_FINER_STREAM_NAMED("optimization", "RPROP: Regularization term gradient: " << jc.asDenseMatrix());
       gradient += jc.asDenseMatrix();
