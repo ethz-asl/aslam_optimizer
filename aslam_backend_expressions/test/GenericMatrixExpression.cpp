@@ -489,3 +489,32 @@ TEST(GenericMatrixExpressionNodeTestSuites, testEigenOperands) {
     FAIL() << e.what();
   }
 }
+
+TEST(GenericMatrixExpressionNodeTestSuites, testSquaredNorm) {
+  try
+  {
+    const int VEC_ROWS = 3;
+
+    typedef Eigen::Matrix<double, VEC_ROWS, 1> vector_t;
+    DesignVariableVector<VEC_ROWS> dvec;
+    dvec.setActive(true);
+    dvec.setBlockIndex(0);
+    vector_t vec = vector_t::Random();
+
+    dvec.setParameters(vec);
+    VectorExpression<VEC_ROWS> vecExp(&dvec);
+
+    auto gVecExp = convertToGME(vecExp);
+
+    {
+      SCOPED_TRACE("");
+      auto squaredNormExp = gVecExp.squaredNorm();
+      EXPECT_DOUBLE_EQ(vec.squaredNorm(), squaredNormExp.evaluate());
+      testExpression(squaredNormExp, 1);
+    }
+  }
+  catch(std::exception const & e)
+  {
+    FAIL() << e.what();
+  }
+}

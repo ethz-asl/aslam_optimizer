@@ -85,6 +85,9 @@ class GenericMatrixExpression {
   /// \brief return the transposed matrix expression.
   GenericMatrixExpression<ICols, IRows, TScalar> transpose() const;
 
+  /// \brief return the squared norm expression (only supported for column vectors)
+  ScalarExpression squaredNorm() const;
+
   template<int IColsOther, typename TOtherNode>
   GenericMatrixExpression<IRows, IColsOther, TScalar> operator*(const GenericMatrixExpression<ICols, IColsOther, TScalar, TOtherNode> & other) const;
 

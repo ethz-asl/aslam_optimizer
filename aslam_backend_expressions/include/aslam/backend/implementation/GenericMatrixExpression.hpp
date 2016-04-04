@@ -189,6 +189,40 @@ _TEMPLATE GenericMatrixExpression<ICols, IRows, TScalar> _CLASS::transpose() con
   return ResultNode::create(*this);
 }
 
+_TEMPLATE ScalarExpression _CLASS::squaredNorm() const
+{
+
+  static_assert(ICols == 1, "squaredNorm() method only supported for column vector expression. "
+      "Rethink this assertion if dynamic size expressions are possible");
+
+  class ResultNode : public UnaryOperationResultNode<ResultNode, self_t, ScalarExpression, Eigen::Matrix<double, 1, 1>, double> {
+  public:
+    typedef UnaryOperationResultNode<ResultNode, self_t, ScalarExpression, Eigen::Matrix<double, 1, 1>, double> base_t;
+
+    ResultNode() { }
+
+    virtual ~ResultNode() {}
+
+    double evaluateImplementation() const override {
+      return this->getOperandNode().evaluate().squaredNorm();
+    }
+
+    inline typename base_t::apply_diff_return_t applyDiff(const typename base_t::operand_t::tangent_vector_t & tangent_vector) const {
+      auto val = this->getOperandNode().evaluate();
+      return 2.*val.transpose()*tangent_vector;
+    }
+    virtual void evaluateJacobiansImplementation(JacobianContainer & outJacobians) const override {
+      auto val = this->getOperandNode().evaluate();
+      this->getOperandNode().evaluateJacobians(outJacobians.apply(2.0*val.transpose()));
+    };
+    virtual void evaluateJacobiansImplementation(JacobianContainer & outJacobians, const Eigen::MatrixXd & applyChainRule) const override {
+      evaluateJacobians(outJacobians.apply(applyChainRule));
+    };
+  };
+
+  return ResultNode::create(*this);
+}
+
 _TEMPLATE GenericMatrixExpression<ICols, IRows, TScalar> _CLASS::inverse() const {
   typedef GenericMatrixExpression<ICols, IRows, TScalar> result_t;
 
