@@ -15,6 +15,8 @@
 #include "CommonDefinitions.hpp"
 
 #include "../../Exceptions.hpp"
+#include "../JacobianContainerDense.hpp"
+#include "../JacobianContainerSparse.hpp"
 
 namespace aslam {
 namespace backend {
@@ -103,7 +105,8 @@ class ProblemManager {
 
   /// \brief computes the gradient of a specific error term
   void addGradientForErrorTerm(RowVectorType& J, ErrorTerm* e, bool useMEstimator);
-  void addGradientForErrorTerm(RowVectorType& J, ScalarNonSquaredErrorTerm* e, bool useMEstimator);
+  void addGradientForErrorTerm(JacobianContainerSparse<1>& jc, RowVectorType& J, ScalarNonSquaredErrorTerm* e, bool useMEstimator);
+  void addGradientForErrorTerm(JacobianContainerDense<RowVectorType&, 1>& jc, ScalarNonSquaredErrorTerm* e, bool useMEstimator);
 
  protected:
   /// \brief Set the initialized status
