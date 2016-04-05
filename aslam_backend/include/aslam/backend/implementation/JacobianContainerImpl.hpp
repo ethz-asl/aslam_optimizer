@@ -41,13 +41,14 @@ class JacobianContainerImplHelper {
     else
     {
       const auto CR = jc.template chainRuleMatrix<JC::RowsAtCompileTime>();
-      SM_ASSERT_EQ_DBG(Exception, CR.cols(), jacobian.rows(), "The Jacobian must have as many rows as the top of the matrix stack has columns");
       multiplyAndAdd(jc, dv, CR, jacobian.template cast<double>(), std::integral_constant<bool, IS_IDENTITY>());
     }
   }
 
   template<typename JC>
   EIGEN_ALWAYS_INLINE static void addImpl(JC & jc, DesignVariable* dv){
+    // Note: The dimensions are not correct if the chain rule is not empty.
+    // Yet in this case we skip the multiplication anyways!
     addImpl<true>(jc, dv, Eigen::MatrixXd::Identity(jc.rows(), dv->minimalDimensions()));
   }
 };
