@@ -38,7 +38,7 @@ void OptimizerRpropOptions::check() const {
   SM_ASSERT_GE( Exception, convergenceGradientNorm, 0.0, "");
   SM_ASSERT_GE( Exception, convergenceDx, 0.0, "");
   SM_ASSERT_GE( Exception, convergenceDObjective, 0.0, "");
-  SM_ASSERT_TRUE( Exception, convergenceDx > 0 || convergenceGradientNorm > 0.0, "");
+  SM_ASSERT_TRUE( Exception, convergenceDx > 0 || convergenceGradientNorm > 0.0 || convergenceDObjective > 0, "");
   SM_ASSERT_GE( Exception, maxIterations, -1, "");
 }
 
@@ -106,7 +106,7 @@ std::ostream& operator<<(std::ostream& out, const RpropReturnValue& ret) {
   out << "\tdobjective: " << ret.derror << std::endl;
   out << "\tmax dx: " << ret.maxDx << std::endl;
   out << "\tevals objective: " << ret.nObjectiveEvaluations << std::endl;
-  out << "\tevals gradient: " << ret.nObjectiveEvaluations;
+  out << "\tevals gradient: " << ret.nGradEvaluations;
   return out;
 }
 
@@ -275,6 +275,12 @@ const RpropReturnValue& OptimizerRprop::optimize()
 
     }
 
+    timeStep.stop();
+
+    timeUpdate.start();
+    this->applyStateUpdate(_dx);
+    timeUpdate.stop();
+
     _returnValue.maxDx = _dx.cwiseAbs().maxCoeff();
     if (_returnValue.maxDx < _options.convergenceDx) {
       _returnValue.convergence = RpropReturnValue::DX;
@@ -285,7 +291,7 @@ const RpropReturnValue& OptimizerRprop::optimize()
 
     if (_options.method == OptimizerRpropOptions::IRPROP_PLUS) {
       _returnValue.derror = this->evaluateError(_options.nThreads) - _returnValue.error;
-      if (_returnValue.derror < _options.convergenceDObjective) {
+      if (fabs(_returnValue.derror) < _options.convergenceDObjective) {
         _returnValue.convergence = RpropReturnValue::DOBJECTIVE;
         SM_DEBUG_STREAM_NAMED("optimization", "RPROP: Change in error " << _returnValue.derror <<
                               " is smaller than convergenceDObjective option -> terminating");
@@ -297,11 +303,6 @@ const RpropReturnValue& OptimizerRprop::optimize()
                          "\tdx: " << _dx.transpose() << std::endl <<
                          "\tdelta: " << _delta.transpose());
 
-    timeStep.stop();
-
-    timeUpdate.start();
-    this->applyStateUpdate(_dx);
-    timeUpdate.stop();
 
   }
 

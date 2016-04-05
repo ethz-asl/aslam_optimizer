@@ -29,7 +29,7 @@ void OptimizerBFGSOptions::check() const {
   SM_ASSERT_GE( Exception, convergenceGradientNorm, 0.0, "");
   SM_ASSERT_GE( Exception, convergenceDx, 0.0, "");
   SM_ASSERT_GE( Exception, convergenceDObjective, 0.0, "");
-  SM_ASSERT_TRUE( Exception, convergenceDx > 0 || convergenceGradientNorm > 0.0, "");
+  SM_ASSERT_TRUE( Exception, convergenceDx > 0 || convergenceGradientNorm > 0.0 || convergenceDObjective > 0, "");
   SM_ASSERT_GE( Exception, maxIterations, -1, "");
   linesearch.check();
 }
@@ -71,7 +71,7 @@ std::ostream& operator<<(std::ostream& out, const BFGSReturnValue& ret) {
   out << "\tdobjective: " << ret.derror << std::endl;
   out << "\tmax dx: " << ret.maxDx << std::endl;
   out << "\tevals objective: " << ret.nObjectiveEvaluations << std::endl;
-  out << "\tevals gradient: " << ret.nObjectiveEvaluations;
+  out << "\tevals gradient: " << ret.nGradEvaluations;
   return out;
 }
 
