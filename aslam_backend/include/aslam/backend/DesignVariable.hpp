@@ -9,15 +9,21 @@
 
 #include <aslam/Exceptions.hpp>
 #include <boost/shared_ptr.hpp>
+#include <boost/weak_ptr.hpp>
 
 namespace aslam {
   namespace backend {
     class DesignVariable;
+    class CacheInterface;
 
     class JacobianContainer;
 
     class DesignVariable {
     public:
+
+      template <typename Expression>
+      friend Expression toCacheExpression(const Expression& expr);
+
       /**
        * \struct BlockIndexOrdering
        *
@@ -100,7 +106,6 @@ namespace aslam {
       /// \brief Computes the minimal distance in tangent space between the current value of the DV and xHat and the jacobian
       void minimalDifferenceAndJacobian(const Eigen::MatrixXd& xHat, Eigen::VectorXd& outDifference, Eigen::MatrixXd& outJacobian) const;
 
-
     protected:
       /// \brief what is the number of dimensions of the perturbation variable.
       virtual int minimalDimensionsImplementation() const = 0;
@@ -125,7 +130,19 @@ namespace aslam {
       /// Computes the minimal distance in tangent space between the current value of the DV and xHat and the jacobian
       virtual void minimalDifferenceAndJacobianImplementation(const Eigen::MatrixXd& xHat, Eigen::VectorXd& outDifference, Eigen::MatrixXd& outJacobian) const;
 
+      /// Invalidates the cache
+      void invalidateCache() {
+        if (!_cacheNodes.empty())
+          invalidateCacheImplementation();
+      }
 
+    private:
+
+      /// Registers a cache expression that has to be reset each time the design variable changes its value
+      void registerCacheExpressionNode(const boost::shared_ptr<CacheInterface>& cn);
+
+      /// Invalidates the cache
+      void invalidateCacheImplementation();
 
     private:
       /// \brief The block index used in the optimization routine.
@@ -143,6 +160,8 @@ namespace aslam {
       /// \brief The scaling of this design variable within the optimization.
       double _scaling;
 
+      /// \brief Cache expressions that have to be reseted
+      std::vector< boost::weak_ptr<CacheInterface> > _cacheNodes;
     };
 
   } // namespace backend

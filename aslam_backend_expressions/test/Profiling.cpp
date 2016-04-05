@@ -25,6 +25,7 @@
 #include <aslam/backend/VectorExpression.hpp>
 #include <aslam/backend/DesignVariableVector.hpp>
 #include <aslam/backend/VectorExpressionToGenericMatrixTraits.hpp>
+#include <aslam/backend/CacheExpression.hpp>
 
 
 using namespace std;
@@ -43,10 +44,12 @@ int main(int argc, char** argv)
     vector<string> enableNamedStreams;
     bool disableDefaultStream = false;
     size_t nIterations = 100000;
+    size_t updateDvEach = 1;
     bool useSparseJacobianContainer = false;
-    bool noUpdateDv = false;
+    bool useCaching = false, noUpdateDv = false;
     bool noDense = false, noSparse = false, noScalar = false,
-         noMatrix = false, noError = false, noJacobian = false;
+         noMatrix = false, noError = false, noJacobian = false,
+         noCached = false, noNonCached = false;
 
     namespace po = boost::program_options;
     po::options_description desc("local_planner options");
@@ -57,12 +60,16 @@ int main(int argc, char** argv)
       ("enable-named-streams", po::value< vector<string> >(&enableNamedStreams)->multitoken(), "Enable these named logging streams")
       ("num-iterations", po::value(&nIterations)->default_value(nIterations), "Number of iterations")
       ("use-sparse-jacobian-container", po::bool_switch(&useSparseJacobianContainer), "Use dense/sparse Jacobian container")
+      ("use-caching", po::bool_switch(&useCaching), "Use caching expressions")
+      ("update-dv-each", po::value(&updateDvEach), "Call update on the design variables each n-th time")
       ("no-dense", po::bool_switch(&noDense), "Don't profile dense Jacobian containers")
       ("no-sparse", po::bool_switch(&noSparse), "Don't profile sparse Jacobian containers")
       ("no-scalar", po::bool_switch(&noScalar), "Don't profile scalar expressions")
       ("no-matrix", po::bool_switch(&noMatrix), "Don't profile matrix expressions")
       ("no-error", po::bool_switch(&noError), "Don't profile error evaluation")
       ("no-jacobian", po::bool_switch(&noJacobian), "Don't profile Jacobian evaluation")
+      ("no-cached", po::bool_switch(&noCached), "Don't profile cached expressions")
+      ("no-noncached", po::bool_switch(&noNonCached), "Don't profile non-cached expressions")
       ("no-update-dv", po::bool_switch(&noUpdateDv), "Don't update the design variables after each call")
     ;
     po::variables_map vm;
@@ -83,12 +90,13 @@ int main(int argc, char** argv)
     // ********************** //
 
     {
-      Scalar dv(0.0);
+      Scalar dv(1.0);
       dv.setBlockIndex(0);
       dv.setColumnBase(0);
       dv.setActive(true);
       ScalarExpression expr = dv.toExpression();
-      ScalarExpression expr2 = expr*expr;
+      ScalarExpression expr2 = log(expr*expr);
+      ScalarExpression cexpr2 = toCacheExpression(expr2);
 
       Eigen::MatrixXd J = Eigen::MatrixXd::Zero(ScalarExpression::Dimension, dv.minimalDimensions());
       JacobianContainerDense<Eigen::MatrixXd&, ScalarExpression::Dimension> jcDense(J);
@@ -96,32 +104,58 @@ int main(int argc, char** argv)
       const double dx = 1.0;
 
       // Test error evaluation non-cached
-      if (!noError && !noScalar) {
+      if (!noError && !noScalar && !noNonCached) {
         sm::timing::Timer timer("ScalarExpression -- NoCache: Error", false);
         for (size_t i=0; i<nIterations; ++i) {
           expr2.evaluate();
-          if (!noUpdateDv) dv.update(&dx, 1);
+          if (!noUpdateDv && i % updateDvEach == 0) dv.update(&dx, 1);
+        }
+      }
+
+      // Test error evaluation cached
+      if (!noError && !noScalar && !noCached) {
+        sm::timing::Timer timer("ScalarExpression -- Cached: Error", false);
+        for (size_t i=0; i<nIterations; ++i) {
+          cexpr2.evaluate();
+          if (!noUpdateDv && i % updateDvEach == 0) dv.update(&dx, 1);
         }
       }
 
       // Test Jacobian evaluation non-cached, sparse container
-      if (!noJacobian && !noSparse && !noScalar) {
+      if (!noJacobian && !noSparse && !noScalar && !noNonCached) {
         sm::timing::Timer timer("ScalarExpression -- NoCache/Sparse: Jacobian", false);
         for (size_t i=0; i<nIterations; ++i) {
           evaluateJacobian(expr2, jcSparse);
-          if (!noUpdateDv) dv.update(&dx, 1);
+          if (!noUpdateDv && i % updateDvEach == 0) dv.update(&dx, 1);
+        }
+      }
+
+      // Test Jacobian evaluation cached, sparse container
+      if (!noJacobian && !noSparse && !noScalar&& !noCached) {
+        sm::timing::Timer timer("ScalarExpression -- Cached/Sparse: Jacobian", false);
+        for (size_t i=0; i<nIterations; ++i) {
+          evaluateJacobian(cexpr2, jcSparse);
+          if (!noUpdateDv && i % updateDvEach == 0) dv.update(&dx, 1);
         }
       }
 
       // Test Jacobian evaluation non-cached, dense container
-      if (!noJacobian && !noDense && !noScalar) {
+      if (!noJacobian && !noDense && !noScalar && !noNonCached) {
         sm::timing::Timer timer("ScalarExpression -- NoCache/Dense: Jacobian", false);
         for (size_t i=0; i<nIterations; ++i) {
           evaluateJacobian(expr2, jcDense);
-          if (!noUpdateDv) dv.update(&dx, 1);
+          if (!noUpdateDv && i % updateDvEach == 0) dv.update(&dx, 1);
         }
       }
 
+      // Test Jacobian evaluation cached, dense container
+      if (!noJacobian && !noDense && !noScalar&& !noCached) {
+        sm::timing::Timer timer("ScalarExpression -- Cached/Dense: Jacobian", false);
+        for (size_t i=0; i<nIterations; ++i) {
+          evaluateJacobian(cexpr2, jcDense);
+          if (!noUpdateDv && i % updateDvEach == 0) dv.update(&dx, 1);
+        }
+      }
     } // ScalarExpression
 
     // ***************************** //
@@ -137,7 +171,9 @@ int main(int argc, char** argv)
       dv.setBlockIndex(0);
       dv.setColumnBase(0);
       GME matExp(&dv);
+      const auto cMatExp = toCacheExpression(matExp);
       const auto matExp2 = matExp.transpose()*matExp;
+      const auto cMatExp2 = cMatExp.transpose()*cMatExp;
 
       Eigen::MatrixXd J = Eigen::MatrixXd::Zero(1, dv.minimalDimensions());
       JacobianContainerDense<Eigen::MatrixXd&, 1> jcDense(J);
@@ -145,29 +181,57 @@ int main(int argc, char** argv)
       const GME::matrix_t dx = GME::matrix_t::Ones(dv.minimalDimensions(), 1);
 
       // Test error evaluation non-cached
-      if (!noError && !noMatrix) {
+      if (!noError && !noMatrix && !noNonCached) {
         sm::timing::Timer timer("GenericMatrixExpression -- No cache: Error", false);
         for (size_t i=0; i<nIterations; ++i) {
           matExp2.evaluate();
-          if (!noUpdateDv) dv.update(dx.data(), dx.size());
+          if (!noUpdateDv && i % updateDvEach == 0) dv.update(dx.data(), dx.size());
         }
       }
 
+      // Test error evaluation cached
+      if (!noError && !noMatrix&& !noCached) {
+        sm::timing::Timer timer("GenericMatrixExpression -- Cached: Error", false);
+        for (size_t i=0; i<nIterations; ++i) {
+          cMatExp2.evaluate();
+          if (!noUpdateDv && i % updateDvEach == 0) dv.update(dx.data(), dx.size());
+        }
+      }
+
+
       // Test Jacobian evaluation non-cached, sparse container
-      if (!noJacobian && !noSparse && !noMatrix) {
+      if (!noJacobian && !noSparse && !noMatrix && !noNonCached) {
         sm::timing::Timer timer("GenericMatrixExpression -- NoCache/Sparse: Jacobian", false);
         for (size_t i=0; i<nIterations; ++i) {
           evaluateJacobian(matExp2, jcSparse);
-          if (!noUpdateDv) dv.update(dx.data(), dx.size());
+          if (!noUpdateDv && i % updateDvEach == 0) dv.update(dx.data(), dx.size());
+        }
+      }
+
+      // Test Jacobian evaluation cached, sparse container
+      if (!noJacobian && !noSparse && !noMatrix&& !noCached) {
+        sm::timing::Timer timer("GenericMatrixExpression -- Cached/Sparse: Jacobian", false);
+        for (size_t i=0; i<nIterations; ++i) {
+          evaluateJacobian(cMatExp2, jcSparse);
+          if (!noUpdateDv && i % updateDvEach == 0) dv.update(dx.data(), dx.size());
         }
       }
 
       // Test Jacobian evaluation non-cached, dense container
-      if (!noJacobian && !noDense && !noMatrix) {
+      if (!noJacobian && !noDense && !noMatrix && !noNonCached) {
         sm::timing::Timer timer("GenericMatrixExpression -- NoCache/Dense: Jacobian", false);
         for (size_t i=0; i<nIterations; ++i) {
           evaluateJacobian(matExp2, jcDense);
-          if (!noUpdateDv) dv.update(dx.data(), dx.size());
+          if (!noUpdateDv && i % updateDvEach == 0) dv.update(dx.data(), dx.size());
+        }
+      }
+
+      // Test Jacobian evaluation cached, dense container
+      if (!noJacobian && !noDense && !noMatrix&& !noCached) {
+        sm::timing::Timer timer("GenericMatrixExpression -- Cached/Dense: Jacobian", false);
+        for (size_t i=0; i<nIterations; ++i) {
+          evaluateJacobian(cMatExp2, jcDense);
+          if (!noUpdateDv && i % updateDvEach == 0) dv.update(dx.data(), dx.size());
         }
       }
     } // GenericMatrixExpression

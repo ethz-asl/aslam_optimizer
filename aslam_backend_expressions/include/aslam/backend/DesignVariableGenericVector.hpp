@@ -30,6 +30,7 @@ class DesignVariableGenericVector : public DesignVariable, public GenericMatrixE
   void setParameters(const Eigen::Matrix<Scalar_, D, 1>& value) {
     this->_currentValue = value;
     this->_valueDirty = false;
+    this->invalidateCache();
   }
  protected:
   /// \brief Revert the last state update.

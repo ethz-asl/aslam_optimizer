@@ -184,6 +184,12 @@ namespace aslam {
     }
 
     JACOBIAN_CONTAINER_SPARSE_TEMPLATE
+    void JACOBIAN_CONTAINER_SPARSE_CLASS_TEMPLATE::setZero() {
+      for (auto& dvJacPair : _jacobianMap)
+        dvJacPair.second.setZero();
+    }
+
+    JACOBIAN_CONTAINER_SPARSE_TEMPLATE
     Eigen::MatrixXd JACOBIAN_CONTAINER_SPARSE_CLASS_TEMPLATE::asDenseMatrix() const
     {
       // \todo make efficient
@@ -319,8 +325,12 @@ namespace aslam {
         add(dvJacPair.first, applyChainRule == nullptr ? dvJacPair.second : (*applyChainRule)*dvJacPair.second);
     }
 
-
-
+    JACOBIAN_CONTAINER_SPARSE_TEMPLATE
+    inline void JACOBIAN_CONTAINER_SPARSE_CLASS_TEMPLATE::addTo(JacobianContainer& jc)
+    {
+      for (auto& dvJacPair : _jacobianMap)
+        jc.add(dvJacPair.first, dvJacPair.second);
+    }
 
     // Explicit template instantiation
     extern template class JacobianContainerSparse<Eigen::Dynamic>;

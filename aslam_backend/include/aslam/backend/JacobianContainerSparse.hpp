@@ -49,6 +49,9 @@ namespace aslam {
       template<typename DERIVED = Eigen::MatrixXd>
       void add(const JacobianContainerSparse& rhs, const Eigen::MatrixBase<DERIVED>* applyChainRule = nullptr);
 
+      /// \brief Add the rhs container to this one.
+      inline void addTo(JacobianContainer& jc);
+
       /// \brief Add the rhs container to this one. Alternative approach suitable for large left-hand sides
       template<typename DERIVED = Eigen::MatrixXd>
       void addLargeLhs(const JacobianContainerSparse& rhs, const Eigen::MatrixBase<DERIVED>* applyChainRule = nullptr);
@@ -87,6 +90,9 @@ namespace aslam {
 
       /// \brief Clear the contents of this container
       void clear();
+
+      /// \brief Set all entries to zero
+      inline void setZero();
 
       /// \brief Clean and set the number of rows
       void reset(int rows);
