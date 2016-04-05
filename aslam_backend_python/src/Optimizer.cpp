@@ -1,3 +1,4 @@
+#include <boost/python/suite/indexing/vector_indexing_suite.hpp>
 #include <numpy_eigen/boost_python_headers.hpp>
 #include <aslam/backend/OptimizerBase.hpp>
 #include <aslam/backend/util/OptimizerProblemManagerBase.hpp>
@@ -6,6 +7,7 @@
 #include <aslam/backend/Optimizer2.hpp>
 #include <aslam/backend/OptimizerRprop.hpp>
 #include <aslam/backend/OptimizerBFGS.hpp>
+#include <aslam/backend/OptimizerSgd.hpp>
 #include <aslam/backend/ScalarNonSquaredErrorTerm.hpp>
 #include <boost/shared_ptr.hpp>
 #include <sm/PropertyTree.hpp>
@@ -351,5 +353,69 @@ void exportOptimizer()
         ;
     implicitly_convertible< boost::shared_ptr<OptimizerBFGS>, boost::shared_ptr<const OptimizerBFGS> >();
 
+
+    class_<LearningRateScheduleBase, boost::shared_ptr<LearningRateScheduleBase>, boost::noncopyable>("LearningRateScheduleBase", no_init)
+        .def("__getitem__", pure_virtual(&LearningRateScheduleBase::operator()))
+        .def("check", &LearningRateScheduleBase::check)
+        .add_property("name", make_function(&LearningRateScheduleBase::name, return_value_policy<copy_const_reference>()))
+        .add_property("initialRate", &LearningRateScheduleBase::initialRate)
+        ;
+    implicitly_convertible< boost::shared_ptr<LearningRateScheduleBase>, boost::shared_ptr<const LearningRateScheduleBase> >();
+
+    class_<LearningRateScheduleConstant, boost::shared_ptr<LearningRateScheduleConstant>, bases<LearningRateScheduleBase> >("LearningRateScheduleConstant", init<const double>("LearningRateScheduleConstant(double rate): Constructor"))
+        .def(init<const sm::PropertyTree&>("LearningRateScheduleConstant(PropertyTree pt): Constructor"))
+        .def("__getitem__", &LearningRateScheduleOptimal::operator()) // TODO: oure_virtual in base class sometimes doesn't work
+        ;
+    implicitly_convertible< boost::shared_ptr<LearningRateScheduleConstant>, boost::shared_ptr<const LearningRateScheduleConstant> >();
+
+    class_<LearningRateScheduleOptimal, boost::shared_ptr<LearningRateScheduleOptimal>, bases<LearningRateScheduleBase> >("LearningRateScheduleOptimal", init<const double, const double>("LearningRateScheduleOptimal(double initialRate, double tau): Constructor"))
+        .def(init<const sm::PropertyTree&>("LearningRateScheduleOptimal(PropertyTree pt): Constructor"))
+        .def("__getitem__", &LearningRateScheduleOptimal::operator()) // TODO: oure_virtual in base class sometimes doesn't work
+        .add_property("tau", &LearningRateScheduleOptimal::tau)
+        ;
+    implicitly_convertible< boost::shared_ptr<LearningRateScheduleOptimal>, boost::shared_ptr<const LearningRateScheduleOptimal> >();
+
+    class_<OptimizerOptionsSgd, bases<OptimizerOptionsBase> >("OptimizerOptionsSgd", init<>())
+        .def_readwrite("useDenseJacobianContainer", &OptimizerOptionsSgd::useDenseJacobianContainer)
+        .def_readwrite("regularizer", &OptimizerOptionsSgd::regularizer)
+        .def_readwrite("learningRateSchedule", &OptimizerOptionsSgd::learningRateSchedule)
+        .def("__str__", &toString<OptimizerOptionsSgd>)
+        ;
+
+    class_<OptimizerStatusSgd, bases<OptimizerStatus> >("OptimizerStatusSgd", init<>())
+        .def_readonly("learningRate", &OptimizerStatusSgd::learningRate)
+        .def("__str__", &toString<OptimizerStatusSgd>)
+        ;
+
+    class_<OptimizerSgd, boost::shared_ptr<OptimizerSgd>, bases<OptimizerProblemManagerBase> >("OptimizerSgd", init<>("OptimizerSgd(): Constructor with default options"))
+
+        .def(init<const OptimizerSgd::Options&>("OptimizerSgd(OptimizerSgdOptions options): Constructor with custom options"))
+        .def(init<const sm::PropertyTree&>("OptimizerSgd(PropertyTree propertyTree): Constructor from sm::PropertyTree"))
+
+        .def("addBatch", &OptimizerSgd::addBatch< std::vector<ScalarNonSquaredErrorTerm*> >,
+             "Add a batch of error terms")
+        .def("addBatch", &OptimizerSgd::addBatch< std::vector< boost::shared_ptr<ScalarNonSquaredErrorTerm> > >,
+             "Add a batch of error terms")
+        .def("addBatch", &OptimizerSgd::addBatch< std::vector<ErrorTerm*> >,
+            "Add a batch of error terms")
+        .def("addBatch", &OptimizerSgd::addBatch< std::vector<boost::shared_ptr<ErrorTerm> > >,
+            "Add a batch of error terms")
+
+        .def("incrementNumberOfIterations", &OptimizerSgd::incrementNumberOfIterations,
+             "Manually increment the number of iterations. Use this, if you have already incorporated some training "
+             "samples in another way (e.g. via batch optimization) in the beginning.")
+        ;
+    implicitly_convertible< boost::shared_ptr<OptimizerSgd>, boost::shared_ptr<const OptimizerSgd> >();
+
+    typedef std::vector< boost::shared_ptr<ScalarNonSquaredErrorTerm> > ScalarNonSquaredErrorTermBatch;
+    class_<ScalarNonSquaredErrorTermBatch>("ScalarNonSquaredErrorTermBatch")
+      .def(boost::python::vector_indexing_suite<ScalarNonSquaredErrorTermBatch>() )
+      .def("__iter__", boost::python::iterator<ScalarNonSquaredErrorTermBatch>())
+    ;
+    typedef std::vector< boost::shared_ptr<ErrorTerm> > ErrorTermBatch;
+    class_<ErrorTermBatch>("ErrorTermBatch")
+      .def(boost::python::vector_indexing_suite<ErrorTermBatch>() )
+      .def("__iter__", boost::python::iterator<ErrorTermBatch>())
+    ;
 }
 
