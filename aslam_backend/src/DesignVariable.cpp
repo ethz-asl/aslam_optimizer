@@ -75,7 +75,7 @@ namespace aslam {
     _cacheNodes.push_back(cn);
   }
 
-  void DesignVariable::invalidateCache() {
+  void DesignVariable::invalidateCacheImplementation() {
     // reset the cache
     for (const auto cn : _cacheNodes) {
       const auto pt = cn.lock();

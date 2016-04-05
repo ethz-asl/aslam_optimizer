@@ -131,12 +131,18 @@ namespace aslam {
       virtual void minimalDifferenceAndJacobianImplementation(const Eigen::MatrixXd& xHat, Eigen::VectorXd& outDifference, Eigen::MatrixXd& outJacobian) const;
 
       /// Invalidates the cache
-      void invalidateCache();
+      void invalidateCache() {
+        if (!_cacheNodes.empty())
+          invalidateCacheImplementation();
+      }
 
     private:
 
       /// Registers a cache expression that has to be reset each time the design variable changes its value
       void registerCacheExpressionNode(const boost::shared_ptr<CacheInterface>& cn);
+
+      /// Invalidates the cache
+      void invalidateCacheImplementation();
 
     private:
       /// \brief The block index used in the optimization routine.
