@@ -32,6 +32,10 @@ void Registry::remove(std::initializer_list<Occasion> occasions, const Optimizer
     vec.erase(p, vec.end());
   }
 }
+void Registry::clear() {
+  data->callbacks.clear();
+}
+
 
 ProceedInstruction Manager::issueCallback(const Argument & arg) {
   for(auto & c : data->callbacks[arg.occasion]){
@@ -46,3 +50,4 @@ ProceedInstruction Manager::issueCallback(const Argument & arg) {
 }  // namespace callback
 }  // namespace backend
 }  // namespace aslam
+

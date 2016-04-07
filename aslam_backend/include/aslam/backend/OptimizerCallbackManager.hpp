@@ -27,6 +27,8 @@ class Registry {
   void remove(Occasion occasion, const OptimizerCallback & callback){
     remove({occasion}, callback);
   }
+
+  void clear();
  private:
   friend class Manager;
   RegistryData * data;
