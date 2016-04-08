@@ -35,6 +35,13 @@ public:
    *   COST_UPDATED:                  the new cost after an update of the design variables
    */
   double currentCost;
+  /**
+   * \brief the most recently evaluated effective cost (J = sum of squared errors after the m-estimators being applied).
+   * Its relation to the optimization phase depends on the callback occasion:
+   *   OPTIMIZATION_INITIALIZED, X_UPDATED, RESIDUALS_UPDATED:  undefined
+   *   COST_UPDATED:                  the lowest previous cost so far (or -1 if this is the initial update)
+   */
+  double previousLowestCost;
 
   //TODO (HannesSommer) specify more argument values
 };

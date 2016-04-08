@@ -190,7 +190,7 @@ namespace aslam {
             // Select the design variables and (eventually) the error terms involved in the optimization.
             initialize();
             SolutionReturnValue srv;
-            _p_J = 0.0;
+            _p_J = -1.0;
 
             //std::cout << "Evaluate error for the first time\n";
             // This sets _J
@@ -333,6 +333,7 @@ namespace aslam {
             {
               SM_ASSERT_TRUE(Exception, _solver.get() != NULL, "The solver is null");
               _J = _solver->evaluateError(_options.nThreads, useMEstimator, &_callbackManager);
+              _callbackManager.issueCallback({callback::Occasion::COST_UPDATED, _J, _p_J});
               return _J;
             }
 
@@ -418,7 +419,7 @@ namespace aslam {
 
         void Optimizer2::issueCallback(callback::Occasion occasion){
           //TODO (HannesSommer) use ProceedInstruction value in the Optimizer
-          _callbackManager.issueCallback({occasion, _J});
+          _callbackManager.issueCallback({occasion, _J, 0});
         }
 
         } // namespace backend

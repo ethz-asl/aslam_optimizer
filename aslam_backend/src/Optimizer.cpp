@@ -160,7 +160,7 @@ namespace aslam {
 
     void Optimizer::issueCallback(callback::Occasion occasion){
       //TODO (HannesSommer) use ProceedInstruction value in the Optimizer
-      _callbackManager.issueCallback({occasion, _J});
+      _callbackManager.issueCallback({occasion, _J, 0});
     }
 
     /*
