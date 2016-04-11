@@ -32,7 +32,7 @@ namespace aslam {
 
     TransformationExpression::TransformationExpression(const RotationExpression & rotation, const EuclideanExpression & translation)
     {
-      _root.reset(new TransformationBasic(rotation, translation) );
+      _root.reset((rotation.isEmpty() && translation.isEmpty()) ? nullptr : new TransformationBasic(rotation, translation) );
     }
 
 
