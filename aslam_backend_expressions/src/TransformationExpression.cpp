@@ -58,8 +58,7 @@ namespace aslam {
   
   RotationExpression TransformationExpression::toRotationExpression() const {
     if(_root){
-      boost::shared_ptr< RotationExpressionNode > een( new RotationExpressionNodeTransformation( _root ) );
-      return RotationExpression(een);
+      return _root->toRotationExpression(_root);
     } else {
       return RotationExpression();
     }
@@ -67,8 +66,7 @@ namespace aslam {
   // HomogeneousExpression toHomogeneousExpression() const;
   EuclideanExpression TransformationExpression::toEuclideanExpression() const {
     if(_root){
-      boost::shared_ptr< EuclideanExpressionNode > een( new EuclideanExpressionNodeTranslation( _root ) );
-      return EuclideanExpression(een);
+      return _root->toEuclideanExpression(_root);
     } else {
       return EuclideanExpression();
     }

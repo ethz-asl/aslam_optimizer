@@ -24,8 +24,10 @@ namespace aslam {
       TransformationExpression(const RotationExpression & rotation, const EuclideanExpression & translation);
       TransformationExpression(TransformationExpressionNode * root);
       TransformationExpression(boost::shared_ptr<TransformationExpressionNode> root);
-        // create a constant expression
-        TransformationExpression(const Eigen::Matrix4d & T);
+
+      // create a constant expression
+      TransformationExpression(const Eigen::Matrix4d & T);
+
       virtual ~TransformationExpression();
 
       Eigen::Matrix4d toTransformationMatrix() const;

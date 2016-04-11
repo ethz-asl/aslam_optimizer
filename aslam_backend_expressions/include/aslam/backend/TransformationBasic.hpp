@@ -22,7 +22,9 @@ namespace aslam {
       virtual Eigen::Matrix4d toTransformationMatrixImplementation();
       virtual void evaluateJacobiansImplementation(JacobianContainer & outJacobians) const;
       virtual void getDesignVariablesImplementation(DesignVariable::set_t & designVariables) const;
-      
+
+      virtual RotationExpression toRotationExpression(const boost::shared_ptr<TransformationExpressionNode> & thisShared) const;
+      virtual EuclideanExpression toEuclideanExpression(const boost::shared_ptr<TransformationExpressionNode> & thisShared) const;
     private:
       boost::shared_ptr<RotationExpressionNode> _rotation;
       boost::shared_ptr<EuclideanExpressionNode>  _translation;

@@ -64,5 +64,17 @@ namespace aslam {
       return TransformationExpression(this);
     }
 
+    RotationExpression TransformationBasic::toRotationExpression(const boost::shared_ptr<TransformationExpressionNode>&) const {
+      return _rotation;
+    }
+
+    EuclideanExpression TransformationBasic::toEuclideanExpression(const boost::shared_ptr<TransformationExpressionNode>& thisShared) const {
+      if(!_rotation){
+        return _translation;
+      } else {
+        return TransformationExpressionNode::toEuclideanExpression(thisShared);
+      }
+    }
+
   } // namespace backend
 } // namespace aslam
