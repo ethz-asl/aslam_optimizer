@@ -4,6 +4,7 @@
 #include <Eigen/Core>
 #include <boost/shared_ptr.hpp>
 #include <aslam/backend/JacobianContainer.hpp>
+#include <sm/kinematics/Transformation.hpp>
 #include "RotationExpression.hpp"
 #include "HomogeneousExpression.hpp"
 #include "TransformationExpression.hpp"
@@ -28,6 +29,7 @@ namespace aslam {
       virtual ~TransformationExpression();
 
       Eigen::Matrix4d toTransformationMatrix() const;
+      sm::kinematics::Transformation toTransformation() const;
 
       RotationExpression toRotationExpression() const;
       HomogeneousExpression toHomogeneousExpression() const;
