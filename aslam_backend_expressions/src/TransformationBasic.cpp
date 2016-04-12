@@ -37,6 +37,7 @@ namespace aslam {
         } else {
           crRotation.topLeftCorner<3,3>().setZero();
         }
+        crRotation.bottomLeftCorner<3,3>().setIdentity();
         _rotation->evaluateJacobians(outJacobians, crRotation);
       }
 
