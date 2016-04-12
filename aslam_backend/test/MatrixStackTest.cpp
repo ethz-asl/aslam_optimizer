@@ -7,6 +7,8 @@
 
 #include <sm/eigen/gtest.hpp>
 
+#undef NDEBUG
+
 #include <aslam/backend/MatrixStack.hpp>
 
 
