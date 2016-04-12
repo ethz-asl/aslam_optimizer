@@ -32,11 +32,6 @@ namespace backend {
   _root->evaluateJacobians(outJacobians, getMatrixToLieAlgebra());
   }
 
-  void Vector2RotationQuaternionExpressionAdapter::evaluateJacobiansImplementation(JacobianContainer & outJacobians, const Eigen::MatrixXd & applyChainRule) const
-  {
-    _root->evaluateJacobians(outJacobians, applyChainRule * getMatrixToLieAlgebra());
-  }
-
   void Vector2RotationQuaternionExpressionAdapter::getDesignVariablesImplementation(DesignVariable::set_t & designVariables) const
   {
     _root->getDesignVariables(designVariables);

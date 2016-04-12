@@ -24,15 +24,15 @@ namespace aslam {
       
       /// \brief Evaluate the Jacobians
       void evaluateJacobians(JacobianContainer & outJacobians) const;   
-    
-      /// \brief Evaluate the Jacobians and apply the chain rule.
-      void evaluateJacobians(JacobianContainer & outJacobians, const Eigen::MatrixXd & applyChainRule) const;
+      template <typename DERIVED>
+      EIGEN_ALWAYS_INLINE void evaluateJacobians(JacobianContainer & outJacobians, const Eigen::MatrixBase<DERIVED> & applyChainRule) const {
+        evaluateJacobians(outJacobians.apply(applyChainRule));
+      }
       void getDesignVariables(DesignVariable::set_t & designVariables) const;
     protected:        
       // These functions must be implemented by child classes.
       virtual Eigen::Matrix4d toTransformationMatrixImplementation() = 0;
       virtual void evaluateJacobiansImplementation(JacobianContainer & outJacobians) const = 0;
-      virtual void evaluateJacobiansImplementation(JacobianContainer & outJacobians, const Eigen::MatrixXd & applyChainRule) const = 0;
       virtual void getDesignVariablesImplementation(DesignVariable::set_t & designVariables) const = 0;
 
     };
@@ -58,7 +58,6 @@ namespace aslam {
     private:
       virtual Eigen::Matrix4d toTransformationMatrixImplementation();
       virtual void evaluateJacobiansImplementation(JacobianContainer & outJacobians) const;
-      virtual void evaluateJacobiansImplementation(JacobianContainer & outJacobians, const Eigen::MatrixXd & applyChainRule) const;
       virtual void getDesignVariablesImplementation(DesignVariable::set_t & designVariables) const;
 
       boost::shared_ptr<TransformationExpressionNode> _lhs;
@@ -87,7 +86,6 @@ namespace aslam {
     private:
       virtual Eigen::Matrix4d toTransformationMatrixImplementation();
       virtual void evaluateJacobiansImplementation(JacobianContainer & outJacobians) const;
-      virtual void evaluateJacobiansImplementation(JacobianContainer & outJacobians, const Eigen::MatrixXd & applyChainRule) const;
       virtual void getDesignVariablesImplementation(DesignVariable::set_t & designVariables) const;
 
       boost::shared_ptr<TransformationExpressionNode> _dvTransformation;
@@ -112,7 +110,6 @@ namespace aslam {
     private:
       virtual Eigen::Matrix4d toTransformationMatrixImplementation();
       virtual void evaluateJacobiansImplementation(JacobianContainer & outJacobians) const;
-      virtual void evaluateJacobiansImplementation(JacobianContainer & outJacobians, const Eigen::MatrixXd & applyChainRule) const;
       virtual void getDesignVariablesImplementation(DesignVariable::set_t & designVariables) const;
 
 

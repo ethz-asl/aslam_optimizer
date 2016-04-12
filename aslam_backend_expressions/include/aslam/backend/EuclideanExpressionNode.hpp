@@ -39,7 +39,6 @@ namespace aslam {
     private:
       virtual Eigen::Vector3d evaluateImplementation() const;
       virtual void evaluateJacobiansImplementation(JacobianContainer & outJacobians) const;
-      virtual void evaluateJacobiansImplementation(JacobianContainer & outJacobians, const Eigen::MatrixXd & applyChainRule) const;
       virtual void getDesignVariablesImplementation(DesignVariable::set_t & designVariables) const;
 
       boost::shared_ptr<RotationExpressionNode> _lhs;
@@ -68,7 +67,6 @@ namespace aslam {
      private:
        virtual Eigen::Vector3d evaluateImplementation() const;
        virtual void evaluateJacobiansImplementation(JacobianContainer & outJacobians) const;
-       virtual void evaluateJacobiansImplementation(JacobianContainer & outJacobians, const Eigen::MatrixXd & applyChainRule) const;
        virtual void getDesignVariablesImplementation(DesignVariable::set_t & designVariables) const;
 
        boost::shared_ptr<MatrixExpressionNode> _lhs;
@@ -98,7 +96,6 @@ namespace aslam {
      private:
        virtual Eigen::Vector3d evaluateImplementation() const;
        virtual void evaluateJacobiansImplementation(JacobianContainer & outJacobians) const;
-       virtual void evaluateJacobiansImplementation(JacobianContainer & outJacobians, const Eigen::MatrixXd & applyChainRule) const;
        virtual void getDesignVariablesImplementation(DesignVariable::set_t & designVariables) const;
 
        boost::shared_ptr<EuclideanExpressionNode> _lhs;
@@ -124,7 +121,6 @@ namespace aslam {
       private:
         virtual Eigen::Vector3d evaluateImplementation() const;
         virtual void evaluateJacobiansImplementation(JacobianContainer & outJacobians) const;
-        virtual void evaluateJacobiansImplementation(JacobianContainer & outJacobians, const Eigen::MatrixXd & applyChainRule) const;
         virtual void getDesignVariablesImplementation(DesignVariable::set_t & designVariables) const;
 
         boost::shared_ptr<EuclideanExpressionNode> _lhs;
@@ -150,7 +146,6 @@ namespace aslam {
      private:
        virtual Eigen::Vector3d evaluateImplementation() const;
        virtual void evaluateJacobiansImplementation(JacobianContainer & outJacobians) const;
-       virtual void evaluateJacobiansImplementation(JacobianContainer & outJacobians, const Eigen::MatrixXd & applyChainRule) const;
        virtual void getDesignVariablesImplementation(DesignVariable::set_t & designVariables) const;
 
        boost::shared_ptr<EuclideanExpressionNode> _lhs;
@@ -175,7 +170,6 @@ namespace aslam {
      private:
          virtual Eigen::Vector3d evaluateImplementation() const;
          virtual void evaluateJacobiansImplementation(JacobianContainer & outJacobians) const;
-         virtual void evaluateJacobiansImplementation(JacobianContainer & outJacobians, const Eigen::MatrixXd & applyChainRule) const;
          virtual void getDesignVariablesImplementation(DesignVariable::set_t & designVariables) const;
 
          Eigen::Vector3d _p;
@@ -199,7 +193,6 @@ namespace aslam {
      private:
        virtual Eigen::Vector3d evaluateImplementation() const;
        virtual void evaluateJacobiansImplementation(JacobianContainer & outJacobians) const;
-       virtual void evaluateJacobiansImplementation(JacobianContainer & outJacobians, const Eigen::MatrixXd & applyChainRule) const;
        virtual void getDesignVariablesImplementation(DesignVariable::set_t & designVariables) const;
 
        boost::shared_ptr<EuclideanExpressionNode> _lhs;
@@ -224,7 +217,6 @@ namespace aslam {
       private:
         virtual Eigen::Vector3d evaluateImplementation() const;
         virtual void evaluateJacobiansImplementation(JacobianContainer & outJacobians) const;
-        virtual void evaluateJacobiansImplementation(JacobianContainer & outJacobians, const Eigen::MatrixXd & applyChainRule) const;
         virtual void getDesignVariablesImplementation(DesignVariable::set_t & designVariables) const;
 
         boost::shared_ptr<EuclideanExpressionNode> _operand;
@@ -247,7 +239,6 @@ namespace aslam {
       private:
         virtual Eigen::Vector3d evaluateImplementation() const;
         virtual void evaluateJacobiansImplementation(JacobianContainer & outJacobians) const;
-        virtual void evaluateJacobiansImplementation(JacobianContainer & outJacobians, const Eigen::MatrixXd & applyChainRule) const;
         virtual void getDesignVariablesImplementation(DesignVariable::set_t & designVariables) const;
 
         boost::shared_ptr<EuclideanExpressionNode> _p;
@@ -265,7 +256,6 @@ namespace aslam {
       private:
         virtual Eigen::Vector3d evaluateImplementation() const;
         virtual void evaluateJacobiansImplementation(JacobianContainer & outJacobians) const;
-        virtual void evaluateJacobiansImplementation(JacobianContainer & outJacobians, const Eigen::MatrixXd & applyChainRule) const;
         virtual void getDesignVariablesImplementation(DesignVariable::set_t & designVariables) const;
 
         boost::shared_ptr<TransformationExpressionNode> _operand;
@@ -283,7 +273,6 @@ namespace aslam {
       private:
         virtual Eigen::Vector3d evaluateImplementation() const;
         virtual void evaluateJacobiansImplementation(JacobianContainer & outJacobians) const;
-        virtual void evaluateJacobiansImplementation(JacobianContainer & outJacobians, const Eigen::MatrixXd & applyChainRule) const;
         virtual void getDesignVariablesImplementation(DesignVariable::set_t & designVariables) const;
 
         boost::shared_ptr<RotationExpressionNode> _operand;
@@ -302,7 +291,6 @@ namespace aslam {
       private:
         virtual Eigen::Vector3d evaluateImplementation() const;
         virtual void evaluateJacobiansImplementation(JacobianContainer & outJacobians) const;
-        virtual void evaluateJacobiansImplementation(JacobianContainer & outJacobians, const Eigen::MatrixXd & applyChainRule) const;
         virtual void getDesignVariablesImplementation(DesignVariable::set_t & designVariables) const;
 
         boost::shared_ptr<HomogeneousExpressionNode> _root;

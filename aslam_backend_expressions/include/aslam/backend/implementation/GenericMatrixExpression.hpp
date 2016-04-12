@@ -101,8 +101,8 @@ ScalarExpression _CLASS::toScalarExpression() const {
     inline typename base_t::apply_diff_return_t applyDiff(const typename base_t::operand_t::tangent_vector_t & tangent_vector) const {
       return tangent_vector.template block<1,1>(RowIndex, ColIndex);
     }
-    virtual void evaluateJacobiansImplementation(JacobianContainer & outJacobians) const { base_t::evaluateJacobiansImplementation(outJacobians, IdentityDifferential<Eigen::Matrix<double, 1,1>, double>()); };
-    virtual void evaluateJacobiansImplementation(JacobianContainer & outJacobians, const Eigen::MatrixXd & applyChainRule) const {
+    void evaluateJacobiansImplementation(JacobianContainer & outJacobians) const { base_t::evaluateJacobiansImplementation(outJacobians, IdentityDifferential<Eigen::Matrix<double, 1,1>, double>()); };
+    void evaluateJacobiansImplementation(JacobianContainer & outJacobians, const Eigen::MatrixXd & applyChainRule) const {
       assert(applyChainRule.cols() == 1);
       evaluateJacobians(outJacobians.apply(applyChainRule));
     };
@@ -129,8 +129,8 @@ ScalarExpression _CLASS::toScalarExpression(int rowIndex, int colIndex) const {
     inline typename base_t::apply_diff_return_t applyDiff(const typename base_t::operand_t::tangent_vector_t & tangent_vector) const {
       return tangent_vector.template block<1,1>(rowIndex, colIndex);
     }
-    virtual void evaluateJacobiansImplementation(JacobianContainer & outJacobians) const { base_t::evaluateJacobiansImplementation(outJacobians, IdentityDifferential<Eigen::Matrix<double, 1,1>, double>()); };
-    virtual void evaluateJacobiansImplementation(JacobianContainer & outJacobians, const Eigen::MatrixXd & applyChainRule) const {
+    void evaluateJacobiansImplementation(JacobianContainer & outJacobians) const { base_t::evaluateJacobiansImplementation(outJacobians, IdentityDifferential<Eigen::Matrix<double, 1,1>, double>()); };
+    void evaluateJacobiansImplementation(JacobianContainer & outJacobians, const Eigen::MatrixXd & applyChainRule) const {
       assert(applyChainRule.cols() == 1);
       evaluateJacobians(outJacobians.apply(applyChainRule));
     };
@@ -214,9 +214,6 @@ _TEMPLATE ScalarExpression _CLASS::squaredNorm() const
     virtual void evaluateJacobiansImplementation(JacobianContainer & outJacobians) const override {
       auto val = this->getOperandNode().evaluate();
       this->getOperandNode().evaluateJacobians(outJacobians.apply(2.0*val.transpose()));
-    };
-    virtual void evaluateJacobiansImplementation(JacobianContainer & outJacobians, const Eigen::MatrixXd & applyChainRule) const override {
-      evaluateJacobians(outJacobians.apply(applyChainRule));
     };
   };
 

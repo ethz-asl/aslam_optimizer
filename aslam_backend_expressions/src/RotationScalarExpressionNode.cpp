@@ -27,16 +27,11 @@ namespace backend {
 
     void RotationScalarExpressionNode::evaluateJacobiansImplementation(JacobianContainer & outJacobians) const
     {
-      _s->evaluateJacobians(outJacobians, -Eigen::Vector3d::Unit(_axis));
-    }
-
-    void RotationScalarExpressionNode::evaluateJacobiansImplementation(JacobianContainer & outJacobians, const Eigen::MatrixXd & applyChainRule) const
-    {
       /*
        * Assume R to be the current rotation value of this exp.
        * J_v (Phi_R^{-1} R(s(v))) = J_v  ( log ( R(s(v) * R^{-1})) = e_axis
        */
-      _s->evaluateJacobians(outJacobians, -applyChainRule.col(_axis));
+      _s->evaluateJacobians(outJacobians, -Eigen::Vector3d::Unit(_axis));
     }
 
     void RotationScalarExpressionNode::getDesignVariablesImplementation(DesignVariable::set_t & designVariables) const

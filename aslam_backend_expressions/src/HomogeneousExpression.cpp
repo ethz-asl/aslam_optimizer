@@ -54,11 +54,6 @@ namespace aslam {
       return _root->evaluateJacobians(outJacobians);
     }
 
-    void HomogeneousExpression::evaluateJacobians(JacobianContainer & outJacobians, const Eigen::MatrixXd & applyChainRule) const
-    {
-      return _root->evaluateJacobians(outJacobians, applyChainRule);
-    }
-
     void HomogeneousExpression::getDesignVariables(DesignVariable::set_t & designVariables) const
     {
       _root->getDesignVariables(designVariables);

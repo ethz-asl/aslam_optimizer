@@ -21,7 +21,6 @@ namespace aslam {
     private:
       virtual Eigen::Matrix4d toTransformationMatrixImplementation();
       virtual void evaluateJacobiansImplementation(JacobianContainer & outJacobians) const;
-      virtual void evaluateJacobiansImplementation(JacobianContainer & outJacobians, const Eigen::MatrixXd & applyChainRule) const;
       virtual void getDesignVariablesImplementation(DesignVariable::set_t & designVariables) const;
       
     private:

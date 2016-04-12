@@ -66,12 +66,6 @@ namespace aslam {
     }
 
     template<int D>
-    void DesignVariableVector<D>::evaluateJacobiansImplementation(JacobianContainer & outJacobians, const Eigen::MatrixXd & applyChainRule) const
-    {
-      outJacobians.add(const_cast<DesignVariableVector<D>*>(this), applyChainRule);
-    }
-
-    template<int D>
     void DesignVariableVector<D>::getDesignVariablesImplementation(DesignVariable::set_t & designVariables) const
     {
       designVariables.insert(const_cast<DesignVariableVector<D>*>(this));

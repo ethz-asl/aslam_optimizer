@@ -38,8 +38,6 @@ class Scalar : public ScalarExpressionNode, public DesignVariable {
 
   virtual void evaluateJacobiansImplementation(JacobianContainer & outJacobians) const;
 
-  virtual void evaluateJacobiansImplementation(JacobianContainer & outJacobians, const Eigen::MatrixXd & applyChainRule) const;
-
   virtual void getDesignVariablesImplementation(DesignVariable::set_t & designVariables) const;
 
   /// Returns the content of the design variable

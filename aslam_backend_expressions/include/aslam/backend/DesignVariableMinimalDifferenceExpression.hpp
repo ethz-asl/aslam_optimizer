@@ -23,25 +23,20 @@ class DesignVariableMinimalDifferenceExpressionNode : public VectorExpressionNod
   DesignVariableMinimalDifferenceExpressionNode(DesignVariable & dv, const Eigen::MatrixXd & xHat) : _xHat(xHat), _dv(dv) {}
   virtual ~DesignVariableMinimalDifferenceExpressionNode() {}
 
-  virtual vector_t evaluateImplementation() const {
+  virtual vector_t evaluateImplementation() const override {
     Eigen::VectorXd v;
     _dv.minimalDifference(_xHat, v);
     return v;
   }
 
-  virtual void evaluateJacobiansImplementation(JacobianContainer & outJacobians) const {
+  virtual void evaluateJacobiansImplementation(JacobianContainer & outJacobians) const override {
     Eigen::MatrixXd jac;
     Eigen::VectorXd v;
     _dv.minimalDifferenceAndJacobian(_xHat, v, jac);
     outJacobians.add(&_dv, jac);
   }
-  virtual void evaluateJacobiansImplementation(JacobianContainer & outJacobians, const Eigen::MatrixXd & applyChainRule) const {
-    Eigen::MatrixXd jac;
-    Eigen::VectorXd v;
-    _dv.minimalDifferenceAndJacobian(_xHat, v, jac);
-    outJacobians.add(&_dv, applyChainRule * jac);
-  }
-  virtual void getDesignVariablesImplementation(DesignVariable::set_t & designVariables) const {
+
+  virtual void getDesignVariablesImplementation(DesignVariable::set_t & designVariables) const override {
     designVariables.insert(&_dv);
   }
  private:

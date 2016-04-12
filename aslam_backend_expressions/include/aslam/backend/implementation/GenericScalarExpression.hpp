@@ -71,12 +71,8 @@ class GenericScalarExpressionNodeCasted : public GSEUnRes<Scalar_, GenericScalar
     return Scalar_(this->_lhs->toScalar());
   }
 
-  void evaluateJacobiansImplementation(JacobianContainer & outJacobians, const Eigen::MatrixXd * applyChainRule) const {
-    if(applyChainRule){
-      this->_lhs->evaluateJacobians(outJacobians, *applyChainRule);
-    } else {
-      this->_lhs->evaluateJacobians(outJacobians, Eigen::Matrix<double, 1, 1>::Identity(1, 1));
-    }
+  void evaluateJacobiansImplementation(JacobianContainer & outJacobians) const {
+    this->_lhs->evaluateJacobians(outJacobians);
   }
 };
 
@@ -89,9 +85,9 @@ class GenericScalarExpressionNodeConstant : public GenericScalarExpressionNode<S
   GenericScalarExpressionNodeConstant(Scalar s) : _s(s) {}
   virtual ~GenericScalarExpressionNodeConstant() {}
  protected:
-  virtual Scalar evaluateImplementation() const { return _s; }
-  virtual void evaluateJacobiansImplementation(JacobianContainer & /* outJacobians */, const Eigen::MatrixXd * /* applyChainRule */) const {}
-  virtual void getDesignVariablesImplementation(DesignVariable::set_t & /* designVariables */) const {}
+  virtual Scalar evaluateImplementation() const override { return _s; }
+  virtual void evaluateJacobiansImplementation(JacobianContainer & /* outJacobians */) const override {}
+  virtual void getDesignVariablesImplementation(DesignVariable::set_t & /* designVariables */) const override {}
 
   Scalar _s;
 };
@@ -108,12 +104,9 @@ class GenericScalarExpressionNodeMultiply : public GSEBinRes<Scalar_> {
     return this->_lhs->toScalar() * this->_rhs->toScalar();
   }
 
-  void evaluateJacobiansImplementation(JacobianContainer & outJacobians, const Eigen::MatrixXd * applyChainRule) const {
-    Eigen::MatrixXd L(1, 1), R(1, 1);
-    L(0, 0) = this->_lhs->toScalar();
-    R(0, 0) = this->_rhs->toScalar();
-    this->_lhs->evaluateJacobians(outJacobians, applyChainRule ? *applyChainRule * R : R);
-    this->_rhs->evaluateJacobians(outJacobians, applyChainRule ? *applyChainRule * L : L);
+  void evaluateJacobiansImplementation(JacobianContainer & outJacobians) const {
+    this->_lhs->evaluateJacobians(outJacobians.apply(this->_rhs->toScalar()));
+    this->_rhs->evaluateJacobians(outJacobians.apply(this->_lhs->toScalar()));
   }
 };
 
@@ -130,12 +123,9 @@ class GenericScalarExpressionNodeDivide : public GSEBinRes<Scalar_> {
     return this->_lhs->toScalar() / this->_rhs->toScalar();
   }
 
-  void evaluateJacobiansImplementation(JacobianContainer & outJacobians, const Eigen::MatrixXd * applyChainRule) const {
-    Eigen::MatrixXd L(1, 1), R(1, 1);
-    L(0, 0) = 1.0 / this->_rhs->toScalar();
-    R(0, 0) = -this->_lhs->toScalar() / (this->_rhs->toScalar() * this->_rhs->toScalar());
-    this->_lhs->evaluateJacobians(outJacobians, applyChainRule ? *applyChainRule * R : R);
-    this->_rhs->evaluateJacobians(outJacobians, applyChainRule ? *applyChainRule * L : L);
+  void evaluateJacobiansImplementation(JacobianContainer & outJacobians) const {
+    this->_lhs->evaluateJacobians(outJacobians.apply(-this->_lhs->toScalar() / (this->_rhs->toScalar() * this->_rhs->toScalar())));
+    this->_rhs->evaluateJacobians(outJacobians.apply(1.0 / this->_rhs->toScalar()));
   }
 };
 
@@ -152,14 +142,9 @@ class GenericScalarExpressionNodeAdd : public GSEBinRes<Scalar_> {
     return this->_lhs->toScalar() + this->_rhs->toScalar();
   }
 
-  void evaluateJacobiansImplementation(JacobianContainer & outJacobians, const Eigen::MatrixXd * applyChainRule) const {
-    if(applyChainRule){
-      this->_lhs->evaluateJacobians(outJacobians, *applyChainRule);
-      this->_rhs->evaluateJacobians(outJacobians, *applyChainRule);
-    } else {
-      this->_lhs->evaluateJacobians(outJacobians);
-      this->_rhs->evaluateJacobians(outJacobians);
-    }
+  void evaluateJacobiansImplementation(JacobianContainer & outJacobians) const {
+    this->_lhs->evaluateJacobians(outJacobians);
+    this->_rhs->evaluateJacobians(outJacobians);
   }
 };
 
@@ -176,14 +161,9 @@ class GenericScalarExpressionNodeSub : public GSEBinRes<Scalar_> {
     return this->_lhs->toScalar() - this->_rhs->toScalar();
   }
 
-  void evaluateJacobiansImplementation(JacobianContainer & outJacobians, const Eigen::MatrixXd * applyChainRule) const {
-    if(applyChainRule){
-      this->_lhs->evaluateJacobians(outJacobians, *applyChainRule);
-      this->_rhs->evaluateJacobians(outJacobians, -*applyChainRule);
-    } else {
-      this->_lhs->evaluateJacobians(outJacobians);
-      this->_rhs->evaluateJacobians(outJacobians, -Eigen::MatrixXd::Identity(1, 1));
-    }
+  void evaluateJacobiansImplementation(JacobianContainer & outJacobians) const {
+    this->_lhs->evaluateJacobians(outJacobians);
+    this->_rhs->evaluateJacobians(outJacobians.apply(-1.0));
   }
 };
 
@@ -200,12 +180,8 @@ class GenericScalarExpressionNodeNegated : public GSEUnRes<Scalar_, GenericScala
     return -this->_lhs->toScalar();
   }
 
-  void evaluateJacobiansImplementation(JacobianContainer & outJacobians, const Eigen::MatrixXd * applyChainRule) const {
-    if(applyChainRule){
-      this->_lhs->evaluateJacobians(outJacobians, -*applyChainRule);
-    } else {
-      this->_lhs->evaluateJacobians(outJacobians, -Eigen::Matrix<double, 1, 1>::Identity(1, 1));
-    }
+  void evaluateJacobiansImplementation(JacobianContainer & outJacobians) const {
+    this->_lhs->evaluateJacobians(outJacobians.apply(-1.0));
   }
 };
 
@@ -223,11 +199,8 @@ class GenericScalarExpressionNodeFromVectorExpression : public GSEUnRes<Scalar_,
     return this->_lhs->evaluate()(0);
   }
 
-  void evaluateJacobiansImplementation(JacobianContainer & outJacobians, const Eigen::MatrixXd * applyChainRule) const {
-    if(applyChainRule)
-      this->_lhs->evaluateJacobians(outJacobians, applyChainRule);
-    else
-      this->_lhs->evaluateJacobians(outJacobians);
+  void evaluateJacobiansImplementation(JacobianContainer & outJacobians) const {
+    this->_lhs->evaluateJacobians(outJacobians);
   }
 };
 }  // namepsace internal

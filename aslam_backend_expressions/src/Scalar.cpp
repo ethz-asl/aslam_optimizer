@@ -43,11 +43,6 @@ namespace aslam {
         {
             outJacobians.add(const_cast<Scalar *>(this));
         }
-    
-        void Scalar::evaluateJacobiansImplementation(JacobianContainer & outJacobians, const Eigen::MatrixXd & applyChainRule) const
-        {
-            evaluateJacobiansImplementation(outJacobians.apply(applyChainRule));
-        }
 
         void Scalar::getDesignVariablesImplementation(DesignVariable::set_t & designVariables) const
         {

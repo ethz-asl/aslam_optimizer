@@ -46,12 +46,7 @@ namespace aslam {
     {
       outJacobians.add(const_cast<HomogeneousPoint *>(this), sm::kinematics::quatInvS(_p));
     }
-    
-    void HomogeneousPoint::evaluateJacobiansImplementation(JacobianContainer & outJacobians, const Eigen::MatrixXd & applyChainRule) const
-    {
-      outJacobians.add(const_cast<HomogeneousPoint *>(this), applyChainRule * sm::kinematics::quatInvS(_p));
-    }
-      
+
     void HomogeneousPoint::getDesignVariablesImplementation(DesignVariable::set_t & designVariables) const
     {
       designVariables.insert(const_cast<HomogeneousPoint *>(this));

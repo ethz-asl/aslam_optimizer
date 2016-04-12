@@ -18,12 +18,6 @@ namespace aslam {
     {
       evaluateJacobiansImplementation(outJacobians);
     }      
-
-    void TransformationExpressionNode::evaluateJacobians(JacobianContainer & outJacobians, const Eigen::MatrixXd & applyChainRule) const
-    {
-      SM_ASSERT_EQ_DBG(Exception, applyChainRule.cols(), 6, "The chain rule matrix must have 6 columns");
-      evaluateJacobiansImplementation(outJacobians, applyChainRule);
-    }
       
     void TransformationExpressionNode::getDesignVariables(DesignVariable::set_t & designVariables) const
     {
@@ -64,14 +58,6 @@ namespace aslam {
       _lhs->evaluateJacobians(outJacobians);
     }
 
- 
-    void TransformationExpressionNodeMultiply::evaluateJacobiansImplementation(JacobianContainer & outJacobians, const Eigen::MatrixXd & applyChainRule) const
-    {	
-      _rhs->evaluateJacobians(outJacobians, (applyChainRule * sm::kinematics::boxTimes(_T_lhs)));
-      _lhs->evaluateJacobians(outJacobians, applyChainRule);
-    }
-
-
     ////////////////////////////////////////////////////
     /// TransformationExpressionNodeInverse: A container for T^-1
     ////////////////////////////////////////////////////
@@ -94,12 +80,6 @@ namespace aslam {
       _dvTransformation->evaluateJacobians(outJacobians, -sm::kinematics::boxTimes(_T));
     }
 
-
-    void TransformationExpressionNodeInverse::evaluateJacobiansImplementation(JacobianContainer & outJacobians, const Eigen::MatrixXd & applyChainRule) const
-    {
-      _dvTransformation->evaluateJacobians(outJacobians, (applyChainRule * -sm::kinematics::boxTimes(_T)));
-    }
-
     void TransformationExpressionNodeInverse::getDesignVariablesImplementation(DesignVariable::set_t & designVariables) const
     {
       _dvTransformation->getDesignVariables(designVariables);
@@ -111,7 +91,6 @@ namespace aslam {
     
       Eigen::Matrix4d TransformationExpressionNodeConstant::toTransformationMatrixImplementation(){ return _T; }
   void TransformationExpressionNodeConstant::evaluateJacobiansImplementation(JacobianContainer & /* outJacobians */) const{}
-  void TransformationExpressionNodeConstant::evaluateJacobiansImplementation(JacobianContainer & /* outJacobians */, const Eigen::MatrixXd & /* applyChainRule */) const{}
   void TransformationExpressionNodeConstant::getDesignVariablesImplementation(DesignVariable::set_t & /* designVariables */) const{}
 
 
