@@ -254,27 +254,6 @@ namespace aslam {
         boost::shared_ptr<ScalarExpressionNode> _s;
       };
 
-     /**
-       * \class VectorExpression2EuclideanExpressionAdapter
-       *
-       * \brief A class representing an adapted VectorExpression<3>.
-       *
-       */
-      class VectorExpression2EuclideanExpressionAdapter : public EuclideanExpressionNode
-      {
-      public:
-        VectorExpression2EuclideanExpressionAdapter(boost::shared_ptr<VectorExpressionNode<3> > vectorExpressionNode);
-        virtual ~VectorExpression2EuclideanExpressionAdapter();
-
-      private:
-        virtual Eigen::Vector3d evaluateImplementation() const;
-        virtual void evaluateJacobiansImplementation(JacobianContainer & outJacobians) const;
-        virtual void evaluateJacobiansImplementation(JacobianContainer & outJacobians, const Eigen::MatrixXd & applyChainRule) const;
-        virtual void getDesignVariablesImplementation(DesignVariable::set_t & designVariables) const;
-
-        boost::shared_ptr<VectorExpressionNode<3> > _vectorExpressionNode;
-      };
-
       class EuclideanExpressionNodeTranslation : public EuclideanExpressionNode
       {
       public:
