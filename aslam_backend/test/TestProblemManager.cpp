@@ -9,12 +9,13 @@
 using namespace std;
 using namespace aslam::backend;
 
-#define MSG_STRING(useMEstimator, applyDvScaling, useDenseJacobianContainer) { \
-    "Failure with options useMEstimator: " + std::to_string(useMEstimator) + \
-    ", applyDvScaling: " + std::to_string(applyDvScaling) + \
-    ", useDenseJacobianContainer: " + std::to_string(useMEstimator) \
-  }
-
+std::string to_string(const bool useMEstimator, const bool applyDvScaling, const bool useDenseJacobianContainer)
+{
+  std::ostringstream os;
+  os << "Failure with options useMEstimator: "  << useMEstimator <<
+      ", applyDvScaling: " + applyDvScaling << ", useDenseJacobianContainer: " << useDenseJacobianContainer;
+  return os.str();
+}
 
 TEST(OptimizationProblemTestSuite, testProblemManager)
 {
@@ -40,16 +41,14 @@ TEST(OptimizationProblemTestSuite, testProblemManager)
     const bool useMEstimator = bits[0];
     const bool applyDvScaling = bits[1];
     const bool useDenseJacobianContainer = bits[2];
+    auto optStr = to_string(useMEstimator, applyDvScaling, useDenseJacobianContainer);
 
-    SCOPED_TRACE(testing::Message() <<
-                 "useMEstimator: " << useMEstimator << ", " <<
-                 "applyDvScaling: " << applyDvScaling << ", " <<
-                 "useDenseJacobianContainer: "  << useDenseJacobianContainer);
+    SCOPED_TRACE(testing::Message() << optStr);
 
     dv0.setActive(false);
     dv1.setActive(true);
 
-    ProblemManager pm(useDenseJacobianContainer);
+    ProblemManager pm;
     pm.setProblem(problem);
 
     ASSERT_FALSE(pm.isInitialized());
@@ -71,20 +70,20 @@ TEST(OptimizationProblemTestSuite, testProblemManager)
     JacobianContainerDense<RowVectorType&, 1> jcDense(grad);
 
     // Gradient should be zero, design variable is not activated
-    pm.addGradientForErrorTerm(grad, &err0, useMEstimator);
+    pm.addGradientForErrorTerm(grad, &err0, useMEstimator, useDenseJacobianContainer);
     sm::eigen::assertEqual(RowVectorType::Zero(pm.numOptParameters()), grad, SM_SOURCE_FILE_POS);
 
     // Gradient should be equal to the one of the scalar error term
     grad.setZero();
     pm.addGradientForErrorTerm(jcDense, &err1, useMEstimator);
-    sm::eigen::assertEqual(grad1, grad, SM_SOURCE_FILE_POS, MSG_STRING(useMEstimator, applyDvScaling, useDenseJacobianContainer));
+    sm::eigen::assertEqual(grad1, grad, SM_SOURCE_FILE_POS, optStr);
     pm.addGradientForErrorTerm(jcDense, &err1, useMEstimator); // test that nothing gets cleared
-    sm::eigen::assertEqual(grad1 + grad1, grad, SM_SOURCE_FILE_POS, MSG_STRING(useMEstimator, applyDvScaling, useDenseJacobianContainer));
+    sm::eigen::assertEqual(grad1 + grad1, grad, SM_SOURCE_FILE_POS, optStr);
 
     // Full gradient should be equal to the sum of the two scalar error terms
     grad.setZero();
-    pm.computeGradient(grad, 1, useMEstimator, applyDvScaling);
-    sm::eigen::assertEqual(grad1 + grad2, grad, SM_SOURCE_FILE_POS, MSG_STRING(useMEstimator, applyDvScaling, useDenseJacobianContainer));
+    pm.computeGradient(grad, 1, useMEstimator, applyDvScaling, useDenseJacobianContainer);
+    sm::eigen::assertEqual(grad1 + grad2, grad, SM_SOURCE_FILE_POS, optStr);
 
     // Now activate design variable 0
     dv0.setActive(true);
@@ -105,15 +104,15 @@ TEST(OptimizationProblemTestSuite, testProblemManager)
     // check gradient for squared error term
     RowVectorType grad_expected = RowVectorType::Zero(pm.numOptParameters());
     grad_expected.segment(0, 2) = grad0;
-    pm.addGradientForErrorTerm(grad, &err0, useMEstimator);
-    sm::eigen::assertEqual(grad_expected, grad, SM_SOURCE_FILE_POS, MSG_STRING(useMEstimator, applyDvScaling, useDenseJacobianContainer));
+    pm.addGradientForErrorTerm(grad, &err0, useMEstimator, useDenseJacobianContainer);
+    sm::eigen::assertEqual(grad_expected, grad, SM_SOURCE_FILE_POS, optStr);
 
     // Full gradient should now contain all error terms
     grad.setZero();
     grad_expected.setZero();
     grad_expected.segment(0, 2) = grad0;
     grad_expected.segment(2, 2) = grad1 + grad2;
-    pm.computeGradient(grad, 1, useMEstimator, applyDvScaling);
-    sm::eigen::assertEqual(grad_expected, grad, SM_SOURCE_FILE_POS, MSG_STRING(useMEstimator, applyDvScaling, useDenseJacobianContainer));
+    pm.computeGradient(grad, 1, useMEstimator, applyDvScaling, useDenseJacobianContainer);
+    sm::eigen::assertEqual(grad_expected, grad, SM_SOURCE_FILE_POS, optStr);
   }
 }

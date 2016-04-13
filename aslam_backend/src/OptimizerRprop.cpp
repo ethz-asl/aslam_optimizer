@@ -163,7 +163,7 @@ const RpropReturnValue& OptimizerRprop::optimize()
 
     RowVectorType gradient;
     timeGrad.start();
-    this->computeGradient(gradient, _options.nThreads, false /*TODO: useMEstimator*/, false /*TODO: use scaling */);
+    this->computeGradient(gradient, _options.nThreads, false /*TODO: useMEstimator*/, false /*TODO: use scaling */, true /*TODO: useDenseJacobianContainer*/);
 
     // optionally add regularizer
     if (_options.regularizer) {
