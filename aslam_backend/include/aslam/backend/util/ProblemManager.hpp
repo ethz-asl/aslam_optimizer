@@ -37,8 +37,6 @@ class ProblemManager {
 
   /// \brief Constructor with default options
   ProblemManager();
-  /// \brief Constructor
-  ProblemManager(bool useDenseJacobianContainer);
 
   /// \brief Destructor
   virtual ~ProblemManager();
@@ -48,9 +46,6 @@ class ProblemManager {
 
   /// \brief initialize the class
   virtual void initialize();
-
-  /// \brief Set the Jacobian container type
-  void useDenseJacobianContainer(const bool useDense) { _useDenseJacobianContainer = useDense; }
 
   /// \brief Is everything initialized?
   bool isInitialized() const { return _isInitialized; }
@@ -99,12 +94,12 @@ class ProblemManager {
   Eigen::VectorXd getFlattenedDesignVariableParameters() const;
 
   /// \brief compute the current gradient of the objective function
-  void computeGradient(RowVectorType& outGrad, size_t nThreads, bool useMEstimator, bool applyDvScaling);
+  void computeGradient(RowVectorType& outGrad, size_t nThreads, bool useMEstimator, bool applyDvScaling, bool useDenseJacobianContainer);
 
   void applyDesignVariableScaling(RowVectorType& outGrad);
 
   /// \brief computes the gradient of a specific error term
-  void addGradientForErrorTerm(RowVectorType& J, ErrorTerm* e, bool useMEstimator);
+  void addGradientForErrorTerm(RowVectorType& J, ErrorTerm* e, bool useMEstimator, bool useDenseJacobianContainer);
   void addGradientForErrorTerm(JacobianContainerSparse<1>& jc, RowVectorType& J, ScalarNonSquaredErrorTerm* e, bool useMEstimator);
   void addGradientForErrorTerm(JacobianContainerDense<RowVectorType&, 1>& jc, ScalarNonSquaredErrorTerm* e, bool useMEstimator);
 
@@ -114,7 +109,7 @@ class ProblemManager {
 
  private:
   /// \brief Evaluate the gradient of the objective function
-  void evaluateGradients(size_t threadId, size_t startIdx, size_t endIdx, bool useMEstimator, RowVectorType& grad);
+  void evaluateGradients(size_t threadId, size_t startIdx, size_t endIdx, RowVectorType& grad, bool useMEstimator, bool useDenseJacobianContainer);
 
   /// \brief Evaluate the objective function
   void sumErrorTerms(size_t /* threadId */, size_t startIdx, size_t endIdx, double& err) const;
@@ -142,9 +137,6 @@ class ProblemManager {
 
   /// \brief Whether the optimizer is correctly initialized
   bool _isInitialized = false;
-
-  /// \brief Whether or not to use a dense Jacobian container
-  bool _useDenseJacobianContainer = true;
 
 };
 
