@@ -20,8 +20,8 @@ namespace aslam {
       int maxIterations = 20; /// \brief stop if we reach this number of iterations without hitting any of the above stopping criteria. -1
       std::size_t nThreads = 4; /// \brief The number of threads to use
       LineSearchOptions linesearch;
+      bool useDenseJacobianContainer = true; /// \brief Whether or not to use a dense Jacobian container
       boost::shared_ptr<ScalarNonSquaredErrorTerm> regularizer = NULL; /// \brief Regularizer
-      bool useDenseJacobianContainer = true;
 
       void check() const;
     };

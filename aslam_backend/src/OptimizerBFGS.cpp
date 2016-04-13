@@ -97,34 +97,24 @@ std::ostream& operator<<(std::ostream& out, const BFGSReturnValue::ConvergenceCr
 }
 
 
-OptimizerBFGS::OptimizerBFGS() :
-    _options(OptimizerBFGSOptions()),
-    _linesearch(this, _options.linesearch)
+OptimizerBFGS::OptimizerBFGS(const OptimizerBFGSOptions& options)
+    : _options(options),
+      _linesearch(getCostFunction<false,true,false,true,false>(*this, false, _options.useDenseJacobianContainer, false, _options.nThreads, 1), _options.linesearch)
 {
   _options.check();
   _linesearch.setEvaluateErrorCallback( boost::bind(&OptimizerBFGS::increaseEvaluateErrorCounter, this) );
   _linesearch.setEvaluateGradientCallback(boost::bind(&OptimizerBFGS::increaseEvaluateGradientCounter, this));
-  this->useDenseJacobianContainer(_options.useDenseJacobianContainer);
 }
 
-OptimizerBFGS::OptimizerBFGS(const OptimizerBFGSOptions& options) :
-    _options(options),
-    _linesearch(this, _options.linesearch)
+OptimizerBFGS::OptimizerBFGS()
+    : OptimizerBFGS::OptimizerBFGS(OptimizerBFGSOptions())
 {
-  _options.check();
-  _linesearch.setEvaluateErrorCallback( boost::bind(&OptimizerBFGS::increaseEvaluateErrorCounter, this) );
-  _linesearch.setEvaluateGradientCallback(boost::bind(&OptimizerBFGS::increaseEvaluateGradientCounter, this));
-  this->useDenseJacobianContainer(_options.useDenseJacobianContainer);
 }
 
-OptimizerBFGS::OptimizerBFGS(const sm::PropertyTree& config) :
-    _options(OptimizerBFGSOptions(config)),
-    _linesearch(this, _options.linesearch)
+
+OptimizerBFGS::OptimizerBFGS(const sm::PropertyTree& config)
+    : OptimizerBFGS::OptimizerBFGS(OptimizerBFGSOptions(config))
 {
-  _options.check();
-  _linesearch.setEvaluateErrorCallback( boost::bind(&OptimizerBFGS::increaseEvaluateErrorCounter, this) );
-  _linesearch.setEvaluateGradientCallback(boost::bind(&OptimizerBFGS::increaseEvaluateGradientCounter, this));
-  this->useDenseJacobianContainer(_options.useDenseJacobianContainer);
 }
 
 OptimizerBFGS::~OptimizerBFGS()
