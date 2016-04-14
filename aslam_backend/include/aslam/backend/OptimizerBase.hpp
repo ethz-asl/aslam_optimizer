@@ -102,7 +102,7 @@ struct OptimizerStatus
 
  private:
   /// \brief Implement in derived class to reset derived-specific information
-  virtual void resetImplementation() const { }
+  virtual void resetImplementation() { }
 };
 
 /// \brief Stream operator for OptimizerStatus
