@@ -42,32 +42,38 @@ TEST(OptimizerBFGSTestSuite, testBFGS)
       }
     }
     // Now let's optimize.
-    OptimizerBFGSOptions options;
+    OptimizerBFGS::Options options;
     options.maxIterations = 500;
-    options.nThreads = 8;
+    options.numThreadsGradient = 8;
     options.convergenceGradientNorm = 0.0;
-    options.convergenceDx = 0.0;
+    options.convergenceDeltaX = 0.0;
     EXPECT_ANY_THROW(options.check());
     options.convergenceGradientNorm = 1e-15;
     EXPECT_NO_THROW(options.check());
     OptimizerBFGS optimizer(options);
     optimizer.setProblem(problem_ptr);
 
+    // Test that linesearch options are correctly forwarded
+    options.linesearch.initialStepLength = 1.1;
+    optimizer.setOptions(options);
+    EXPECT_DOUBLE_EQ(options.linesearch.initialStepLength, optimizer.getLineSearch().options().initialStepLength);
+
     EXPECT_NO_THROW(optimizer.checkProblemSetup());
 
     optimizer.initialize();
     SCOPED_TRACE("");
-    auto ret = optimizer.optimize();
+    optimizer.optimize();
+    const auto& ret = optimizer.getStatus();
 
-    EXPECT_GT(ret.convergence, BFGSReturnValue::FAILURE);
+    EXPECT_GT(ret.convergence, ConvergenceStatus::FAILURE);
     EXPECT_LE(ret.gradientNorm, options.convergenceGradientNorm);
-    EXPECT_GT(ret.nObjectiveEvaluations, 0);
-    EXPECT_GT(ret.nGradEvaluations, 0);
+    EXPECT_GT(ret.numObjectiveEvaluations, 0);
+    EXPECT_GT(ret.numDerivativeEvaluations, 0);
     EXPECT_GE(ret.error, 0.0);
-    EXPECT_LT(ret.derror, 1e-12);
-    EXPECT_LT(ret.maxDx, 1e-3);
+    EXPECT_LT(ret.deltaError, 1e-12);
+    EXPECT_LT(ret.maxDeltaX, 1e-3);
     EXPECT_LT(ret.error, std::numeric_limits<double>::max());
-    EXPECT_GT(ret.nIterations, 0);
+    EXPECT_GT(ret.numIterations, 0);
 
   } catch (const std::exception& e) {
     FAIL() << e.what();
