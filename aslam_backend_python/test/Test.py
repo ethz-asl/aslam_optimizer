@@ -39,9 +39,9 @@ class TestJacobianContainerDense(unittest.TestCase):
 
 class TestRprop(unittest.TestCase):
     def test_simple_optimization(self):
-        options = ab.OptimizerRpropOptions()
+        options = ab.OptimizerOptionsRprop()
         options.maxIterations = 500;
-        options.nThreads = 1;
+        options.numThreads = 1;
         options.convergenceGradientNorm = 1e-6
         options.method = ab.RpropMethod.RPROP_PLUS
         optimizer = ab.OptimizerRprop(options)
@@ -74,7 +74,7 @@ class TestRprop(unittest.TestCase):
         optimizer.checkProblemSetup();
         optimizer.optimize();
     
-        self.assertLessEqual(optimizer.gradientNorm, 1e-3);
+        self.assertLessEqual(optimizer.status.gradientNorm, 1e-3);
         
 class TestMetropolisHastings(unittest.TestCase):
     def test_simple_sampling_problem(self):
