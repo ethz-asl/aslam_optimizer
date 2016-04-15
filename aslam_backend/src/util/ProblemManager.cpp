@@ -123,7 +123,7 @@ void ProblemManager::computeGradient(RowVectorType& outGrad, size_t nThreads, bo
     applyDesignVariableScaling(outGrad);
 }
 
-void ProblemManager::applyDesignVariableScaling(RowVectorType& outGrad) {
+void ProblemManager::applyDesignVariableScaling(RowVectorType& outGrad) const {
   for (const auto dv : _designVariables)
     outGrad.block(0, dv->columnBase(), outGrad.rows(), dv->minimalDimensions()) *= dv->scaling();
 }
