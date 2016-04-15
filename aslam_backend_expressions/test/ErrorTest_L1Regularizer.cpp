@@ -110,11 +110,11 @@ TEST(AslamVChargeBackendTestSuite, testL1RegularizerRprop)
     }
 
     // Now let's optimize.
-    OptimizerRpropOptions options;
+    OptimizerOptionsRprop options;
     options.maxIterations = 500;
-    options.nThreads = 1;
+    options.numThreadsGradient = 1;
     options.convergenceGradientNorm = 1e-6;
-    options.convergenceDx = 1e-6;
+    options.convergenceDeltaX = 1e-6;
     options.regularizer.reset(new L1Regularizer(dvs, 1.0));
     OptimizerRprop optimizer(options);
     optimizer.setProblem(problem_ptr);
