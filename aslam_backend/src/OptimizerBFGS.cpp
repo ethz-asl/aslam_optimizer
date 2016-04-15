@@ -181,6 +181,7 @@ const BFGSReturnValue& OptimizerBFGS::optimize()
         try {
           pk = -_Bk*gfk.transpose();
           _linesearch.setSearchDirection(pk);
+          break;
         } catch (const std::exception& e) {
           if (j == 0) {
             SM_WARN("Inverse Hessian approximation became negative, resetting to identity matrix. "
