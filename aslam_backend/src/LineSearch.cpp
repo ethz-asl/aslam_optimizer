@@ -801,6 +801,7 @@ bool LineSearch::lineSearchWolfe12() {
     _errorOld = errorOld0;
     _error = error0;
     _derror = derror0;
+    _stepLength = 0.0;
     _problemManager->restoreDesignVariables();
 
     return lineSearchWolfe2();
