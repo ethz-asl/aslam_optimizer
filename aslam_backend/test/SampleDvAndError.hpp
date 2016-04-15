@@ -16,6 +16,7 @@ public:
   Vector1d _p_v;
 
   Scalar(const Vector1d& v) : _v(v), _p_v(v) {}
+  Scalar(const double v) : _v( (Vector1d() << v). finished() ), _p_v(_v) {}
   virtual ~Scalar() {}
 
 protected:
@@ -243,6 +244,40 @@ public:
     outJ.add(_p2d, -2.*_grad*(_p - _grad*_p2d->_v));
   }
 
+};
+
+/// \brief Negated squared exponential error in 1d \f$ -exp(- \frac{ (\mathbf p - \mathbf \mu)^2 } { \sigma^2} )\f$
+class NegatedSquaredExponentialError1d : public aslam::backend::ScalarNonSquaredErrorTerm
+{
+ public:
+   EIGEN_MAKE_ALIGNED_OPERATOR_NEW;
+
+   typedef aslam::backend::ScalarNonSquaredErrorTerm parent_t;
+   typedef Eigen::Matrix<double, 1, 1> Vector1d;
+
+   double _mu;                       /// \brief The mean value
+   double _sigma;                    /// \brief standard deviation
+   Scalar* _dv;                      /// \brief The design variable
+
+   NegatedSquaredExponentialError1d(Scalar* dv, const double mu, const double sigma = 1.0, const double weight = 1.0)
+       : _mu(mu), _sigma(sigma), _dv(dv)
+   {
+     _dv->setActive(true);
+     parent_t::setDesignVariables(_dv);
+     setWeight(weight);
+   }
+
+   /// \brief evaluate the error term
+   virtual double evaluateErrorImplementation() {
+     double dx = _dv->_v(0,0) - _mu;
+     return -exp(-dx*dx/(_sigma*_sigma));
+   }
+
+   /// \brief evaluate the jacobian
+   virtual void evaluateJacobiansImplementation(aslam::backend::JacobianContainer & outJ) {
+     Vector1d dx = _dv->_v.array() - _mu;
+     outJ.add(_dv, -2.*dx/(_sigma*_sigma)*evaluateErrorImplementation());
+   }
 };
 
 inline void buildSystem(int D, int E, std::vector<aslam::backend::DesignVariable*>& dvs, std::vector<aslam::backend::ErrorTerm*>& errs)
