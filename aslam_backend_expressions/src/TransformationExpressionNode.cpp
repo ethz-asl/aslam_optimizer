@@ -38,8 +38,6 @@ namespace aslam {
     TransformationExpressionNodeMultiply::TransformationExpressionNodeMultiply(boost::shared_ptr<TransformationExpressionNode> lhs, boost::shared_ptr<TransformationExpressionNode> rhs):
       _lhs(lhs), _rhs(rhs)
     {
-      _T_lhs = _lhs->toTransformationMatrix();
-      _T_rhs = _rhs->toTransformationMatrix();
     }
 
     TransformationExpressionNodeMultiply::~TransformationExpressionNodeMultiply(){}
