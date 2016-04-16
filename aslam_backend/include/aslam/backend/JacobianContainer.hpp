@@ -67,6 +67,9 @@ namespace aslam {
       /// \brief How many rows does this set of Jacobians have?
       int rows() const { return _rows; }
 
+      /// \brief How many rows does this set of Jacobians currently expect for a newly added matrix?
+      int expectedRows() const { return chainRuleEmpty() ? rows() : numTopCols(); }
+
       /// \brief Push a matrix \p mat to the top of the stack
       template <typename DERIVED>
       EIGEN_ALWAYS_INLINE JacobianContainerChainRuleApplied apply(const Eigen::MatrixBase<DERIVED>& mat)

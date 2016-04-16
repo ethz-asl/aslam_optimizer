@@ -221,7 +221,7 @@ namespace backend {
       return ConstMap<Rows, Cols>( &(_data[_headers[i].dataIndex]), this->numRows(), _headers[i].cols );
     }
 
-   private:
+   protected:
 
     /// \brief Number of columns of the matrix on top of the stack
     int numTopCols() const
@@ -229,6 +229,7 @@ namespace backend {
       return _headers.back().cols;
     }
 
+   private:
     /// \brief Number of rows determined by the first matrix that was pushed
     int numRows() const
     {
