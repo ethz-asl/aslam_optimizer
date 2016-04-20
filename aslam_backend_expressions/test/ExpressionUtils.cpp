@@ -25,12 +25,21 @@ TEST(GenericMatrixExpressionNodeTestSuites, testExpressionUtils) {
     bool isFinite = false;
     Scalar s(1.0);
     s.setBlockIndex(0);
-    s.setActive(true);
     ScalarExpression se = s.toExpression()*s.toExpression();
     JacobianContainerSparse<1> jc(1);
 
     // test isFinite
     {
+      s.setActive(false);
+      se.evaluateJacobians(jc);
+      SCOPED_TRACE("");
+      ASSERT_NO_THROW(isFinite = utils::isFinite(jc, se));
+      EXPECT_TRUE(isFinite);
+    }
+
+    // test isFinite
+    {
+      s.setActive(true);
       se.evaluateJacobians(jc);
       SCOPED_TRACE("");
       ASSERT_NO_THROW(isFinite = utils::isFinite(jc, se));
