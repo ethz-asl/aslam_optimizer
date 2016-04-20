@@ -48,7 +48,7 @@ TEST(OptimizerBFGSTestSuite, testBFGS)
     options.convergenceGradientNorm = 0.0;
     options.convergenceDx = 0.0;
     EXPECT_ANY_THROW(options.check());
-    options.convergenceGradientNorm = 1e-6;
+    options.convergenceGradientNorm = 1e-15;
     EXPECT_NO_THROW(options.check());
     OptimizerBFGS optimizer(options);
     optimizer.setProblem(problem_ptr);
@@ -60,7 +60,7 @@ TEST(OptimizerBFGSTestSuite, testBFGS)
     auto ret = optimizer.optimize();
 
     EXPECT_GT(ret.convergence, BFGSReturnValue::FAILURE);
-    EXPECT_LE(optimizer.getGradientNorm(), 1e-6);
+    EXPECT_LE(ret.gradientNorm, options.convergenceGradientNorm);
     EXPECT_GT(ret.nObjectiveEvaluations, 0);
     EXPECT_GT(ret.nGradEvaluations, 0);
     EXPECT_GE(ret.error, 0.0);
