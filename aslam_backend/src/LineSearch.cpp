@@ -622,7 +622,7 @@ bool LineSearch::lineSearchWolfe1() {
 
   double stepLength = _options.initialStepLength;
   if (!isnan(_errorOld) && _derror != 0.0) {
-    stepLength = min(_options.initialStepLength, 1.01*2.0*(_error - _errorOld)/_derror);
+    stepLength = min(_options.maxStepLength, 1.01*2.0*(_error - _errorOld)/_derror);
     if (stepLength < 0.0) stepLength = _options.initialStepLength;
   }
 
