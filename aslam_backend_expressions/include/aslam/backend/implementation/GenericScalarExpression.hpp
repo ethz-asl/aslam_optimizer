@@ -7,19 +7,23 @@ namespace backend {
 
 template<typename Scalar_>
 Scalar_ GenericScalarExpression<Scalar_>::toScalar() const {
+  if(empty()) return Scalar_(0.0);
   return this->_root->toScalar();
 }
 
 template<typename Scalar_>
 void GenericScalarExpression<Scalar_>::evaluateJacobians(JacobianContainer & outJacobians) const{
+  if(empty()) return;
   _root->evaluateJacobians(outJacobians);
 }
 template<typename Scalar_>
 void GenericScalarExpression<Scalar_>::evaluateJacobians(JacobianContainer & outJacobians, const Eigen::MatrixXd & applyChainRule) const{
+  if(empty()) return;
   _root->evaluateJacobians(outJacobians, applyChainRule);
 }
 template<typename Scalar_>
 void GenericScalarExpression<Scalar_>::getDesignVariables(DesignVariable::set_t & designVariables) const {
+  if(empty()) return;
   _root->getDesignVariables(designVariables);
 }
 
