@@ -347,19 +347,19 @@ LineSearchOptions::LineSearchOptions() {
   check();
 }
 
-LineSearchOptions::LineSearchOptions(const sm::PropertyTree& config) :
-    nThreadsError(config.getInt("nThreadsError", nThreadsError)),
-    nThreadsGradient(config.getInt("nThreadsGradient", nThreadsGradient)),
-    c1WolfeCondition(config.getDouble("c1WolfeCondition", c1WolfeCondition)),
-    c2WolfeCondition(config.getDouble("c2WolfeCondition", c2WolfeCondition)),
-    maxStepLength(config.getDouble("maxStepLength", maxStepLength)),
-    minStepLength(config.getDouble("minStepLength", minStepLength)),
-    xtol(config.getDouble("xtol", xtol)),
-    initialStepLength(config.getDouble("initialStepLength", initialStepLength)),
-    nMaxIterWolfe1(config.getInt("nMaxIterWolfe1", nMaxIterWolfe1)),
-    nMaxIterWolfe2(config.getInt("nMaxIterWolfe2", nMaxIterWolfe2)),
-    nMaxIterZoom(config.getInt("nMaxIterZoom", nMaxIterZoom))
+LineSearchOptions::LineSearchOptions(const sm::PropertyTree& config)
 {
+  nThreadsError = config.getInt("nThreadsError", nThreadsError);
+  nThreadsGradient = config.getInt("nThreadsGradient", nThreadsGradient);
+  c1WolfeCondition = config.getDouble("c1WolfeCondition", c1WolfeCondition);
+  c2WolfeCondition = config.getDouble("c2WolfeCondition", c2WolfeCondition);
+  maxStepLength = config.getDouble("maxStepLength", maxStepLength);
+  minStepLength = config.getDouble("minStepLength", minStepLength);
+  xtol = config.getDouble("xtol", xtol);
+  initialStepLength = config.getDouble("initialStepLength", initialStepLength);
+  nMaxIterWolfe1 = config.getInt("nMaxIterWolfe1", nMaxIterWolfe1);
+  nMaxIterWolfe2 = config.getInt("nMaxIterWolfe2", nMaxIterWolfe2);
+  nMaxIterZoom = config.getInt("nMaxIterZoom", nMaxIterZoom);
   check();
 }
 

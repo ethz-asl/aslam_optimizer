@@ -15,13 +15,13 @@ OptimizerBFGSOptions::OptimizerBFGSOptions() {
   check();
 }
 
-OptimizerBFGSOptions::OptimizerBFGSOptions(const sm::PropertyTree& config) :
-    convergenceGradientNorm(config.getDouble("convergenceGradientNorm", convergenceGradientNorm)),
-    convergenceDx(config.getDouble("convergenceDx", convergenceDx)),
-    convergenceDObjective(config.getDouble("convergenceDObjective", convergenceDObjective)),
-    maxIterations(config.getInt("maxIterations", maxIterations)),
-    linesearch(config)
+OptimizerBFGSOptions::OptimizerBFGSOptions(const sm::PropertyTree& config)
+    : linesearch(config)
 {
+  convergenceGradientNorm = config.getDouble("convergenceGradientNorm", convergenceGradientNorm);
+  convergenceDx = config.getDouble("convergenceDx", convergenceDx);
+  convergenceDObjective = config.getDouble("convergenceDObjective", convergenceDObjective);
+  maxIterations = config.getInt("maxIterations", maxIterations);
   check();
 }
 
