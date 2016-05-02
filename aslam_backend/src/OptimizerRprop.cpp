@@ -14,18 +14,18 @@ OptimizerRpropOptions::OptimizerRpropOptions() {
   check();
 }
 
-OptimizerRpropOptions::OptimizerRpropOptions(const sm::PropertyTree& config) :
-    etaMinus(config.getDouble("etaMinus", etaMinus)),
-    etaPlus(config.getDouble("etaPlus", etaPlus)),
-    initialDelta(config.getDouble("initialDelta", initialDelta)),
-    minDelta(config.getDouble("minDelta", minDelta)),
-    maxDelta(config.getDouble("maxDelta", maxDelta)),
-    convergenceGradientNorm(config.getDouble("convergenceGradientNorm", convergenceGradientNorm)),
-    convergenceDx(config.getDouble("convergenceDx", convergenceDx)),
-    convergenceDObjective(config.getDouble("convergenceDObjective", convergenceDObjective)),
-    maxIterations(config.getInt("maxIterations", maxIterations)),
-    nThreads(config.getInt("nThreads", nThreads))
+OptimizerRpropOptions::OptimizerRpropOptions(const sm::PropertyTree& config)
 {
+  etaMinus = config.getDouble("etaMinus", etaMinus);
+  etaPlus = config.getDouble("etaPlus", etaPlus);
+  initialDelta = config.getDouble("initialDelta", initialDelta);
+  minDelta = config.getDouble("minDelta", minDelta);
+  maxDelta = config.getDouble("maxDelta", maxDelta);
+  convergenceGradientNorm = config.getDouble("convergenceGradientNorm", convergenceGradientNorm);
+  convergenceDx = config.getDouble("convergenceDx", convergenceDx);
+  convergenceDObjective = config.getDouble("convergenceDObjective", convergenceDObjective);
+  maxIterations = config.getInt("maxIterations", maxIterations);
+  nThreads = config.getInt("nThreads", nThreads);
   check();
 }
 
