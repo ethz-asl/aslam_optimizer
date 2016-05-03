@@ -378,6 +378,9 @@ void LineSearchOptions::check() const {
 ostream& operator<<(ostream& out, const aslam::backend::LineSearchOptions& options)
 {
   out << "LineSearchOptions:\n";
+  out << "\tnThreadsError: " << options.nThreadsError << endl;
+  out << "\tnThreadsGradient: " << options.nThreadsGradient << endl;
+  out << "\tc1WolfeCondition: " << options.c1WolfeCondition << endl;
   out << "\tc1WolfeCondition: " << options.c1WolfeCondition << endl;
   out << "\tc2WolfeCondition: " << options.c2WolfeCondition << endl;
   out << "\tmaxStepLength: " << options.maxStepLength << endl;
@@ -386,7 +389,7 @@ ostream& operator<<(ostream& out, const aslam::backend::LineSearchOptions& optio
   out << "\tinitialStepLength: " << options.initialStepLength << endl;
   out << "\tnMaxIterWolfe1: " << options.nMaxIterWolfe1 << endl;
   out << "\tnMaxIterWolfe2: " << options.nMaxIterWolfe2 << endl;
-  out << "\tnMaxIterZoom: " << options.nMaxIterZoom << endl;
+  out << "\tnMaxIterZoom: " << options.nMaxIterZoom;
   return out;
 }
 

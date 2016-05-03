@@ -55,7 +55,7 @@ std::ostream& operator<<(std::ostream& out, const aslam::backend::OptimizerRprop
   out << "\tconvergenceDObjective: " << options.convergenceDObjective << std::endl;
   out << "\tmaxIterations: " << options.maxIterations << std::endl;
   out << "\tnThreads: " << options.nThreads << std::endl;
-  out << "\tmethod: " << options.method << std::endl;
+  out << "\tmethod: " << options.method;
   return out;
 }
 
