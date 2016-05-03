@@ -16,7 +16,7 @@ OptimizerBFGSOptions::OptimizerBFGSOptions() {
 }
 
 OptimizerBFGSOptions::OptimizerBFGSOptions(const sm::PropertyTree& config)
-    : linesearch(config)
+    : linesearch(sm::PropertyTree(config, "linesearch"))
 {
   convergenceGradientNorm = config.getDouble("convergenceGradientNorm", convergenceGradientNorm);
   convergenceDx = config.getDouble("convergenceDx", convergenceDx);
