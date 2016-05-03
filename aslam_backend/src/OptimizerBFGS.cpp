@@ -41,7 +41,7 @@ std::ostream& operator<<(std::ostream& out, const aslam::backend::OptimizerBFGSO
   out << "\tconvergenceDx: " << options.convergenceDx << std::endl;
   out << "\tconvergenceDObjective: " << options.convergenceDObjective << std::endl;
   out << "\tmaxIterations: " << options.maxIterations << std::endl;
-  out << options.linesearch << std::endl;
+  out << options.linesearch;
   return out;
 }
 
