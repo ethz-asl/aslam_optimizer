@@ -603,3 +603,24 @@ TEST(EuclideanExpressionNodeTestSuites, testToHomogeneous)
     }
 }
 
+// Test that the jacobian matches the finite difference jacobian
+TEST(EuclideanExpressionNodeTestSuites, testElementwiseMultiply)
+{
+  try
+  {
+    EuclideanPoint point1(Eigen::Vector3d::Random());
+    EuclideanExpression p1(&point1);
+
+    EuclideanPoint point2(Eigen::Vector3d::Random());
+    EuclideanExpression p2(&point2);
+
+    SCOPED_TRACE("");
+    EuclideanExpression e = p1.elementwiseMultiply(p2);
+    testExpression(e, 2);
+    sm::eigen::assertNear(e.toEuclidean(), p1.toEuclidean().array() * p2.toEuclidean().array(), 1e-14, SM_SOURCE_FILE_POS, "Testing the result is unchanged");
+  }
+  catch(std::exception const & e)
+  {
+    FAIL() << e.what();
+  }
+}

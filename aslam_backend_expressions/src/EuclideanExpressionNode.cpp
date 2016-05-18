@@ -353,8 +353,31 @@ namespace aslam {
     _root->getDesignVariables(designVariables);
   }
 
-  
+    EuclideanExpressionNodeElementwiseMultiplyEuclidean::EuclideanExpressionNodeElementwiseMultiplyEuclidean(boost::shared_ptr<EuclideanExpressionNode> lhs, boost::shared_ptr<EuclideanExpressionNode> rhs) :
+      _lhs(lhs), _rhs(rhs)
+    {
+    }
 
-  
+    EuclideanExpressionNodeElementwiseMultiplyEuclidean::~EuclideanExpressionNodeElementwiseMultiplyEuclidean()
+    {
+    }
+
+    void EuclideanExpressionNodeElementwiseMultiplyEuclidean::getDesignVariablesImplementation(DesignVariable::set_t & designVariables) const
+    {
+      _lhs->getDesignVariables(designVariables);
+      _rhs->getDesignVariables(designVariables);
+    }
+
+    Eigen::Vector3d EuclideanExpressionNodeElementwiseMultiplyEuclidean::evaluateImplementation() const
+    {
+      return (_lhs->evaluate()).cwiseProduct(_rhs->evaluate());
+    }
+
+    void EuclideanExpressionNodeElementwiseMultiplyEuclidean::evaluateJacobiansImplementation(JacobianContainer & outJacobians) const
+    {
+      _lhs->evaluateJacobians(outJacobians, Eigen::Matrix3d(_rhs->evaluate().asDiagonal()));
+      _rhs->evaluateJacobians(outJacobians, Eigen::Matrix3d(_lhs->evaluate().asDiagonal()));
+    }
+
   } // namespace backend
 } // namespace aslam

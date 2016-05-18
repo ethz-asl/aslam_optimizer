@@ -82,6 +82,7 @@ void exportBackendExpressions()
     .def("evaluateJacobians", &evaluateJacobians1<EuclideanExpression>)
     .def("evaluateJacobians", &evaluateJacobians2<EuclideanExpression>)
     .def("getDesignVariables", &getDesignVariables<EuclideanExpression>)
+    .def("elementwiseMultiply", &EuclideanExpression::elementwiseMultiply)
     // Decide later if it is useful to export the expression nodes.
     //.def("root", &EuclideanExpression::root)
     ;
