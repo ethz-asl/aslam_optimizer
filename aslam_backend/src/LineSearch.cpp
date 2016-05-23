@@ -349,8 +349,6 @@ LineSearchOptions::LineSearchOptions() {
 
 LineSearchOptions::LineSearchOptions(const sm::PropertyTree& config)
 {
-  nThreadsError = config.getInt("nThreadsError", nThreadsError);
-  nThreadsGradient = config.getInt("nThreadsGradient", nThreadsGradient);
   c1WolfeCondition = config.getDouble("c1WolfeCondition", c1WolfeCondition);
   c2WolfeCondition = config.getDouble("c2WolfeCondition", c2WolfeCondition);
   maxStepLength = config.getDouble("maxStepLength", maxStepLength);
@@ -378,8 +376,6 @@ void LineSearchOptions::check() const {
 ostream& operator<<(ostream& out, const aslam::backend::LineSearchOptions& options)
 {
   out << "LineSearchOptions:\n";
-  out << "\tnThreadsError: " << options.nThreadsError << endl;
-  out << "\tnThreadsGradient: " << options.nThreadsGradient << endl;
   out << "\tc1WolfeCondition: " << options.c1WolfeCondition << endl;
   out << "\tc1WolfeCondition: " << options.c1WolfeCondition << endl;
   out << "\tc2WolfeCondition: " << options.c2WolfeCondition << endl;
@@ -394,26 +390,22 @@ ostream& operator<<(ostream& out, const aslam::backend::LineSearchOptions& optio
 }
 
 
-LineSearch::LineSearch(ProblemManager* pm) :
-    _problemManager(pm),
-    _options(LineSearchOptions())
-{
-  SM_ASSERT_TRUE(Exception, pm != nullptr, "");
-}
-
-LineSearch::LineSearch(ProblemManager* pm, const LineSearchOptions& options) :
-    _problemManager(pm),
+LineSearch::LineSearch(const boost::shared_ptr<CostFunctionInterface>& cf, const LineSearchOptions& options) :
+    _costFunction(cf),
     _options(options)
 {
-  SM_ASSERT_TRUE(Exception, pm != nullptr, "");
+  SM_ASSERT_TRUE(Exception, cf != nullptr, "");
   _options.check();
 }
 
-LineSearch::LineSearch(ProblemManager* pm, const sm::PropertyTree& config) :
-     _problemManager(pm)
+LineSearch::LineSearch(const boost::shared_ptr<CostFunctionInterface>& cf) :
+    LineSearch::LineSearch(cf, LineSearchOptions())
 {
-  SM_ASSERT_TRUE(Exception, pm != nullptr, "");
-  _options = LineSearchOptions(config);
+}
+
+LineSearch::LineSearch(const boost::shared_ptr<CostFunctionInterface>& cf, const sm::PropertyTree& config) :
+    LineSearch::LineSearch(cf, LineSearchOptions(config))
+{
 }
 
 LineSearch::~LineSearch()
@@ -472,14 +464,14 @@ void LineSearch::applyStateUpdate(const double s) {
 
   if (ds != 0.0) { // save computation time
     Eigen::RowVectorXd p = sm::logging::getLevel() <= sm::logging::Level::Verbose ?
-        _problemManager->getFlattenedDesignVariableParameters().transpose() :  Eigen::RowVectorXd();
-    _problemManager->applyStateUpdate(ds*_searchDirection);
+        utils::getFlattenedDesignVariableParameters(_costFunction->getDesignVariables()).transpose() :  Eigen::RowVectorXd();
+    utils::applyStateUpdate(_costFunction->getDesignVariables(), ds*_searchDirection);
     _errorOutdated = _derrorOutdated = true;
     SM_VERBOSE_STREAM_NAMED("optimization", "LineSearch: update step length " << s - ds << " -> " << _stepLength << " (ds: " << ds<< ")");
     SM_VERBOSE_STREAM_NAMED("optimization", "LineSearch: update state" << std::endl <<
                             "Old  : " << p.format(fmt) << std::endl <<
-                            "New  : " << _problemManager->getFlattenedDesignVariableParameters().transpose().format(fmt) << std::endl <<
-                            "Delta: " << (_problemManager->getFlattenedDesignVariableParameters().transpose() - p).format(fmt));
+                            "New  : " << utils::getFlattenedDesignVariableParameters(_costFunction->getDesignVariables()).transpose().format(fmt) << std::endl <<
+                            "Delta: " << (utils::getFlattenedDesignVariableParameters(_costFunction->getDesignVariables()).transpose() - p).format(fmt));
   } else {
     SM_ALL_NAMED("optimization", "LineSearch: skipping unnecessary update of information");
   }
@@ -489,7 +481,7 @@ void LineSearch::applyStateUpdate(const double s) {
 void LineSearch::updateError() {
   if (_errorOutdated) {
     const double errorOld = _error;
-    _error = _problemManager->evaluateError(_options.nThreadsError);
+    _error = _costFunction->evaluateError();
     if (_evalErrorCallback) _evalErrorCallback();
     SM_VERBOSE_STREAM_NAMED("optimization", setprecision(20) << "LineSearch: update error " << errorOld << " -> " << _error << " (" << _error - errorOld << ")");
   }
@@ -497,7 +489,7 @@ void LineSearch::updateError() {
 }
 
 void LineSearch::updateGradient() {
-  _problemManager->computeGradient(_gradient, _options.nThreadsGradient, false /*TODO*/, false /*TODO*/);
+  _costFunction->computeGradient(_gradient);
   if (_evalGradCallback) _evalGradCallback();
 }
 
@@ -794,7 +786,8 @@ bool LineSearch::lineSearchWolfe12() {
   const double errorOld0 = _errorOld; // _errorOld gets modified by lineSearchWolfe1
   const double error0 = _error;
   const double derror0 = _derror;
-  _problemManager->saveDesignVariables();
+
+  utils::DesignVariableState dvstate(_costFunction->getDesignVariables());
 
   if (!lineSearchWolfe1()) {
     SM_FINE_STREAM_NAMED("optimization", "LineSearch: method wolfe1 failed, trying method wolfe2");
@@ -805,7 +798,7 @@ bool LineSearch::lineSearchWolfe12() {
     _error = error0;
     _derror = derror0;
     _stepLength = 0.0;
-    _problemManager->restoreDesignVariables();
+    dvstate.restore();
 
     return lineSearchWolfe2();
   }

@@ -1,6 +1,7 @@
 #include <sm/eigen/gtest.hpp>
 #include <aslam/backend/LineSearch.hpp>
 #include <aslam/backend/OptimizationProblem.hpp>
+#include <aslam/backend/util/ProblemManager.hpp>
 #include <aslam/backend/ErrorTerm.hpp>
 #include <aslam/backend/ScalarNonSquaredErrorTerm.hpp>
 #include <aslam/backend/test/ErrorTermTester.hpp>
@@ -60,14 +61,15 @@ TEST(LineSearchTestSuite, testLineSearch)
     pm.initialize();
     ASSERT_EQ(1, pm.numOptParameters());
 
-    LineSearch ls(&pm);
+    auto costFunction = getCostFunction(pm, useMEstimator, true, applyDvScaling, 1, 1);
+    LineSearch ls(costFunction);
 
     // Compute initial error
     const double error0 = pm.evaluateError(1);
 
     // Compute search direction
     RowVectorType grad0 = RowVectorType::Zero(1);
-    pm.computeGradient(grad0, 1, useMEstimator, applyDvScaling);
+    costFunction->computeGradient(grad0);
     RowVectorType searchDirection = -grad0;
 
     {
@@ -128,7 +130,7 @@ TEST(LineSearchTestSuite, testLineSearch)
 
           // Check that information is consistent
           RowVectorType grad1;
-          pm.computeGradient(grad1, 1, useMEstimator, applyDvScaling);
+          costFunction->computeGradient(grad1);
           sm::eigen::assertEqual(grad1, ls.getGradient(), SM_SOURCE_FILE_POS);
           EXPECT_DOUBLE_EQ(ls.getErrorDerivative(), ls.computeErrorDerivative());
 

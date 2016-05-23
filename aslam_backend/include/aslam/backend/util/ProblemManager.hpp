@@ -13,6 +13,7 @@
 #include <boost/shared_ptr.hpp>
 
 #include "CommonDefinitions.hpp"
+#include "CostFunctionInterface.hpp"
 
 #include "../../Exceptions.hpp"
 #include "../JacobianContainerDense.hpp"
@@ -37,8 +38,6 @@ class ProblemManager {
 
   /// \brief Constructor with default options
   ProblemManager();
-  /// \brief Constructor
-  ProblemManager(bool useDenseJacobianContainer);
 
   /// \brief Destructor
   virtual ~ProblemManager();
@@ -48,9 +47,6 @@ class ProblemManager {
 
   /// \brief initialize the class
   virtual void initialize();
-
-  /// \brief Set the Jacobian container type
-  void useDenseJacobianContainer(const bool useDense) { _useDenseJacobianContainer = useDense; }
 
   /// \brief Is everything initialized?
   bool isInitialized() const { return _isInitialized; }
@@ -66,6 +62,9 @@ class ProblemManager {
 
   /// \brief how many dense design variables are involved in the problem
   size_t numDesignVariables() const { return _designVariables.size(); };
+
+  /// \brief Get the design variables
+  const std::vector<DesignVariable*>& designVariables() { return _designVariables; };
 
   /// \brief how many scalar parameters (design variables with their minimal dimension)
   ///        are involved in the problem
@@ -99,12 +98,13 @@ class ProblemManager {
   Eigen::VectorXd getFlattenedDesignVariableParameters() const;
 
   /// \brief compute the current gradient of the objective function
-  void computeGradient(RowVectorType& outGrad, size_t nThreads, bool useMEstimator, bool applyDvScaling);
+  void computeGradient(RowVectorType& outGrad, size_t nThreads, bool useMEstimator, bool applyDvScaling, bool useDenseJacobianContainer);
 
-  void applyDesignVariableScaling(RowVectorType& outGrad);
+  /// \brief Apply the scaling of the design variables to \p outGrad
+  void applyDesignVariableScaling(RowVectorType& outGrad) const;
 
   /// \brief computes the gradient of a specific error term
-  void addGradientForErrorTerm(RowVectorType& J, ErrorTerm* e, bool useMEstimator);
+  void addGradientForErrorTerm(RowVectorType& J, ErrorTerm* e, bool useMEstimator, bool useDenseJacobianContainer);
   void addGradientForErrorTerm(JacobianContainerSparse<1>& jc, RowVectorType& J, ScalarNonSquaredErrorTerm* e, bool useMEstimator);
   void addGradientForErrorTerm(JacobianContainerDense<RowVectorType&, 1>& jc, ScalarNonSquaredErrorTerm* e, bool useMEstimator);
 
@@ -114,7 +114,7 @@ class ProblemManager {
 
  private:
   /// \brief Evaluate the gradient of the objective function
-  void evaluateGradients(size_t threadId, size_t startIdx, size_t endIdx, bool useMEstimator, RowVectorType& grad);
+  void evaluateGradients(size_t threadId, size_t startIdx, size_t endIdx, RowVectorType& grad, bool useMEstimator, bool useDenseJacobianContainer);
 
   /// \brief Evaluate the objective function
   void sumErrorTerms(size_t /* threadId */, size_t startIdx, size_t endIdx, double& err) const;
@@ -143,10 +143,64 @@ class ProblemManager {
   /// \brief Whether the optimizer is correctly initialized
   bool _isInitialized = false;
 
-  /// \brief Whether or not to use a dense Jacobian container
-  bool _useDenseJacobianContainer = true;
-
 };
+
+namespace details
+{
+  template <bool IS_REFERENCE=false>
+  struct CostFunctionParameterTraits { typedef const bool const_bool_t; typedef const std::size_t const_size_t; };
+  template <>
+  struct CostFunctionParameterTraits<true> { typedef const bool& const_bool_t; typedef const std::size_t& const_size_t; };
+}
+
+/// \brief Creates a cost function from a problem manager
+/// \tparam UseReference Use true iff parameters shall be stored as references
+template <bool UseMEstimatorRef = false, bool UseDenseJacobianContainerRef = false,
+    bool ApplyDvScalingRef = false, bool NumThreadsGradientRef = false, bool NumThreadsErrorRef = false>
+inline boost::shared_ptr<CostFunctionInterface> getCostFunction(ProblemManager& pm,
+                                                                const bool& useMEstimator,
+                                                                const bool& useDenseJacobianContainer,
+                                                                const bool& applyDvScaling,
+                                                                const std::size_t& numThreadsGradient,
+                                                                const std::size_t& numThreadsError)
+{
+
+  /// \brief Implements CostFunctionInterface via ProblemManager
+  struct CostFunctionPM : public CostFunctionInterface
+  {
+    CostFunctionPM(ProblemManager& pm,
+                   const bool& useMEstimator,
+                   const bool& useDenseJacobianContainer,
+                   const bool& applyDvScaling,
+                   const std::size_t& numThreadsGradient,
+                   const std::size_t& numThreadsError)
+        : _pm(pm),
+          _useMEstimator(useMEstimator),
+          _useDenseJacobianContainer(useDenseJacobianContainer),
+          _applyDvScaling(applyDvScaling),
+          _numThreadsGradient(numThreadsGradient),
+          _numThreadsError(numThreadsError)
+    {
+
+    }
+    ~CostFunctionPM() { }
+    double evaluateError() const override { return _pm.evaluateError(_numThreadsError); }
+    void computeGradient(RowVectorType& gradient) override { _pm.computeGradient(gradient, _numThreadsGradient, _useMEstimator, _applyDvScaling, _useDenseJacobianContainer); }
+    const std::vector<DesignVariable*>& getDesignVariables() override { return _pm.designVariables(); };
+   private:
+    ProblemManager& _pm;
+    typename details::CostFunctionParameterTraits<UseMEstimatorRef>::const_bool_t _useMEstimator;
+    typename details::CostFunctionParameterTraits<UseDenseJacobianContainerRef>::const_bool_t _useDenseJacobianContainer;
+    typename details::CostFunctionParameterTraits<ApplyDvScalingRef>::const_bool_t _applyDvScaling;
+    typename details::CostFunctionParameterTraits<NumThreadsGradientRef>::const_size_t _numThreadsGradient;
+    typename details::CostFunctionParameterTraits<NumThreadsErrorRef>::const_size_t _numThreadsError;
+  };
+
+  return boost::shared_ptr<CostFunctionInterface>(new CostFunctionPM(pm, useMEstimator, useDenseJacobianContainer, applyDvScaling,
+                                                                     numThreadsGradient, numThreadsError));
+
+}
+
 
 } // namespace backend
 } // namespace aslam

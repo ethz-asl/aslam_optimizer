@@ -18,12 +18,6 @@ ProblemManager::ProblemManager()
 
 }
 
-ProblemManager::ProblemManager(bool useDenseJacobianContainer) :
-  _useDenseJacobianContainer(useDenseJacobianContainer)
-{
-
-}
-
 ProblemManager::~ProblemManager()
 {
 }
@@ -114,12 +108,12 @@ void ProblemManager::checkProblemSetup() const
  * @param nThreads How many threads to use
  * @param useMEstimator Whether to use an MEstimator
  */
-void ProblemManager::computeGradient(RowVectorType& outGrad, size_t nThreads, bool useMEstimator, bool applyDvScaling)
+void ProblemManager::computeGradient(RowVectorType& outGrad, size_t nThreads, bool useMEstimator, bool applyDvScaling, bool useDenseJacobianContainer)
 {
   SM_ASSERT_GT(Exception, nThreads, 0, "");
   Timer t("ProblemManager: Compute gradient", false);
   std::vector<RowVectorType> gradients(nThreads, RowVectorType::Zero(1, _numOptParameters)); // compute gradients separately in different threads and add in the end
-  boost::function<void(size_t, size_t, size_t, RowVectorType&)> job(boost::bind(&ProblemManager::evaluateGradients, this, _1, _2, _3, useMEstimator, _4));
+  boost::function<void(size_t, size_t, size_t, RowVectorType&)> job(boost::bind(&ProblemManager::evaluateGradients, this, _1, _2, _3, _4, useMEstimator, useDenseJacobianContainer));
   util::runThreadedFunction(job, _numErrorTerms, gradients);
   // Add up the gradients
   outGrad = gradients[0];
@@ -129,18 +123,18 @@ void ProblemManager::computeGradient(RowVectorType& outGrad, size_t nThreads, bo
     applyDesignVariableScaling(outGrad);
 }
 
-void ProblemManager::applyDesignVariableScaling(RowVectorType& outGrad) {
+void ProblemManager::applyDesignVariableScaling(RowVectorType& outGrad) const {
   for (const auto dv : _designVariables)
     outGrad.block(0, dv->columnBase(), outGrad.rows(), dv->minimalDimensions()) *= dv->scaling();
 }
 
-void ProblemManager::addGradientForErrorTerm(RowVectorType& J, ErrorTerm* e, bool useMEstimator) {
+void ProblemManager::addGradientForErrorTerm(RowVectorType& J, ErrorTerm* e, bool useMEstimator, bool useDenseJacobianContainer) {
   e->updateRawSquaredError();
   ColumnVectorType ev;
   e->getWeightedError(ev, useMEstimator);
   ev *= 2.0;
 
-  if (_useDenseJacobianContainer) {
+  if (useDenseJacobianContainer) {
     Eigen::MatrixXd J2 = Eigen::MatrixXd::Zero(e->dimension(), J.cols());
     JacobianContainerDense<Eigen::MatrixXd&, Eigen::Dynamic> jc(J2);
     e->getWeightedJacobians(jc, useMEstimator);
@@ -263,14 +257,14 @@ void ProblemManager::sumErrorTerms(size_t /* threadId */, size_t startIdx, size_
  * @param useMEstimator Whether or not to use an MEstimator
  * @param J The gradient for the specified error terms
  */
-void ProblemManager::evaluateGradients(size_t /* threadId */, size_t startIdx, size_t endIdx, bool useMEstimator, RowVectorType& J)
+void ProblemManager::evaluateGradients(size_t /* threadId */, size_t startIdx, size_t endIdx, RowVectorType& J, bool useMEstimator, bool useDenseJacobianContainer)
 {
   SM_ASSERT_LE_DBG(Exception, endIdx, _numErrorTerms, "");
 
   size_t cnt = startIdx;
 
   // process non-squared error terms
-  if (_useDenseJacobianContainer)
+  if (useDenseJacobianContainer)
   {
     JacobianContainerDense<RowVectorType&, 1> jc(J);
     for (; cnt < endIdx && cnt < _errorTermsNS.size(); ++cnt)
@@ -289,7 +283,7 @@ void ProblemManager::evaluateGradients(size_t /* threadId */, size_t startIdx, s
   // process squared error terms
   for (; cnt < endIdx; ++cnt)
   {
-    addGradientForErrorTerm(J, _errorTermsS[cnt - _errorTermsNS.size()], useMEstimator);
+    addGradientForErrorTerm(J, _errorTermsS[cnt - _errorTermsNS.size()], useMEstimator, useDenseJacobianContainer);
   }
 
 }

@@ -4,7 +4,9 @@
 #include <boost/shared_ptr.hpp>
 #include <boost/optional.hpp>
 #include <boost/function.hpp>
-#include <aslam/backend/util/ProblemManager.hpp>
+
+#include <aslam/Exceptions.hpp>
+#include <aslam/backend/util/CostFunctionInterface.hpp>
 
 namespace sm {
   class PropertyTree;
@@ -135,8 +137,6 @@ namespace aslam {
       LineSearchOptions(const sm::PropertyTree& config);
       void check() const;
 
-      std::size_t nThreadsError = 1;       /// \brief Number of threads for evaluation of error
-      std::size_t nThreadsGradient = 1;    /// \brief Number of threads for evaluation of gradient
       double c1WolfeCondition = 1e-4; /// \brief A nonnegative tolerance for the sufficient decrease condition
       double c2WolfeCondition = 0.9;  /// \brief A nonnegative tolerance for the curvature condition
       double maxStepLength = 50;      /// \brief A nonnegative upper bound for the step.
@@ -163,16 +163,19 @@ namespace aslam {
       typedef boost::shared_ptr<const LineSearch> ConstPtr;
 
       /// \brief Constructor with default options
-      LineSearch(ProblemManager* pm);
+      LineSearch(const boost::shared_ptr<CostFunctionInterface>& cf);
       /// \brief Constructor with custom options
-      LineSearch(ProblemManager* pm, const LineSearchOptions& options);
+      LineSearch(const boost::shared_ptr<CostFunctionInterface>& cf, const LineSearchOptions& options);
       /// \brief Constructor from property tree
-      LineSearch(ProblemManager* pm, const sm::PropertyTree& config);
+      LineSearch(const boost::shared_ptr<CostFunctionInterface>& cf, const sm::PropertyTree& config);
       /// \brief Destructor
       ~LineSearch();
 
-      /// \brief Get the optimizer options.
+      /// \brief Mutable getter for the options.
       LineSearchOptions& options() { return _options; }
+
+      /// \brief Const getter for the options.
+      const LineSearchOptions& options() const { return _options; }
 
       /**
        * @brief Initialize the class. Mandatory to call before using any of the line-search methods.
@@ -283,8 +286,8 @@ namespace aslam {
 
     private: // private members
 
-      /// \brief Problem manager
-      ProblemManager* _problemManager;
+      /// \brief Cost function
+      boost::shared_ptr<CostFunctionInterface> _costFunction;
 
       /// \brief current search direction
       RowVectorType _searchDirection;

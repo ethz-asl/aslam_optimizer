@@ -1,4 +1,6 @@
 #include <numpy_eigen/boost_python_headers.hpp>
+#include <aslam/backend/OptimizerBase.hpp>
+#include <aslam/backend/util/OptimizerProblemManagerBase.hpp>
 #include <aslam/backend/Optimizer.hpp>
 #include <aslam/backend/Optimizer2.hpp>
 #include <aslam/backend/OptimizerRprop.hpp>
@@ -27,6 +29,7 @@ std::string toString(const T& t) {
   os << t;
   return os.str();
 }
+
 
 void exportOptimizer()
 {
@@ -182,94 +185,107 @@ void exportOptimizer()
    
         ;
 
-
-    enum_<OptimizerRpropOptions::Method>("RpropMethod")
-        .value("RPROP_PLUS", OptimizerRpropOptions::Method::RPROP_PLUS)
-        .value("RPROP_MINUS", OptimizerRpropOptions::Method::RPROP_MINUS)
-        .value("IRPROP_MINUS", OptimizerRpropOptions::Method::IRPROP_MINUS)
-        .value("IRPROP_PLUS", OptimizerRpropOptions::Method::IRPROP_PLUS)
+    class_<OptimizerOptionsBase>("OptimizerOptionsBase", init<>("OptimizerOptionsBase(): Constructor"))
+        .def(init<const sm::PropertyTree&>("OptimizerOptionsBase(sm::PropertyTree pt): Constructor"))
+        .def_readwrite("convergenceGradientNorm", &OptimizerOptionsBase::convergenceGradientNorm)
+        .def_readwrite("convergenceDeltaX", &OptimizerOptionsBase::convergenceDeltaX)
+        .def_readwrite("convergenceDeltaObjective", &OptimizerOptionsBase::convergenceDeltaObjective)
+        .def_readwrite("maxIterations",&OptimizerOptionsBase::maxIterations)
+        .def_readwrite("numThreadsGradient", &OptimizerOptionsBase::numThreadsGradient)
+        .def_readwrite("numThreadsError", &OptimizerOptionsBase::numThreadsError)
+        .def("__str__", &toString<OptimizerOptionsBase>)
         ;
 
-    class_<OptimizerRpropOptions>("OptimizerRpropOptions", init<>())
-        .def_readwrite("etaMinus",&OptimizerRpropOptions::etaMinus)
-        .def_readwrite("etaPlus",&OptimizerRpropOptions::etaPlus)
-        .def_readwrite("initialDelta",&OptimizerRpropOptions::initialDelta)
-        .def_readwrite("minDelta",&OptimizerRpropOptions::minDelta)
-        .def_readwrite("maxDelta",&OptimizerRpropOptions::maxDelta)
-        .def_readwrite("maxIterations",&OptimizerRpropOptions::maxIterations)
-        .def_readwrite("nThreads", &OptimizerRpropOptions::nThreads)
-        .def_readwrite("convergenceGradientNorm", &OptimizerRpropOptions::convergenceGradientNorm)
-        .def_readwrite("convergenceDx", &OptimizerRpropOptions::convergenceDx)
-        .def_readwrite("convergenceDObjective", &OptimizerRpropOptions::convergenceDObjective)
-        .def_readwrite("regularizer", &OptimizerRpropOptions::regularizer)
-        .def_readwrite("method", &OptimizerRpropOptions::method)
+    enum_<ConvergenceStatus>("ConvergenceStatus")
+        .value("IN_PROGRESS", ConvergenceStatus::IN_PROGRESS)
+        .value("FAILURE", ConvergenceStatus::FAILURE)
+        .value("GRADIENT_NORM", ConvergenceStatus::GRADIENT_NORM)
+        .value("DX", ConvergenceStatus::DX)
+        .value("DOBJECTIVE", ConvergenceStatus::DOBJECTIVE)
         ;
 
-    enum_<RpropReturnValue::ConvergenceCriterion>("RpropConvergenceCriterion")
-        .value("IN_PROGRESS", RpropReturnValue::ConvergenceCriterion::IN_PROGRESS)
-        .value("FAILURE", RpropReturnValue::ConvergenceCriterion::FAILURE)
-        .value("GRADIENT_NORM", RpropReturnValue::ConvergenceCriterion::GRADIENT_NORM)
-        .value("DX", RpropReturnValue::ConvergenceCriterion::DX)
-        .value("DOBJECTIVE", RpropReturnValue::ConvergenceCriterion::DOBJECTIVE)
+    class_<OptimizerStatus>("OptimizerStatus")
+        .def_readwrite("convergence",&OptimizerStatus::convergence)
+        .def_readwrite("numIterations",&OptimizerStatus::numIterations)
+        .def_readwrite("numDerivativeEvaluations",&OptimizerStatus::numDerivativeEvaluations)
+        .def_readwrite("numObjectiveEvaluations",&OptimizerStatus::numObjectiveEvaluations)
+        .def_readwrite("gradientNorm",&OptimizerStatus::gradientNorm)
+        .def_readwrite("maxDeltaX",&OptimizerStatus::maxDeltaX)
+        .def_readwrite("error",&OptimizerStatus::error)
+        .def_readwrite("deltaError",&OptimizerStatus::deltaError)
+        .def("success", &OptimizerStatus::success)
+        .def("failure", &OptimizerStatus::failure)
+        .def("__str__", &toString<OptimizerStatus>)
         ;
 
-    class_<RpropReturnValue>("RpropReturnValue", init<>())
-        .def_readwrite("convergence",&RpropReturnValue::convergence)
-        .def_readwrite("nIterations",&RpropReturnValue::nIterations)
-        .def_readwrite("nGradEvaluations",&RpropReturnValue::nGradEvaluations)
-        .def_readwrite("nObjectiveEvaluations",&RpropReturnValue::nObjectiveEvaluations)
-        .def_readwrite("gradientNorm",&RpropReturnValue::gradientNorm)
-        .def_readwrite("maxDx",&RpropReturnValue::maxDx)
-        .def_readwrite("error",&RpropReturnValue::error)
-        .def_readwrite("derror",&RpropReturnValue::derror)
-        .def("success", &RpropReturnValue::success)
-        .def("failure", &RpropReturnValue::failure)
-        .def("__str__", &toString<RpropReturnValue>)
-        ;
+    class_<OptimizerBase, boost::shared_ptr<OptimizerBase>, boost::noncopyable >("OptimizerBase", no_init)
 
-    class_<OptimizerRprop, boost::shared_ptr<OptimizerRprop> >("OptimizerRprop", init<>("OptimizerRprop(): Constructor with default options"))
+        .def("setProblem", pure_virtual(&OptimizerBase::setProblem),
+             "Set up to work on the optimization problem.")
 
-        .def(init<const OptimizerRpropOptions&>("OptimizerRprop(OptimizerRpropOptions options): Constructor with custom options"))
-        .def(init<const sm::PropertyTree&>("OptimizerRprop(PropertyTree propertyTree): Constructor from sm::PropertyTree"))
-
-        .def("setProblem", (void (OptimizerRprop::*)(boost::shared_ptr<OptimizationProblemBase>))&OptimizerRprop::setProblem, "Set up to work on the optimization problem.")
-        .def("checkProblemSetup", (void (OptimizerRprop::*)(void))&OptimizerRprop::checkProblemSetup,
+        .def("checkProblemSetup", pure_virtual(&OptimizerBase::checkProblemSetup),
              "Do a bunch of checks to see if the problem is well-defined. This includes checking that every error term is hooked up to design variables and running "
              "finite differences on error terms where this is possible.")
-//
-        .def("initialize", &OptimizerRprop::initialize,
+
+        .def("initialize", &OptimizerBase::initialize,
              "Initialize the optimizer to run on an optimization problem. optimize() will call initialize() upon the first call.")
 
-       .def("reset", &OptimizerRprop::reset,
-            "Reset internal states but don't re-initialize the whole problem")
+        .def("isInitialized", pure_virtual(&OptimizerBase::isInitialized),
+             "Initialize the optimizer to run on an optimization problem. optimize() will call initialize() upon the first call.")
 
-        .def("optimize", make_function(&OptimizerRprop::optimize, return_internal_reference<>()),
+        .def("reset", &OptimizerBase::reset,
+             "Reset internal states but don't re-initialize the whole problem")
+
+        .def("optimize", pure_virtual(&OptimizerBase::optimize),
              "Run the optimization")
-        .add_property("status", make_function(&OptimizerRprop::getStatus, return_internal_reference<>()),
-                      "Return the status")
-        .add_property("options", make_function(&OptimizerRprop::options, return_internal_reference<>()),
-                      "The optimizer options.")
 
-        .add_property("gradientNorm", &OptimizerRprop::getGradientNorm,
-                      "The norm of the gradient of the objective function.")
+        .add_property("status", make_function(&OptimizerBase::getStatus, return_internal_reference<>()),
+                      "Status of the optimizer")
 
-        .add_property("numberOfIterations", &OptimizerRprop::getNumberOfIterations,
-                      "Get the number of iterations the solver has run. If it has never been started, the value will be zero.")
+        .add_property("options", make_function(&OptimizerBase::getOptions, return_internal_reference<>()), &OptimizerBase::setOptions,
+                      "Options of the optimizer")
+
+        .def("isConverged", &OptimizerBase::isConverged,
+             "Has the optimizer converged?")
+
+        .def("isFailed", &OptimizerBase::isFailed,
+            "Has the optimizer failed?")
+
+        .def("isInProgress", &OptimizerBase::isInProgress,
+             "Is the optimizer still running?")
+        ;
+
+    class_<OptimizerProblemManagerBase, boost::shared_ptr<OptimizerProblemManagerBase>, bases<OptimizerBase>, boost::noncopyable >("OptimizerProblemManagerBase", no_init)
+        ;
+
+    enum_<OptimizerOptionsRprop::Method>("RpropMethod")
+        .value("RPROP_PLUS", OptimizerOptionsRprop::Method::RPROP_PLUS)
+        .value("RPROP_MINUS", OptimizerOptionsRprop::Method::RPROP_MINUS)
+        .value("IRPROP_MINUS", OptimizerOptionsRprop::Method::IRPROP_MINUS)
+        .value("IRPROP_PLUS", OptimizerOptionsRprop::Method::IRPROP_PLUS)
+        ;
+
+    class_<OptimizerOptionsRprop, bases<OptimizerOptionsBase> >("OptimizerOptionsRprop", init<>())
+        .def_readwrite("etaMinus",&OptimizerOptionsRprop::etaMinus)
+        .def_readwrite("etaPlus",&OptimizerOptionsRprop::etaPlus)
+        .def_readwrite("initialDelta",&OptimizerOptionsRprop::initialDelta)
+        .def_readwrite("minDelta",&OptimizerOptionsRprop::minDelta)
+        .def_readwrite("maxDelta",&OptimizerOptionsRprop::maxDelta)
+        .def_readwrite("regularizer", &OptimizerOptionsRprop::regularizer)
+        .def_readwrite("method", &OptimizerOptionsRprop::method)
+        .def_readwrite("useDenseJacobianContainer", &OptimizerOptionsRprop::useDenseJacobianContainer)
+        .def("__str__", &toString<OptimizerOptionsRprop>)
+        ;
+
+
+    class_<OptimizerRprop, boost::shared_ptr<OptimizerRprop>, bases<OptimizerProblemManagerBase> >("OptimizerRprop", init<>("OptimizerRprop(): Constructor with default options"))
+        .def(init<const OptimizerOptionsRprop&>("OptimizerRprop(OptimizerOptionsRprop options): Constructor with custom options"))
+        .def(init<const sm::PropertyTree&>("OptimizerRprop(PropertyTree propertyTree): Constructor from sm::PropertyTree"))
         ;
     implicitly_convertible< boost::shared_ptr<OptimizerRprop>, boost::shared_ptr<const OptimizerRprop> >();
 
 
-    enum_<BFGSReturnValue::ConvergenceCriterion>("BFGSConvergenceCriterion")
-        .value("IN_PROGRESS", BFGSReturnValue::ConvergenceCriterion::IN_PROGRESS)
-        .value("FAILURE", BFGSReturnValue::ConvergenceCriterion::FAILURE)
-        .value("GRADIENT_NORM", BFGSReturnValue::ConvergenceCriterion::GRADIENT_NORM)
-        .value("DX", BFGSReturnValue::ConvergenceCriterion::DX)
-        .value("DOBJECTIVE", BFGSReturnValue::ConvergenceCriterion::DOBJECTIVE)
-        ;
-
     class_<LineSearchOptions>("LineSearchOptions", init<>())
-        .def_readwrite("nThreadsError",&LineSearchOptions::nThreadsError)
-        .def_readwrite("nThreadsGradient",&LineSearchOptions::nThreadsGradient)
         .def_readwrite("c1WolfeCondition",&LineSearchOptions::c1WolfeCondition)
         .def_readwrite("c2WolfeCondition", &LineSearchOptions::c2WolfeCondition)
         .def_readwrite("maxStepLength", &LineSearchOptions::maxStepLength)
@@ -279,60 +295,19 @@ void exportOptimizer()
         .def_readwrite("nMaxIterWolfe1", &LineSearchOptions::nMaxIterWolfe1)
         .def_readwrite("nMaxIterWolfe2", &LineSearchOptions::nMaxIterWolfe2)
         .def_readwrite("nMaxIterZoom", &LineSearchOptions::nMaxIterZoom)
+        .def("__str__", &toString<LineSearchOptions>)
         ;
 
-    class_<OptimizerBFGSOptions>("OptimizerBFGSOptions", init<>())
-        .def_readwrite("linesearch",&OptimizerBFGSOptions::linesearch)
-        .def_readwrite("maxIterations",&OptimizerBFGSOptions::maxIterations)
-        .def_readwrite("convergenceGradientNorm", &OptimizerBFGSOptions::convergenceGradientNorm)
-        .def_readwrite("convergenceDx", &OptimizerBFGSOptions::convergenceDx)
-        .def_readwrite("convergenceDObjective", &OptimizerBFGSOptions::convergenceDObjective)
-        .def_readwrite("regularizer", &OptimizerBFGSOptions::regularizer)
+    class_<OptimizerOptionsBFGS, bases<OptimizerOptionsBase> >("OptimizerOptionsBFGS", init<>())
+        .def_readwrite("linesearch", &OptimizerOptionsBFGS::linesearch)
+        .def_readwrite("useDenseJacobianContainer", &OptimizerOptionsBFGS::useDenseJacobianContainer)
+        .def_readwrite("regularizer", &OptimizerOptionsBFGS::regularizer)
+        .def("__str__", &toString<OptimizerOptionsBFGS>)
         ;
 
-    class_<BFGSReturnValue>("BFGSReturnValue", init<>())
-        .def_readwrite("convergence",&BFGSReturnValue::convergence)
-        .def_readwrite("nIterations",&BFGSReturnValue::nIterations)
-        .def_readwrite("nGradEvaluations",&BFGSReturnValue::nGradEvaluations)
-        .def_readwrite("nObjectiveEvaluations",&BFGSReturnValue::nObjectiveEvaluations)
-        .def_readwrite("gradientNorm",&BFGSReturnValue::gradientNorm)
-        .def_readwrite("error",&BFGSReturnValue::error)
-        .def_readwrite("derror",&BFGSReturnValue::derror)
-        .def_readwrite("maxDx",&BFGSReturnValue::maxDx)
-        .def("reset", &BFGSReturnValue::reset)
-        .def("success", &BFGSReturnValue::success)
-        .def("failure", &BFGSReturnValue::failure)
-        .def("__str__", &toString<BFGSReturnValue>)
-        ;
-
-    class_<OptimizerBFGS, boost::shared_ptr<OptimizerBFGS> >("OptimizerBFGS", init<>("OptimizerBFGS(): Constructor with default options"))
-
-        .def(init<const OptimizerBFGSOptions&>("OptimizerBFGSOptions(OptimizerRpropOptions options): Constructor with custom options"))
+    class_<OptimizerBFGS, boost::shared_ptr<OptimizerBFGS>, bases<OptimizerProblemManagerBase> >("OptimizerBFGS", init<>("OptimizerBFGS(): Constructor with default options"))
+        .def(init<const OptimizerOptionsBFGS&>("OptimizerBFGSOptions(OptimizerOptionsBFGS options): Constructor with custom options"))
         .def(init<const sm::PropertyTree&>("OptimizerRprop(PropertyTree propertyTree): Constructor from sm::PropertyTree"))
-
-        .def("setProblem", (void (OptimizerBFGS::*)(boost::shared_ptr<OptimizationProblemBase>))&OptimizerBFGS::setProblem, "Set up to work on the optimization problem.")
-        .def("checkProblemSetup", (void (OptimizerBFGS::*)(void))&OptimizerBFGS::checkProblemSetup,
-             "Do a bunch of checks to see if the problem is well-defined. This includes checking that every error term is hooked up to design variables and running "
-             "finite differences on error terms where this is possible.")
-//
-        .def("initialize", &OptimizerBFGS::initialize,
-             "Initialize the optimizer to run on an optimization problem. optimize() will call initialize() upon the first call.")
-
-        .def("reset", &OptimizerBFGS::reset,
-             "Reset internal states but don't re-initialize the whole problem")
-
-        .def("optimize", make_function(&OptimizerBFGS::optimize, return_internal_reference<>()),
-             "Run the optimization")
-        .add_property("status", make_function(&OptimizerBFGS::getStatus, return_internal_reference<>()),
-                      "Return the status")
-        .add_property("options", make_function(&OptimizerBFGS::getOptions, return_internal_reference<>()), &OptimizerBFGS::setOptions,
-                      "The optimizer options.")
-
-        .add_property("gradientNorm", &OptimizerBFGS::getGradientNorm,
-                      "The norm of the gradient of the objective function.")
-
-        .add_property("numberOfIterations", &OptimizerBFGS::getNumberOfIterations,
-                      "Get the number of iterations the solver has run. If it has never been started, the value will be zero.")
         ;
     implicitly_convertible< boost::shared_ptr<OptimizerBFGS>, boost::shared_ptr<const OptimizerBFGS> >();
 

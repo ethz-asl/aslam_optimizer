@@ -39,25 +39,25 @@ RowVectorType computeGradientForScalarNonSquaredErrorTerm(boost::shared_ptr<Opti
   return J;
 }
 
-RowVectorType computeGradientForErrorTerm(boost::shared_ptr<OptimizationProblemBase> problem, ErrorTerm* errorTerm, bool useMEstimator = true) {
+RowVectorType computeGradientForErrorTerm(boost::shared_ptr<OptimizationProblemBase> problem, ErrorTerm* errorTerm, bool useMEstimator = true, bool useDenseJacobianContainer = true) {
 
   ProblemManager pm;
   pm.setProblem(problem);
   pm.initialize();
 
   RowVectorType J = RowVectorType::Zero(1, pm.numOptParameters());
-  pm.addGradientForErrorTerm(J, errorTerm, useMEstimator);
+  pm.addGradientForErrorTerm(J, errorTerm, useMEstimator, useDenseJacobianContainer);
   return J;
 }
 
-RowVectorType computeGradient(boost::shared_ptr<OptimizationProblemBase> problem, std::size_t nThreads = 2, bool useMEstimator = true, bool applyDvScaling = true) {
+RowVectorType computeGradient(boost::shared_ptr<OptimizationProblemBase> problem, std::size_t nThreads = 2, bool useMEstimator = true, bool applyDvScaling = true, bool useDenseJacobianContainer = true) {
 
   ProblemManager pm;
   pm.setProblem(problem);
   pm.initialize();
 
   RowVectorType J = RowVectorType::Zero(1, pm.numOptParameters());
-  pm.computeGradient(J, nThreads, useMEstimator, applyDvScaling);
+  pm.computeGradient(J, nThreads, useMEstimator, applyDvScaling, useDenseJacobianContainer);
   return J;
 }
 
@@ -68,9 +68,9 @@ double evaluateError(boost::shared_ptr<OptimizationProblemBase> problem, std::si
   return pm.evaluateError(nThreads);
 }
 
-BOOST_PYTHON_FUNCTION_OVERLOADS(computeGradientForErrorTerm_overloads, computeGradientForErrorTerm, 2, 3);
+BOOST_PYTHON_FUNCTION_OVERLOADS(computeGradientForErrorTerm_overloads, computeGradientForErrorTerm, 2, 4);
 BOOST_PYTHON_FUNCTION_OVERLOADS(computeGradientForScalarNonSquaredErrorTerm_overloads, computeGradientForScalarNonSquaredErrorTerm, 2, 3);
-BOOST_PYTHON_FUNCTION_OVERLOADS(computeGradient_overloads, computeGradient, 1, 4);
+BOOST_PYTHON_FUNCTION_OVERLOADS(computeGradient_overloads, computeGradient, 1, 5);
 BOOST_PYTHON_FUNCTION_OVERLOADS(evaluateError_overloads, evaluateError, 1, 2);
 
 void exportOptimizationProblem()

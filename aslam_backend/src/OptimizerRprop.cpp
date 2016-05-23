@@ -10,142 +10,97 @@
 namespace aslam {
 namespace backend {
 
-OptimizerRpropOptions::OptimizerRpropOptions() {
-  check();
+OptimizerOptionsRprop::OptimizerOptionsRprop()
+    : OptimizerOptionsBase()
+{
 }
 
-OptimizerRpropOptions::OptimizerRpropOptions(const sm::PropertyTree& config)
+OptimizerOptionsRprop::OptimizerOptionsRprop(const sm::PropertyTree& config)
+    : OptimizerOptionsBase(config)
 {
   etaMinus = config.getDouble("etaMinus", etaMinus);
   etaPlus = config.getDouble("etaPlus", etaPlus);
   initialDelta = config.getDouble("initialDelta", initialDelta);
   minDelta = config.getDouble("minDelta", minDelta);
   maxDelta = config.getDouble("maxDelta", maxDelta);
-  convergenceGradientNorm = config.getDouble("convergenceGradientNorm", convergenceGradientNorm);
-  convergenceDx = config.getDouble("convergenceDx", convergenceDx);
-  convergenceDObjective = config.getDouble("convergenceDObjective", convergenceDObjective);
-  maxIterations = config.getInt("maxIterations", maxIterations);
-  nThreads = config.getInt("nThreads", nThreads);
   check();
 }
 
-void OptimizerRpropOptions::check() const {
+void OptimizerOptionsRprop::check() const
+{
   SM_ASSERT_GT( Exception, etaMinus, 0.0, "");
   SM_ASSERT_GT( Exception, etaPlus, etaMinus, "");
   SM_ASSERT_GT( Exception, initialDelta, 0.0, "");
   SM_ASSERT_GT( Exception, minDelta, 0.0, "");
   SM_ASSERT_GT( Exception, maxDelta, minDelta, "");
-  SM_ASSERT_GE( Exception, convergenceGradientNorm, 0.0, "");
-  SM_ASSERT_GE( Exception, convergenceDx, 0.0, "");
-  SM_ASSERT_GE( Exception, convergenceDObjective, 0.0, "");
-  SM_ASSERT_TRUE( Exception, convergenceDx > 0 || convergenceGradientNorm > 0.0 || convergenceDObjective > 0, "");
-  SM_ASSERT_GE( Exception, maxIterations, -1, "");
+  OptimizerOptionsBase::check();
 }
 
-std::ostream& operator<<(std::ostream& out, const aslam::backend::OptimizerRpropOptions& options)
+std::ostream& operator<<(std::ostream& out, const aslam::backend::OptimizerOptionsRprop::Method& method)
 {
-  out << "OptimizerRpropOptions:\n";
-  out << "\tetaMinus: " << options.etaMinus << std::endl;
-  out << "\tetaPlus: " << options.etaPlus << std::endl;
-  out << "\tinitialDelta: " << options.initialDelta << std::endl;
-  out << "\tminDelta: " << options.minDelta << std::endl;
-  out << "\tmaxDelta: " << options.maxDelta << std::endl;
-  out << "\tconvergenceGradientNorm: " << options.convergenceGradientNorm << std::endl;
-  out << "\tconvergenceDx: " << options.convergenceDx << std::endl;
-  out << "\tconvergenceDObjective: " << options.convergenceDObjective << std::endl;
-  out << "\tmaxIterations: " << options.maxIterations << std::endl;
-  out << "\tnThreads: " << options.nThreads << std::endl;
-  out << "\tmethod: " << options.method;
-  return out;
-}
-
-void RpropReturnValue::reset() {
-  convergence = IN_PROGRESS;
-  nIterations = nGradEvaluations = nObjectiveEvaluations = 0;
-  gradientNorm = std::numeric_limits<double>::signaling_NaN();
-  maxDx = std::numeric_limits<double>::signaling_NaN();
-  error = std::numeric_limits<double>::max();
-  derror = std::numeric_limits<double>::signaling_NaN();
-}
-
-bool RpropReturnValue::success() const {
-  return convergence != FAILURE && convergence != IN_PROGRESS;
-}
-
-bool RpropReturnValue::failure() const {
-  return convergence == FAILURE;
-}
-
-std::ostream& operator<<(std::ostream& out, const RpropReturnValue::ConvergenceCriterion& convergence) {
-  switch (convergence) {
-    case RpropReturnValue::ConvergenceCriterion::IN_PROGRESS:
-      out << "IN_PROGRESS";
+  switch(method)
+  {
+    case OptimizerOptionsRprop::Method::IRPROP_MINUS:
+      out << "IRPROP_MINUS";
       break;
-    case RpropReturnValue::ConvergenceCriterion::FAILURE:
-      out << "FAILURE";
+    case OptimizerOptionsRprop::Method::IRPROP_PLUS:
+      out << "IRPROP_PLUS";
       break;
-    case RpropReturnValue::ConvergenceCriterion::GRADIENT_NORM:
-      out << "GRADIENT_NORM";
+    case OptimizerOptionsRprop::Method::RPROP_MINUS:
+      out << "RPROP_MINUS";
       break;
-    case RpropReturnValue::ConvergenceCriterion::DX:
-      out << "DX";
-      break;
-    case RpropReturnValue::ConvergenceCriterion::DOBJECTIVE:
-      out << "DOBJECTIVE";
+    case OptimizerOptionsRprop::Method::RPROP_PLUS:
+      out << "RPROP_PLUS";
       break;
   }
   return out;
 }
 
-std::ostream& operator<<(std::ostream& out, const RpropReturnValue& ret) {
-  out << "RPropReturnValue: " << std::endl;
-  out << "\tconvergence: " << ret.convergence << std::endl;
-  out << "\titerations: " << ret.nIterations << std::endl;
-  out << "\tgradient norm: " << ret.gradientNorm << std::endl;
-  out << "\tobjective: " << ret.error << std::endl;
-  out << "\tdobjective: " << ret.derror << std::endl;
-  out << "\tmax dx: " << ret.maxDx << std::endl;
-  out << "\tevals objective: " << ret.nObjectiveEvaluations << std::endl;
-  out << "\tevals gradient: " << ret.nGradEvaluations;
+std::ostream& operator<<(std::ostream& out, const aslam::backend::OptimizerOptionsRprop& options)
+{
+  out << static_cast<OptimizerOptionsBase>(options) << std::endl;
+  out << "OptimizerOptionsRprop:" << std::endl;
+  out << "\tetaMinus: " << options.etaMinus << std::endl;
+  out << "\tetaPlus: " << options.etaPlus << std::endl;
+  out << "\tinitialDelta: " << options.initialDelta << std::endl;
+  out << "\tminDelta: " << options.minDelta << std::endl;
+  out << "\tmaxDelta: " << options.maxDelta << std::endl;
+  out << "\tmethod: " << options.method << std::endl;
+  out << "\tuseDenseJacobianContainer: " << (options.useDenseJacobianContainer ? "TRUE" : "FALSE") << std::endl;
+  out << "\thasRegularizer: " << ((options.regularizer != nullptr) ? "TRUE" : "FALSE");
   return out;
 }
 
-OptimizerRprop::OptimizerRprop() :
-    _options(OptimizerRpropOptions())
-{
 
-}
-
-OptimizerRprop::OptimizerRprop(const OptimizerRpropOptions& options) :
-    _options(options)
+OptimizerRprop::OptimizerRprop(const OptimizerOptionsRprop& options)
+    : _options(options)
 {
   _options.check();
 }
 
-OptimizerRprop::OptimizerRprop(const sm::PropertyTree& config) {
-  _options = OptimizerRpropOptions(config);
+OptimizerRprop::OptimizerRprop()
+    : OptimizerRprop::OptimizerRprop(OptimizerOptionsRprop())
+{
+}
+
+
+OptimizerRprop::OptimizerRprop(const sm::PropertyTree& config)
+    : OptimizerRprop::OptimizerRprop(OptimizerOptionsRprop(config))
+{
 }
 
 OptimizerRprop::~OptimizerRprop()
 {
 }
 
-
-void OptimizerRprop::initialize()
-{
-  ProblemManager::initialize();
-  reset();
-}
-
-void OptimizerRprop::reset() {
-  _dx = ColumnVectorType::Constant(numOptParameters(), 0.0);
-  _prev_gradient = ColumnVectorType::Constant(numOptParameters(), 0.0);
+void OptimizerRprop::resetImplementation() {
+  _dx = ColumnVectorType::Constant(problemManager().numOptParameters(), 0.0);
+  _prev_gradient = ColumnVectorType::Constant(problemManager().numOptParameters(), 0.0);
   _prev_error = std::numeric_limits<double>::max();
-  _delta = ColumnVectorType::Constant(numOptParameters(), _options.initialDelta);
-  _returnValue.reset();
+  _delta = ColumnVectorType::Constant(problemManager().numOptParameters(), _options.initialDelta);
 }
 
-const RpropReturnValue& OptimizerRprop::optimize()
+void OptimizerRprop::optimizeImplementation()
 {
   Timer timeGrad("OptimizerRprop: Compute---Gradient", true);
   Timer timeStep("OptimizerRprop: Compute---Step size", true);
@@ -156,14 +111,13 @@ const RpropReturnValue& OptimizerRprop::optimize()
 
   using namespace Eigen;
 
-  std::size_t cnt = 0;
-  for (cnt = 0; _options.maxIterations == -1 || cnt < static_cast<size_t>(_options.maxIterations); ++cnt) {
+  for ( ; _options.maxIterations == -1 || _status.numIterations < static_cast<size_t>(_options.maxIterations); ++_status.numIterations) {
 
-    _returnValue.nIterations++;
+    _status.convergence = ConvergenceStatus::IN_PROGRESS;
 
     RowVectorType gradient;
     timeGrad.start();
-    this->computeGradient(gradient, _options.nThreads, false /*TODO: useMEstimator*/, false /*TODO: use scaling */);
+    problemManager().computeGradient(gradient, _options.numThreadsGradient, false /*useMEstimator*/, false /*use scaling */, _options.useDenseJacobianContainer /*useDenseJacobianContainer*/);
 
     // optionally add regularizer
     if (_options.regularizer) {
@@ -172,28 +126,28 @@ const RpropReturnValue& OptimizerRprop::optimize()
       SM_FINER_STREAM_NAMED("optimization", "RPROP: Regularization term gradient: " << jc.asDenseMatrix());
       gradient += jc.asDenseMatrix();
     }
-    _returnValue.nGradEvaluations++;
+    _status.numDerivativeEvaluations++;
     timeGrad.stop();
 
     SM_ASSERT_TRUE_DBG(Exception, gradient.allFinite (), "Gradient " << gradient.format(IOFormat(2, DontAlignCols, ", ", ", ", "", "", "[", "]")) << " is not finite");
 
     timeStep.start();
-    _returnValue.gradientNorm = gradient.norm();
+    _status.gradientNorm = gradient.norm();
 
-    if (_returnValue.gradientNorm < _options.convergenceGradientNorm) {
-      _returnValue.convergence = RpropReturnValue::GRADIENT_NORM;
-      SM_DEBUG_STREAM_NAMED("optimization", "RPROP: Current gradient norm " << _returnValue.gradientNorm <<
+    if (_status.gradientNorm < _options.convergenceGradientNorm) {
+      _status.convergence = ConvergenceStatus::GRADIENT_NORM;
+      SM_DEBUG_STREAM_NAMED("optimization", "RPROP: Current gradient norm " << _status.gradientNorm <<
                             " is smaller than convergenceGradientNorm option -> terminating");
       break;
     }
 
     // Compute error for iPRop+
     bool errorIncreased = false;
-    if (_options.method == OptimizerRpropOptions::IRPROP_PLUS) {
-      _returnValue.error = this->evaluateError(_options.nThreads);
-      _returnValue.nObjectiveEvaluations++;
-      errorIncreased = (_returnValue.error - _prev_error) > 0.0;
-      _prev_error = _returnValue.error;
+    if (_options.method == OptimizerOptionsRprop::IRPROP_PLUS) {
+      _status.error = problemManager().evaluateError(_options.numThreadsError);
+      _status.numObjectiveEvaluations++;
+      errorIncreased = (_status.error - _prev_error) > 0.0;
+      _prev_error = _status.error;
     }
 
     // determine whether gradient direction switched
@@ -202,7 +156,7 @@ const RpropReturnValue& OptimizerRprop::optimize()
     Eigen::Matrix<bool, 1, Eigen::Dynamic> switchYes = gg.array() < 0.0;
     _prev_gradient = gradient;
 
-    for (std::size_t d = 0; d < numOptParameters(); ++d) {
+    for (std::size_t d = 0; d < problemManager().numOptParameters(); ++d) {
 
       // Adapt delta
       if (switchNo(d))
@@ -216,7 +170,7 @@ const RpropReturnValue& OptimizerRprop::optimize()
 
         // RPROP_PLUS
         // With backtracking. If gradient switched direction, revert this update.
-        case OptimizerRpropOptions::RPROP_PLUS:
+        case OptimizerOptionsRprop::RPROP_PLUS:
         {
           // Compute design variable update vector
           if (switchYes(d)) {
@@ -232,7 +186,7 @@ const RpropReturnValue& OptimizerRprop::optimize()
         // RPROP_MINUS
         // No backtracking. Reduce step-length if gradient switched direction,
         // Increase step-length if gradient in same direction.
-        case OptimizerRpropOptions::RPROP_MINUS:
+        case OptimizerOptionsRprop::RPROP_MINUS:
         {
           // Compute design variable update vector
           _dx(d) = -sign(gradient(d))*_delta(d);
@@ -242,7 +196,7 @@ const RpropReturnValue& OptimizerRprop::optimize()
         // IRPROP_MINUS
         // In case gradient direction switched, stay at this point for one iteration and
         // then move into the direction of the gradient with half the step-length.
-        case OptimizerRpropOptions::IRPROP_MINUS:
+        case OptimizerOptionsRprop::IRPROP_MINUS:
         {
           // Compute design variable update vector
           if (switchYes(d))
@@ -255,7 +209,7 @@ const RpropReturnValue& OptimizerRprop::optimize()
         // IRPROP_PLUS
         // Revert only weight updates that have caused changes of the corresponding
         // partial derivatives in case of an error increase.
-        case OptimizerRpropOptions::IRPROP_PLUS:
+        case OptimizerOptionsRprop::IRPROP_PLUS:
         {
 
           // Compute design variable update vector
@@ -278,37 +232,36 @@ const RpropReturnValue& OptimizerRprop::optimize()
     timeStep.stop();
 
     timeUpdate.start();
-    this->applyStateUpdate(_dx);
+    problemManager().applyStateUpdate(_dx);
     timeUpdate.stop();
 
-    _returnValue.maxDx = _dx.cwiseAbs().maxCoeff();
-    if (_returnValue.maxDx < _options.convergenceDx) {
-      _returnValue.convergence = RpropReturnValue::DX;
-      SM_DEBUG_STREAM_NAMED("optimization", "RPROP: Maximum dx coefficient " << _returnValue.maxDx <<
+    _status.maxDeltaX = _dx.cwiseAbs().maxCoeff();
+    if (_status.maxDeltaX < _options.convergenceDeltaX) {
+      _status.convergence = ConvergenceStatus::DX;
+      SM_DEBUG_STREAM_NAMED("optimization", "RPROP: Maximum dx coefficient " << _status.maxDeltaX <<
                             " is smaller than convergenceDx option -> terminating");
       break;
     }
 
-    if (_options.method == OptimizerRpropOptions::IRPROP_PLUS) {
-      _returnValue.derror = this->evaluateError(_options.nThreads) - _returnValue.error;
-      if (fabs(_returnValue.derror) < _options.convergenceDObjective) {
-        _returnValue.convergence = RpropReturnValue::DOBJECTIVE;
-        SM_DEBUG_STREAM_NAMED("optimization", "RPROP: Change in error " << _returnValue.derror <<
+    if (_options.method == OptimizerOptionsRprop::IRPROP_PLUS) {
+      _status.deltaError = problemManager().evaluateError(_options.numThreadsError) - _status.error;
+      if (fabs(_status.deltaError) < _options.convergenceDeltaObjective) {
+        _status.convergence = ConvergenceStatus::DOBJECTIVE;
+        SM_DEBUG_STREAM_NAMED("optimization", "RPROP: Change in error " << _status.deltaError <<
                               " is smaller than convergenceDObjective option -> terminating");
         break;
       }
     }
 
-    SM_FINE_STREAM_NAMED("optimization", _returnValue << std::endl <<
+    SM_FINE_STREAM_NAMED("optimization", _status << std::endl <<
                          "\tdx: " << _dx.transpose() << std::endl <<
                          "\tdelta: " << _delta.transpose());
 
 
   }
 
-  SM_DEBUG_STREAM_NAMED("optimization", _returnValue);
+  SM_DEBUG_STREAM_NAMED("optimization", _status);
 
-  return _returnValue;
 }
 
 } // namespace backend

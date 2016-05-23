@@ -11,165 +11,89 @@
 namespace aslam {
 namespace backend {
 
-OptimizerBFGSOptions::OptimizerBFGSOptions() {
-  check();
-}
-
-OptimizerBFGSOptions::OptimizerBFGSOptions(const sm::PropertyTree& config)
-    : linesearch(sm::PropertyTree(config, "linesearch"))
+OptimizerOptionsBFGS::OptimizerOptionsBFGS()
+    : OptimizerOptionsBase(), linesearch()
 {
-  convergenceGradientNorm = config.getDouble("convergenceGradientNorm", convergenceGradientNorm);
-  convergenceDx = config.getDouble("convergenceDx", convergenceDx);
-  convergenceDObjective = config.getDouble("convergenceDObjective", convergenceDObjective);
-  maxIterations = config.getInt("maxIterations", maxIterations);
-  check();
-}
-
-void OptimizerBFGSOptions::check() const {
-  SM_ASSERT_GE( Exception, convergenceGradientNorm, 0.0, "");
-  SM_ASSERT_GE( Exception, convergenceDx, 0.0, "");
-  SM_ASSERT_GE( Exception, convergenceDObjective, 0.0, "");
-  SM_ASSERT_TRUE( Exception, convergenceDx > 0 || convergenceGradientNorm > 0.0 || convergenceDObjective > 0, "");
-  SM_ASSERT_GE( Exception, maxIterations, -1, "");
+  // base options checked by OptimizerOptionsBase
   linesearch.check();
 }
 
-std::ostream& operator<<(std::ostream& out, const aslam::backend::OptimizerBFGSOptions& options)
+OptimizerOptionsBFGS::OptimizerOptionsBFGS(const sm::PropertyTree& config)
+    : OptimizerOptionsBase(config), linesearch(sm::PropertyTree(config, "linesearch")), useDenseJacobianContainer(config.getDouble("useDenseJacobianContainer", useDenseJacobianContainer))
 {
-  out << "OptimizerBFGSOptions:\n";
-  out << "\tconvergenceGradientNorm: " << options.convergenceGradientNorm << std::endl;
-  out << "\tconvergenceDx: " << options.convergenceDx << std::endl;
-  out << "\tconvergenceDObjective: " << options.convergenceDObjective << std::endl;
-  out << "\tmaxIterations: " << options.maxIterations << std::endl;
-  out << options.linesearch;
-  return out;
+  // base options checked by OptimizerOptionsBase
+  linesearch.check();
 }
 
-void BFGSReturnValue::reset() {
-  convergence = IN_PROGRESS;
-  nIterations = nGradEvaluations = nObjectiveEvaluations = 0;
-  gradientNorm = std::numeric_limits<double>::signaling_NaN();
-  error = std::numeric_limits<double>::max();
-  derror = std::numeric_limits<double>::signaling_NaN();
-  maxDx = std::numeric_limits<double>::signaling_NaN();
+void OptimizerOptionsBFGS::check() const
+{
+  OptimizerOptionsBase::check();
+  linesearch.check();
 }
 
-bool BFGSReturnValue::success() const {
-  return convergence != FAILURE && convergence != IN_PROGRESS;
-}
-
-bool BFGSReturnValue::failure() const {
-  return convergence == FAILURE;
-}
-
-std::ostream& operator<<(std::ostream& out, const BFGSReturnValue& ret) {
-  out << "BFGSReturnValue: " << std::endl;
-  out << "\tconvergence: " << ret.convergence << std::endl;
-  out << "\titerations: " << ret.nIterations << std::endl;
-  out << "\tgradient norm: " << ret.gradientNorm << std::endl;
-  out << "\tobjective: " << ret.error << std::endl;
-  out << "\tdobjective: " << ret.derror << std::endl;
-  out << "\tmax dx: " << ret.maxDx << std::endl;
-  out << "\tevals objective: " << ret.nObjectiveEvaluations << std::endl;
-  out << "\tevals gradient: " << ret.nGradEvaluations;
-  return out;
-}
-
-std::ostream& operator<<(std::ostream& out, const BFGSReturnValue::ConvergenceCriterion& convergence) {
-  switch (convergence) {
-    case BFGSReturnValue::ConvergenceCriterion::IN_PROGRESS:
-      out << "IN_PROGRESS";
-      break;
-    case BFGSReturnValue::ConvergenceCriterion::FAILURE:
-      out << "FAILURE";
-      break;
-    case BFGSReturnValue::ConvergenceCriterion::GRADIENT_NORM:
-      out << "GRADIENT_NORM";
-      break;
-    case BFGSReturnValue::ConvergenceCriterion::DX:
-      out << "DX";
-      break;
-    case BFGSReturnValue::ConvergenceCriterion::DOBJECTIVE:
-      out << "DOBJECTIVE";
-      break;
-  }
+std::ostream& operator<<(std::ostream& out, const aslam::backend::OptimizerOptionsBFGS& options)
+{
+  out << static_cast<OptimizerOptionsBase>(options) << std::endl;
+  out << options.linesearch << std::endl;
+  out << "OptimizerOptionsBFGS:" << std::endl;
+  out << "\tuseDenseJacobianContainer: " << (options.useDenseJacobianContainer ? "TRUE" : "FALSE") << std::endl;
+  out << "\thasRegularizer: " << ((options.regularizer != nullptr) ? "TRUE" : "FALSE");
   return out;
 }
 
 
-OptimizerBFGS::OptimizerBFGS() :
-    _options(OptimizerBFGSOptions()),
-    _linesearch(this, _options.linesearch)
+OptimizerBFGS::OptimizerBFGS(const OptimizerOptionsBFGS& options)
+    : _options(options),
+      _linesearch(getCostFunction<false,true,false,true,true>(problemManager(), false, _options.useDenseJacobianContainer, false, _options.numThreadsGradient, _options.numThreadsError), _options.linesearch)
 {
   _options.check();
-  _linesearch.setEvaluateErrorCallback( boost::bind(&OptimizerBFGS::increaseEvaluateErrorCounter, this) );
-  _linesearch.setEvaluateGradientCallback(boost::bind(&OptimizerBFGS::increaseEvaluateGradientCounter, this));
-  this->useDenseJacobianContainer(_options.useDenseJacobianContainer);
+  _linesearch.setEvaluateErrorCallback( [&]() { _status.numObjectiveEvaluations++; } );
+  _linesearch.setEvaluateGradientCallback( [&]() { _status.numDerivativeEvaluations++; });
 }
 
-OptimizerBFGS::OptimizerBFGS(const OptimizerBFGSOptions& options) :
-    _options(options),
-    _linesearch(this, _options.linesearch)
+OptimizerBFGS::OptimizerBFGS()
+    : OptimizerBFGS::OptimizerBFGS(OptimizerOptionsBFGS())
 {
-  _options.check();
-  _linesearch.setEvaluateErrorCallback( boost::bind(&OptimizerBFGS::increaseEvaluateErrorCounter, this) );
-  _linesearch.setEvaluateGradientCallback(boost::bind(&OptimizerBFGS::increaseEvaluateGradientCounter, this));
-  this->useDenseJacobianContainer(_options.useDenseJacobianContainer);
 }
 
-OptimizerBFGS::OptimizerBFGS(const sm::PropertyTree& config) :
-    _options(OptimizerBFGSOptions(config)),
-    _linesearch(this, _options.linesearch)
+
+OptimizerBFGS::OptimizerBFGS(const sm::PropertyTree& config)
+    : OptimizerBFGS::OptimizerBFGS(OptimizerOptionsBFGS(config))
 {
-  _options.check();
-  _linesearch.setEvaluateErrorCallback( boost::bind(&OptimizerBFGS::increaseEvaluateErrorCounter, this) );
-  _linesearch.setEvaluateGradientCallback(boost::bind(&OptimizerBFGS::increaseEvaluateGradientCounter, this));
-  this->useDenseJacobianContainer(_options.useDenseJacobianContainer);
 }
 
 OptimizerBFGS::~OptimizerBFGS()
 {
 }
 
-
-void OptimizerBFGS::initialize()
-{
-  ProblemManager::initialize();
-  reset();
-}
-
-void OptimizerBFGS::reset() {
-  _returnValue.reset();
-  _Bk = Eigen::MatrixXd::Identity(numOptParameters(), numOptParameters());
+void OptimizerBFGS::resetImplementation() {
+  _Bk.setIdentity(problemManager().numOptParameters(), problemManager().numOptParameters());
   _linesearch.initialize();
 }
 
-const BFGSReturnValue& OptimizerBFGS::optimize()
+void OptimizerBFGS::optimizeImplementation()
 {
   Timer timeUpdateHessian("OptimizerBFGS: Update---Hessian", true);
 
-  if (!isInitialized())
-    initialize();
-
   using namespace Eigen;
 
-  const MatrixXd I = MatrixXd::Identity(numOptParameters(), numOptParameters());
+  const MatrixXd I = MatrixXd::Identity(problemManager().numOptParameters(), problemManager().numOptParameters());
   RowVectorType gfk, gfkp1;
   gfk = _linesearch.getGradient();
-  _returnValue.gradientNorm = gfk.norm();
-  _returnValue.error = _linesearch.getError();
+  _status.gradientNorm = gfk.norm();
+  _status.error = _linesearch.getError();
   SM_FINE_STREAM_NAMED("optimization", std::setprecision(20) << "OptimizerBFGS: Start optimization at state " <<
-                        this->getFlattenedDesignVariableParameters().transpose().format(IOFormat(15, DontAlignCols, ", ", ", ", "", "", "[", "]")) <<
+                       problemManager().getFlattenedDesignVariableParameters().transpose().format(IOFormat(15, DontAlignCols, ", ", ", ", "", "", "[", "]")) <<
                         " with gradient " << gfk.transpose().format(IOFormat(15, DontAlignCols, ", ", ", ", "", "", "[", "]")) << " (norm: " <<
-                        _returnValue.gradientNorm << ") and error " << _returnValue.error);
+                        _status.gradientNorm << ") and error " << _status.error);
   this->updateStatus(true);
 
-  if (!_returnValue.success()) {
+  if (!_status.success()) {
 
     std::size_t cnt = 0;
     for (cnt = 0; _options.maxIterations == -1 || cnt < static_cast<size_t>(_options.maxIterations); ++cnt) {
 
-      _returnValue.nIterations++;
+      _status.numIterations++;
 
       // compute search direction
       // Note: this could fail due to numerical issues making the inverse Hessian approximation negative definite
@@ -194,23 +118,23 @@ const BFGSReturnValue& OptimizerBFGS::optimize()
       }
 
       // store last design variables
-      const Eigen::VectorXd dv = this->getFlattenedDesignVariableParameters();
+      const Eigen::VectorXd dv = problemManager().getFlattenedDesignVariableParameters();
 
       // perform line search
       bool lsSuccess = _linesearch.lineSearchWolfe12();
 
       const double alpha_k = _linesearch.getCurrentStepLength();
       gfkp1 = _linesearch.getGradient();
-      _returnValue.gradientNorm = gfkp1.norm();
-      _returnValue.derror = _linesearch.getError() - _returnValue.error;
-      _returnValue.error = _linesearch.getError();
-      _returnValue.maxDx = (this->getFlattenedDesignVariableParameters() - dv).cwiseAbs().maxCoeff();
+      _status.gradientNorm = gfkp1.norm();
+      _status.deltaError = _linesearch.getError() - _status.error;
+      _status.error = _linesearch.getError();
+      _status.maxDeltaX = (problemManager().getFlattenedDesignVariableParameters() - dv).cwiseAbs().maxCoeff();
 
       this->updateStatus(lsSuccess);
-      if (_returnValue.success() || _returnValue.failure())
+      if (_status.success() || _status.failure())
         break;
 
-      SM_FINE_STREAM_NAMED("optimization", std::setprecision(20) << _returnValue << std::endl <<
+      SM_FINE_STREAM_NAMED("optimization", std::setprecision(20) << _status << std::endl <<
                            "\tsteplength: " << alpha_k);
 
       // Update Hessian
@@ -235,54 +159,31 @@ const BFGSReturnValue& OptimizerBFGS::optimize()
     }
   }
 
-  if (!_returnValue.failure())
-    SM_DEBUG_STREAM_NAMED("optimization", _returnValue);
+  if (!_status.failure())
+    SM_DEBUG_STREAM_NAMED("optimization", _status);
   else
-    SM_ERROR_STREAM(_returnValue);
+    SM_ERROR_STREAM(_status);
 
-  return _returnValue;
 }
 
-void OptimizerBFGS::setOptions(const OptimizerBFGSOptions& options) {
-  _options = options;
-  _linesearch.options() = _options.linesearch;
-}
-
-void OptimizerBFGS::updateStatus(const bool lineSearchSuccess) {
+void OptimizerBFGS::updateStatus(const bool lineSearchSuccess)
+{
 
   // Test failure criteria
   if (!lineSearchSuccess) {
-    _returnValue.convergence = BFGSReturnValue::FAILURE;
+    _status.convergence = ConvergenceStatus::FAILURE;
     return;
   }
 
-  if (!std::isfinite(_returnValue.error)) {
-    _returnValue.convergence = BFGSReturnValue::FAILURE; // TODO: Is this really a failure?
+  if (!std::isfinite(_status.error)) {
+    _status.convergence = ConvergenceStatus::FAILURE; // TODO: Is this really a failure?
     SM_WARN("OptimizerBFGS: We correctly found +-inf as optimal value, or something went wrong?");
     return;
   }
 
   // Test success criteria
-  if (_returnValue.gradientNorm < _options.convergenceGradientNorm) {
-    _returnValue.convergence = BFGSReturnValue::GRADIENT_NORM;
-    SM_FINE_STREAM_NAMED("optimization", "BFGS: Current gradient norm " << _returnValue.gradientNorm <<
-                         " is smaller than convergenceGradientNorm option -> terminating");
-    return;
-  }
-
-  if (fabs(_returnValue.derror) < _options.convergenceDObjective) {
-    _returnValue.convergence = BFGSReturnValue::DOBJECTIVE;
-    SM_FINE_STREAM_NAMED("optimization", "BFGS: Change in error " << _returnValue.derror <<
-                         " is smaller than convergenceDObjective option -> terminating");
-    return;
-  }
-
-  if (_returnValue.maxDx < _options.convergenceDx) {
-    _returnValue.convergence = BFGSReturnValue::DX;
-    SM_FINE_STREAM_NAMED("optimization", "BFGS: Maximum change in design variables " << _returnValue.maxDx <<
-                        " is smaller than convergenceDx option -> terminating");
-    return;
-  }
+  _status.convergence = ConvergenceStatus::IN_PROGRESS; // if none of the success criteria succeed, we are not converged yet
+  this->updateConvergenceStatus();
 
 }
 

@@ -47,11 +47,11 @@ TEST(OptimizerRpropTestSuite, testRpropNonSquaredErrorTerms)
       }
     }
     // Now let's optimize.
-    OptimizerRpropOptions options;
+    OptimizerRprop::Options options;
     options.maxIterations = 500;
-    options.nThreads = 8;
+    options.numThreadsGradient = 8;
     options.convergenceGradientNorm = 0.0;
-    options.convergenceDx = 0.0;
+    options.convergenceDeltaX = 0.0;
     EXPECT_ANY_THROW(options.check());
     options.convergenceGradientNorm = 1e-6;
     EXPECT_NO_THROW(options.check());
@@ -60,21 +60,21 @@ TEST(OptimizerRpropTestSuite, testRpropNonSquaredErrorTerms)
 
     EXPECT_NO_THROW(optimizer.checkProblemSetup());
 
-    for (OptimizerRpropOptions::Method method : {OptimizerRpropOptions::RPROP_PLUS, OptimizerRpropOptions::RPROP_MINUS,
-      OptimizerRpropOptions::IRPROP_MINUS, OptimizerRpropOptions::IRPROP_PLUS}) {
+    for (OptimizerRprop::Options::Method method : {OptimizerRprop::Options::RPROP_PLUS, OptimizerRprop::Options::RPROP_MINUS,
+      OptimizerRprop::Options::IRPROP_MINUS, OptimizerRprop::Options::IRPROP_PLUS}) {
 
-      options.method = method;
-      optimizer.options() = options;
+      optimizer.getOptions().method = method;
       optimizer.initialize();
       for (std::size_t i=0; i<p2d.size(); i++) p2d[i]->_v = p2d0[i]->_v;
       SCOPED_TRACE("");
-      auto ret = optimizer.optimize();
+      optimizer.optimize();
+      auto ret = optimizer.getStatus();
       EXPECT_TRUE(ret.success());
-      EXPECT_LE(optimizer.getGradientNorm(), 1e-6);
+      EXPECT_LE(ret.gradientNorm, 1e-6);
       EXPECT_GE(ret.error, 0.0);
-      EXPECT_LT(ret.maxDx, 1e-3);
-      if (method == OptimizerRpropOptions::IRPROP_PLUS)
-        EXPECT_LT(ret.derror, 1e-12);
+      EXPECT_LT(ret.maxDeltaX, 1e-3);
+      if (method == OptimizerRprop::Options::IRPROP_PLUS)
+        EXPECT_LT(ret.deltaError, 1e-12);
     }
 
   } catch (const std::exception& e) {
@@ -119,30 +119,30 @@ TEST(OptimizerRpropTestSuite, testRpropSquaredErrorTerms)
       }
     }
     // Now let's optimize.
-    OptimizerRpropOptions options;
-    options.method = OptimizerRpropOptions::RPROP_PLUS;
+    OptimizerRprop::Options options;
+    options.method = OptimizerRprop::Options::RPROP_PLUS;
     options.maxIterations = 500;
-    options.nThreads = 8;
+    options.numThreadsGradient = 8;
     OptimizerRprop optimizer(options);
     optimizer.setProblem(problem_ptr);
 
     EXPECT_NO_THROW(optimizer.checkProblemSetup());
 
-    for (OptimizerRpropOptions::Method method : {OptimizerRpropOptions::RPROP_PLUS, OptimizerRpropOptions::RPROP_MINUS,
-      OptimizerRpropOptions::IRPROP_MINUS, OptimizerRpropOptions::IRPROP_PLUS}) {
+    for (OptimizerRprop::Options::Method method : {OptimizerRprop::Options::RPROP_PLUS, OptimizerRprop::Options::RPROP_MINUS,
+      OptimizerRprop::Options::IRPROP_MINUS, OptimizerRprop::Options::IRPROP_PLUS}) {
 
-      options.method = method;
-      optimizer.options() = options;
+      optimizer.getOptions().method = method;
       optimizer.initialize();
       for (std::size_t i=0; i<p2d.size(); i++) p2d[i]->_v = p2d0[i]->_v;
       SCOPED_TRACE("");
-      auto ret = optimizer.optimize();
+      optimizer.optimize();
+      auto ret = optimizer.getStatus();
       EXPECT_TRUE(ret.success());
-      EXPECT_LT(optimizer.getGradientNorm(), 1e-3);
+      EXPECT_LT(ret.gradientNorm, 1e-3);
       EXPECT_GE(ret.error, 0.0);
-      EXPECT_LT(ret.maxDx, 1e-3);
-      if (method == OptimizerRpropOptions::IRPROP_PLUS)
-        EXPECT_LT(ret.derror, 1e-12);
+      EXPECT_LT(ret.maxDeltaX, 1e-3);
+      if (method == OptimizerRprop::Options::IRPROP_PLUS)
+        EXPECT_LT(ret.deltaError, 1e-12);
     }
 
   } catch (const std::exception& e) {

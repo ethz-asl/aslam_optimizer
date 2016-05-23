@@ -10,6 +10,7 @@ namespace aslam {
     SM_DEFINE_EXCEPTION(NotImplementedException,Exception);
     SM_DEFINE_EXCEPTION(InvalidArgumentException,Exception);
     SM_DEFINE_EXCEPTION(UnsupportedOperationException,Exception);
+    SM_DEFINE_EXCEPTION(NotInitializedException,Exception);
 
 } // namespace aslam
 

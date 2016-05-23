@@ -6,6 +6,9 @@ from libaslam_backend_python import *
 # Import other files in the directory
 # from mypyfile import *
 
+# typedefs
+class OptimizerStatusRprop(OptimizerStatus): pass
+class OptimizerStatusBFGS(OptimizerStatus): pass
 
 class TransformationDv(object):
     def __init__(self, transformation, rotationActive=True, translationActive=True ):
