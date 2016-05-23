@@ -27,16 +27,9 @@ namespace aslam {
 
     void TransformationBasic::evaluateJacobiansImplementation(JacobianContainer & outJacobians) const
     {
-      //S(x) = [ 1    - r^\times S(theta) ]
-      //       [ 0         S(theta)       ]
-      // Eigen::Matrix3d C = _rotation->toRotationMatrix();
       if(_rotation){
         Eigen::Matrix<double,6,3> crRotation;
-        if(_translation){
-          crRotation.topLeftCorner<3,3>() = -sm::kinematics::crossMx(_translation->evaluate());
-        } else {
-          crRotation.topLeftCorner<3,3>().setZero();
-        }
+        crRotation.topLeftCorner<3,3>().setZero();
         crRotation.bottomLeftCorner<3,3>().setIdentity();
         _rotation->evaluateJacobians(outJacobians, crRotation);
       }

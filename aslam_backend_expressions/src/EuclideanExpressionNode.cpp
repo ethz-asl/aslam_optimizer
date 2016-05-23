@@ -288,8 +288,6 @@ namespace aslam {
 
   void EuclideanExpressionNodeTranslation::evaluateJacobiansImplementation(JacobianContainer & outJacobians) const {
     Eigen::MatrixXd J = Eigen::MatrixXd::Identity(3,6);
-    Eigen::Vector3d p = _operand->toTransformationMatrix().topRightCorner<3,1>();
-    J.topRightCorner<3,3>() = sm::kinematics::crossMx(p);
     _operand->evaluateJacobians(outJacobians, J);
   }
 

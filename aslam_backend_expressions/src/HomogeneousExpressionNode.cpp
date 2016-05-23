@@ -63,7 +63,14 @@ namespace aslam {
 
     void HomogeneousExpressionNodeMultiply::evaluateJacobiansImplementation(JacobianContainer & outJacobians) const
     {
-      _lhs->evaluateJacobians(outJacobians, sm::kinematics::boxMinus(_T_lhs * _p_rhs));
+//      _lhs->evaluateJacobians(outJacobians, sm::kinematics::boxMinus(_T_lhs * _p_rhs));
+      Eigen::Matrix<double, 4, 6>m;
+      m.topLeftCorner(3, 3).setIdentity();
+      m.topLeftCorner(3, 3) *= _p_rhs[3];
+      m.topRightCorner(3, 3) = sm::kinematics::crossMx(_T_lhs.topLeftCorner(3, 3) * _p_rhs.head(3));
+      m.bottomRows(1).setZero();
+
+      _lhs->evaluateJacobians(outJacobians, m);
       _rhs->evaluateJacobians(outJacobians, _T_lhs);
     }
 

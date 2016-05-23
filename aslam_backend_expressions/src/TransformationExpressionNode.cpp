@@ -55,9 +55,21 @@ namespace aslam {
     }
 
     void TransformationExpressionNodeMultiply::evaluateJacobiansImplementation(JacobianContainer & outJacobians) const
-    {	
-      _rhs->evaluateJacobians(outJacobians,sm::kinematics::boxTimes(_T_lhs));
-      _lhs->evaluateJacobians(outJacobians);
+    {
+      Eigen::Matrix<double, 6, 6> m;
+      auto C = _T_lhs.topLeftCorner<3, 3>();
+      m.topLeftCorner<3, 3>() = C;
+      m.topRightCorner<3, 3>().setZero();
+      m.bottomRightCorner<3, 3>() = C;
+      m.bottomLeftCorner<3, 3>().setZero();
+
+      _rhs->evaluateJacobians(outJacobians, m);
+
+      m.topLeftCorner<3, 3>().setIdentity();
+      m.topRightCorner<3, 3>() = sm::kinematics::crossMx(C * _T_rhs.topRightCorner<3, 1>());
+      m.bottomRightCorner<3, 3>().setIdentity();
+
+      _lhs->evaluateJacobians(outJacobians, m);
     }
 
     ////////////////////////////////////////////////////
@@ -79,7 +91,14 @@ namespace aslam {
 
     void TransformationExpressionNodeInverse::evaluateJacobiansImplementation(JacobianContainer & outJacobians) const
     {
-      _dvTransformation->evaluateJacobians(outJacobians, -sm::kinematics::boxTimes(_T));
+      Eigen::Matrix<double, 6, 6> m;
+      auto C = _T.topLeftCorner<3, 3>();
+      m.topLeftCorner<3, 3>() = -C;
+      m.topRightCorner<3, 3>() = -sm::kinematics::crossMx(_T.topRightCorner(3, 1)) * C;
+      m.bottomRightCorner<3, 3>() = -C;
+      m.bottomLeftCorner<3, 3>().setZero();
+
+      _dvTransformation->evaluateJacobians(outJacobians, m);
     }
 
     void TransformationExpressionNodeInverse::getDesignVariablesImplementation(DesignVariable::set_t & designVariables) const
