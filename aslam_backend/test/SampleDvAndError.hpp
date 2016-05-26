@@ -55,6 +55,7 @@ public:
   Eigen::Vector2d _v;
   Eigen::Vector2d _p_v;
 
+  Point2d() = default;
   Point2d(const Eigen::Vector2d& v) : _v(v), _p_v(v) {}
   virtual ~Point2d() {}
 

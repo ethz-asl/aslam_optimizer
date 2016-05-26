@@ -76,6 +76,7 @@ catkin_add_gtest(${PROJECT_NAME}_test
   test/test_sparse_matrix_functions.cpp
   test/TestProblemManager.cpp
   test/TestLineSearch.cpp
+  test/TestOptimizerSupport.cpp
   test/TestOptimizerBase.cpp
   test/TestOptimizer.cpp
   test/TestOptimizerRprop.cpp
