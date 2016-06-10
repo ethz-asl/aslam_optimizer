@@ -22,14 +22,15 @@ OptimizerOptionsBase::OptimizerOptionsBase()
   this->check();
 }
 
-OptimizerOptionsBase::OptimizerOptionsBase(const sm::PropertyTree& config)
-    : convergenceGradientNorm(config.getDouble("convergenceGradientNorm", convergenceGradientNorm)),
-      convergenceDeltaX(config.getDouble("convergenceDeltaX", convergenceDeltaX)),
-      convergenceDeltaObjective(config.getDouble("convergenceDeltaObjective", convergenceDeltaObjective)),
-      maxIterations(config.getInt("maxIterations", maxIterations)),
-      numThreadsGradient(config.getInt("numThreadsGradient", numThreadsGradient)),
-      numThreadsError(config.getInt("numThreadsError", numThreadsError))
-{
+OptimizerOptionsBase::OptimizerOptionsBase(const sm::PropertyTree& config) {
+
+  convergenceGradientNorm = config.getDouble("convergenceGradientNorm", convergenceGradientNorm);
+  convergenceDeltaX = config.getDouble("convergenceDeltaX", convergenceDeltaX);
+  convergenceDeltaObjective = config.getDouble("convergenceDeltaObjective", convergenceDeltaObjective);
+  maxIterations = config.getInt("maxIterations", maxIterations);
+  numThreadsGradient = config.getInt("numThreadsGradient", numThreadsGradient);
+  numThreadsError = config.getInt("numThreadsError", numThreadsError);
+
   this->check();
 }
 
