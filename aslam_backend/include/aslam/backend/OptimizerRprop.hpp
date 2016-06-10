@@ -26,6 +26,9 @@ namespace aslam {
       Method method = RPROP_PLUS; /// \brief the RProp method used
 
       void check() const override;
+
+      template<class Archive>
+      inline void serialize(Archive & ar, const unsigned int version);
     };
     std::ostream& operator<<(std::ostream& out, const aslam::backend::OptimizerOptionsRprop::Method& method);
     std::ostream& operator<<(std::ostream& out, const aslam::backend::OptimizerOptionsRprop& options);
@@ -109,5 +112,7 @@ namespace aslam {
 
   } // namespace backend
 } // namespace aslam
+
+#include "implementation/OptimizerRpropImpl.hpp"
 
 #endif /* ASLAM_BACKEND_OPTIMIZER_RPROP_HPP */
