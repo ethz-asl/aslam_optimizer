@@ -185,7 +185,7 @@ void exportOptimizer()
    
         ;
 
-    class_<OptimizerOptionsBase>("OptimizerOptionsBase", init<>("OptimizerOptionsBase(): Constructor"))
+    class_<OptimizerOptionsBase, boost::shared_ptr<OptimizerOptionsBase> >("OptimizerOptionsBase", init<>("OptimizerOptionsBase(): Constructor"))
         .def(init<const sm::PropertyTree&>("OptimizerOptionsBase(sm::PropertyTree pt): Constructor"))
         .def_readwrite("convergenceGradientNorm", &OptimizerOptionsBase::convergenceGradientNorm)
         .def_readwrite("convergenceDeltaX", &OptimizerOptionsBase::convergenceDeltaX)
@@ -204,7 +204,7 @@ void exportOptimizer()
         .value("DOBJECTIVE", ConvergenceStatus::DOBJECTIVE)
         ;
 
-    class_<OptimizerStatus>("OptimizerStatus")
+    class_<OptimizerStatus, boost::shared_ptr<OptimizerStatus> >("OptimizerStatus")
         .def_readwrite("convergence",&OptimizerStatus::convergence)
         .def_readwrite("numIterations",&OptimizerStatus::numIterations)
         .def_readwrite("numDerivativeEvaluations",&OptimizerStatus::numDerivativeEvaluations)
@@ -265,7 +265,7 @@ void exportOptimizer()
         .value("IRPROP_PLUS", OptimizerOptionsRprop::Method::IRPROP_PLUS)
         ;
 
-    class_<OptimizerOptionsRprop, bases<OptimizerOptionsBase> >("OptimizerOptionsRprop", init<>())
+    class_<OptimizerOptionsRprop, boost::shared_ptr<OptimizerOptionsRprop>, bases<OptimizerOptionsBase> >("OptimizerOptionsRprop", init<>())
         .def_readwrite("etaMinus",&OptimizerOptionsRprop::etaMinus)
         .def_readwrite("etaPlus",&OptimizerOptionsRprop::etaPlus)
         .def_readwrite("initialDelta",&OptimizerOptionsRprop::initialDelta)
@@ -285,7 +285,7 @@ void exportOptimizer()
     implicitly_convertible< boost::shared_ptr<OptimizerRprop>, boost::shared_ptr<const OptimizerRprop> >();
 
 
-    class_<LineSearchOptions>("LineSearchOptions", init<>())
+    class_<LineSearchOptions, boost::shared_ptr<LineSearchOptions> >("LineSearchOptions", init<>())
         .def_readwrite("c1WolfeCondition",&LineSearchOptions::c1WolfeCondition)
         .def_readwrite("c2WolfeCondition", &LineSearchOptions::c2WolfeCondition)
         .def_readwrite("maxStepLength", &LineSearchOptions::maxStepLength)
@@ -298,7 +298,7 @@ void exportOptimizer()
         .def("__str__", &toString<LineSearchOptions>)
         ;
 
-    class_<OptimizerOptionsBFGS, bases<OptimizerOptionsBase> >("OptimizerOptionsBFGS", init<>())
+    class_<OptimizerOptionsBFGS, boost::shared_ptr<OptimizerOptionsBFGS>, bases<OptimizerOptionsBase> >("OptimizerOptionsBFGS", init<>())
         .def_readwrite("linesearch", &OptimizerOptionsBFGS::linesearch)
         .def_readwrite("useDenseJacobianContainer", &OptimizerOptionsBFGS::useDenseJacobianContainer)
         .def_readwrite("regularizer", &OptimizerOptionsBFGS::regularizer)
