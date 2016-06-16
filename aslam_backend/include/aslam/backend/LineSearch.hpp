@@ -146,6 +146,9 @@ namespace aslam {
       std::size_t nMaxIterWolfe1 = 30; /// \brief Maximum number of iterations for method wolfe1
       std::size_t nMaxIterWolfe2 = 10; /// \brief Maximum number of iterations for method wolfe2
       std::size_t nMaxIterZoom = 10;   /// \brief Maximum number of iterations for the internal zoom method
+
+      template<class Archive>
+      inline void serialize(Archive & ar, const unsigned int version);
     };
 
     std::ostream& operator<<(std::ostream& out, const aslam::backend::LineSearchOptions& options);
@@ -358,5 +361,7 @@ namespace aslam {
 
   } // namespace backend
 } // namespace aslam
+
+#include "implementation/LineSearchImpl.hpp"
 
 #endif /* ASLAM_BACKEND_LINESEARCH_HPP */

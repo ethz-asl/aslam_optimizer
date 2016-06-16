@@ -64,6 +64,8 @@ struct OptimizerOptionsBase
   /// \brief Checks options for sanity. Throws if any options is not valid.
   virtual void check() const;
 
+  template<class Archive>
+  inline void serialize(Archive & ar, const unsigned int version);
 };
 
 /// \brief Stream operator for OptimizerOptionsBase
@@ -95,6 +97,9 @@ struct OptimizerStatus
   double maxDeltaX = std::numeric_limits<double>::signaling_NaN(); /// \brief Maximum absolute value of change in design variables
   double error = std::numeric_limits<double>::max(); /// \brief Current error/objective value. numeric_limits<double>::max() if error is not evaluated.
   double deltaError = std::numeric_limits<double>::signaling_NaN(); /// \brief last change of the error. numeric_limits<double>::signaling_NaN() if error is not evaluated.
+
+  template<class Archive>
+  inline void serialize(Archive & ar, const unsigned int version);
 
  protected:
   /// \brief Reset to initial values

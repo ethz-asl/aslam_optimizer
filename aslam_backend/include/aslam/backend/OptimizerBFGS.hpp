@@ -20,6 +20,9 @@ namespace aslam {
       boost::shared_ptr<ScalarNonSquaredErrorTerm> regularizer = NULL; /// \brief Regularizer
 
       void check() const override;
+
+      template<class Archive>
+      inline void serialize(Archive & ar, const unsigned int version);
     };
 
     std::ostream& operator<<(std::ostream& out, const aslam::backend::OptimizerOptionsBFGS& options);
@@ -96,5 +99,7 @@ namespace aslam {
 
   } // namespace backend
 } // namespace aslam
+
+#include "implementation/OptimizerBFGSImpl.hpp"
 
 #endif /* ASLAM_BACKEND_OPTIMIZER_BFGS_HPP */
