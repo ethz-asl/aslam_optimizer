@@ -123,13 +123,13 @@ namespace backend {
     {
       if (LIKELY(!this->empty()))
       {
-        SM_ASSERT_EQ(Exception, this->numTopCols(), mat.rows(), "Incompatible matrix sizes");
+        SM_ASSERT_EQ_DBG(Exception, this->numTopCols(), mat.rows(), "Incompatible matrix sizes");
         this->allocate(mat.cols()); // We allocate space for 1 more matrix. Stack wasn't empty before, so now we have at least 2.
         this->top().noalias() = this->matrix(this->numMatrices()-2)*mat;
       }
       else
       {
-        SM_ASSERT_EQ(Exception, this->numRows(), mat.rows(), "Incompatible matrix sizes");
+        SM_ASSERT_EQ_DBG(Exception, this->numRows(), mat.rows(), "Incompatible matrix sizes");
         this->allocate(mat.cols());
         this->top() = mat;
       }
@@ -221,7 +221,7 @@ namespace backend {
       return ConstMap<Rows, Cols>( &(_data[_headers[i].dataIndex]), this->numRows(), _headers[i].cols );
     }
 
-   private:
+   protected:
 
     /// \brief Number of columns of the matrix on top of the stack
     int numTopCols() const
@@ -229,6 +229,7 @@ namespace backend {
       return _headers.back().cols;
     }
 
+   private:
     /// \brief Number of rows determined by the first matrix that was pushed
     int numRows() const
     {

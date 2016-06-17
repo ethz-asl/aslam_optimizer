@@ -20,10 +20,11 @@ namespace aslam {
       typedef GenericScalarExpressionNode<Scalar> NodeType;
       typedef boost::shared_ptr<NodeType> SharedNodePointer;
 
-      inline GenericScalarExpression(Scalar value);
-      inline GenericScalarExpression(NodeType * node, bool expressionOwnsNode = false);
-      inline GenericScalarExpression(SharedNodePointer node) { _root = node; }
-      inline GenericScalarExpression(const GenericScalarExpression& /* other */) = default;
+      GenericScalarExpression() = default;
+      GenericScalarExpression(Scalar value);
+      GenericScalarExpression(NodeType * node, bool expressionOwnsNode = false);
+      GenericScalarExpression(SharedNodePointer node) { _root = node; }
+      GenericScalarExpression(const GenericScalarExpression& /* other */) = default;
 
       template <typename OtherScalar, typename = decltype(Scalar_(OtherScalar()))>
       inline GenericScalarExpression(const GenericScalarExpression<OtherScalar> & other);
@@ -40,6 +41,8 @@ namespace aslam {
 
       const SharedNodePointer & root() { return _root; }
 
+      bool empty() const { return !_root;}
+
       GenericScalarExpression operator-();
 
       GenericScalarExpression operator+(const GenericScalarExpression & s);
@@ -47,7 +50,6 @@ namespace aslam {
       GenericScalarExpression operator*(const GenericScalarExpression & s);
       GenericScalarExpression operator/(const GenericScalarExpression & s);
     private:
-      GenericScalarExpression();
       SharedNodePointer _root;
       template <typename OtherScalar> friend class GenericScalarExpression;
     };

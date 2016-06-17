@@ -107,5 +107,10 @@ namespace aslam {
       return TransformationExpression(newRoot);
     }
 
+    sm::kinematics::Transformation TransformationExpression::toTransformation() const {
+      return toTransformationMatrix();
+    }
+
   } // namespace backend
-} // namespace aslam
+}  // namespace aslam
+

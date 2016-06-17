@@ -12,12 +12,8 @@
 #include <aslam/backend/ErrorTerm.hpp>
 
 
-
 using namespace aslam::backend;
-using namespace sm::kinematics;
-
-
-
+using sm::kinematics::quatRandom;
 
 class HpErr : public aslam::backend::ErrorTermFs<4> 
 {
@@ -194,8 +190,6 @@ TEST(HomogeneousExpressionNodeTestSuites, testSimpleError)
     {
       using namespace aslam::backend;
       
-
-      using namespace sm::kinematics;
       HomogeneousPoint point(Eigen::Vector4d::Random());
       point.setActive(true);
       point.setBlockIndex(0);
