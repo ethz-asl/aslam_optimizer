@@ -10,16 +10,6 @@ namespace aslam {
 
     RotationExpressionNode::~RotationExpressionNode(){}
 
-    Eigen::Matrix3d RotationExpressionNode::toRotationMatrix() const { return toRotationMatrixImplementation(); }
-
-    void RotationExpressionNode::evaluateJacobians(JacobianContainer & outJacobians) const{
-      evaluateJacobiansImplementation(outJacobians);
-    }
-
-    void RotationExpressionNode::evaluateJacobians(JacobianContainer & outJacobians, const Eigen::MatrixXd & applyChainRule) const{
-      evaluateJacobiansImplementation(outJacobians, applyChainRule);
-    }
-      
     void RotationExpressionNode::getDesignVariables(DesignVariable::set_t & designVariables) const
     {
       getDesignVariablesImplementation(designVariables);
@@ -42,9 +32,6 @@ namespace aslam {
     }
 
     void ConstantRotationExpressionNode::evaluateJacobiansImplementation(JacobianContainer & /*outJacobians*/) const {
-    }
-
-    void ConstantRotationExpressionNode::evaluateJacobiansImplementation(JacobianContainer & /*outJacobians*/, const Eigen::MatrixXd & /* applyChainRule */) const {
     }
 
     void ConstantRotationExpressionNode::getDesignVariablesImplementation(DesignVariable::set_t & /* designVariables */) const {
@@ -77,11 +64,6 @@ namespace aslam {
       _lhs->evaluateJacobians(outJacobians);
     }
 
-    void RotationExpressionNodeMultiply::evaluateJacobiansImplementation(JacobianContainer & outJacobians, const Eigen::MatrixXd & applyChainRule) const {
-      _rhs->evaluateJacobians(outJacobians, applyChainRule * _C_lhs);
-      _lhs->evaluateJacobians(outJacobians, applyChainRule);
-    }
-
     void RotationExpressionNodeMultiply::getDesignVariablesImplementation(DesignVariable::set_t & designVariables) const {
       _lhs->getDesignVariables(designVariables);
       _rhs->getDesignVariables(designVariables);
@@ -110,11 +92,6 @@ namespace aslam {
       _dvRotation->evaluateJacobians(outJacobians, -_C.transpose());
     }
 
-    void RotationExpressionNodeInverse::evaluateJacobiansImplementation(JacobianContainer & outJacobians, const Eigen::MatrixXd & applyChainRule) const
-    {
-      _dvRotation->evaluateJacobians(outJacobians, -applyChainRule * _C.transpose());
-    }
-
     void RotationExpressionNodeInverse::getDesignVariablesImplementation(DesignVariable::set_t & designVariables) const
     {
       _dvRotation->getDesignVariables(designVariables);
@@ -140,13 +117,6 @@ namespace aslam {
     Eigen::MatrixXd J = Eigen::MatrixXd::Zero(3,6);
     J.topRightCorner<3,3>() = Eigen::Matrix3d::Identity();
     _transformation->evaluateJacobians(outJacobians, J);
-  }
-
-  void RotationExpressionNodeTransformation::evaluateJacobiansImplementation(JacobianContainer & outJacobians, const Eigen::MatrixXd & applyChainRule) const {
-    Eigen::MatrixXd J = Eigen::MatrixXd::Zero(3,6);
-    J.topRightCorner<3,3>() = Eigen::Matrix3d::Identity();
-    _transformation->evaluateJacobians(outJacobians, applyChainRule*J);
-
   }
 
   void RotationExpressionNodeTransformation::getDesignVariablesImplementation(DesignVariable::set_t & designVariables) const {

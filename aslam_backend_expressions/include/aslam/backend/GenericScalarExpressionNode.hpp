@@ -26,15 +26,19 @@ class GenericScalarExpressionNode {
   inline Scalar toScalar() const { return evaluateImplementation(); }
 
   /// \brief Evaluate the Jacobians
-  void evaluateJacobians(JacobianContainer & outJacobians) const { evaluateJacobiansImplementation(outJacobians, nullptr); }
+  void evaluateJacobians(JacobianContainer & outJacobians) const { evaluateJacobiansImplementation(outJacobians); }
 
   /// \brief Evaluate the Jacobians and apply the chain rule.
-  void evaluateJacobians(JacobianContainer & outJacobians, const Eigen::MatrixXd & applyChainRule) const { evaluateJacobiansImplementation(outJacobians, &applyChainRule); }
+  template <typename DERIVED>
+  EIGEN_ALWAYS_INLINE void evaluateJacobians(JacobianContainer & outJacobians, const Eigen::MatrixBase<DERIVED> & applyChainRule) const {
+    evaluateJacobians(outJacobians.apply(applyChainRule));
+  }
+
   void getDesignVariables(DesignVariable::set_t & designVariables) const { getDesignVariablesImplementation(designVariables); }
  protected:
   // These functions must be implemented by child classes.
   virtual Scalar evaluateImplementation() const = 0;
-  virtual void evaluateJacobiansImplementation(JacobianContainer & outJacobians, const Eigen::MatrixXd * applyChainRule) const = 0;
+  virtual void evaluateJacobiansImplementation(JacobianContainer & outJacobians) const = 0;
   virtual void getDesignVariablesImplementation(DesignVariable::set_t & designVariables) const = 0;
 };
 

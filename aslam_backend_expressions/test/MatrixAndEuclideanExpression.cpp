@@ -492,8 +492,6 @@ TEST(EuclideanExpressionNodeTestSuites, testLowerMixedMatrixTransformedPoint)
 
 
 
-
-
 // Test that the jacobian matches the finite difference jacobian
 TEST(EuclideanExpressionNodeTestSuites, testTransformationTransformedPoint)
 {
@@ -504,6 +502,8 @@ TEST(EuclideanExpressionNodeTestSuites, testTransformationTransformedPoint)
       boost::shared_ptr<MappedEuclideanPoint> outT;
       T.setRandom();
       TransformationExpression A(transformationToExpression(T,outQ,outT));
+      sm::eigen::assertNear(T.T(), A.toTransformationMatrix(), 1e-14, SM_SOURCE_FILE_POS, "Testing the value is the one mapped to");
+
       outQ->setActive(true);
       outQ->setBlockIndex(0);
       outT->setActive(true);
@@ -515,7 +515,7 @@ TEST(EuclideanExpressionNodeTestSuites, testTransformationTransformedPoint)
       SCOPED_TRACE("");
       testJacobian(p);
       SCOPED_TRACE("");
-      sm::eigen::assertNear(p.toEuclidean(), A.toTransformationMatrix().topRightCorner<3,1>(), 1e-14, SM_SOURCE_FILE_POS, "Testing the result is unchanged");
+      sm::eigen::assertNear(T.T(), A.toTransformationMatrix(), 1e-14, SM_SOURCE_FILE_POS, "Testing the result is unchanged");
     }
   catch(std::exception const & e)
     {

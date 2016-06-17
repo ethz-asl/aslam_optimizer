@@ -40,7 +40,7 @@ class GenericScalar : public GenericScalarExpressionNode<Scalar_>, public Design
   virtual inline constexpr int minimalDimensionsImplementation() const { return MinimalDimension; }
  private:
   virtual Scalar evaluateImplementation() const;
-  virtual void evaluateJacobiansImplementation(JacobianContainer & outJacobians, const Eigen::MatrixXd * applyChainRule) const;
+  virtual void evaluateJacobiansImplementation(JacobianContainer & outJacobians) const;
   virtual void getDesignVariablesImplementation(DesignVariable::set_t & designVariables) const;
 
   /// Returns the content of the design variable

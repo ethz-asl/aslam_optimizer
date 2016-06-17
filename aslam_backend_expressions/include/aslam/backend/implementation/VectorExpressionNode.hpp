@@ -8,11 +8,6 @@ void VectorExpressionNode<D>::evaluateJacobians(JacobianContainer & outJacobians
 }
 
 template<int D>
-void VectorExpressionNode<D>::evaluateJacobians(JacobianContainer & outJacobians, const Eigen::MatrixXd & applyChainRule) const {
-  evaluateJacobiansImplementation(outJacobians, applyChainRule);
-}
-
-template<int D>
 void VectorExpressionNode<D>::evaluateJacobians(JacobianContainer & outJacobians, const differential_t & diff) const {
   evaluateJacobiansImplementationWithDifferential(outJacobians, diff);
 }

@@ -46,13 +46,6 @@ namespace aslam {
     }
 
     template<int D>
-    void VectorExpression<D>::evaluateJacobians(JacobianContainer & outJacobians, const Eigen::MatrixXd & applyChainRule) const
-    {
-      if(!isEmpty())
-        _root->evaluateJacobians(outJacobians, applyChainRule);
-    }
-
-    template<int D>
     void VectorExpression<D>::getDesignVariables(DesignVariable::set_t & designVariables) const
     {
       if(!isEmpty())

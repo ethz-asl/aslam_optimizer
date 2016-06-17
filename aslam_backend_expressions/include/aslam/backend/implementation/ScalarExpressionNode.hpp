@@ -26,15 +26,6 @@ void ScalarExpressionNode::evaluateJacobians(JacobianContainer & outJacobians) c
   evaluateJacobiansImplementation(outJacobians);
 }
 
-/// \brief Evaluate the Jacobians and apply the chain rule.
-void ScalarExpressionNode::evaluateJacobians(JacobianContainer & outJacobians, const Eigen::MatrixXd & applyChainRule) const
-{
-  SM_ASSERT_EQ_DBG(Exception, applyChainRule.cols(), 1, "The chain rule matrix must have one columns");
-  evaluateJacobiansImplementation(outJacobians, applyChainRule);
-}
-
-
-
 double ScalarExpressionNodeMultiply::evaluateImplementation() const
 {
   return _lhs->toScalar() * _rhs->toScalar();
@@ -44,11 +35,6 @@ void ScalarExpressionNodeMultiply::evaluateJacobiansImplementation(JacobianConta
 {
   _lhs->evaluateJacobians(outJacobians.apply(_rhs->toScalar()));
   _rhs->evaluateJacobians(outJacobians.apply(_lhs->toScalar()));
-}
-
-void ScalarExpressionNodeMultiply::evaluateJacobiansImplementation(JacobianContainer & outJacobians, const Eigen::MatrixXd & applyChainRule) const
-{
-  evaluateJacobiansImplementation(outJacobians.apply(applyChainRule));
 }
 
 double ScalarExpressionNodeDivide::evaluateImplementation() const
@@ -64,13 +50,6 @@ void ScalarExpressionNodeDivide::evaluateJacobiansImplementation(JacobianContain
   _rhs->evaluateJacobians(outJacobians.apply(R));
 }
 
-void ScalarExpressionNodeDivide::evaluateJacobiansImplementation(JacobianContainer & outJacobians, const Eigen::MatrixXd & applyChainRule) const
-{
-  evaluateJacobiansImplementation(outJacobians.apply(applyChainRule));
-}
-
-
-
 double ScalarExpressionNodeNegated::evaluateImplementation() const
 {
   return -_rhs->toScalar();
@@ -80,12 +59,6 @@ void ScalarExpressionNodeNegated::evaluateJacobiansImplementation(JacobianContai
 {
   _rhs->evaluateJacobians(outJacobians.apply(-1.0));
 }
-
-void ScalarExpressionNodeNegated::evaluateJacobiansImplementation(JacobianContainer & outJacobians, const Eigen::MatrixXd & applyChainRule) const
-{
-  evaluateJacobiansImplementation(outJacobians.apply(applyChainRule));
-}
-
 
 double ScalarExpressionNodeAdd::evaluateImplementation() const
 {
@@ -97,12 +70,6 @@ void ScalarExpressionNodeAdd::evaluateJacobiansImplementation(JacobianContainer 
   _lhs->evaluateJacobians(outJacobians);
   _rhs->evaluateJacobians(outJacobians.apply(_multiplyRhs));
 }
-
-void ScalarExpressionNodeAdd::evaluateJacobiansImplementation(JacobianContainer & outJacobians, const Eigen::MatrixXd & applyChainRule) const
-{
-  evaluateJacobiansImplementation(outJacobians.apply(applyChainRule));
-}
-
 
 double ScalarExpressionNodeSqrt::evaluateImplementation() const
 {
@@ -119,12 +86,6 @@ void ScalarExpressionNodeSqrt::evaluateJacobiansImplementation(JacobianContainer
   _lhs->evaluateJacobians(outJacobians.apply(R));
 }
 
-void ScalarExpressionNodeSqrt::evaluateJacobiansImplementation(JacobianContainer & outJacobians, const Eigen::MatrixXd & applyChainRule) const
-{
-  evaluateJacobiansImplementation(outJacobians.apply(applyChainRule));
-}
-
-
 double ScalarExpressionNodeLog::evaluateImplementation() const
 {
   using std::log;
@@ -139,12 +100,6 @@ void ScalarExpressionNodeLog::evaluateJacobiansImplementation(JacobianContainer 
   _lhs->evaluateJacobians(outJacobians.apply(R));
 }
 
-void ScalarExpressionNodeLog::evaluateJacobiansImplementation(JacobianContainer & outJacobians, const Eigen::MatrixXd & applyChainRule) const
-{
-  evaluateJacobiansImplementation(outJacobians.apply(applyChainRule));
-}
-
-
 double ScalarExpressionNodeExp::evaluateImplementation() const
 {
   using std::exp;
@@ -158,12 +113,6 @@ void ScalarExpressionNodeExp::evaluateJacobiansImplementation(JacobianContainer 
   _lhs->evaluateJacobians(outJacobians.apply(R));
 }
 
-void ScalarExpressionNodeExp::evaluateJacobiansImplementation(JacobianContainer & outJacobians, const Eigen::MatrixXd & applyChainRule) const
-{
-  evaluateJacobiansImplementation(outJacobians.apply(applyChainRule));
-}
-
-
 double ScalarExpressionNodeAtan::evaluateImplementation() const
 {
   using std::atan;
@@ -176,12 +125,6 @@ void ScalarExpressionNodeAtan::evaluateJacobiansImplementation(JacobianContainer
   const auto R = 1./(1. + lhss * lhss);
   _lhs->evaluateJacobians(outJacobians.apply(R));
 }
-
-void ScalarExpressionNodeAtan::evaluateJacobiansImplementation(JacobianContainer & outJacobians, const Eigen::MatrixXd & applyChainRule) const
-{
-  evaluateJacobiansImplementation(outJacobians.apply(applyChainRule));
-}
-
 
 double ScalarExpressionNodeAtan2::evaluateImplementation() const
 {
@@ -201,12 +144,6 @@ void ScalarExpressionNodeAtan2::evaluateJacobiansImplementation(JacobianContaine
   _rhs->evaluateJacobians(outJacobians.apply(R));
 }
 
-void ScalarExpressionNodeAtan2::evaluateJacobiansImplementation(JacobianContainer & outJacobians, const Eigen::MatrixXd & applyChainRule) const
-{
-  evaluateJacobiansImplementation(outJacobians.apply(applyChainRule));
-}
-
-
 double ScalarExpressionNodeAcos::evaluateImplementation() const
 {
   using std::acos;
@@ -222,11 +159,6 @@ void ScalarExpressionNodeAcos::evaluateJacobiansImplementation(JacobianContainer
   SM_ASSERT_LE(std::runtime_error, lhss, 1.0, "");
   const auto R = -1./sqrt(1. - lhss*lhss);
   _lhs->evaluateJacobians(outJacobians.apply(R));
-}
-
-void ScalarExpressionNodeAcos::evaluateJacobiansImplementation(JacobianContainer & outJacobians, const Eigen::MatrixXd & applyChainRule) const
-{
-  evaluateJacobiansImplementation(outJacobians.apply(applyChainRule));
 }
 
 double ScalarExpressionNodeAcosSquared::evaluateImplementation() const
@@ -255,12 +187,6 @@ void ScalarExpressionNodeAcosSquared::evaluateJacobiansImplementation(JacobianCo
 
   _lhs->evaluateJacobians(outJacobians.apply(R));
 }
-
-void ScalarExpressionNodeAcosSquared::evaluateJacobiansImplementation(JacobianContainer & outJacobians, const Eigen::MatrixXd & applyChainRule) const
-{
-  evaluateJacobiansImplementation(outJacobians.apply(applyChainRule));
-}
-
 
 double ScalarExpressionNodeInverseSigmoid::evaluateImplementation() const
 {
@@ -294,12 +220,6 @@ void ScalarExpressionNodeInverseSigmoid::evaluateJacobiansImplementation(Jacobia
   _lhs->evaluateJacobians(outJacobians.apply(R));
 }
 
-void ScalarExpressionNodeInverseSigmoid::evaluateJacobiansImplementation(JacobianContainer & outJacobians, const Eigen::MatrixXd & applyChainRule) const
-{
-  evaluateJacobiansImplementation(outJacobians.apply(applyChainRule));
-}
-
-
 double ScalarExpressionNodePower::evaluateImplementation() const
 {
   using std::pow;
@@ -315,12 +235,6 @@ void ScalarExpressionNodePower::evaluateJacobiansImplementation(JacobianContaine
   SM_ASSERT_FALSE_DBG(Exception, std::isnan(R), "");
   _lhs->evaluateJacobians(outJacobians.apply(R));
 }
-
-void ScalarExpressionNodePower::evaluateJacobiansImplementation(JacobianContainer & outJacobians, const Eigen::MatrixXd & applyChainRule) const
-{
-  evaluateJacobiansImplementation(outJacobians.apply(applyChainRule));
-}
-
 
 double ScalarExpressionPiecewiseExpression::evaluateImplementation() const
 {
@@ -339,12 +253,6 @@ void ScalarExpressionPiecewiseExpression::evaluateJacobiansImplementation(Jacobi
     return _e2->evaluateJacobians(outJacobians);
   }
 }
-
-void ScalarExpressionPiecewiseExpression::evaluateJacobiansImplementation(JacobianContainer & outJacobians, const Eigen::MatrixXd & applyChainRule) const
-{
-  evaluateJacobiansImplementation(outJacobians.apply(applyChainRule));
-}
-
 
 } /* namespace aslam */
 } /* namespace backend */

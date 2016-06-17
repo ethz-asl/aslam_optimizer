@@ -22,17 +22,17 @@ namespace aslam {
       virtual ~RotationQuaternion();
 
       /// \brief Revert the last state update.
-      virtual void revertUpdateImplementation();
+      virtual void revertUpdateImplementation() override;
 
       /// \brief Update the design variable.
-      virtual void updateImplementation(const double * dp, int size);
+      virtual void updateImplementation(const double * dp, int size) override;
 
       /// \brief the size of an update step
-      virtual int minimalDimensionsImplementation() const;
+      virtual int minimalDimensionsImplementation() const override;
 
-      virtual void minimalDifferenceImplementation(const Eigen::MatrixXd& xHat, Eigen::VectorXd& outDifference) const;
+      virtual void minimalDifferenceImplementation(const Eigen::MatrixXd& xHat, Eigen::VectorXd& outDifference) const override;
 
-      virtual void minimalDifferenceAndJacobianImplementation(const Eigen::MatrixXd& xHat, Eigen::VectorXd& outDifference, Eigen::MatrixXd& outJacobian) const;
+      virtual void minimalDifferenceAndJacobianImplementation(const Eigen::MatrixXd& xHat, Eigen::VectorXd& outDifference, Eigen::MatrixXd& outJacobian) const override;
 
       RotationExpression toExpression();
 
@@ -40,16 +40,15 @@ namespace aslam {
 
       void set( const Eigen::Vector4d & q){ _q = q; _p_q = q; }
     private:
-      virtual Eigen::Matrix3d toRotationMatrixImplementation() const;
-      virtual void evaluateJacobiansImplementation(JacobianContainer & outJacobians) const;
-      virtual void evaluateJacobiansImplementation(JacobianContainer & outJacobians, const Eigen::MatrixXd & applyChainRule) const;
-      virtual void getDesignVariablesImplementation(DesignVariable::set_t & designVariables) const;
+      virtual Eigen::Matrix3d toRotationMatrixImplementation() const override;
+      virtual void evaluateJacobiansImplementation(JacobianContainer & outJacobians) const override;
+      virtual void getDesignVariablesImplementation(DesignVariable::set_t & designVariables) const override;
 
       /// Returns the content of the design variable
-      virtual void getParametersImplementation(Eigen::MatrixXd& value) const;
+      virtual void getParametersImplementation(Eigen::MatrixXd& value) const override;
 
       /// Sets the content of the design variable
-      virtual void setParametersImplementation(const Eigen::MatrixXd& value);
+      virtual void setParametersImplementation(const Eigen::MatrixXd& value) override;
 
       Eigen::Vector4d _q;
       Eigen::Vector4d _p_q;

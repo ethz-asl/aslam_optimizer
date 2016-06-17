@@ -69,11 +69,6 @@ class CacheExpressionNode : public CacheInterface, public ExpressionNode
     _jc.addTo(outJacobians);
   }
 
-  void evaluateJacobiansImplementation(JacobianContainer & outJacobians, const Eigen::MatrixXd & applyChainRule) const override
-  {
-    evaluateJacobiansImplementation(outJacobians.apply(applyChainRule));
-  }
-
   virtual void getDesignVariablesImplementation(DesignVariable::set_t & designVariables) const override
   {
     _node->getDesignVariables(designVariables);

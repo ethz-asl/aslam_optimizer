@@ -66,17 +66,6 @@ namespace aslam {
             outJacobians.add(const_cast<EuclideanDirection*>(this), J);
         }
 
-
-        void EuclideanDirection::evaluateJacobiansImplementation(JacobianContainer & outJacobians, const Eigen::MatrixXd & applyChainRule) const
-        {
-            Eigen::MatrixXd J(3,2);
-            J.setZero();
-            J.col(0) = -_C.col(0) * _magnitude;
-            J.col(1) = _C.col(1) * _magnitude;
-            outJacobians.add(const_cast<EuclideanDirection*>(this), applyChainRule * J);
-        }
-
-
         void EuclideanDirection::getDesignVariablesImplementation(DesignVariable::set_t & designVariables) const
         {
             designVariables.insert(const_cast<EuclideanDirection*>(this));

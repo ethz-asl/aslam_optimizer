@@ -20,32 +20,32 @@ namespace aslam {
       virtual ~MatrixTransformation();
 
       /// \brief Revert the last state update.
-      virtual void revertUpdateImplementation();
+      virtual void revertUpdateImplementation() override;
 
       /// \brief Update the design variable.
-      virtual void updateImplementation(const double * dp, int size);
+      virtual void updateImplementation(const double * dp, int size) override;
 
       /// \brief the size of an update step
-      virtual int minimalDimensionsImplementation() const;
+      virtual int minimalDimensionsImplementation() const override;
 
       MatrixExpression toExpression();
     private:
-      virtual Eigen::Matrix3d toFullMatrixImplementation();
-      virtual void evaluateJacobiansImplementation(JacobianContainer & outJacobians) const;
-      virtual void evaluateJacobiansImplementation(JacobianContainer & outJacobians, const Eigen::MatrixXd & applyChainRule) const;
-      virtual void getDesignVariablesImplementation(DesignVariable::set_t & designVariables) const;
+      virtual Eigen::Matrix3d toFullMatrixImplementation() override;
+      virtual void evaluateJacobiansImplementation(JacobianContainer & outJacobians) const override;
+      virtual void evaluateJacobiansImplementation(JacobianContainer & outJacobians, const Eigen::MatrixXd & applyChainRule) const override;
+      virtual void getDesignVariablesImplementation(DesignVariable::set_t & designVariables) const override;
 
       /// Returns the content of the design variable
-      virtual void getParametersImplementation(Eigen::MatrixXd& value) const;
+      virtual void getParametersImplementation(Eigen::MatrixXd& value) const override;
 
       /// Sets the content of the design variable
-      virtual void setParametersImplementation(const Eigen::MatrixXd& value);
+      virtual void setParametersImplementation(const Eigen::MatrixXd& value) override;
 
       /// Computes the minimal distance in tangent space between the current value of the DV and xHat
-      virtual void minimalDifferenceImplementation(const Eigen::MatrixXd& xHat, Eigen::VectorXd& outDifference) const;
+      virtual void minimalDifferenceImplementation(const Eigen::MatrixXd& xHat, Eigen::VectorXd& outDifference) const override;
 
       /// Computes the minimal distance in tangent space between the current value of the DV and xHat and the jacobian
-      virtual void minimalDifferenceAndJacobianImplementation(const Eigen::MatrixXd& xHat, Eigen::VectorXd& outDifference, Eigen::MatrixXd& outJacobian) const;
+      virtual void minimalDifferenceAndJacobianImplementation(const Eigen::MatrixXd& xHat, Eigen::VectorXd& outDifference, Eigen::MatrixXd& outJacobian) const override;
 
 
       Eigen::Matrix3d _A;

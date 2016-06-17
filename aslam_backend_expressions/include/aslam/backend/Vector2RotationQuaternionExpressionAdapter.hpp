@@ -27,7 +27,6 @@ class Vector2RotationQuaternionExpressionAdapter : public RotationExpressionNode
   Vector2RotationQuaternionExpressionAdapter(const VectorExpression<4> & vectorExpression);
   virtual Eigen::Matrix3d toRotationMatrixImplementation() const;
   virtual void evaluateJacobiansImplementation(JacobianContainer & outJacobians) const;
-  virtual void evaluateJacobiansImplementation(JacobianContainer & outJacobians, const Eigen::MatrixXd & applyChainRule) const;
   virtual void getDesignVariablesImplementation(DesignVariable::set_t & designVariables) const;
  private:
   Eigen::MatrixXd getMatrixToLieAlgebra() const;

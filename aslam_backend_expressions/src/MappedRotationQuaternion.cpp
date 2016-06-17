@@ -42,12 +42,7 @@ namespace aslam {
 
     void MappedRotationQuaternion::evaluateJacobiansImplementation(JacobianContainer & outJacobians) const
     {
-      outJacobians.add( const_cast<MappedRotationQuaternion *>(this), Eigen::Matrix3d::Identity() );
-    }
-
-    void MappedRotationQuaternion::evaluateJacobiansImplementation(JacobianContainer & outJacobians, const Eigen::MatrixXd & applyChainRule) const
-    {
-      outJacobians.add( const_cast<MappedRotationQuaternion*>(this), applyChainRule );
+      outJacobians.add(const_cast<MappedRotationQuaternion *>(this));
     }
 
     RotationExpression MappedRotationQuaternion::toExpression()

@@ -21,12 +21,11 @@ struct RotationQuaternionAsVectorExpressionNode : public VectorExpressionNode<4>
   RotationQuaternionAsVectorExpressionNode(RotationQuaternion & quat) : quat(quat){
   }
   virtual vector_t evaluateImplementation() const{ Eigen::MatrixXd ret; quat.getParameters(ret); return ret; };
-  virtual void evaluateJacobiansImplementation(JacobianContainer & outJacobians) const { evaluateJacobiansImplementation(outJacobians, Eigen::Matrix3d::Identity()); };
-  virtual void evaluateJacobiansImplementation(JacobianContainer & outJacobians, const Eigen::MatrixXd & applyChainRule) const {
+  virtual void evaluateJacobiansImplementation(JacobianContainer & outJacobians) const override {
     if(AssumeLieAlgebraVectorInputInJacobian){
-      quat.evaluateJacobians(outJacobians, applyChainRule * sm::kinematics::quatOPlus(quat.getQuaternion() * 0.5).topLeftCorner<4,3>());
+      quat.evaluateJacobians(outJacobians, sm::kinematics::quatOPlus(quat.getQuaternion() * 0.5).topLeftCorner<4,3>());
     }else{
-      quat.evaluateJacobians(outJacobians, applyChainRule);
+      quat.evaluateJacobians(outJacobians);
     }
   };
   virtual void evaluateJacobiansImplementationWithDifferential(JacobianContainer & /* outJacobians */, const differential_t & /* chainRuleDifferentail */) const { throw std::runtime_error("should not happen");};

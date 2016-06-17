@@ -44,12 +44,7 @@ namespace aslam {
     
     void EuclideanPoint::evaluateJacobiansImplementation(JacobianContainer & outJacobians) const
     {
-      outJacobians.add(const_cast<EuclideanPoint *>(this), Eigen::Matrix3d::Identity());
-    }
-    
-    void EuclideanPoint::evaluateJacobiansImplementation(JacobianContainer & outJacobians, const Eigen::MatrixXd & applyChainRule) const
-    {
-      outJacobians.add(const_cast<EuclideanPoint *>(this), applyChainRule);
+      outJacobians.add(const_cast<EuclideanPoint *>(this));
     }
 
     void EuclideanPoint::getDesignVariablesImplementation(DesignVariable::set_t & designVariables) const

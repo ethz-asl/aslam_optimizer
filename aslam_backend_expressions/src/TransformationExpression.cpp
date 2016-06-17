@@ -81,14 +81,6 @@ namespace aslam {
         _root->evaluateJacobians(outJacobians);
     }
 
-
-    void TransformationExpression::evaluateJacobians(JacobianContainer & outJacobians, const Eigen::MatrixXd & applyChainRule) const
-    {
-      if(_root)
-        _root->evaluateJacobians(outJacobians, applyChainRule);
-    }
-
-
     EuclideanExpression TransformationExpression::operator*(const EuclideanExpression & rhs) const{
       if(!_root) return rhs;
       return (*this * rhs.toHomogeneousExpression()).toEuclideanExpression();

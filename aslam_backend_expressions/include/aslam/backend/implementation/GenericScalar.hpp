@@ -30,14 +30,8 @@ MEMBER(Scalar_, evaluateImplementation()) const {
   return _p;
 }
 
-MEMBER(void, evaluateJacobiansImplementation(JacobianContainer & outJacobians, const Eigen::MatrixXd * applyChainRule)) const {
-  if(applyChainRule)
-    outJacobians.add(const_cast<_CLASS *>(this), *applyChainRule);
-  else {
-    Eigen::Matrix<double, 1, 1> J;
-    J(0, 0) = 1;
-    outJacobians.add(const_cast<_CLASS *>(this), J);
-  }
+MEMBER(void, evaluateJacobiansImplementation(JacobianContainer & outJacobians)) const {
+  outJacobians.add(const_cast<_CLASS *>(this));
 }
 
 MEMBER(void, getDesignVariablesImplementation(DesignVariable::set_t & designVariables)) const {

@@ -32,7 +32,10 @@ namespace aslam {
       value_t evaluate() const { return toHomogeneous(); }
       EuclideanExpression toEuclideanExpression() const;
       void evaluateJacobians(JacobianContainer & outJacobians) const;
-      void evaluateJacobians(JacobianContainer & outJacobians, const Eigen::MatrixXd & applyChainRule) const;
+      template <typename DERIVED>
+      EIGEN_ALWAYS_INLINE void evaluateJacobians(JacobianContainer & outJacobians, const Eigen::MatrixBase<DERIVED> & applyChainRule) const {
+        evaluateJacobians(outJacobians.apply(applyChainRule));
+      }
 
       void getDesignVariables(DesignVariable::set_t & designVariables) const;
       boost::shared_ptr<HomogeneousExpressionNode> root() { return _root; }

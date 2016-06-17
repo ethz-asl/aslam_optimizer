@@ -28,7 +28,10 @@ namespace aslam {
       vector_t toValue() const { return evaluate(); }
       
       void evaluateJacobians(JacobianContainer & outJacobians) const;
-      void evaluateJacobians(JacobianContainer & outJacobians, const Eigen::MatrixXd & applyChainRule) const;
+      template <typename DERIVED>
+      EIGEN_ALWAYS_INLINE void evaluateJacobians(JacobianContainer & outJacobians, const Eigen::MatrixBase<DERIVED> & applyChainRule) const {
+        evaluateJacobians(outJacobians.apply(applyChainRule));
+      }
 
       void getDesignVariables(DesignVariable::set_t & designVariables) const;
 

@@ -30,13 +30,6 @@ namespace aslam {
       evaluateJacobiansImplementation(outJacobians);
     }
    
-    
-    /// \brief Evaluate the Jacobians and apply the chain rule.
-    void HomogeneousExpressionNode::evaluateJacobians(JacobianContainer & outJacobians, const Eigen::MatrixXd & applyChainRule) const
-    {
-      evaluateJacobiansImplementation(outJacobians, applyChainRule);
-    }
-
     void HomogeneousExpressionNode::getDesignVariables(DesignVariable::set_t & designVariables) const
     {
       getDesignVariablesImplementation(designVariables);
@@ -74,13 +67,6 @@ namespace aslam {
       _rhs->evaluateJacobians(outJacobians, _T_lhs);
     }
 
-    void HomogeneousExpressionNodeMultiply::evaluateJacobiansImplementation(JacobianContainer & outJacobians, const Eigen::MatrixXd & applyChainRule) const
-    {
-      _lhs->evaluateJacobians(outJacobians, applyChainRule * sm::kinematics::boxMinus(_T_lhs * _p_rhs));
-      _rhs->evaluateJacobians(outJacobians, applyChainRule * _T_lhs);
-
-    }
-
     void HomogeneousExpressionNodeMultiply::getDesignVariablesImplementation(DesignVariable::set_t & designVariables) const
     {
       _lhs->getDesignVariables(designVariables);
@@ -96,8 +82,7 @@ namespace aslam {
 
       Eigen::Vector4d HomogeneousExpressionNodeConstant::toHomogeneousImplementation() const{ return _p; }
       void HomogeneousExpressionNodeConstant::evaluateJacobiansImplementation(JacobianContainer & /* outJacobians */) const{}
-  void HomogeneousExpressionNodeConstant::evaluateJacobiansImplementation(JacobianContainer & /* outJacobians */, const Eigen::MatrixXd & /* applyChainRule */) const{}
-  void HomogeneousExpressionNodeConstant::getDesignVariablesImplementation(DesignVariable::set_t & /* designVariables */) const{}
+      void HomogeneousExpressionNodeConstant::getDesignVariablesImplementation(DesignVariable::set_t & /* designVariables */) const{}
 
       
 
@@ -116,10 +101,6 @@ namespace aslam {
 
   void HomogeneousExpressionNodeEuclidean::evaluateJacobiansImplementation(JacobianContainer & outJacobians) const {
     _p->evaluateJacobians( outJacobians, Eigen::MatrixXd::Identity(4,3) );
-  }
-
-  void HomogeneousExpressionNodeEuclidean::evaluateJacobiansImplementation(JacobianContainer & outJacobians, const Eigen::MatrixXd & applyChainRule) const {
-    _p->evaluateJacobians( outJacobians, applyChainRule * Eigen::MatrixXd::Identity(4,3) );
   }
 
   void HomogeneousExpressionNodeEuclidean::getDesignVariablesImplementation(DesignVariable::set_t & designVariables) const {

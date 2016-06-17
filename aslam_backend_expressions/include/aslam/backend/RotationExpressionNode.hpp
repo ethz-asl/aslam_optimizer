@@ -24,10 +24,10 @@ namespace aslam {
       virtual ~RotationExpressionNode();
 
       /// \brief Evaluate the rotation matrix.
-      Eigen::Matrix3d toRotationMatrix() const;
+      EIGEN_ALWAYS_INLINE Eigen::Matrix3d toRotationMatrix() const { return toRotationMatrixImplementation(); }
       
       /// \brief Evaluate the Jacobians
-      void evaluateJacobians(JacobianContainer & outJacobians) const;
+      EIGEN_ALWAYS_INLINE void evaluateJacobians(JacobianContainer & outJacobians) const { evaluateJacobiansImplementation(outJacobians); }
     
       /// \brief Evaluate the Jacobians and apply the chain rule.
       /** The chain rule matrix is assumed to be calculated in the left exponential chart centered at the current value (Phi(w)=Phi_R(w):= exp(w) R)),
@@ -44,13 +44,16 @@ namespace aslam {
        * J_v = id and
        * J_w = J_w (log (A * exp(w) * A^{-1}) = log (exp(A * w)) = A
        */
-      void evaluateJacobians(JacobianContainer & outJacobians, const Eigen::MatrixXd & applyChainRule) const;
+      template <typename DERIVED>
+      EIGEN_ALWAYS_INLINE void evaluateJacobians(JacobianContainer & outJacobians, const Eigen::MatrixBase<DERIVED> & applyChainRule) const {
+        evaluateJacobians(outJacobians.apply(applyChainRule));
+      }
+
       void getDesignVariables(DesignVariable::set_t & designVariables) const;
     protected:        
       // These functions must be implemented by child classes.
       virtual Eigen::Matrix3d toRotationMatrixImplementation() const = 0;
       virtual void evaluateJacobiansImplementation(JacobianContainer & outJacobians) const = 0;
-      virtual void evaluateJacobiansImplementation(JacobianContainer & outJacobians, const Eigen::MatrixXd & applyChainRule) const = 0;
       virtual void getDesignVariablesImplementation(DesignVariable::set_t & designVariables) const = 0;
     };
 
@@ -69,10 +72,9 @@ namespace aslam {
       virtual ~ConstantRotationExpressionNode();
 
     private:
-      virtual Eigen::Matrix3d toRotationMatrixImplementation() const;
-      virtual void evaluateJacobiansImplementation(JacobianContainer & outJacobians) const;
-      virtual void evaluateJacobiansImplementation(JacobianContainer & outJacobians, const Eigen::MatrixXd & applyChainRule) const;
-      virtual void getDesignVariablesImplementation(DesignVariable::set_t & designVariables) const;
+      virtual Eigen::Matrix3d toRotationMatrixImplementation() const override;
+      virtual void evaluateJacobiansImplementation(JacobianContainer & outJacobians) const override;
+      virtual void getDesignVariablesImplementation(DesignVariable::set_t & designVariables) const override;
 
       const Eigen::Matrix3d _C;
     };
@@ -93,10 +95,9 @@ namespace aslam {
       virtual ~RotationExpressionNodeMultiply();
 
     private:
-      virtual Eigen::Matrix3d toRotationMatrixImplementation() const;
-      virtual void evaluateJacobiansImplementation(JacobianContainer & outJacobians) const;
-      virtual void evaluateJacobiansImplementation(JacobianContainer & outJacobians, const Eigen::MatrixXd & applyChainRule) const;
-      virtual void getDesignVariablesImplementation(DesignVariable::set_t & designVariables) const;
+      virtual Eigen::Matrix3d toRotationMatrixImplementation() const override;
+      virtual void evaluateJacobiansImplementation(JacobianContainer & outJacobians) const override;
+      virtual void getDesignVariablesImplementation(DesignVariable::set_t & designVariables) const override;
 
       boost::shared_ptr<RotationExpressionNode> _lhs;
       mutable Eigen::Matrix3d _C_lhs;
@@ -119,10 +120,9 @@ namespace aslam {
       virtual ~RotationExpressionNodeInverse();
 
     private:
-      virtual Eigen::Matrix3d toRotationMatrixImplementation() const;
-      virtual void evaluateJacobiansImplementation(JacobianContainer & outJacobians) const;
-      virtual void evaluateJacobiansImplementation(JacobianContainer & outJacobians, const Eigen::MatrixXd & applyChainRule) const;
-      virtual void getDesignVariablesImplementation(DesignVariable::set_t & designVariables) const;
+      virtual Eigen::Matrix3d toRotationMatrixImplementation() const override;
+      virtual void evaluateJacobiansImplementation(JacobianContainer & outJacobians) const override;
+      virtual void getDesignVariablesImplementation(DesignVariable::set_t & designVariables) const override;
 
       boost::shared_ptr<RotationExpressionNode> _dvRotation;
       mutable Eigen::Matrix3d _C;
@@ -136,10 +136,9 @@ namespace aslam {
       virtual ~RotationExpressionNodeTransformation();
 
     private:
-      virtual Eigen::Matrix3d toRotationMatrixImplementation() const;
-      virtual void evaluateJacobiansImplementation(JacobianContainer & outJacobians) const;
-      virtual void evaluateJacobiansImplementation(JacobianContainer & outJacobians, const Eigen::MatrixXd & applyChainRule) const;
-      virtual void getDesignVariablesImplementation(DesignVariable::set_t & designVariables) const;
+      virtual Eigen::Matrix3d toRotationMatrixImplementation() const override;
+      virtual void evaluateJacobiansImplementation(JacobianContainer & outJacobians) const override;
+      virtual void getDesignVariablesImplementation(DesignVariable::set_t & designVariables) const override;
 
       boost::shared_ptr<TransformationExpressionNode> _transformation;
     };
