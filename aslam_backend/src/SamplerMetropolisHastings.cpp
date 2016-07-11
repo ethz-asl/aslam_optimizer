@@ -17,20 +17,17 @@ using namespace std;
 namespace aslam {
 namespace backend {
 
-SamplerMetropolisHastingsOptions::SamplerMetropolisHastingsOptions() :
-  transitionKernelSigma(0.1),
-  nThreadsEvaluateLogDensity(1) {
+SamplerMetropolisHastingsOptions::SamplerMetropolisHastingsOptions() {
 
 }
 
-SamplerMetropolisHastingsOptions::SamplerMetropolisHastingsOptions(const sm::PropertyTree& config) :
-    transitionKernelSigma(config.getDouble("transitionKernelSigma")),
-    nThreadsEvaluateLogDensity(config.getDouble("nThreadsEvaluateLogDensity")) {
-
+SamplerMetropolisHastingsOptions::SamplerMetropolisHastingsOptions(const sm::PropertyTree& config) {
+    transitionKernelSigma = config.getDouble("transitionKernelSigma", transitionKernelSigma);
+    nThreadsEvaluateLogDensity = config.getDouble("nThreadsEvaluateLogDensity", nThreadsEvaluateLogDensity);
 }
 
 void SamplerMetropolisHastingsOptions::check() const {
-  SM_ASSERT_GT( Exception, transitionKernelSigma, 0.0, "");
+  SM_ASSERT_POSITIVE( Exception, transitionKernelSigma, "");
 }
 
 std::ostream& operator<<(std::ostream& out, const aslam::backend::SamplerMetropolisHastingsOptions& options) {
@@ -42,9 +39,8 @@ std::ostream& operator<<(std::ostream& out, const aslam::backend::SamplerMetropo
 
 
 
-SamplerMetropolisHastings::SamplerMetropolisHastings() :
-  _options(),
-  _negLogDensity(std::numeric_limits<double>::signaling_NaN()) {
+SamplerMetropolisHastings::SamplerMetropolisHastings()
+    : SamplerMetropolisHastings::SamplerMetropolisHastings(Options()) {
 
 }
 
