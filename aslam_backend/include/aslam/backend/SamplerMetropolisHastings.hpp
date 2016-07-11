@@ -18,8 +18,8 @@ namespace backend {
 struct SamplerMetropolisHastingsOptions {
   SamplerMetropolisHastingsOptions();
   SamplerMetropolisHastingsOptions(const sm::PropertyTree& config);
-  double transitionKernelSigma;  /// \brief Standard deviation for the Gaussian Markov transition kernel \f$ \\mathcal{N(\mathbf 0, \text{diag{\sigma^2})} f$
-  std::size_t nThreadsEvaluateLogDensity; /// \brief How many threads to use to evaluate the error terms involved in the negative log density
+  double transitionKernelSigma = 0.1;  /// \brief Standard deviation for the Gaussian Markov transition kernel \f$ \\mathcal{N(\mathbf 0, \text{diag{\sigma^2})} f$
+  std::size_t nThreadsEvaluateLogDensity = 1; /// \brief How many threads to use to evaluate the error terms involved in the negative log density
 
   void check() const;
 };
@@ -37,17 +37,18 @@ class SamplerMetropolisHastings : public SamplerBase {
  public:
   typedef boost::shared_ptr<SamplerMetropolisHastings> Ptr;
   typedef boost::shared_ptr<const SamplerMetropolisHastings> ConstPtr;
+  typedef SamplerMetropolisHastingsOptions Options;
 
  public:
   /// \brief Default constructor with default options
   SamplerMetropolisHastings();
   /// \brief Constructor
-  SamplerMetropolisHastings(const SamplerMetropolisHastingsOptions& options);
+  SamplerMetropolisHastings(const Options& options);
   /// \brief Destructor
   ~SamplerMetropolisHastings() { }
 
   /// \brief Mutable getter for options
-  SamplerMetropolisHastingsOptions& options() { return _options; }
+  Options& options() { return _options; }
 
  private:
   virtual void step(bool& accepted, double& acceptanceProbability) override;
