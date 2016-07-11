@@ -5,6 +5,7 @@
  *      Author: Ulrich Schwesinger
  */
 
+#include <cmath>
 #include <aslam/backend/SamplerBase.hpp>
 
 #include <sm/logging.hpp>
@@ -116,7 +117,15 @@ void SamplerBase::checkNegativeLogDensitySetup() const {
 
 /// \brief Evaluate the current negative log density
 double SamplerBase::evaluateNegativeLogDensity(const size_t nThreads /*= 1*/) const {
-  return _problemManager.evaluateError(nThreads);
+  double ret = _problemManager.evaluateError(nThreads);
+  if (_inverseTemperature != 1.0) { ret *= _inverseTemperature; }
+  return ret;
+}
+
+/// \brief compute the current gradient of the objective function
+void SamplerBase::computeGradient(RowVectorType& outGrad, size_t nThreads, bool useMEstimator, bool applyDvScaling, bool useDenseJacobianContainer) {
+  getProblemManager().computeGradient(outGrad, nThreads, useMEstimator, applyDvScaling, useDenseJacobianContainer);
+  if (_inverseTemperature != 1.0) { outGrad = _inverseTemperature * outGrad; }
 }
 
 /// \brief Initialization method
@@ -143,6 +152,12 @@ void SamplerBase::setWeightedMeanSmoothingFactor(const double alpha) {
   SM_ASSERT_GT(Exception, alpha, 0.0, "");
   SM_ASSERT_LE(Exception, alpha, 1.0, "");
   _statistics.setWeightedMeanSmoothingFactor(alpha);
+}
+
+/// \brief Set temperature of the distribution
+void SamplerBase::setTemperature(const double temperature) {
+  SM_ASSERT_POSITIVE(Exception, temperature, "");
+  _inverseTemperature = 1./temperature;
 }
 
 }

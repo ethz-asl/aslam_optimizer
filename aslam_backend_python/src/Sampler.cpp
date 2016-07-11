@@ -47,6 +47,7 @@ void exportSampler()
       .def("setWeightedMeanSmoothingFactor", &SamplerBase::setWeightedMeanSmoothingFactor)
       .add_property("statistics", make_function(&SamplerBase::statistics, return_internal_reference<>()))
       .add_property("isBurnIn", &SamplerBase::setIsBurnIn, &SamplerBase::isBurnIn)
+      .add_property("temperature", &SamplerBase::getTemperature, &SamplerBase::setTemperature)
   ;
   implicitly_convertible< boost::shared_ptr<SamplerBase>, boost::shared_ptr<const SamplerBase> >();
 

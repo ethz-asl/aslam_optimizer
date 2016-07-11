@@ -98,9 +98,17 @@ class SamplerBase {
   /// \brief Whether or not the sampler is in burn-in phase
   bool isBurnIn() const { return _isBurnIn; }
 
+  /// \brief Set temperature of the distribution
+  void setTemperature(const double temperature);
+  /// \brief Get temperature of the distribution
+  double getTemperature() const { return 1./_inverseTemperature; }
+
  protected:
   /// \brief Evaluate the current negative log density
   double evaluateNegativeLogDensity(const size_t nThreads = 1) const;
+
+  /// \brief compute the current gradient of the objective function
+  void computeGradient(RowVectorType& outGrad, size_t nThreads, bool useMEstimator, bool applyDvScaling, bool useDenseJacobianContainer);
 
   /// \brief Getter for problem manager
   ProblemManager& getProblemManager() { return _problemManager; }
@@ -121,6 +129,7 @@ class SamplerBase {
 
   bool _isBurnIn = false; /// \brief Whether or not the sampler is in burn-in phase
 
+  double _inverseTemperature = 1.0; /// \brief Inverse temperature of the distribution, yields \f$ p^{T} (\matbf{x}) =  p (\matbf{x})^{1./T}\f$
 };
 
 }

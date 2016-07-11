@@ -46,7 +46,7 @@ public:
 
 };
 
-boost::shared_ptr<OptimizationProblem> setupProblem(const double meanTrue, const double sigmaTrue) {
+boost::shared_ptr<OptimizationProblem> setupProblem(const double meanTrue, const double sigmaTrue, const double sigmaDv = 10.0) {
 
   sm::random::seed(std::time(nullptr));
 
@@ -54,7 +54,7 @@ boost::shared_ptr<OptimizationProblem> setupProblem(const double meanTrue, const
   OptimizationProblem& gaussian1dLogDensity = *gaussian1dLogDensityPtr;
 
   Scalar::Vector1d x;
-  x << meanTrue + 10.0*sm::random::randn();
+  x << meanTrue + sigmaDv*sm::random::randn();
 
   // Add some design variables.
   boost::shared_ptr<Scalar> sdv(new Scalar(x));
@@ -70,6 +70,58 @@ boost::shared_ptr<OptimizationProblem> setupProblem(const double meanTrue, const
   testErrorTerm(err);
 
   return gaussian1dLogDensityPtr;
+}
+
+class TestSampler : public SamplerBase {
+ public:
+  using SamplerBase::SamplerBase;
+  using SamplerBase::evaluateNegativeLogDensity;
+  using SamplerBase::computeGradient;
+  using SamplerBase::getProblemManager;
+  virtual ~TestSampler() { }
+ private:
+  virtual void step(bool& /*accepted*/, double& /*acceptanceProbability*/) override {
+    SM_THROW(std::runtime_error, "Not implemented");
+  }
+};
+
+TEST(OptimizerSamplerMcmcTestSuite, testSamplerBase)
+{
+  try {
+
+    TestSampler sampler;
+    const double mu = 0.0;
+    const double x = 1.0;
+    const double sigma = 1.0;
+    boost::shared_ptr<OptimizationProblem> gaussian1dLogDensityPtr = setupProblem(mu, sigma, 0.0);
+    sampler.setNegativeLogDensity(gaussian1dLogDensityPtr);
+    sampler.initialize();
+    sampler.getProblemManager().applyStateUpdate( (ColumnVectorType(1,1) << x).finished() );
+    const double negloglikUntempered = (x-mu)*(x-mu)/(2.*sigma*sigma);
+    RowVectorType gradUntempered = (RowVectorType(1,1) << (x-mu)/(sigma*sigma)).finished();
+
+    {
+      const double negloglik= sampler.evaluateNegativeLogDensity();
+      EXPECT_DOUBLE_EQ(negloglikUntempered, negloglik);
+      RowVectorType grad;
+      sampler.computeGradient(grad, 1, false, false, true);
+      sm::eigen::assertEqual(gradUntempered, grad, SM_SOURCE_FILE_POS, "");
+    }
+
+    {
+      const double temperature = 2.0;
+      sampler.setTemperature(temperature);
+      EXPECT_DOUBLE_EQ(temperature, sampler.getTemperature());
+      const double negloglik= sampler.evaluateNegativeLogDensity();
+      EXPECT_DOUBLE_EQ(negloglikUntempered*1./temperature, negloglik);
+      RowVectorType grad;
+      sampler.computeGradient(grad, 1, false, false, true);
+      sm::eigen::assertEqual(1./temperature * gradUntempered, grad, SM_SOURCE_FILE_POS, "");
+    }
+
+  } catch (const std::exception& e) {
+    FAIL() << e.what();
+  }
 }
 
 
