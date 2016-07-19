@@ -144,6 +144,22 @@ namespace aslam {
             _lhs->getDesignVariables(designVariables);
         }
 
+        ScalarExpressionNodeTanh::ScalarExpressionNodeTanh(boost::shared_ptr<ScalarExpressionNode> lhs) :
+            _lhs(lhs)
+        {
+
+        }
+
+        ScalarExpressionNodeTanh::~ScalarExpressionNodeTanh()
+        {
+
+        }
+
+        void ScalarExpressionNodeTanh::getDesignVariablesImplementation(DesignVariable::set_t & designVariables) const
+        {
+            _lhs->getDesignVariables(designVariables);
+        }
+
         ScalarExpressionNodeAtan2::ScalarExpressionNodeAtan2(boost::shared_ptr<ScalarExpressionNode> lhs, boost::shared_ptr<ScalarExpressionNode> rhs) :
             _lhs(lhs),
             _rhs(rhs)

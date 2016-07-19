@@ -126,6 +126,19 @@ void ScalarExpressionNodeAtan::evaluateJacobiansImplementation(JacobianContainer
   _lhs->evaluateJacobians(outJacobians.apply(R));
 }
 
+double ScalarExpressionNodeTanh::evaluateImplementation() const
+{
+  using std::tanh;
+  return tanh(_lhs->toScalar());
+}
+
+void ScalarExpressionNodeTanh::evaluateJacobiansImplementation(JacobianContainer & outJacobians) const
+{
+  const auto e = evaluateImplementation();
+  const auto R = 1. - e*e;
+  _lhs->evaluateJacobians(outJacobians.apply(R));
+}
+
 double ScalarExpressionNodeAtan2::evaluateImplementation() const
 {
   using std::atan2;

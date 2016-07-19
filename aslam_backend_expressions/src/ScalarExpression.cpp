@@ -119,6 +119,11 @@ ScalarExpression atan(const ScalarExpression& e) {
   return ScalarExpression(newRoot);
 }
 
+ScalarExpression tanh(const ScalarExpression& e) {
+  boost::shared_ptr<ScalarExpressionNode> newRoot(new ScalarExpressionNodeTanh(e.root()));
+  return ScalarExpression(newRoot);
+}
+
 ScalarExpression atan2(const ScalarExpression& e0, const ScalarExpression& e1) {
   boost::shared_ptr<ScalarExpressionNode> newRoot(new ScalarExpressionNodeAtan2(e0.root(), e1.root()));
   return ScalarExpression(newRoot);

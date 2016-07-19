@@ -367,6 +367,27 @@ TEST(ScalarExpressionNodeTestSuites, testAtan)
 }
 
 // Test that the jacobian matches the finite difference jacobian
+TEST(ScalarExpressionNodeTestSuites, testTanh)
+{
+    try
+    {
+        using namespace sm::kinematics;
+        Scalar p(1e6*sm::random::rand());
+        ScalarExpression pExpr = p.toExpression();
+        ScalarExpression pExprTanh = tanh(pExpr);
+
+        ASSERT_EQ(tanh(p.toScalar()), pExprTanh.toValue());
+
+        SCOPED_TRACE("");
+        testExpression(pExprTanh, 1);
+    }
+    catch(std::exception const & e)
+    {
+        FAIL() << e.what();
+    }
+}
+
+// Test that the jacobian matches the finite difference jacobian
 TEST(ScalarExpressionNodeTestSuites, testAcos)
 {
     try
