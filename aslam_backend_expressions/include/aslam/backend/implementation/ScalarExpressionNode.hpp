@@ -205,7 +205,7 @@ double ScalarExpressionNodeInverseSigmoid::evaluateImplementation() const
 {
   using std::tanh;
   const auto lhss = _lhs->toScalar();
-  return _height * (1. - 0.5 * (1. + tanh( _scale*(lhss - _shift) * 0.5)));
+  return _height * 0.5 * (1. + tanh( - _scale*(lhss - _shift) * 0.5));
 }
 
 void ScalarExpressionNodeInverseSigmoid::evaluateJacobiansImplementation(JacobianContainer & outJacobians) const

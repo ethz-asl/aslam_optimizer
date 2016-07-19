@@ -521,12 +521,12 @@ TEST(ScalarExpressionNodeTestSuites, testSigmoid)
           const double scale = factor * sm::random::rand();
           const double shift = sm::random::rand();
           ScalarExpression pExprSigmoid = inverseSigmoid(pExpr, height, scale, shift);
-          ScalarExpression p1 = (-((tanh( (p.toExpression() - shift) * scale * 0.5) + 1.) * 0.5) + 1.) * height;
+          const double p1 = height * 0.5 * (1. + std::tanh( -scale*(p.toScalar() - shift) * 0.5));
 
-          ASSERT_EQ(p1.toScalar(), pExprSigmoid.toScalar());
+          ASSERT_EQ(p1, pExprSigmoid.toScalar());
 
           SCOPED_TRACE(testing::Message() << "Testing sigmoid at x = " << p.toScalar());
-          testExpression(pExprSigmoid, 1, true);
+          testExpression(pExprSigmoid, 1, false);
         }
     }
     catch(std::exception const & e)
