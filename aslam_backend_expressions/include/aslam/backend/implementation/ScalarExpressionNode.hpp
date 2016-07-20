@@ -203,33 +203,17 @@ void ScalarExpressionNodeAcosSquared::evaluateJacobiansImplementation(JacobianCo
 
 double ScalarExpressionNodeInverseSigmoid::evaluateImplementation() const
 {
-  using std::exp;
+  using std::tanh;
   const auto lhss = _lhs->toScalar();
-  return _height / (exp((lhss - _shift) * _scale) + 1.0);
+  return _height * 0.5 * (1. + tanh( - _scale*(lhss - _shift) * 0.5));
 }
 
 void ScalarExpressionNodeInverseSigmoid::evaluateJacobiansImplementation(JacobianContainer & outJacobians) const
 {
-  using std::exp;
-
+  using std::cosh;
   const auto lhss = _lhs->toScalar();
-  const double threshold = 50;
-
-  double R;
-  if (lhss > threshold) {
-    // approximate with Taylor expansion since exponents become too big otherwise
-    auto den = exp(_scale*_shift) + exp(_scale*threshold);
-    auto denSq = den*den;
-    R = - _height*_scale*exp(_scale*(threshold+_shift)) / denSq +
-        _height*_scale*_scale*(lhss-threshold)*exp(_scale*(_shift+threshold))
-        *(exp(threshold*_scale) - exp(_scale*_shift)) / (denSq*den);
-  }
-  else {
-    auto den = 1 + exp(_scale*(lhss-_shift));
-    R = - _height*_scale*exp(_scale*(lhss-_shift)) / (den * den);
-  }
-
-  SM_ASSERT_FALSE(Exception, std::isnan(R), "");
+  const auto secant = 1./cosh(0.5 * _scale * (_shift - lhss));
+  const auto R = -0.25 * _height * _scale * secant * secant;
   _lhs->evaluateJacobians(outJacobians.apply(R));
 }
 

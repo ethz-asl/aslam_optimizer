@@ -513,54 +513,21 @@ TEST(ScalarExpressionNodeTestSuites, testSigmoid)
 {
     try
     {
-        using namespace sm::kinematics;
-        Scalar p(sm::random::rand());
-        ScalarExpression pExpr = p.toExpression();
-        double _height = 100;
-        double _scale = 5;
-        double _shift = 1;
-        ScalarExpression pExprSigmoid = inverseSigmoid(pExpr, _height, _scale, _shift);
-        ScalarExpression p1 = _height / (exp((p.toExpression() - _shift) * _scale) + 1.0);
+        for (std::size_t i=0; i<1000; ++i) {
+          const double factor = i < 500 ? 1000. : 1.; // Test some large values for the 1st 500 iterations
+          Scalar p(factor * sm::random::randn());
+          ScalarExpression pExpr = p.toExpression();
+          const double height = factor * sm::random::rand();
+          const double scale = factor * sm::random::rand();
+          const double shift = sm::random::rand();
+          ScalarExpression pExprSigmoid = inverseSigmoid(pExpr, height, scale, shift);
+          const double p1 = height * 0.5 * (1. + std::tanh( -scale*(p.toScalar() - shift) * 0.5));
 
-        ASSERT_EQ(p1.toScalar(), pExprSigmoid.toScalar());
+          ASSERT_EQ(p1, pExprSigmoid.toScalar());
 
-        SCOPED_TRACE("");
-        testExpression(pExprSigmoid, 1);
-    }
-    catch(std::exception const & e)
-    {
-        FAIL() << e.what();
-    }
-}
-
-TEST(ScalarExpressionNodeTestSuites, testSigmoidLimits)
-{
-    try
-    {
-        using namespace sm::kinematics;
-        Scalar p(10000);
-        p.setActive(true);
-        p.setBlockIndex(0);
-        ScalarExpression pExpr = p.toExpression();
-        double _height = 100;
-        double _scale = 5;
-        double _shift = 1;
-        double threshold = 50;
-        ScalarExpression pExprSigmoid = inverseSigmoid(pExpr, _height, _scale, _shift);
-        ScalarExpression p1 = _height / (exp((p.toExpression() - _shift) * _scale) + 1.0);
-
-        ASSERT_EQ(p1.toScalar(), pExprSigmoid.toScalar());
-
-        SCOPED_TRACE("");
-        const size_t rows = 1;
-        JacobianContainerSparse<rows> Jc(rows);
-        pExprSigmoid.evaluateJacobians(Jc);
-        testExpression(pExprSigmoid, 1);
-
-        auto den = exp(_scale*_shift) + exp(_scale*threshold);
-        auto denSq = den*den;
-
-        ASSERT_DOUBLE_EQ(-_height*_scale*exp(_scale*(threshold+_shift)) / denSq + _height*_scale*_scale*(p.toScalar()-threshold)*exp(_scale*(_shift+threshold)) *(exp(threshold*_scale) - exp(_scale*_shift)) / (denSq*den), Jc.asDenseMatrix()(0,0));
+          SCOPED_TRACE(testing::Message() << "Testing sigmoid at x = " << p.toScalar());
+          testExpression(pExprSigmoid, 1, false);
+        }
     }
     catch(std::exception const & e)
     {
