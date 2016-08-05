@@ -18,6 +18,12 @@ ProblemManager::ProblemManager()
 
 }
 
+ProblemManager::ProblemManager(boost::shared_ptr<OptimizationProblemBase> problem)
+{
+  setProblem(problem);
+  initialize();
+}
+
 ProblemManager::~ProblemManager()
 {
 }
