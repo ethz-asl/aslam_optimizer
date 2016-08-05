@@ -58,6 +58,7 @@ cs_add_library(${PROJECT_NAME}
   src/OptimizerRprop.cpp
   src/OptimizerBFGS.cpp
   src/ProbDataAssocPolicy.cpp
+  src/LeapFrog.cpp
   src/SamplerMetropolisHastings.cpp
   src/SamplerHybridMcmc.cpp
   src/util/ThreadedRangeProcessor.cpp

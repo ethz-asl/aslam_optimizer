@@ -6,6 +6,7 @@
  */
 
 #include <aslam/backend/SamplerHybridMcmc.hpp>
+#include <aslam/backend/LeapFrog.hpp>
 #include <aslam/backend/DesignVariable.hpp>
 
 #include <cmath>
@@ -129,13 +130,12 @@ void SamplerHybridMcmc::step(bool& accepted, double& acceptanceProbability) {
 
   SM_FINEST_STREAM_NAMED("sampling", "Current leap frog step size is " << _stepLength << ".");
 
-  // pre-computations for speed-up of upcoming calculations
-  const double deltaHalf = _stepLength/2.;
-
   ColumnVectorType dxStar;
   ColumnVectorType pStar;
   double u0, k0, kStar, eTotal0, eTotalStar;
   bool success = false;
+
+  const auto potEnergy = getCostFunction(getProblemManager(), false, true, false, _options.nThreads, 1);
 
   // save the state of the design variables to be able to revert them later to this stage
   saveDesignVariables();
@@ -174,61 +174,16 @@ void SamplerHybridMcmc::step(bool& accepted, double& acceptanceProbability) {
       SM_ASSERT_TRUE(Exception, _gradient.isApprox(grad), ""); // check that caching works
     }
 #endif
+
     RowVectorType gradient0 = _gradient; // to be able to restore later
 
-
-    pStar -= deltaHalf*_gradient;
-
-    // first full step for position/sample
-    dxStar = _stepLength*pStar;
-    getProblemManager().applyStateUpdate(dxStar);
-
-    SM_ALL_STREAM_NAMED("sampling", "Step 0 -- Momentum: " << pStar.transpose() << ", position update: " << dxStar.transpose());
-
-    // L-1 full steps
-    for(size_t l = 1; l < _options.nLeapFrogSteps - 1; ++l) {
-      try {
-        // momentum
-        Timer timer("SamplerHybridMcmc: Compute---Gradient", false);
-        this->computeGradient(_gradient, _options.nThreads, false /*TODO: useMEstimator*/, false /*TODO: use scaling*/, true /*TODO: useDenseJacobianContainer */);
-        timer.stop();
-
-        pStar -= _stepLength*_gradient;
-
-        // position/sample
-        dxStar = _stepLength*pStar;
-        if(!dxStar.allFinite()) { // we can abort the trajectory generation if it diverged
-          diverged = true;
-          break;
-        }
-        getProblemManager().applyStateUpdate(dxStar);
-
-        SM_ALL_STREAM_NAMED("sampling", "Step " << l << " -- Momentum: " << pStar.transpose() << ", position update: " << dxStar.transpose());
-      } catch (const std::exception& e) {
-        SM_WARN_STREAM(e.what() << ": Compute gradient failed, terminating leap-frog simulation and rejecting sample");
-        diverged = true;
-        break;
-      }
-    }
+    diverged = !leapfrog::simulate(potEnergy, _gradient, pStar, _options.nLeapFrogSteps, _stepLength);
 
     if (!diverged) {
-      try {
-        // last half step
-        Timer timer("SamplerHybridMcmc: Compute---Gradient", false);
-        this->computeGradient(_gradient, _options.nThreads, false /*TODO: useMEstimator*/, false /*TODO: use scaling*/, true /*TODO: useDenseJacobianContainer */);
-        timer.stop();
-        pStar -= deltaHalf*_gradient;
-
-        // ******************************************************************* //
-
-        // evaluate energies at end of trajectory
-        _u = evaluateNegativeLogDensity(); // potential energy
-        kStar = 0.5*pStar.transpose()*pStar; // kinetic energy
-        eTotalStar = _u + kStar;
-      } catch (const std::exception& e) {
-        SM_WARN_STREAM(e.what() << ": Compute gradient failed, terminating leap-frog simulation and rejecting sample");
-        diverged = true;
-      }
+      // evaluate energies at end of trajectory
+      _u = evaluateNegativeLogDensity(); // potential energy
+      kStar = 0.5*pStar.transpose()*pStar; // kinetic energy
+      eTotalStar = _u + kStar;
     }
 
     // Check the total energy is finite
