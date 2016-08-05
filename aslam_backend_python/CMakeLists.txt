@@ -30,6 +30,7 @@ add_python_export_library(${PROJECT_NAME} python/aslam_backend
   src/DesignVariableTimePair.cpp
   src/SampleDvAndError.cpp
   src/Sampler.cpp
+  src/LeapFrog.cpp
   src/ProblemManager.cpp
 )
 

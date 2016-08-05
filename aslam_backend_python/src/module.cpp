@@ -13,6 +13,7 @@ void exportErrorTermDs();
 void exportDesignVariableTimePair();
 void exportSampleDvAndError();
 void exportScalarNonSquaredErrorTerm();
+void exportLeapFrog();
 void exportProblemManager();
 
 // The title of this library must match exactly
@@ -30,5 +31,6 @@ BOOST_PYTHON_MODULE(libaslam_backend_python)
   exportL1Regularizer();
   exportDesignVariableTimePair();
   exportSampleDvAndError();
+  exportLeapFrog();
   exportProblemManager();
 }
