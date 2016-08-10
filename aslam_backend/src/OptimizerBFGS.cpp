@@ -92,9 +92,9 @@ void OptimizerBFGS::optimizeImplementation()
   if (!_status.success()) {
 
     std::size_t cnt = 0;
-    for (cnt = 0; _options.maxIterations == -1 || cnt < static_cast<size_t>(_options.maxIterations); ++cnt) {
+    for (cnt = 0; _options.maxIterations == -1 || cnt < static_cast<size_t>(_options.maxIterations); ++cnt, ++_status.numIterations) {
 
-      _status.numIterations++;
+      _callbackManager.issueCallback( {callback::Occasion::ITERATION_START} );
 
       // compute search direction
       // Note: this could fail due to numerical issues making the inverse Hessian approximation negative definite
@@ -123,6 +123,7 @@ void OptimizerBFGS::optimizeImplementation()
 
       // perform line search
       bool lsSuccess = _linesearch.lineSearchWolfe12();
+      _callbackManager.issueCallback( {callback::Occasion::DESIGN_VARIABLES_UPDATED} );
 
       const double alpha_k = _linesearch.getCurrentStepLength();
       gfkp1 = _linesearch.getGradient();
@@ -157,6 +158,7 @@ void OptimizerBFGS::optimizeImplementation()
 
       timeUpdateHessian.stop();
 
+      _callbackManager.issueCallback( {callback::Occasion::ITERATION_END} );
     }
   }
 

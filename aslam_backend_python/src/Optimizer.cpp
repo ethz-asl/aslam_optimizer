@@ -290,6 +290,9 @@ void exportOptimizer()
 
         .def("isInProgress", &OptimizerBase::isInProgress,
              "Is the optimizer still running?")
+
+        .add_property("callback", make_function(&OptimizerBase::callback, return_internal_reference<>()),
+                      "Callback manager")
         ;
 
     class_<OptimizerProblemManagerBase, boost::shared_ptr<OptimizerProblemManagerBase>, bases<OptimizerBase>, boost::noncopyable >("OptimizerProblemManagerBase", no_init)
