@@ -29,6 +29,10 @@ class Registry {
   }
 
   void clear();
+  void clear(Occasion occasion);
+
+  std::size_t numCallbacks(Occasion occasion) const;
+
  private:
   friend class Manager;
   RegistryData * data;

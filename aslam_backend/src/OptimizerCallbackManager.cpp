@@ -36,6 +36,13 @@ void Registry::clear() {
   data->callbacks.clear();
 }
 
+void Registry::clear(Occasion occasion) {
+  data->callbacks[occasion].clear();
+}
+
+std::size_t Registry::numCallbacks(Occasion occasion) const {
+  return data->callbacks[occasion].size();
+}
 
 ProceedInstruction Manager::issueCallback(const Argument & arg) {
   for(auto & c : data->callbacks[arg.occasion]){
