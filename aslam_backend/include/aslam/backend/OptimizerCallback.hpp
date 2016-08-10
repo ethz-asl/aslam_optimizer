@@ -25,6 +25,13 @@ enum Occasion {
  */
 class Argument {
 public:
+
+  Argument() { }
+  Argument(Occasion occasion_,
+           double currentCost_ = std::numeric_limits<double>::signaling_NaN(),
+           double previousLowestCost_ = std::numeric_limits<double>::signaling_NaN())
+      : occasion(occasion_), currentCost(currentCost_), previousLowestCost(previousLowestCost_) { }
+
   /**
    * \brief the callback occasion. (where in the optimizer was it issued).
    */
