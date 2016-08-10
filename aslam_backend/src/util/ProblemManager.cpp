@@ -129,6 +129,23 @@ void ProblemManager::computeGradient(RowVectorType& outGrad, size_t nThreads, bo
     applyDesignVariableScaling(outGrad);
 }
 
+/**
+ * Computes the partial gradient of the scalar objective function with respect to the error terms in range [start, end)
+ * @param[out] outGrad The gradient
+ * @param[in] startIdx start index of error terms (inclusive)
+ * @param[in] endIdx end index of error terms (exclusive)
+ * @param nThreads How many threads to use
+ * @param useMEstimator Whether to use an MEstimator
+ */
+void ProblemManager::computeGradient(RowVectorType& outGrad, size_t startIdx, size_t endIdx, size_t /*nThreads*/,
+                                     bool useMEstimator, bool applyDvScaling, bool useDenseJacobianContainer)
+{
+  // TODO: Use threaded method
+  this->evaluateGradients(0, startIdx, endIdx, outGrad, useMEstimator, useDenseJacobianContainer);
+  if (applyDvScaling)
+    applyDesignVariableScaling(outGrad);
+}
+
 void ProblemManager::applyDesignVariableScaling(RowVectorType& outGrad) const {
   for (const auto dv : _designVariables)
     outGrad.block(0, dv->columnBase(), outGrad.rows(), dv->minimalDimensions()) *= dv->scaling();

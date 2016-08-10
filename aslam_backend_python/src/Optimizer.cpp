@@ -376,6 +376,7 @@ void exportOptimizer()
     implicitly_convertible< boost::shared_ptr<LearningRateScheduleOptimal>, boost::shared_ptr<const LearningRateScheduleOptimal> >();
 
     class_<OptimizerOptionsSgd, bases<OptimizerOptionsBase> >("OptimizerOptionsSgd", init<>())
+        .def_readwrite("batchSize", &OptimizerOptionsSgd::batchSize)
         .def_readwrite("useDenseJacobianContainer", &OptimizerOptionsSgd::useDenseJacobianContainer)
         .def_readwrite("regularizer", &OptimizerOptionsSgd::regularizer)
         .def_readwrite("learningRateSchedule", &OptimizerOptionsSgd::learningRateSchedule)

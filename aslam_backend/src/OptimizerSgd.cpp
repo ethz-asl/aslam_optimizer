@@ -1,3 +1,4 @@
+#include <algorithm>
 #include <aslam/backend/OptimizerSgd.hpp>
 #include <Eigen/Dense>
 #include <sm/eigen/assert_macros.hpp>
@@ -73,7 +74,8 @@ OptimizerOptionsSgd::OptimizerOptionsSgd()
 OptimizerOptionsSgd::OptimizerOptionsSgd(const sm::PropertyTree& config)
     : OptimizerOptionsBase(config)
 {
-  useDenseJacobianContainer = config.getDouble("useDenseJacobianContainer", useDenseJacobianContainer);
+  batchSize = config.getInt("batchSize", batchSize);
+  useDenseJacobianContainer = config.getBool("useDenseJacobianContainer", useDenseJacobianContainer);
   const std::string type = config.getString("learning_rate/type");
   if (type == "constant") {
     sm::PropertyTree pt(config, "learning_rate/constant"); // extract subtree
@@ -97,6 +99,7 @@ std::ostream& operator<<(std::ostream& out, const aslam::backend::OptimizerOptio
 {
   out << static_cast<OptimizerOptionsBase>(options) << std::endl;
   out << "OptimizerSgdOptions:\n";
+  out << "\tbatchSize: " << options.batchSize << std::endl;
   out << "\tuseDenseJacobianContainer: " << (options.useDenseJacobianContainer ? "TRUE" : "FALSE") << std::endl;
   out << "\tlearningRateSchedule: " << (options.learningRateSchedule != nullptr ? options.learningRateSchedule->name() : "N/A");
   return out;
@@ -145,6 +148,7 @@ void OptimizerSgd::resetImplementation()
 
 void OptimizerSgd::optimizeImplementation()
 {
+  using namespace std;
   using namespace Eigen;
   static IOFormat fmt(StreamPrecision, DontAlignCols, ", ", ", ", "", "", "[", "]");
 
@@ -152,38 +156,67 @@ void OptimizerSgd::optimizeImplementation()
 
   RowVectorType gradient;
 
-  {
-    Timer timeGrad("OptimizerSgd: Compute---Gradient", false);
-    problemManager().computeGradient(gradient, _options.numThreadsGradient, false /*TODO: useMEstimator*/, false /* TODO: applyDvScaling*/, _options.useDenseJacobianContainer);
-    ++_status.numDerivativeEvaluations;
-    _status.gradientNorm = gradient.norm();
+  for ( ; _options.maxIterations == -1 || _status.numIterations < static_cast<std::size_t>(_options.maxIterations); ++_status.numIterations) { // epochs/passes over the data
 
-    // optionally add regularizer
-    if (_options.regularizer) {
-      JacobianContainerDense<RowVectorType&, 1> jc(gradient);
-      problemManager().addGradientForErrorTerm(jc, _options.regularizer.get(), false /*TODO: useMEstimator*/);
+    // partition the error terms into mini-batches and shuffle them
+    size_t numBatches = std::ceil(static_cast<double>(problemManager().numErrorTerms())/_options.batchSize);
+    vector< std::vector<size_t> > batches(numBatches);
+    size_t cnt = 0;
+    for (auto& batch : batches) {
+      for (size_t n = 0; n < _options.batchSize && cnt < problemManager().numErrorTerms(); ++n, ++cnt) {
+        batch.push_back(cnt);
+      }
+    }
+    random_shuffle(batches.begin(), batches.end());
+
+    // iterate over the mini-batches
+    size_t cntBatch = 0;
+    for (auto& batch : batches) {
+
+      SM_DEBUG_STREAM_NAMED("optimization", "OptimizerSgd: Processing batch number " << cntBatch + 1 << "/" << batches.size() <<
+                            " with error terms in interval [" << batch.front() << ", " << batch.back() + 1 << ").");
+
+      {
+        Timer timeGrad("OptimizerSgd: Compute---Gradient", false);
+        RowVectorType gradient = RowVectorType::Zero(1, problemManager().numOptParameters());
+        problemManager().computeGradient(gradient, batch.front(), batch.back() + 1, _options.numThreadsGradient, false /*TODO: useMEstimator*/, false /* TODO: applyDvScaling*/, _options.useDenseJacobianContainer);
+        ++_status.numDerivativeEvaluations;
+        _status.gradientNorm = gradient.norm();
+
+//        // optionally add regularizer
+//        if (_options.regularizer) {
+//          JacobianContainerDense<RowVectorType&, 1> jc(gradient);
+//          problemManager().addGradientForErrorTerm(jc, _options.regularizer.get(), false /*TODO: useMEstimator*/);
+//        }
+      }
+
+      SM_ASSERT_TRUE_DBG(Exception, gradient.allFinite (), "Gradient " << gradient.format(fmt) << " is not finite");
+
+      // Update
+      RowVectorType dx;
+      computeStateUpdate(dx, gradient);
+
+      {
+        Timer timeUpdate("OptimizerSgd: Compute---State update", true);
+        problemManager().applyStateUpdate(dx);
+        _status.maxDeltaX = dx.cwiseAbs().maxCoeff();
+      }
+
+      SM_FINE_STREAM_NAMED("optimization", _status << std::endl <<
+                           "\tgradient: " << gradient.format(fmt) << std::endl <<
+                           "\tdx:    " << dx.format(fmt));
+
+      _isBatchProcessed = true;
+      _status.numIterations += problemManager().numErrorTerms();
+      cntBatch++;
+
     }
   }
+}
 
-  SM_ASSERT_TRUE_DBG(Exception, gradient.allFinite (), "Gradient " << gradient.format(fmt) << " is not finite");
-
-  // Compute learning rate
+void OptimizerSgd::computeStateUpdate(RowVectorType& dx, const RowVectorType& gradient) {
   _status.learningRate = _options.learningRateSchedule->operator()(_status.numIterations);
-
-  // Update
-  RowVectorType dx = -_status.learningRate*1./problemManager().numErrorTerms()*gradient;
-  {
-    Timer timeUpdate("OptimizerSgd: Compute---State update", true);
-    problemManager().applyStateUpdate(dx);
-    _status.maxDeltaX = dx.cwiseAbs().maxCoeff();
-  }
-
-  SM_FINE_STREAM_NAMED("optimization", _status << std::endl <<
-                       "\tgradient: " << gradient.format(fmt) << std::endl <<
-                       "\tdx:    " << dx.format(fmt));
-
-  _isBatchProcessed = true;
-  _status.numIterations += problemManager().numErrorTerms();
+  dx = -_status.learningRate*1./problemManager().numErrorTerms()*gradient;
 }
 
 } // namespace backend

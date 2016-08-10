@@ -72,6 +72,7 @@ class LearningRateScheduleOptimal : public LearningRateScheduleBase {
 struct OptimizerOptionsSgd : public OptimizerOptionsBase {
   OptimizerOptionsSgd();
   OptimizerOptionsSgd(const sm::PropertyTree& config);
+  std::size_t batchSize = 1; /// \brief Mini-batch size
   bool useDenseJacobianContainer = true; /// \brief Whether or not to use a dense Jacobian container
   boost::shared_ptr<LearningRateScheduleBase> learningRateSchedule;
   boost::shared_ptr<ScalarNonSquaredErrorTerm> regularizer = NULL; /// \brief Regularizer
@@ -144,10 +145,16 @@ class OptimizerSgd : public OptimizerProblemManagerBase {
   ///        but labeled as not processed.
   void resetImplementation() override;
 
+  /// \brief Given the current gradient, compute the state update vector
+  virtual void computeStateUpdate(RowVectorType& dx, const RowVectorType& gradient);
+
   template <typename T>
   void addErrorTerm(boost::shared_ptr<OptimizationProblem> problem, T* et) const;
   template <typename T>
   void addErrorTerm(boost::shared_ptr<OptimizationProblem> problem, boost::shared_ptr<T> et) const;
+
+  /// \brief Extracts a problem with the error terms in range [start, end)
+  void computeGradient(RowVectorType& gradient, const std::size_t start, const std::size_t end) const;
 
  private:
 
