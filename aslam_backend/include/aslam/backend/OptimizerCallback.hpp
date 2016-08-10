@@ -25,8 +25,6 @@ enum Occasion {
  */
 class Argument {
 public:
-
-  Argument() { }
   Argument(Occasion occasion_,
            double currentCost_ = std::numeric_limits<double>::signaling_NaN(),
            double previousLowestCost_ = std::numeric_limits<double>::signaling_NaN())
@@ -77,7 +75,7 @@ public:
     return call(arg);
   }
 private:
-  template<typename F = Funct, std::is_same<ProceedInstruction, decltype((*static_cast<F*>(nullptr))(Argument()))>* returnsProceedInstruction = nullptr>
+  template<typename F = Funct, std::is_same<ProceedInstruction, decltype((*static_cast<F*>(nullptr))(*static_cast<Argument*>(nullptr)))>* returnsProceedInstruction = nullptr>
   ProceedInstruction call(const Argument & arg) override {
     return withArg(arg, returnsProceedInstruction);
   }
