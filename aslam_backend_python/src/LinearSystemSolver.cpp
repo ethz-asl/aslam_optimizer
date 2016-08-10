@@ -5,6 +5,7 @@
 #include <aslam/backend/SparseCholeskyLinearSystemSolver.hpp>
 #include <aslam/backend/SparseQrLinearSystemSolver.hpp>
 #include <aslam/backend/DenseQrLinearSystemSolver.hpp>
+#include <aslam/backend/OptimizerCallbackManager.hpp>
 
 
 /// \brief solve the system storing the solution in outDx and returning true on success.

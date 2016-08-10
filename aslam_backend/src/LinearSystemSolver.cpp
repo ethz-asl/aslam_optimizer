@@ -1,7 +1,9 @@
 #include <aslam/backend/LinearSystemSolver.hpp>
 #include <boost/thread.hpp>
-#include <aslam/backend/ErrorTerm.hpp>
 #include <boost/ref.hpp>
+
+#include <aslam/backend/ErrorTerm.hpp>
+#include <aslam/backend/OptimizerCallbackManager.hpp>
 
 namespace aslam {
   namespace backend {
@@ -78,13 +80,14 @@ namespace aslam {
     }
 
 
-    double LinearSystemSolver::evaluateError(size_t nThreads, bool useMEstimator)
+    double LinearSystemSolver::evaluateError(size_t nThreads, bool useMEstimator, callback::Manager * callback)
     {
       nThreads = std::max((size_t)1, nThreads);
       _threadLocalErrors.clear();
       _threadLocalErrors.resize(nThreads, 0.0);
       setupThreadedJob(boost::bind(&LinearSystemSolver::evaluateErrors, this, _1, _2, _3, _4), nThreads, useMEstimator);
       // Gather the squared error results from the multiple threads.
+      if(callback) callback->issueCallback({callback::Occasion::RESIDUALS_UPDATED, 0, 0});
       double error = 0.0;
       for (unsigned i = 0; i < _threadLocalErrors.size(); ++i)
         error += _threadLocalErrors[i];

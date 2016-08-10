@@ -9,6 +9,7 @@
 #include "OptimizerOptions.hpp"
 #include "backend.hpp"
 #include "OptimizationProblemBase.hpp"
+#include "OptimizerCallbackManager.hpp"
 #include <aslam/Exceptions.hpp>
 #include <aslam/backend/PerIterationCallback.hpp>
 #include <sm/timing/Timer.hpp>
@@ -144,10 +145,9 @@ namespace aslam {
       /// \brief Build the Gauss-Newton matrices.
       void buildGnMatrices();
 
-      /// \brief Set a PerIterationCallback
-      inline void setPerIterationCallback(
-          boost::shared_ptr<PerIterationCallback> callback) {
-        _callback = callback;
+      /// \brief expose callback registry
+      inline callback::Registry & callback(){
+        return _callbackManager;
       }
 
       double applyNormalizedStateUpdate();
@@ -172,6 +172,9 @@ namespace aslam {
 
       /// \brief Set the initial lambda by looking at the entries of the Hessian matrix.
       void setInitialLambda();
+
+      /// \brief issue callback for given occasion
+      void issueCallback(callback::Occasion occasion);
 
       /// \brief The current value of LM lambda.
       double _lambda;
@@ -225,10 +228,8 @@ namespace aslam {
       /// \brief the current set of options
       Options _options;
 
-      /// \brief A class that contains a callback function to be called 
-      /// immediately after computing the raw squared errors, but before 
-      /// evaluating the cost function, i.e. the sum of weighted square errors.
-      boost::shared_ptr<PerIterationCallback> _callback;
+      /// \brief A class that manages the optimizer callbacks
+      callback::Manager _callbackManager;
     };
 
   } // namespace backend

@@ -9,6 +9,7 @@
 #include "Optimizer2Options.hpp"
 #include "backend.hpp"
 #include "OptimizationProblemBase.hpp"
+#include "OptimizerCallbackManager.hpp"
 #include <aslam/Exceptions.hpp>
 #include <sm/timing/Timer.hpp>
 #include <boost/thread.hpp>
@@ -127,6 +128,11 @@ namespace aslam {
         return solver;
       }
 
+      /// \brief expose callback registry
+      inline callback::Registry & callback(){
+        return _callbackManager;
+      }
+
 
         const Matrix * getJacobian() const;
       
@@ -142,6 +148,9 @@ namespace aslam {
 
       /// \brief Apply a state update.
       double applyStateUpdate();
+
+      /// \brief issue callback for given occasion
+      void issueCallback(callback::Occasion occasion);
 
       /// \brief The dense update vector.
       Eigen::VectorXd _dx;
@@ -168,6 +177,8 @@ namespace aslam {
       /// \brief the current set of options
       Options _options;
 
+      /// \brief A class that manages the optimizer callbacks
+      callback::Manager _callbackManager;
     };
 
   } // namespace backend
