@@ -11,7 +11,29 @@ namespace aslam {
     class ErrorTerm;
     class ScalarNonSquaredErrorTerm;
 
-    class OptimizationProblemBase {
+    class ErrorTermReceiver {
+     public:
+      virtual ~ErrorTermReceiver(){}
+      virtual void addErrorTerm(const boost::shared_ptr<ErrorTerm> & et) = 0;
+    };
+
+    template <typename Functor>
+    class FunctionErrorTermReceiver : public ErrorTermReceiver {
+     public:
+      FunctionErrorTermReceiver(Functor addErrorTermFunctor) : addErrorTermFunctor_(addErrorTermFunctor){}
+
+      Functor addErrorTermFunctor_;
+      void addErrorTerm(const boost::shared_ptr<ErrorTerm> & et) override {
+        addErrorTermFunctor_(et);
+      }
+    };
+
+    template <typename Functor>
+    FunctionErrorTermReceiver<Functor> toErrorTermReceiver(Functor addErrorTermFunctor){
+      return FunctionErrorTermReceiver<Functor>(addErrorTermFunctor);
+    }
+
+    class OptimizationProblemBase : public ErrorTermReceiver {
     public:
       SM_DEFINE_EXCEPTION(Exception, aslam::Exception);
 
@@ -56,7 +78,7 @@ namespace aslam {
 
       /// \brief This is ugly but it is just enough abstract interface
       ///        to allow error term factories to work
-      virtual void addErrorTerm(const boost::shared_ptr<ErrorTerm> & /* et */) {
+      virtual void addErrorTerm(const boost::shared_ptr<ErrorTerm> & /* et */) override {
         SM_THROW(std::runtime_error, "Not Implemented");
       }
     protected:
