@@ -93,6 +93,11 @@ class SamplerBase {
   /// \brief Set smoothing factor for exponential moving average of acceptance probabilities
   void setWeightedMeanSmoothingFactor(const double alpha);
 
+  /// \brief Set the burn-in phase state of the sampler
+  void setIsBurnIn(const bool isBurnIn) { _isBurnIn = isBurnIn; }
+  /// \brief Whether or not the sampler is in burn-in phase
+  bool isBurnIn() const { return _isBurnIn; }
+
  protected:
   /// \brief Evaluate the current negative log density
   double evaluateNegativeLogDensity(const size_t nThreads = 1) const;
@@ -113,6 +118,9 @@ class SamplerBase {
 
   bool _isLastSampleAccepted = false; /// \brief Was the sample in the last iteration accepted
   bool _forceRecomputationNegLogDensity = true; /// \brief Should density information definitely be recomputed in the next step
+
+  bool _isBurnIn = false; /// \brief Whether or not the sampler is in burn-in phase
+
 };
 
 }

@@ -119,11 +119,13 @@ void SamplerHybridMcmc::step(bool& accepted, double& acceptanceProbability) {
   using namespace Eigen;
 
   // Adapt step length
-  if (statistics().getWeightedMeanAcceptanceProbability() > _options.targetAcceptanceRate)
-    _stepLength *= _options.incFactorLeapFrogStepSize;
-  else
-    _stepLength *= _options.decFactorLeapFrogStepSize;
-  _stepLength = max(min(_stepLength, _options.maxLeapFrogStepSize), _options.minLeapFrogStepSize); // clip
+  if (isBurnIn()) {
+    if (statistics().getWeightedMeanAcceptanceProbability() > _options.targetAcceptanceRate)
+      _stepLength *= _options.incFactorLeapFrogStepSize;
+    else
+      _stepLength *= _options.decFactorLeapFrogStepSize;
+    _stepLength = max(min(_stepLength, _options.maxLeapFrogStepSize), _options.minLeapFrogStepSize); // clip
+  }
 
   SM_FINEST_STREAM_NAMED("sampling", "Current leap frog step size is " << _stepLength << ".");
 
