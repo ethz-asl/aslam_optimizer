@@ -61,7 +61,7 @@ class FixedPointNumber{
   inline FixedPointNumber(const FixedPointNumber & other) = default;
 
   inline FixedPointNumber(Integer p) : _p(p){}
-  inline explicit FixedPointNumber(double const & other) : _p(other * getDivider()) {}
+  inline FixedPointNumber(double const & other) : _p(other * getDivider()) {}
 
   template <typename OtherInteger_, std::uintmax_t OtherDivider_>
   inline explicit FixedPointNumber(FixedPointNumber<OtherInteger_, OtherDivider_> const & other) { _p = other._p * getDivider() / other.getDivider(); }
@@ -77,6 +77,7 @@ class FixedPointNumber{
 //  inline operator Integer() = delete; TODO find out : why does this disable conversions to double?
 //  inline operator Integer() const { return getNumerator(); }
   inline Integer getNumerator() const { return _p; }
+  inline operator Integer() const { return getNumerator(); }
   inline Integer getDenominator() const { return Integer(getDivider()); }
 
   FixedPointNumber operator - () const {
@@ -120,6 +121,18 @@ class FixedPointNumber{
   }
   inline bool operator != (const FixedPointNumber & other) const {
     return _p != other._p;
+  }
+  inline bool operator < (const FixedPointNumber & other) const {
+    return _p < other._p;
+  }
+  inline bool operator > (const FixedPointNumber & other) const {
+    return _p > other._p;
+  }
+  inline bool operator <= (const FixedPointNumber & other) const {
+    return _p <= other._p;
+  }
+  inline bool operator >= (const FixedPointNumber & other) const {
+    return _p >= other._p;
   }
 
   friend std::ostream & operator << (std::ostream & o, const FixedPointNumber & v){

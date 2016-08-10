@@ -182,11 +182,10 @@ namespace aslam {
 
         SolutionReturnValue Optimizer2::optimize()
         {
-            Timer timeGn("Optimizer2: build Hessian", true);
             Timer timeErr("Optimizer2: evaluate error", true);
             Timer timeSchur("Optimizer2: Schur complement", true);
             Timer timeBackSub("Optimizer2: Back substitution", true);
-            Timer timeSolve("Optimizer2: Solve linear system", true);
+            Timer timeSolve("Optimizer2: Build and solve linear system", true);
             // Select the design variables and (eventually) the error terms involved in the optimization.
             initialize();
             SolutionReturnValue srv;

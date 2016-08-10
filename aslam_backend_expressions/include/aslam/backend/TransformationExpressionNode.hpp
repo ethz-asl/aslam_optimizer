@@ -8,6 +8,8 @@
 
 namespace aslam {
   namespace backend {
+    class EuclideanExpression;
+    class RotationExpression;
     
     class TransformationExpressionNode
     {
@@ -29,12 +31,16 @@ namespace aslam {
         evaluateJacobians(outJacobians.apply(applyChainRule));
       }
       void getDesignVariables(DesignVariable::set_t & designVariables) const;
-    protected:        
+    protected:
       // These functions must be implemented by child classes.
       virtual Eigen::Matrix4d toTransformationMatrixImplementation() = 0;
       virtual void evaluateJacobiansImplementation(JacobianContainer & outJacobians) const = 0;
       virtual void getDesignVariablesImplementation(DesignVariable::set_t & designVariables) const = 0;
 
+      virtual RotationExpression toRotationExpression(const boost::shared_ptr<TransformationExpressionNode> & thisShared) const;
+      virtual EuclideanExpression toEuclideanExpression(const boost::shared_ptr<TransformationExpressionNode> & thisShared) const;
+      
+      friend class TransformationExpression;
     };
 
     

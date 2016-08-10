@@ -1,5 +1,9 @@
 #include <aslam/backend/TransformationExpressionNode.hpp>
 #include <sm/kinematics/transformations.hpp>
+#include <aslam/backend/EuclideanExpression.hpp>
+#include <aslam/backend/EuclideanExpressionNode.hpp>
+#include <aslam/backend/RotationExpression.hpp>
+#include <aslam/backend/RotationExpressionNode.hpp>
 #include <Eigen/Dense>
 
 namespace aslam {
@@ -91,6 +95,15 @@ namespace aslam {
   void TransformationExpressionNodeConstant::evaluateJacobiansImplementation(JacobianContainer & /* outJacobians */) const{}
   void TransformationExpressionNodeConstant::getDesignVariablesImplementation(DesignVariable::set_t & /* designVariables */) const{}
 
+  RotationExpression aslam::backend::TransformationExpressionNode::toRotationExpression(const boost::shared_ptr<TransformationExpressionNode>& thisShared) const {
+    assert(thisShared.get() == this);
+    return boost::shared_ptr< RotationExpressionNode >( new RotationExpressionNodeTransformation( thisShared ) );
+  }
+
+  EuclideanExpression aslam::backend::TransformationExpressionNode::toEuclideanExpression(const boost::shared_ptr<TransformationExpressionNode>& thisShared) const {
+    assert(thisShared.get() == this);
+    return boost::shared_ptr< EuclideanExpressionNode >( new EuclideanExpressionNodeTranslation( thisShared ) );
+  }
 
   } // namespace backend
 } // namespace aslam
