@@ -1,6 +1,7 @@
 #include <numpy_eigen/boost_python_headers.hpp>
 #include <aslam/backend/OptimizerBase.hpp>
 #include <aslam/backend/util/OptimizerProblemManagerBase.hpp>
+#include <aslam/backend/OptimizerCallbackManager.hpp>
 #include <aslam/backend/Optimizer.hpp>
 #include <aslam/backend/Optimizer2.hpp>
 #include <aslam/backend/OptimizerRprop.hpp>
@@ -30,6 +31,21 @@ std::string toString(const T& t) {
   return os.str();
 }
 
+void addCallbackWrapper(aslam::backend::callback::Registry& registry,
+                        aslam::backend::callback::Occasion occasion,
+                        boost::python::object callback) {
+  registry.add(occasion, [callback]() {
+    callback();
+  });
+}
+
+void addCallbackWithArgWrapper(aslam::backend::callback::Registry& registry,
+                        aslam::backend::callback::Occasion occasion,
+                        boost::python::object callback) {
+  registry.add(occasion, [callback](const aslam::backend::callback::Argument& arg) {
+    callback(arg);
+  });
+}
 
 void exportOptimizer()
 {
@@ -50,9 +66,30 @@ void exportOptimizer()
         .def_readwrite("linearSolverFailure",&SolutionReturnValue::linearSolverFailure)
         ;
 
+    enum_<callback::Occasion>("CallbackOccasion")
+        .value("COST_UPDATED", callback::Occasion::COST_UPDATED)
+        .value("DESIGN_VARIABLES_UPDATED", callback::Occasion::DESIGN_VARIABLES_UPDATED)
+        .value("LINEAR_SYSTEM_SOLVED", callback::Occasion::LINEAR_SYSTEM_SOLVED)
+        .value("OPTIMIZATION_INITIALIZED", callback::Occasion::OPTIMIZATION_INITIALIZED)
+        .value("ITERATION_START", callback::Occasion::ITERATION_START)
+        .value("ITERATION_END", callback::Occasion::ITERATION_END)
+        .value("OPTIMIZATION_INITIALIZED", callback::Occasion::OPTIMIZATION_INITIALIZED)
+        .value("RESIDUALS_UPDATED", callback::Occasion::RESIDUALS_UPDATED)
+    ;
 
+    class_<callback::Registry>("CallbackRegistry", no_init)
+        .def("clear", (void (callback::Registry::*)(void))&callback::Registry::clear, "Removes all callbacks")
+        .def("clear", (void (callback::Registry::*)(callback::Occasion))&callback::Registry::clear, "Removes all callbacks for a specific occasion")
+        .def("add", &addCallbackWrapper, "Adds a callback for a specific occasion")
+        .def("addWithArg", &addCallbackWithArgWrapper, "Adds a callback for a specific occasion that gets a callback argument passed")
+        .def("numCallbacks", &callback::Registry::numCallbacks, "Number of callbacks for a specific occasion")
+    ;
 
-
+    class_<callback::Argument>("CallbackArgument", no_init)
+        .def_readonly("occasion", &callback::Argument::occasion)
+        .def_readonly("currentCost", &callback::Argument::currentCost)
+        .def_readonly("previousLowestCost", &callback::Argument::previousLowestCost)
+    ;
 
     class_<Optimizer, boost::shared_ptr<Optimizer> >("Optimizer",init<>())
         .def(init<OptimizerOptions>())
