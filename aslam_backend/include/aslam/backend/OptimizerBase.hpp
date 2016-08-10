@@ -15,6 +15,7 @@
 // self
 #include <aslam/backend/util/CommonDefinitions.hpp> // RowVectorType
 #include <aslam/backend/OptimizationProblemBase.hpp>
+#include <aslam/backend/OptimizerCallbackManager.hpp>
 
 namespace sm
 {
@@ -164,10 +165,16 @@ class OptimizerBase
   /// \brief Is the optimizer still running?
   inline bool isInProgress() const;
 
+  /// \brief expose callback registry
+  inline callback::Registry & callback() { return _callbackManager; }
+
  protected:
   /// \brief Helper function to update the convergence status. Set the error/derivative information
   ///        before you call this method.
   void updateConvergenceStatus();
+
+  /// \brief A class that manages the optimizer callbacks
+  callback::Manager _callbackManager;
 
  private:
   /// \brief Implement in derived class
