@@ -118,7 +118,8 @@ void exportBackendExpressions()
     .def(self * homogeneousExpression)
     .def(self * self)
     .def("inverse", &TransformationExpression::inverse)
-    
+    .def("evaluateJacobians", &evaluateJacobians1<TransformationExpression>)
+    .def("evaluateJacobians", &evaluateJacobians2<TransformationExpression>)
     .def("getDesignVariables", &getDesignVariables<TransformationExpression>)
     ;
 
@@ -129,6 +130,7 @@ void exportBackendExpressions()
     .def(self * self)
     .def("inverse", &RotationExpression::inverse)
     .def("getDesignVariables", &getDesignVariables<RotationExpression>)
+    .def("evaluateJacobians", &evaluateJacobians2<RotationExpression>)
     ;
   
 
