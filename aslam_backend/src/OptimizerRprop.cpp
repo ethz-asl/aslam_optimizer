@@ -233,6 +233,7 @@ void OptimizerRprop::optimizeImplementation()
 
     timeStep.stop();
 
+    _callbackManager.issueCallback( {callback::Occasion::DESIGN_VARIABLE_UPDATE_COMPUTED} );
     timeUpdate.start();
     problemManager().applyStateUpdate(_dx);
     timeUpdate.stop();
