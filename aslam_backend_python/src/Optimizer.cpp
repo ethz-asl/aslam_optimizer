@@ -49,6 +49,14 @@ void addCallbackWithArgWrapper(aslam::backend::callback::Registry& registry,
   });
 }
 
+boost::python::list processedErrorTermsWrapper(const aslam::backend::OptimizerStatusSgd& status) {
+  boost::python::list l;
+  for (const auto& item : status.processedErrorTerms) {
+    l.append(item);
+  }
+  return l;
+}
+
 void exportOptimizer()
 {
     using namespace boost::python;
@@ -355,26 +363,74 @@ void exportOptimizer()
     implicitly_convertible< boost::shared_ptr<OptimizerBFGS>, boost::shared_ptr<const OptimizerBFGS> >();
 
 
-    class_<LearningRateScheduleBase, boost::shared_ptr<LearningRateScheduleBase>, boost::noncopyable>("LearningRateScheduleBase", no_init)
-        .def("__getitem__", pure_virtual(&LearningRateScheduleBase::operator()))
+    class_<LearningRateScheduleBase, boost::shared_ptr<LearningRateScheduleBase>, boost::noncopyable>("__LearningRateScheduleBase", no_init)
+        .def("computeDx", &LearningRateScheduleBase::computeDx)
+        .def("initialize", &LearningRateScheduleBase::initialize)
         .def("check", &LearningRateScheduleBase::check)
-        .add_property("name", make_function(&LearningRateScheduleBase::name, return_value_policy<copy_const_reference>()))
-        .add_property("initialRate", &LearningRateScheduleBase::initialRate)
+        .add_property("name", make_function(&LearningRateScheduleBase::getName, return_value_policy<copy_const_reference>()))
+        .add_property("currentRate", make_function(&LearningRateScheduleBase::getCurrentRate, return_value_policy<copy_const_reference>()))
         ;
-    implicitly_convertible< boost::shared_ptr<LearningRateScheduleBase>, boost::shared_ptr<const LearningRateScheduleBase> >();
 
-    class_<LearningRateScheduleConstant, boost::shared_ptr<LearningRateScheduleConstant>, bases<LearningRateScheduleBase> >("LearningRateScheduleConstant", init<const double>("LearningRateScheduleConstant(double rate): Constructor"))
-        .def(init<const sm::PropertyTree&>("LearningRateScheduleConstant(PropertyTree pt): Constructor"))
-        .def("__getitem__", &LearningRateScheduleOptimal::operator()) // TODO: oure_virtual in base class sometimes doesn't work
+    class_<LearningRateScheduleWithMomentumBase, boost::shared_ptr<LearningRateScheduleWithMomentumBase>, bases<LearningRateScheduleBase>, boost::noncopyable>("__LearningRateScheduleWithMomentumBase", no_init)
+        .add_property("momentum", &LearningRateScheduleWithMomentumBase::getMomentum, &LearningRateScheduleWithMomentumBase::setMomentum)
+        .add_property("prevDx", make_function(&LearningRateScheduleWithMomentumBase::getPrevDx, return_value_policy<copy_const_reference>()))
         ;
+
+    class_<LearningRateScheduleConstant, boost::shared_ptr<LearningRateScheduleConstant>, bases<LearningRateScheduleWithMomentumBase> >("LearningRateScheduleConstant",
+        init<const double, optional<const double> >("LearningRateScheduleConstant(rate, momentum): Constructor"))
+        .def(init<const sm::PropertyTree&>("LearningRateScheduleConstant(PropertyTree pt): Constructor"))
+        .add_property("lr", &LearningRateScheduleConstant::getLr, &LearningRateScheduleConstant::setLr)
+        ;
+    register_ptr_to_python< boost::shared_ptr<const LearningRateScheduleConstant> >();
     implicitly_convertible< boost::shared_ptr<LearningRateScheduleConstant>, boost::shared_ptr<const LearningRateScheduleConstant> >();
 
-    class_<LearningRateScheduleOptimal, boost::shared_ptr<LearningRateScheduleOptimal>, bases<LearningRateScheduleBase> >("LearningRateScheduleOptimal", init<const double, const double>("LearningRateScheduleOptimal(double initialRate, double tau): Constructor"))
+    class_<LearningRateScheduleOptimal, boost::shared_ptr<LearningRateScheduleOptimal>, bases<LearningRateScheduleWithMomentumBase> >("LearningRateScheduleOptimal",
+        init<const double, const double, optional<const double> >("LearningRateScheduleOptimal(lr, tau, momentum): Constructor"))
         .def(init<const sm::PropertyTree&>("LearningRateScheduleOptimal(PropertyTree pt): Constructor"))
-        .def("__getitem__", &LearningRateScheduleOptimal::operator()) // TODO: oure_virtual in base class sometimes doesn't work
-        .add_property("tau", &LearningRateScheduleOptimal::tau)
+        .add_property("lr", &LearningRateScheduleOptimal::getLr, &LearningRateScheduleOptimal::setLr)
+        .add_property("tau", &LearningRateScheduleOptimal::getTau, &LearningRateScheduleOptimal::setTau)
         ;
+    register_ptr_to_python< boost::shared_ptr<const LearningRateScheduleOptimal> >();
     implicitly_convertible< boost::shared_ptr<LearningRateScheduleOptimal>, boost::shared_ptr<const LearningRateScheduleOptimal> >();
+
+    class_<LearningRateScheduleRMSProp, boost::shared_ptr<LearningRateScheduleRMSProp>, bases<LearningRateScheduleWithMomentumBase> >("LearningRateScheduleRMSProp",
+        init< const double, optional<const double, const double, const double, const bool, const double, const double, const double> >(
+            "LearningRateScheduleRMSProp(lr, rho, epsilon, momentum, isStepAdapt, stepFactor, minLr, maxLr): Constructor"))
+        .def(init<const sm::PropertyTree&>("LearningRateScheduleRMSProp(PropertyTree pt): Constructor"))
+        .add_property("lr", &LearningRateScheduleRMSProp::getLr, &LearningRateScheduleRMSProp::setLr)
+        .add_property("rho", &LearningRateScheduleRMSProp::getRho, &LearningRateScheduleRMSProp::setRho)
+        .add_property("epsilon", &LearningRateScheduleRMSProp::getEpsilon, &LearningRateScheduleRMSProp::setEpsilon)
+        .add_property("gradSqrAverage", make_function(&LearningRateScheduleRMSProp::getGradSqrAverage, return_value_policy<copy_const_reference>()))
+        .add_property("alpha", make_function(&LearningRateScheduleRMSProp::getAlpha, return_value_policy<copy_const_reference>()))
+        ;
+    register_ptr_to_python< boost::shared_ptr<const LearningRateScheduleRMSProp> >();
+    implicitly_convertible< boost::shared_ptr<LearningRateScheduleRMSProp>, boost::shared_ptr<const LearningRateScheduleRMSProp> >();
+
+    class_<LearningRateScheduleAdaDelta, boost::shared_ptr<LearningRateScheduleAdaDelta>, bases<LearningRateScheduleBase> >("LearningRateScheduleAdaDelta",
+        init< optional<const double, const double, const double> >("LearningRateScheduleAdaDelta(rho, epsilon, lr): Constructor"))
+        .def(init<const sm::PropertyTree&>("LearningRateScheduleAdaDelta(PropertyTree pt): Constructor"))
+        .add_property("lr", &LearningRateScheduleAdaDelta::getLr, &LearningRateScheduleAdaDelta::setLr)
+        .add_property("rho", &LearningRateScheduleAdaDelta::getRho, &LearningRateScheduleAdaDelta::setRho)
+        .add_property("epsilon", &LearningRateScheduleAdaDelta::getEpsilon, &LearningRateScheduleAdaDelta::setEpsilon)
+        .add_property("gradSqrAverage", make_function(&LearningRateScheduleAdaDelta::getGradSqrAverage, return_value_policy<copy_const_reference>()))
+        .add_property("dxSqrAverage", make_function(&LearningRateScheduleAdaDelta::getDxSqrAverage, return_value_policy<copy_const_reference>()))
+        ;
+    register_ptr_to_python< boost::shared_ptr<const LearningRateScheduleAdaDelta> >();
+    implicitly_convertible< boost::shared_ptr<LearningRateScheduleAdaDelta>, boost::shared_ptr<const LearningRateScheduleAdaDelta> >();
+
+    class_<LearningRateScheduleAdam, boost::shared_ptr<LearningRateScheduleAdam>, bases<LearningRateScheduleBase> >("LearningRateScheduleAdam",
+        init< const double, optional<const double, const double, const double> >("LearningRateScheduleAdam(lr, rho1, rho2, epsilon): Constructor"))
+        .def(init<const sm::PropertyTree&>("LearningRateScheduleAdam(PropertyTree pt): Constructor"))
+        .add_property("lr", &LearningRateScheduleAdam::getLr, &LearningRateScheduleAdam::setLr)
+        .add_property("rho1", &LearningRateScheduleAdam::getRho1)
+        .add_property("rho2", &LearningRateScheduleAdam::getRho2)
+        .add_property("epsilon", &LearningRateScheduleAdam::getEpsilon, &LearningRateScheduleAdam::setEpsilon)
+        .add_property("gradAverage", make_function(&LearningRateScheduleAdam::getGradAverage, return_value_policy<copy_const_reference>()))
+        .add_property("gradSqrAverage", make_function(&LearningRateScheduleAdam::getGradSqrAverage, return_value_policy<copy_const_reference>()))
+        ;
+    register_ptr_to_python< boost::shared_ptr<const LearningRateScheduleAdam> >();
+    implicitly_convertible< boost::shared_ptr<LearningRateScheduleAdam>, boost::shared_ptr<const LearningRateScheduleAdam> >();
+
 
     class_<OptimizerOptionsSgd, bases<OptimizerOptionsBase> >("OptimizerOptionsSgd", init<>())
         .def_readwrite("batchSize", &OptimizerOptionsSgd::batchSize)
@@ -385,7 +441,10 @@ void exportOptimizer()
         ;
 
     class_<OptimizerStatusSgd, bases<OptimizerStatus> >("OptimizerStatusSgd", init<>())
-        .def_readonly("learningRate", &OptimizerStatusSgd::learningRate)
+        .def_readonly("numBatches", &OptimizerStatusSgd::numBatches)
+        .def_readonly("numSubIterations", &OptimizerStatusSgd::numSubIterations)
+        .def_readonly("numTotalIterations", &OptimizerStatusSgd::numTotalIterations)
+        .add_property("processedErrorTerms", &processedErrorTermsWrapper)
         .def("__str__", &toString<OptimizerStatusSgd>)
         ;
 
@@ -403,9 +462,11 @@ void exportOptimizer()
         .def("addBatch", &OptimizerSgd::addBatch< std::vector<boost::shared_ptr<ErrorTerm> > >,
             "Add a batch of error terms")
 
-        .def("incrementNumberOfIterations", &OptimizerSgd::incrementNumberOfIterations,
-             "Manually increment the number of iterations. Use this, if you have already incorporated some training "
+        .def("setCounters", &OptimizerSgd::setCounters,
+             "Manually set the number of iterations. Use this, if you have already incorporated some training "
              "samples in another way (e.g. via batch optimization) in the beginning.")
+        .def("setRandomSeed", &OptimizerSgd::setRandomSeed,
+             "Set seed for random number generator used to shuffle data")
         ;
     implicitly_convertible< boost::shared_ptr<OptimizerSgd>, boost::shared_ptr<const OptimizerSgd> >();
 

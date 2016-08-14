@@ -31,7 +31,7 @@ class OptimizerProblemManagerBase : public OptimizerBase
   const ProblemManager& problemManager() const { return _problemManager; }
   ProblemManager& problemManager() { return _problemManager; }
 
- private:
+ protected:
   virtual void initializeImplementation() override { _problemManager.initialize(); }
 
 private:
