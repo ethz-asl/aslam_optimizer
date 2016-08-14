@@ -70,6 +70,7 @@ void exportOptimizer()
 
     enum_<callback::Occasion>("CallbackOccasion")
         .value("COST_UPDATED", callback::Occasion::COST_UPDATED)
+        .value("DESIGN_VARIABLE_UPDATE_COMPUTED", callback::Occasion::DESIGN_VARIABLE_UPDATE_COMPUTED)
         .value("DESIGN_VARIABLES_UPDATED", callback::Occasion::DESIGN_VARIABLES_UPDATED)
         .value("LINEAR_SYSTEM_SOLVED", callback::Occasion::LINEAR_SYSTEM_SOLVED)
         .value("OPTIMIZATION_INITIALIZED", callback::Occasion::OPTIMIZATION_INITIALIZED)

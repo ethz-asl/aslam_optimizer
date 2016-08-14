@@ -11,13 +11,14 @@ namespace callback {
  * \brief The callback occasion specifies the callback injection point in the optimizer.
  */
 enum Occasion {
-  OPTIMIZATION_INITIALIZED,   /// \brief Right after the the initial cost has been computed.
-  ITERATION_START,            /// \brief At the start of an iteration before any work has been done, same state as in PER_ITERATION_END in previous iteration
-  ITERATION_END,              /// \brief At the end of an iteration after all work has been done, same state as in PER_ITERATION_START in next iteration
-  LINEAR_SYSTEM_SOLVED,       /// \brief Right after the linear system was solved
-  DESIGN_VARIABLES_UPDATED,   /// \brief Right after the design variables (X) have been updated.
-  RESIDUALS_UPDATED,          /// \brief After the raw squared error for each error term has been updated but before the m-estimators are applied to compute the effective cost. This is the right occasion to update m-estimators based on residuals.
-  COST_UPDATED,               /// \brief Right after the m-estimators are applied to compute the effective cost.
+  OPTIMIZATION_INITIALIZED,         /// \brief Right after the the initial cost has been computed.
+  ITERATION_START,                  /// \brief At the start of an iteration before any work has been done, same state as in PER_ITERATION_END in previous iteration
+  ITERATION_END,                    /// \brief At the end of an iteration after all work has been done, same state as in PER_ITERATION_START in next iteration
+  LINEAR_SYSTEM_SOLVED,             /// \brief Right after the linear system was solved
+  DESIGN_VARIABLE_UPDATE_COMPUTED,  /// \brief Right before design variables are updated, step has been computed
+  DESIGN_VARIABLES_UPDATED,         /// \brief Right after the design variables (X) have been updated.
+  RESIDUALS_UPDATED,                /// \brief After the raw squared error for each error term has been updated but before the m-estimators are applied to compute the effective cost. This is the right occasion to update m-estimators based on residuals.
+  COST_UPDATED,                     /// \brief Right after the m-estimators are applied to compute the effective cost.
 };
 
 /**
