@@ -39,6 +39,9 @@ class ProblemManager {
   /// \brief Constructor with default options
   ProblemManager();
 
+  /// \brief Convenience constructor instead of setProblem() + initialize()
+  ProblemManager(boost::shared_ptr<OptimizationProblemBase> problem);
+
   /// \brief Destructor
   virtual ~ProblemManager();
 
