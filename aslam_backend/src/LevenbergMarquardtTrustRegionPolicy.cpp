@@ -56,7 +56,7 @@ namespace aslam {
                 _solver->buildSystem(nThreads, true);
             } else {
                 ///get Rho and update Lambda:
-                double rho = getLmRho();
+                double rho = getLmRho(outDx);
               
                 if (previousIterationFailed ) {
                   // The last step was a regression.
@@ -85,9 +85,7 @@ namespace aslam {
             }
             
             _solver->setConstantConditioner(_lambda);
-            bool success = _solver->solveSystem(_dx);
-            outDx = _dx;
-            return success;
+            return _solver->solveSystem(outDx);
         }
         
         /// \brief print the current state to a stream (no newlines).
@@ -104,11 +102,11 @@ namespace aslam {
         }
         
         
-        double LevenbergMarquardtTrustRegionPolicy::getLmRho()
+        double LevenbergMarquardtTrustRegionPolicy::getLmRho(const Eigen::VectorXd & dx)
         {
             double d1 = get_dJ();    // update cost delta
             // L(0) - L(h):
-            double d2 = _dx.transpose() * (_lambda * _dx + _solver->rhs());
+            double d2 = dx.transpose() * (_lambda * dx + _solver->rhs());
             return d1 / d2;
         }
         

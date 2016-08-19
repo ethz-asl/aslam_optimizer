@@ -34,7 +34,7 @@ namespace aslam {
           virtual bool requiresAugmentedDiagonal() const;
           virtual std::string name() const { return "levenberg_marquardt"; }
         private:
-          double getLmRho();
+          double getLmRho(const Eigen::VectorXd & dx);
           double _lambdaInit;
           double _gammaInit;
           double _betaInit;
@@ -46,9 +46,6 @@ namespace aslam {
           double _beta;
           int _p;
           double _mu;
-          
-          Eigen::VectorXd _dx;
-            
         };
         
     } // namespace backend
