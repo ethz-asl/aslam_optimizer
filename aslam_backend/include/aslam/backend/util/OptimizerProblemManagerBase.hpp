@@ -18,7 +18,7 @@ namespace backend
 
 /**
  * \class OptimizerProblemManagerBase
- * Helper class to facilitate deriving optimizers that use the ProblemManager under to hood
+ * Helper class to facilitate deriving optimizers that use the ProblemManager under the hood
  */
 class OptimizerProblemManagerBase : public OptimizerBase
 {
