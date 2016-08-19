@@ -28,13 +28,13 @@ class OptimizerProblemManagerBase : public OptimizerBase
   void checkProblemSetup() override { _problemManager.checkProblemSetup(); }
   bool isInitialized() override { return _problemManager.isInitialized(); }
   const std::vector<DesignVariable*>& getDesignVariables() const override { return _problemManager.designVariables(); }
+
+ protected:
   const ProblemManager& problemManager() const { return _problemManager; }
   ProblemManager& problemManager() { return _problemManager; }
-
- private:
   virtual void initializeImplementation() override { _problemManager.initialize(); }
 
-private:
+ private:
   ProblemManager _problemManager; /// \brief Problem manager
 
 };
