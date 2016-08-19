@@ -27,7 +27,7 @@ class OptimizerProblemManagerBase : public OptimizerBase
   void setProblem(boost::shared_ptr<OptimizationProblemBase> problem) override { _problemManager.setProblem(problem); }
   void checkProblemSetup() override { _problemManager.checkProblemSetup(); }
   bool isInitialized() override { return _problemManager.isInitialized(); }
-  const std::vector<DesignVariable*>& getDesignVariables() { return _problemManager.designVariables(); }
+  const std::vector<DesignVariable*>& getDesignVariables() const override { return _problemManager.designVariables(); }
   const ProblemManager& problemManager() const { return _problemManager; }
   ProblemManager& problemManager() { return _problemManager; }
 

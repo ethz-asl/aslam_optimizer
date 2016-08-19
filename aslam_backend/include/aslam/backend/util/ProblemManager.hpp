@@ -67,7 +67,7 @@ class ProblemManager {
   size_t numDesignVariables() const { return _designVariables.size(); };
 
   /// \brief Get the design variables
-  const std::vector<DesignVariable*>& designVariables() { return _designVariables; };
+  const std::vector<DesignVariable*>& designVariables() const { return _designVariables; };
 
   /// \brief how many scalar parameters (design variables with their minimal dimension)
   ///        are involved in the problem
