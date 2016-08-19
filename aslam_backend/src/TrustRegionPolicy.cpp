@@ -43,7 +43,7 @@ namespace aslam {
             }
             _J = J;
 
-            bool success = solveSystemImplementation(J, previousIterationFailed, nThreads, outDx);
+            const bool success = solveSystemImplementation(J, previousIterationFailed, nThreads, outDx);
             _isFirstIteration = false;
             return success;
         }

@@ -114,8 +114,6 @@ TEST(LinearSolverTestSuite, testSparseCholesky)
   }
 }
 
-
-
 TEST(LinearSolverTestSuite, testSparseQR)
 {
   using namespace aslam::backend;
