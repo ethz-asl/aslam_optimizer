@@ -210,7 +210,7 @@ namespace aslam {
             _trustRegionPolicy->setSolver(_solver);
             _trustRegionPolicy->optimizationStarting(_J);
 
-            issueCallback(callback::Occasion::OPTIMIZATION_INITIALIZED);
+            issueCallback<callback::event::OPTIMIZATION_INITIALIZED>();
 
             // Loop until convergence
             while (srv.iterations <  _options.maxIterations &&
@@ -222,7 +222,7 @@ namespace aslam {
                 timeSolve.start();
                 bool solutionSuccess = _trustRegionPolicy->solveSystem(_J, previousIterationFailed, _options.nThreads, _dx);
                 timeSolve.stop();
-                issueCallback(callback::Occasion::LINEAR_SYSTEM_SOLVED);
+                issueCallback<callback::event::LINEAR_SYSTEM_SOLVED>();
 
                 if (!solutionSuccess) {
                     _options.verbose && std::cout << "[WARNING] System solution failed\n";
@@ -234,7 +234,7 @@ namespace aslam {
                     timeBackSub.start();
                     deltaX = applyStateUpdate();
                     timeBackSub.stop();
-                    issueCallback(callback::Occasion::DESIGN_VARIABLES_UPDATED);
+                    issueCallback<callback::event::DESIGN_VARIABLES_UPDATED>();
                     // This sets _J
                     timeErr.start();
                     evaluateError(true);
@@ -332,7 +332,7 @@ namespace aslam {
             {
               SM_ASSERT_TRUE(Exception, _solver.get() != NULL, "The solver is null");
               _J = _solver->evaluateError(_options.nThreads, useMEstimator, &_callbackManager);
-              _callbackManager.issueCallback({callback::Occasion::COST_UPDATED, _J, _p_J});
+              _callbackManager.issueCallback(callback::event::COST_UPDATED{_J, _p_J});
               return _J;
             }
 
@@ -416,9 +416,10 @@ namespace aslam {
             return _solver->Jacobian();
         }
 
-        void Optimizer2::issueCallback(callback::Occasion occasion){
+        template <typename Event>
+        void Optimizer2::issueCallback(){
           //TODO (HannesSommer) use ProceedInstruction value in the Optimizer
-          _callbackManager.issueCallback({occasion, _J, 0});
+          _callbackManager.issueCallback(Event{_J, 0});
         }
 
         } // namespace backend

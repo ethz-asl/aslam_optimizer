@@ -8,51 +8,74 @@ namespace backend {
 namespace callback {
 
 /**
- * \brief The callback occasion specifies the callback injection point in the optimizer.
+ * \brief The callback event specifies the callback injection point in the optimizer.
  */
-enum Occasion {
-  OPTIMIZATION_INITIALIZED,   /// \brief Right after the the initial cost has been computed.
-  ITERATION_START,            /// \brief At the start of an iteration before any work has been done, same state as in PER_ITERATION_END in previous iteration
-  ITERATION_END,              /// \brief At the end of an iteration after all work has been done, same state as in PER_ITERATION_START in next iteration
-  LINEAR_SYSTEM_SOLVED,       /// \brief Right after the linear system was solved
-  DESIGN_VARIABLES_UPDATED,   /// \brief Right after the design variables (X) have been updated.
-  RESIDUALS_UPDATED,          /// \brief After the raw squared error for each error term has been updated but before the m-estimators are applied to compute the effective cost. This is the right occasion to update m-estimators based on residuals.
-  COST_UPDATED,               /// \brief Right after the m-estimators are applied to compute the effective cost.
-};
 
-/**
- * \brief The argument class for the optimizer callbacks.
- */
-class Argument {
-public:
-  Argument(Occasion occasion_,
-           double currentCost_ = std::numeric_limits<double>::signaling_NaN(),
-           double previousLowestCost_ = std::numeric_limits<double>::signaling_NaN())
-      : occasion(occasion_), currentCost(currentCost_), previousLowestCost(previousLowestCost_) { }
+struct Event {
+  Event(
+      double currentCost_ = std::numeric_limits<double>::signaling_NaN(),
+      double previousLowestCost_ = std::numeric_limits<double>::signaling_NaN()
+      )
+      : currentCost(currentCost_), previousLowestCost(previousLowestCost_)
+  {
+  }
+  virtual ~Event() = default;
 
-  /**
-   * \brief the callback occasion. (where in the optimizer was it issued).
-   */
-  Occasion occasion;
   /**
    * \brief the most recently evaluated effective cost (J = sum of squared errors after the m-estimators being applied).
-   * Its relation to the optimization phase depends on the callback occasion:
+   * Its relation to the optimization phase depends on the callback event:
    *   OPTIMIZATION_INITIALIZED:      the initial value (before any optimization)
-   *   X_UPDATED, RESIDUALS_UPDATED:  undefined
+   *   DESIGN_VARIABLES_UPDATED, RESIDUALS_UPDATED:  undefined
    *   COST_UPDATED:                  the new cost after an update of the design variables
    */
   double currentCost;
   /**
    * \brief the most recently evaluated effective cost (J = sum of squared errors after the m-estimators being applied).
-   * Its relation to the optimization phase depends on the callback occasion:
-   *   OPTIMIZATION_INITIALIZED, X_UPDATED, RESIDUALS_UPDATED:  undefined
+   * Its relation to the optimization phase depends on the callback event:
+   *   OPTIMIZATION_INITIALIZED, DESIGN_VARIABLES_UPDATED, RESIDUALS_UPDATED:  undefined
    *   COST_UPDATED:                  the lowest previous cost so far (or -1 if this is the initial update)
    */
   double previousLowestCost;
-
-  //TODO (HannesSommer) specify more argument values
 };
 
+namespace event {
+
+/// \brief Right after the the initial cost has been computed.
+struct OPTIMIZATION_INITIALIZED : Event {
+  using Event::Event;
+};
+
+/// \brief At the start of an iteration before any work has been done, same state as in PER_ITERATION_END in previous iteration
+struct ITERATION_START : Event {
+  using Event::Event;
+};
+
+/// \brief At the end of an iteration after all work has been done, same state as in PER_ITERATION_START in next iteration
+struct ITERATION_END : Event {
+  using Event::Event;
+};
+
+/// \brief Right after the linear system was solved
+struct LINEAR_SYSTEM_SOLVED : Event {
+  using Event::Event;
+};
+
+/// \brief Right after the design variables (X) have been updated.
+struct DESIGN_VARIABLES_UPDATED : Event {
+  using Event::Event;
+};
+
+/// \brief After the raw squared error for each error term has been updated but before the m-estimators are applied to compute the effective cost. This is the right event to update m-estimators based on residuals.
+struct RESIDUALS_UPDATED : Event {
+  using Event::Event;
+};
+
+/// \brief Right after the m-estimators are applied to compute the effective cost.
+struct COST_UPDATED : Event {
+  using Event::Event;
+};
+
+}
 
 enum class ProceedInstruction {
   CONTINUE,
@@ -64,23 +87,23 @@ class OptimizerCallbackInterface {
 public:
   typedef boost::shared_ptr<OptimizerCallbackInterface> Ptr;
   virtual ~OptimizerCallbackInterface() {}
-  virtual ProceedInstruction operator() (const Argument & arg) = 0;
+  virtual ProceedInstruction operator() (const Event & arg) = 0;
 };
 
 template <typename Funct>
 class CallbackFunctor : public OptimizerCallbackInterface {
 public:
   CallbackFunctor(Funct f) : f(f) {}
-  virtual ProceedInstruction operator() (const Argument & arg) override {
+  virtual ProceedInstruction operator() (const Event & arg) override {
     return call(arg);
   }
 private:
-  template<typename F = Funct, std::is_same<ProceedInstruction, decltype((*static_cast<F*>(nullptr))(*static_cast<Argument*>(nullptr)))>* returnsProceedInstruction = nullptr>
-  ProceedInstruction call(const Argument & arg) override {
+  template<typename F = Funct, std::is_same<ProceedInstruction, decltype((*static_cast<F*>(nullptr))(*static_cast<Event*>(nullptr)))>* returnsProceedInstruction = nullptr>
+  ProceedInstruction call(const Event & arg) override {
     return withArg(arg, returnsProceedInstruction);
   }
   template<typename F = Funct, std::is_same<ProceedInstruction, decltype((*static_cast<F*>(nullptr))())>* returnsProceedInstruction = nullptr>
-  ProceedInstruction call(const Argument &) override {
+  ProceedInstruction call(const Event &) override {
     return withoutArg(returnsProceedInstruction);
   }
 
@@ -91,10 +114,10 @@ private:
     f();
     return ProceedInstruction::CONTINUE;
   }
-  ProceedInstruction withArg(const Argument & arg, std::true_type*) {
+  ProceedInstruction withArg(const Event & arg, std::true_type*) {
     return f(arg);
   }
-  ProceedInstruction withArg(const Argument & arg, std::false_type*) {
+  ProceedInstruction withArg(const Event & arg, std::false_type*) {
     f(arg);
     return ProceedInstruction::CONTINUE;
   }
@@ -114,7 +137,7 @@ public:
   OptimizerCallback(Funct funct) : OptimizerCallback(toOptimizerCallback(funct)) {}
 
   bool operator == (const OptimizerCallback & other) const { return impl_ == other.impl_; };
-  ProceedInstruction operator() (const Argument & arg){
+  ProceedInstruction operator() (const Event & arg){
     return (*impl_)(arg);
   }
 private:

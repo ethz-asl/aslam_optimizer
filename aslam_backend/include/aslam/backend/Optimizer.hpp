@@ -173,8 +173,9 @@ namespace aslam {
       /// \brief Set the initial lambda by looking at the entries of the Hessian matrix.
       void setInitialLambda();
 
-      /// \brief issue callback for given occasion
-      void issueCallback(callback::Occasion occasion);
+      /// \brief issue callback for given event
+      template <typename Event>
+      void issueCallback();
 
       /// \brief The current value of LM lambda.
       double _lambda;

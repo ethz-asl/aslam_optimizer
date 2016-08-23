@@ -158,9 +158,10 @@ namespace aslam {
       }
     }
 
-    void Optimizer::issueCallback(callback::Occasion occasion){
+    template <typename Event>
+    void Optimizer::issueCallback(){
       //TODO (HannesSommer) use ProceedInstruction value in the Optimizer
-      _callbackManager.issueCallback({occasion, _J, 0});
+      _callbackManager.issueCallback(Event{_J, 0});
     }
 
     /*
@@ -490,7 +491,7 @@ namespace aslam {
       timeErr.stop();
       _p_J = _J;
       srv.JStart = _p_J;
-      issueCallback(callback::Occasion::OPTIMIZATION_INITIALIZED);
+      issueCallback<callback::event::OPTIMIZATION_INITIALIZED>();
       // *** while not done
       _options.verbose && std::cout << "[" << srv.iterations << ".0]: J: " << _J << std::endl;
       // Set up the estimation problem.
@@ -539,7 +540,7 @@ namespace aslam {
           timeBackSub.start();
           deltaX = applyStateUpdate();
           timeBackSub.stop();
-          issueCallback(callback::Occasion::DESIGN_VARIABLES_UPDATED);
+          issueCallback<callback::event::DESIGN_VARIABLES_UPDATED>();
           // This sets _J
           timeErr.start();
           evaluateError();
@@ -671,12 +672,12 @@ namespace aslam {
       for (auto e : _errorTerms) {
         e->updateRawSquaredError();
       }
-      issueCallback(callback::Occasion::RESIDUALS_UPDATED);
+      issueCallback<callback::event::RESIDUALS_UPDATED>();
       _J = 0.0;
       for (auto e : _errorTerms) {
         _J += e->getSquaredError();
       }
-      issueCallback(callback::Occasion::COST_UPDATED);
+      issueCallback<callback::event::COST_UPDATED>();
       return _J;
     }
 

@@ -113,7 +113,7 @@ void OptimizerRprop::optimizeImplementation()
 
   for ( ; _options.maxIterations == -1 || _status.numIterations < static_cast<size_t>(_options.maxIterations); ++_status.numIterations) {
 
-    _callbackManager.issueCallback( {callback::Occasion::ITERATION_START} );
+    _callbackManager.issueCallback( callback::event::ITERATION_START{} );
 
     _status.convergence = ConvergenceStatus::IN_PROGRESS;
 
@@ -236,7 +236,7 @@ void OptimizerRprop::optimizeImplementation()
     timeUpdate.start();
     problemManager().applyStateUpdate(_dx);
     timeUpdate.stop();
-    _callbackManager.issueCallback( {callback::Occasion::DESIGN_VARIABLES_UPDATED} );
+    _callbackManager.issueCallback( callback::event::DESIGN_VARIABLES_UPDATED{} );
 
     _status.maxDeltaX = _dx.cwiseAbs().maxCoeff();
     if (_status.maxDeltaX < _options.convergenceDeltaX) {
@@ -260,7 +260,7 @@ void OptimizerRprop::optimizeImplementation()
                          "\tdx: " << _dx.transpose() << std::endl <<
                          "\tdelta: " << _delta.transpose());
 
-    _callbackManager.issueCallback( {callback::Occasion::ITERATION_END} );
+    _callbackManager.issueCallback( callback::event::ITERATION_END{} );
 
   }
 
