@@ -122,6 +122,7 @@ void OptimizerBFGS::optimizeImplementation()
       const Eigen::VectorXd dv = problemManager().getFlattenedDesignVariableParameters();
 
       // perform line search
+      _callbackManager.issueCallback( {callback::Occasion::DESIGN_VARIABLE_UPDATE_COMPUTED} );
       bool lsSuccess = _linesearch.lineSearchWolfe12();
       _callbackManager.issueCallback( {callback::Occasion::DESIGN_VARIABLES_UPDATED} );
 

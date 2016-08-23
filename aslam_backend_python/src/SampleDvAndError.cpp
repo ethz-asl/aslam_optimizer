@@ -8,11 +8,16 @@
 using namespace boost::python;
 using namespace aslam::backend;
 
+Eigen::Vector2d getValue(const Point2d& p) {
+  return p._v;
+}
+
 void exportSampleDvAndError()
 {
 
     class_<Point2d, boost::shared_ptr<Point2d>, bases<DesignVariable> >
       ("Point2d", init<const Eigen::Vector2d&>("Point2d(vector2d v): Constructor"))
+      .add_property("_v", &getValue)
       ;
 
     class_<LinearErr, boost::shared_ptr<LinearErr>, bases< aslam::backend::ErrorTermFs<2> > >
@@ -28,10 +33,9 @@ void exportSampleDvAndError()
       ;
 
     class_<TestNonSquaredError, boost::shared_ptr<TestNonSquaredError>, bases<ScalarNonSquaredErrorTerm> >
-      ("TestNonSquaredError", init<Point2d*, const TestNonSquaredError::grad_t&>("TestNonSquaredError(Point2d p, Vector2d grad): Constructor"))
-      .def_readwrite("_p", &TestNonSquaredError::_p)
-      .def_readwrite("_grad", &TestNonSquaredError::_grad)
-      .def_readwrite("_p2d", &TestNonSquaredError::_p2d)
+      ("TestNonSquaredError", init<Point2d*, const double, const double>("TestNonSquaredError(Point2d p, double x, double y): Constructor"))
+      .def_readwrite("_y", &TestNonSquaredError::_y)
+      .def_readwrite("_dv", &TestNonSquaredError::_dv)
       ;
 
 }

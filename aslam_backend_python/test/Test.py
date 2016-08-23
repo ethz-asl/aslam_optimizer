@@ -47,34 +47,34 @@ class TestRprop(unittest.TestCase):
         optimizer = ab.OptimizerRprop(options)
         problem = ab.OptimizationProblem()
         
-        D = 2
-        E = 3
-        
-        # Add some design variables.
-        p2ds = [];
-        for d in range(0, D):
-          point = ab.Point2d(np.array([d, d]))
-          p2ds.append(point);
-          problem.addDesignVariable(point);
-          point.setBlockIndex(d);
-          point.setActive(True);
+        a = 1.0
+        b = 2.0
+        stddev = 0.1
+                
+        # Add a design variable
+        point = ab.Point2d(np.array([1., 1.]))
+        problem.addDesignVariable(point)
+        point.setBlockIndex(0)
+        point.setActive(True)
         
         # Add some error terms.
+        numErrors = 1000
         errors = [];
-        for e in range(0, E):
-          for d in range(0, D):
-            grad = np.array( [d+1, e+1] );
-            err = ab.TestNonSquaredError(p2ds[d], grad);
-            err._p = 1.0;
-            errors.append(err);
-            problem.addScalarNonSquaredErrorTerm(err);
+        for i in range(0, numErrors):
+          x = float(i)
+          y = a + b*x + stddev*np.random.randn()
+          err = ab.TestNonSquaredError(point, x, y)
+          errors.append(err)
+          problem.addScalarNonSquaredErrorTerm(err)
             
         # Now let's optimize.
-        optimizer.setProblem(problem);
-        optimizer.checkProblemSetup();
-        optimizer.optimize();
+        optimizer.setProblem(problem)
+        optimizer.checkProblemSetup()
+        optimizer.optimize()
     
-        self.assertLessEqual(optimizer.status.gradientNorm, 1e-3);
+        self.assertLessEqual(optimizer.status.gradientNorm, options.convergenceGradientNorm);
+        self.assertAlmostEqual(point._v[0], a, delta=1e-1)
+        self.assertAlmostEqual(point._v[1], b, delta=1e-1)
         
 class TestMetropolisHastings(unittest.TestCase):
     def test_simple_sampling_problem(self):
@@ -88,20 +88,19 @@ class TestMetropolisHastings(unittest.TestCase):
 
         # Add a scalar design variables.
         point = ab.Point2d(np.array([0, 0]))
-        point.setBlockIndex(0);
-        point.setActive(True);
-        negLogDensity.addDesignVariable(point);
+        point.setBlockIndex(0)
+        point.setActive(True)
+        negLogDensity.addDesignVariable(point)
 
         # Add the error term.
-        grad = np.array( [-1., -1.] );
-        err = ab.TestNonSquaredError(point, grad);
-        err._p = 0.0; # set mean
-        negLogDensity.addScalarNonSquaredErrorTerm(err);
+        err = ab.TestNonSquaredError(point, -1.0, -1.0)
+        err._p = 0.0 # set mean
+        negLogDensity.addScalarNonSquaredErrorTerm(err)
 
         # Now let's sample.
-        sampler.setNegativeLogDensity(negLogDensity);
-        sampler.checkNegativeLogDensitySetup();
-        sampler.run(10000);
+        sampler.setNegativeLogDensity(negLogDensity)
+        sampler.checkNegativeLogDensitySetup()
+        sampler.run(10000)
         
 if __name__ == '__main__':
     import rostest

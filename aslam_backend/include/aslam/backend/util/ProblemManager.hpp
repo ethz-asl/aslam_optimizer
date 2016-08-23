@@ -103,6 +103,10 @@ class ProblemManager {
   /// \brief compute the current gradient of the objective function
   void computeGradient(RowVectorType& outGrad, size_t nThreads, bool useMEstimator, bool applyDvScaling, bool useDenseJacobianContainer);
 
+  /// \brief compute the current gradient of the objective function for a certain range of error terms
+  void computeGradient(RowVectorType& outGrad, size_t startIdx, size_t endIdx, size_t nThreads,
+                        bool useMEstimator, bool applyDvScaling, bool useDenseJacobianContainer);
+
   /// \brief Apply the scaling of the design variables to \p outGrad
   void applyDesignVariableScaling(RowVectorType& outGrad) const;
 
