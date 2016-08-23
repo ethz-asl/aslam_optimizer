@@ -25,6 +25,8 @@ class CacheInterface {
   void invalidate() {
     _isCacheValidV = _isCacheValidJ = false;
   }
+  bool isCacheValidV() const { return _isCacheValidV; }
+  bool isCacheValidJ() const { return _isCacheValidJ; }
  protected:
   mutable bool _isCacheValidV; /// \brief Is the cache for the error valid?
   mutable bool _isCacheValidJ; /// \brief Is the cache for the Jacobian valid?
