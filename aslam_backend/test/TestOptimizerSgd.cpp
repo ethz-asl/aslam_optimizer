@@ -21,16 +21,17 @@ TEST(OptimizerStochasticGradientDescentTestSuite, testLearningRateScheduleConsta
     using namespace aslam::backend;
     {
       LearningRateScheduleConstant schedule(2.0);
-      EXPECT_DOUBLE_EQ(-2.0, schedule.step(0, 0, RowVectorType::Ones(1,1))[0]);
-      EXPECT_DOUBLE_EQ(-2.0, schedule.step(0, 1, RowVectorType::Ones(1,1))[0]);
+      schedule.initialize(1);
+      EXPECT_DOUBLE_EQ(-2.0, schedule.computeDx(0, 0, RowVectorType::Ones(1,1))[0]);
+      EXPECT_DOUBLE_EQ(-2.0, schedule.computeDx(0, 1, RowVectorType::Ones(1,1))[0]);
     }
     {
       sm::BoostPropertyTree pt;
-      pt.setDouble("constant", -2.0);
+      pt.setDouble("lr", -2.0);
       EXPECT_ANY_THROW(LearningRateScheduleConstant schedule(pt));
-      pt.setDouble("constant", 2.0);
+      pt.setDouble("lr", 2.0);
       LearningRateScheduleConstant schedule(pt);
-      EXPECT_DOUBLE_EQ(pt.getDouble("constant"), schedule.rate());
+      EXPECT_DOUBLE_EQ(pt.getDouble("lr"), schedule.getLr());
     }
   } catch (const std::exception& e) {
     FAIL() << e.what();
@@ -43,17 +44,18 @@ TEST(OptimizerStochasticGradientDescentTestSuite, testLearningRateScheduleOptima
     using namespace aslam::backend;
     {
       LearningRateScheduleOptimal schedule(2.0, 0.5);
-      EXPECT_DOUBLE_EQ(-2.0, schedule.step(0, 0, RowVectorType::Ones(1,1))[0]);
-      EXPECT_DOUBLE_EQ(-2.*2.0/(1.0 + 2.0*1.0/0.5), schedule.step(0, 1, 2.*RowVectorType::Ones(1,1))[0]);
+      schedule.initialize(1);
+      EXPECT_DOUBLE_EQ(-2.0, schedule.computeDx(0, 0, RowVectorType::Ones(1,1))[0]);
+      EXPECT_DOUBLE_EQ(-2.*2.0/(1.0 + 2.0*1.0/0.5), schedule.computeDx(0, 1, 2.*RowVectorType::Ones(1,1))[0]);
     }
     {
       sm::BoostPropertyTree pt;
-      pt.setDouble("initialRate", 2.0);
+      pt.setDouble("lr", 2.0);
       pt.setDouble("tau", -2.0);
       EXPECT_ANY_THROW(LearningRateScheduleOptimal schedule(pt));
       pt.setDouble("tau", 2.0);
       LearningRateScheduleOptimal schedule(pt);
-      EXPECT_DOUBLE_EQ(pt.getDouble("tau"), schedule.tau());
+      EXPECT_DOUBLE_EQ(pt.getDouble("tau"), schedule.getTau());
     }
   } catch (const std::exception& e) {
     FAIL() << e.what();
@@ -66,18 +68,19 @@ TEST(OptimizerStochasticGradientDescentTestSuite, testLearningRateScheduleAdaDel
     using namespace aslam::backend;
     {
       LearningRateScheduleAdaDelta schedule(0.95, 1e-3);
+      schedule.initialize(1);
 //      EXPECT_DOUBLE_EQ(2.0, schedule.step(0, 0, RowVectorType::Ones(1,1))[0]);
 //      EXPECT_DOUBLE_EQ(2.0/(1.0 + 2.0*1.0/0.5), schedule.step(0, 1, RowVectorType::Ones(1,1))[0]);
     }
     {
       sm::BoostPropertyTree pt;
-      pt.setDouble("decayRate", 0.95);
-      pt.setDouble("eps", -1.);
+      pt.setDouble("rho", 0.95);
+      pt.setDouble("epsilon", -1.);
       EXPECT_ANY_THROW(LearningRateScheduleAdaDelta schedule(pt));
-      pt.setDouble("eps", 1e-3);
+      pt.setDouble("epsilon", 1e-3);
       LearningRateScheduleAdaDelta schedule(pt);
-      EXPECT_DOUBLE_EQ(pt.getDouble("decayRate"), schedule.decayRate());
-      EXPECT_DOUBLE_EQ(pt.getDouble("eps"), schedule.eps());
+      EXPECT_DOUBLE_EQ(pt.getDouble("rho"), schedule.getRho());
+      EXPECT_DOUBLE_EQ(pt.getDouble("epsilon"), schedule.getEpsilon());
     }
   } catch (const std::exception& e) {
     FAIL() << e.what();
@@ -131,7 +134,7 @@ TEST(OptimizerStochasticGradientDescentTestSuite, testOptimizerStochasticGradien
         SM_VERBOSE_STREAM("f(x) = " << dv._v[0] << " + " << dv._v[1] << " * x, error = " << test::evaluateError(*problem));
         cnt++;
         ASSERT_EQ(cnt, optimizer.getStatus().numIterations);
-        ASSERT_EQ(cnt, optimizer.getStatus().numSubIterations);
+        ASSERT_EQ(1, optimizer.getStatus().numSubIterations);
         ASSERT_EQ(i*ets.size() + cnt, optimizer.getStatus().numTotalIterations);
       }
     }

@@ -84,7 +84,7 @@ LearningRateScheduleConstant::LearningRateScheduleConstant(const double lr, cons
 LearningRateScheduleConstant::LearningRateScheduleConstant(const sm::PropertyTree& config)
     : LearningRateScheduleWithMomentumBase("constant", config)
 {
-  _lr = config.getDouble("constant");
+  _lr = config.getDouble("lr");
   this->check();
 }
 
@@ -114,13 +114,14 @@ LearningRateScheduleOptimal::LearningRateScheduleOptimal(const sm::PropertyTree&
     : LearningRateScheduleWithMomentumBase("optimal", config)
 {
   _tau = config.getDouble("tau");
-  _lr = config.getDouble("initialRate");
+  _lr = config.getDouble("lr");
   this->check();
 }
 
 RowVectorType LearningRateScheduleOptimal::computeDxImplementation(const std::size_t /*nEpoch*/, const std::size_t nTotal,
                                                                    const RowVectorType& gradient)
 {
+  SM_ASSERT_EQ(Exception, _currentRate.size(), gradient.size(), "Forgot to call initialize()?");
   const double rate = getLr() / (1.0 + getLr() * (static_cast<double>(nTotal)/_tau) );
   _currentRate.setConstant(1, gradient.size(), rate);
   return -rate * gradient;
@@ -211,7 +212,7 @@ LearningRateScheduleAdaDelta::LearningRateScheduleAdaDelta(const sm::PropertyTre
 {
   _lr = config.getDouble("lr", _lr);
   _rho = config.getDouble("rho", _rho);
-  _epsilon = config.getDouble("eps", _epsilon);
+  _epsilon = config.getDouble("epsilon", _epsilon);
   this->check();
 }
 
@@ -256,7 +257,7 @@ LearningRateScheduleAdam::LearningRateScheduleAdam(const sm::PropertyTree& confi
   _lr = config.getDouble("lr");
   _rho1 = config.getDouble("rho1", _rho1);
   _rho2 = config.getDouble("rho2", _rho2);
-  _epsilon = config.getDouble("eps", _epsilon);
+  _epsilon = config.getDouble("epsilon", _epsilon);
   _beta1 = _rho1;
   _beta2 = _rho2;
   this->check();
@@ -489,7 +490,7 @@ void OptimizerSgd::optimizeImplementation()
       }
       _callbackManager.issueCallback( {callback::Occasion::DESIGN_VARIABLES_UPDATED} );
 
-      SM_DEBUG_STREAM_NAMED("optimization.learningrate", "OptimizerSgd: Learning rate" << std::endl <<
+      SM_DEBUG_STREAM_NAMED("optimization.learningrate", "OptimizerSgd:" << std::endl <<
                             "\tgradient: " << gradient.format(fmt) << std::endl <<
                             "\tlearning rate: " << _options.learningRateSchedule->getCurrentRate().format(fmt) << std::endl <<
                             "\tdx:    " << dx.format(fmt));
