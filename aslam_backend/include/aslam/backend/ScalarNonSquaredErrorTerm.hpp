@@ -117,7 +117,7 @@ namespace aslam {
       const std::vector<DesignVariable*> & designVariables() const;
 
       void setTime(const sm::timing::NsecTime& t);
-      sm::timing::NsecTime getTime() { return _timestamp; }
+      sm::timing::NsecTime getTime() const { return _timestamp; }
 
       /// \brief Get the error term dimension. For compatibility with squared error term interface.
       inline size_t dimension() const { return 1UL; }
