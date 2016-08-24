@@ -19,6 +19,10 @@ class Registry {
     add(events, optCallback);
     return optCallback;
   }
+  template <typename T>
+  void add(std::type_index event, T callback) {
+    add({event}, callback);
+  }
 
   void add(std::initializer_list<std::type_index> events, const OptimizerCallback & callback);
 
