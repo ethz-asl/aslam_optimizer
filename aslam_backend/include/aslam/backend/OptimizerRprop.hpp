@@ -10,6 +10,14 @@ namespace sm {
 namespace aslam {
   namespace backend {
 
+    namespace callback {
+      namespace event {
+        struct DESIGN_VARIABLE_UPDATE_COMPUTED : Event {
+          using Event::Event;
+        };
+      }
+    }
+
     struct OptimizerOptionsRprop : public OptimizerOptionsBase
     {
       enum Method { RPROP_PLUS, RPROP_MINUS, IRPROP_MINUS, IRPROP_PLUS };

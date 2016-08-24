@@ -7,6 +7,7 @@
 #include <aslam/backend/OptimizerRprop.hpp>
 #include <aslam/backend/OptimizerBFGS.hpp>
 #include <aslam/backend/ScalarNonSquaredErrorTerm.hpp>
+#include <aslam/python/ExportOptimizerCallbackEvent.hpp>
 #include <boost/shared_ptr.hpp>
 #include <sm/PropertyTree.hpp>
 
@@ -277,6 +278,7 @@ void exportOptimizer()
         .def("__str__", &toString<OptimizerOptionsRprop>)
         ;
 
+    aslam::python::exportEvent<callback::event::DESIGN_VARIABLE_UPDATE_COMPUTED>("EVENT_DESIGN_VARIABLE_UPDATE_COMPUTED", "");
 
     class_<OptimizerRprop, boost::shared_ptr<OptimizerRprop>, bases<OptimizerProblemManagerBase> >("OptimizerRprop", init<>("OptimizerRprop(): Constructor with default options"))
         .def(init<const OptimizerOptionsRprop&>("OptimizerRprop(OptimizerOptionsRprop options): Constructor with custom options"))
