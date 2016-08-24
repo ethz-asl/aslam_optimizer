@@ -1,5 +1,6 @@
 #include <numpy_eigen/boost_python_headers.hpp>
 
+void exportOptimizerCallback();
 void exportOptimizer();
 void exportOptimizerOptions();
 void exportOptimizationProblem();
@@ -14,6 +15,7 @@ void exportBackendExpressions();
 
 void exportBackend()
 {
+  exportOptimizerCallback();
   exportOptimizer();
   exportOptimizerOptions();
   exportOptimizationProblem();
