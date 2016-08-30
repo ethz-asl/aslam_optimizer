@@ -36,7 +36,7 @@ namespace aslam {
       typedef boost::shared_ptr<aslam::backend::ErrorTerm> Ptr;
 
       ErrorTerm();
-      virtual ~ErrorTerm();
+      virtual ~ErrorTerm() {}
 
       /// \brief evaluate the error term and return the effective squared error.
       ///        This is equivalent to first call updateRawSquaredError() and then taking the result of getSquaredError();
@@ -48,10 +48,9 @@ namespace aslam {
 
       /// \brief update (compute and store) the raw squared error
       ///        After this is called, the _squaredError is filled in with \f$ \mathbf e^T \mathbf R^{-1} \mathbf e \f$
-      double updateRawSquaredError();
-
-      /// \brief Get the current, weighted squared error, i.e. with the M-estimator weight already applied.
-      double getSquaredError();
+      double updateRawSquaredError() {
+        return _squaredError = evaluateErrorImplementation();
+      }
 
       /// \brief evaluate the Jacobians.
       void evaluateJacobians(JacobianContainer & outJacobians);
@@ -66,7 +65,7 @@ namespace aslam {
       /// \brief get the current value of the error.
       /// This was put here to make the python interface easier to generate. It doesn't
       /// fit for quadratic integral terms so it may go away in future versions.
-      Eigen::VectorXd vsError() const;
+      Eigen::VectorXd vsError() const { return vsErrorImplementation(); }
 
       virtual void getInvR(Eigen::MatrixXd& invR) const = 0;
       virtual Eigen::MatrixXd vsInvR() const = 0;
@@ -85,9 +84,9 @@ namespace aslam {
       void clearMEstimatorPolicy();
 
       /// \brief compute the M-estimator weight from a squared error.
-      double getMEstimatorWeight(double squaredError) const;
+      double getMEstimatorWeight(double squaredError) const { return _mEstimatorPolicy->getWeight(squaredError); }
 
-      double getCurrentMEstimatorWeight() const;
+      double getCurrentMEstimatorWeight() const { return getMEstimatorWeight(_squaredError); }
 
       /// \brief get the name of the M-Estimator.
       std::string getMEstimatorName();
@@ -100,22 +99,32 @@ namespace aslam {
       void buildHessian(SparseBlockMatrix& outHessian, Eigen::VectorXd& outRhs, bool useMEstimator) ;
 
       /// \brief How many design variables is this error term connected to?
-      size_t numDesignVariables() const;
+      size_t numDesignVariables() const { return _designVariables.size(); }
 
       /// \brief Get design variable i.
-      DesignVariable* designVariable(size_t i);
+      DesignVariable* designVariable(size_t i)
+      {
+        SM_ASSERT_LT_DBG(aslam::IndexOutOfBoundsException, i, _designVariables.size(), "index out of bounds");
+        return _designVariables[i];
+      }
 
       /// \brief Get design variable i.
-      const DesignVariable* designVariable(size_t i) const;
+      const DesignVariable* designVariable(size_t i) const
+      {
+        SM_ASSERT_LT_DBG(aslam::IndexOutOfBoundsException, i, _designVariables.size(), "index out of bounds");
+        return _designVariables[i];
+      }
+
+      /// \brief Get the current, weighted squared error, i.e. with the M-estimator weight already applied. (DEPRECATED : use one of the alternatives below)
+      double getSquaredError() { return getWeightedSquaredError(); }
 
       /// \brief Get the squared error (weighted by the M-estimator policy)
-      double getWeightedSquaredError() const;
+      double getWeightedSquaredError() const { return getCurrentMEstimatorWeight() * _squaredError; }
 
-      // \brief Get the squared error (before weighting by the M-estimator policy)
-      double getRawSquaredError() const;
+      /// \brief Get the squared error (before weighting by the M-estimator policy)
+      double getRawSquaredError() const { return _squaredError; }
 
-
-      double getSquaredError(bool useMEstimator)const {
+      double getSquaredError(bool useMEstimator) const {
         return useMEstimator ? getWeightedSquaredError() : getRawSquaredError();
       }
 
@@ -123,13 +132,13 @@ namespace aslam {
       void getDesignVariables(DesignVariable::set_t& dvs);
 
       /// \breif Get the error term dimension
-      size_t dimension() const;
+      size_t dimension() const { return getDimensionImplementation(); }
 
       /// \brief Get the design variables
       const std::vector<DesignVariable*> & designVariables() const;
 
       /// \brief Get the column base of this error term in the Jacobian matrix.
-      size_t rowBase() const;
+      size_t rowBase() const { return _rowBase; }
 
       /// \brief Set the row base of this error term in the Jacobian matrix.
       void setRowBase(size_t);
@@ -193,7 +202,6 @@ namespace aslam {
 
       sm::timing::NsecTime _timestamp;
     };
-
 
 
     /**
