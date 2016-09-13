@@ -44,7 +44,7 @@ TEST(OptimizerBFGSTestSuite, testBFGS)
     // Now let's optimize.
     OptimizerBFGS::Options options;
     options.maxIterations = 500;
-    options.numThreadsGradient = 8;
+    options.numThreadsJacobian = 8;
     options.convergenceGradientNorm = 0.0;
     options.convergenceDeltaX = 0.0;
     EXPECT_ANY_THROW(options.check());

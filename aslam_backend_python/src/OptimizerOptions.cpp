@@ -33,7 +33,7 @@ void exportOptimizerOptions()
     .def_readwrite("maxIterations",&Optimizer2Options::maxIterations)
     .def_readwrite("verbose",&Optimizer2Options::verbose)
     .def_readwrite("numThreadsError", &Optimizer2Options::numThreadsError)
-    .def_readwrite("numThreadsGradient", &Optimizer2Options::numThreadsGradient)
+    .def_readwrite("numThreadsJacobian", &Optimizer2Options::numThreadsJacobian)
     .def_readwrite("linearSolver",&Optimizer2Options::linearSystemSolver)
     .def_readwrite("trustRegionPolicy", &Optimizer2Options::trustRegionPolicy)
     ;

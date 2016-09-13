@@ -28,7 +28,7 @@ OptimizerOptionsBase::OptimizerOptionsBase(const sm::PropertyTree& config) {
   convergenceDeltaX = config.getDouble("convergenceDeltaX", convergenceDeltaX);
   convergenceDeltaError = config.getDouble("convergenceDeltaError", convergenceDeltaError);
   maxIterations = config.getInt("maxIterations", maxIterations);
-  numThreadsGradient = config.getInt("numThreadsGradient", numThreadsGradient);
+  numThreadsJacobian = config.getInt("numThreadsJacobian", numThreadsJacobian);
   numThreadsError = config.getInt("numThreadsError", numThreadsError);
 
   this->check();
@@ -50,7 +50,7 @@ std::ostream& operator<<(std::ostream& out, const aslam::backend::OptimizerOptio
   out << "\tconvergenceDeltaX: " << options.convergenceDeltaX << std::endl;
   out << "\tconvergenceDeltaError: " << options.convergenceDeltaError << std::endl;
   out << "\tmaxIterations: " << options.maxIterations << std::endl;
-  out << "\tnumThreadsGradient: " << options.numThreadsGradient << std::endl;
+  out << "\tnumThreadsJacobian: " << options.numThreadsJacobian << std::endl;
   out << "\tnumThreadsError: " << options.numThreadsError;
   return out;
 }

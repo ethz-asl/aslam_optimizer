@@ -50,7 +50,7 @@ std::ostream& operator<<(std::ostream& out, const aslam::backend::OptimizerOptio
 
 OptimizerBFGS::OptimizerBFGS(const OptimizerOptionsBFGS& options)
     : _options(options),
-      _linesearch(getCostFunction<false,true,false,true,true>(problemManager(), false, _options.useDenseJacobianContainer, false, _options.numThreadsGradient, _options.numThreadsError), _options.linesearch)
+      _linesearch(getCostFunction<false,true,false,true,true>(problemManager(), false, _options.useDenseJacobianContainer, false, _options.numThreadsJacobian, _options.numThreadsError), _options.linesearch)
 {
   _options.check();
   _linesearch.setEvaluateErrorCallback( [&]() { _status.numObjectiveEvaluations++; } );

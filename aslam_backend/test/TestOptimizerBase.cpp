@@ -36,7 +36,7 @@ class TestOptimizer : public OptimizerProblemManagerBase
     _status.numObjectiveEvaluations++;
     _status.error += _status.deltaError;
     RowVectorType gradient;
-    _problemManager.computeGradient(gradient, _options.numThreadsGradient, true, true, true);
+    _problemManager.computeGradient(gradient, _options.numThreadsJacobian, true, true, true);
     _status.numDerivativeEvaluations++;
     _status.gradientNorm = 0.0; // optimizer should stop due to this criterion
     _status.maxDeltaX = 1.0;
@@ -94,7 +94,7 @@ TEST(OptimizerTestSuite, testOptimizerOptions)
     pt.setDouble("convergenceDeltaX", 1.0);
     pt.setDouble("convergenceDeltaError", 1.0);
     pt.setInt("maxIterations", 1);
-    pt.setInt("numThreadsGradient", 1);
+    pt.setInt("numThreadsJacobian", 1);
     pt.setInt("numThreadsError", 4);
     EXPECT_ANY_THROW(OptimizerOptionsBase options(pt)); // invalid option convergenceGradientNorm
     pt.setDouble("convergenceGradientNorm", 1.0);
@@ -103,7 +103,7 @@ TEST(OptimizerTestSuite, testOptimizerOptions)
     EXPECT_DOUBLE_EQ(pt.getDouble("convergenceDeltaX"), options.convergenceDeltaX);
     EXPECT_DOUBLE_EQ(pt.getDouble("convergenceDeltaError"), options.convergenceDeltaError);
     EXPECT_EQ(pt.getInt("maxIterations"), options.maxIterations);
-    EXPECT_EQ(pt.getInt("numThreadsGradient"), options.numThreadsGradient);
+    EXPECT_EQ(pt.getInt("numThreadsJacobian"), options.numThreadsJacobian);
     EXPECT_EQ(pt.getInt("numThreadsError"), options.numThreadsError);
   }
 }

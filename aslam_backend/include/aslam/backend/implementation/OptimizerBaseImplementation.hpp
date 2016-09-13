@@ -23,7 +23,7 @@ inline void OptimizerOptionsBase::serialize(Archive & ar, const unsigned int /*v
   ar & BOOST_SERIALIZATION_NVP(convergenceDeltaX);
   ar & BOOST_SERIALIZATION_NVP(convergenceDeltaError);
   ar & BOOST_SERIALIZATION_NVP(maxIterations);
-  ar & BOOST_SERIALIZATION_NVP(numThreadsGradient);
+  ar & BOOST_SERIALIZATION_NVP(numThreadsJacobian);
   ar & BOOST_SERIALIZATION_NVP(numThreadsError);
 }
 

@@ -54,7 +54,7 @@ namespace aslam {
           options.doSchurComplement = config.getBool("doSchurComplement", options.doSchurComplement);
           options.verbose = config.getBool("verbose", options.verbose);
           options.linearSolverMaximumFails = config.getInt("linearSolverMaximumFails", options.linearSolverMaximumFails);
-          options.numThreadsGradient = getDeprecatedPropertyIfItExists(config, "nThreads", "numThreadsGradient", (int)options.numThreadsGradient, static_cast<int(sm::PropertyTree::*)(const std::string&, int) const>(&sm::PropertyTree::getInt));
+          options.numThreadsJacobian = getDeprecatedPropertyIfItExists(config, "nThreads", "numThreadsJacobian", (int)options.numThreadsJacobian, static_cast<int(sm::PropertyTree::*)(const std::string&, int) const>(&sm::PropertyTree::getInt));
           options.numThreadsError = config.getInt("numThreadsError", options.numThreadsError);
           options.linearSystemSolver = linearSystemSolver;
           options.trustRegionPolicy = trustRegionPolicy;
@@ -371,7 +371,7 @@ namespace aslam {
               _options.verbose && std::cout << "Setting the diagonal conditioner to: " << lambda << ".\n";
               evaluateError(false);
               solver_sp->setConstantConditioner(lambda);
-              solver_sp->buildSystem(_options.numThreadsGradient, false);
+              solver_sp->buildSystem(_options.numThreadsJacobian, false);
               solver_sp->copyHessian(outH);
             }
 

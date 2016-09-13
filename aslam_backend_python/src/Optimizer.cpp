@@ -189,7 +189,7 @@ void exportOptimizer()
         .def_readwrite("convergenceDeltaX", &OptimizerOptionsBase::convergenceDeltaX)
         .def_readwrite("convergenceDeltaError", &OptimizerOptionsBase::convergenceDeltaError)
         .def_readwrite("maxIterations",&OptimizerOptionsBase::maxIterations)
-        .def_readwrite("numThreadsGradient", &OptimizerOptionsBase::numThreadsGradient)
+        .def_readwrite("numThreadsJacobian", &OptimizerOptionsBase::numThreadsJacobian)
         .def_readwrite("numThreadsError", &OptimizerOptionsBase::numThreadsError)
         .def("__str__", &toString<OptimizerOptionsBase>)
         ;

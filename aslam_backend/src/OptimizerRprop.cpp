@@ -119,7 +119,7 @@ void OptimizerRprop::optimizeImplementation()
 
     RowVectorType gradient;
     timeGrad.start();
-    problemManager().computeGradient(gradient, _options.numThreadsGradient, false /*useMEstimator*/, false /*use scaling */, _options.useDenseJacobianContainer /*useDenseJacobianContainer*/);
+    problemManager().computeGradient(gradient, _options.numThreadsJacobian, false /*useMEstimator*/, false /*use scaling */, _options.useDenseJacobianContainer /*useDenseJacobianContainer*/);
 
     // optionally add regularizer
     if (_options.regularizer) {

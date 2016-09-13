@@ -59,7 +59,7 @@ struct OptimizerOptionsBase
   double convergenceDeltaX = 0.0; /// \brief Convergence criterion on maximum absolute state update coefficient
   double convergenceDeltaError = 0.0; /// \brief Convergence criterion on change of objective/error
   int maxIterations = 100; /// \brief Stop if we reach this number of iterations without hitting any of the above stopping criteria. -1 for unlimited.
-  std::size_t numThreadsGradient = 4; /// \brief The number of threads to use for gradient computation
+  std::size_t numThreadsJacobian = 4; /// \brief The number of threads to use for gradient/Jacobian computation
   std::size_t numThreadsError = 1; /// \brief The number of threads to use for error computation
 
   /// \brief Checks options for sanity. Throws if any options is not valid.
