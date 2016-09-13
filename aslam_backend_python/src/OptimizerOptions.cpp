@@ -27,16 +27,15 @@ void exportOptimizerOptions()
   using namespace boost::python;
   using namespace aslam::backend;
   class_<Optimizer2Options>("Optimizer2Options", init<>())
-    .def_readwrite("convergenceDeltaJ",&Optimizer2Options::convergenceDeltaJ)
+    .def_readwrite("convergenceDeltaObjective",&Optimizer2Options::convergenceDeltaObjective)
     .def_readwrite("convergenceDeltaX",&Optimizer2Options::convergenceDeltaX)
-
-      //.def_readwrite("doLevenbergMarquardt",&Optimizer2Options::doLevenbergMarquardt) 
     .def_readwrite("doSchurComplement",&Optimizer2Options::doSchurComplement)
     .def_readwrite("maxIterations",&Optimizer2Options::maxIterations)
     .def_readwrite("verbose",&Optimizer2Options::verbose)
+    .def_readwrite("numThreadsError", &Optimizer2Options::numThreadsError)
+    .def_readwrite("numThreadsGradient", &Optimizer2Options::numThreadsGradient)
     .def_readwrite("linearSolver",&Optimizer2Options::linearSystemSolver)
-    .def_readwrite("nThreads", &Optimizer2Options::nThreads)
-      .def_readwrite("trustRegionPolicy", &Optimizer2Options::trustRegionPolicy)
+    .def_readwrite("trustRegionPolicy", &Optimizer2Options::trustRegionPolicy)
     ;
 
 }
