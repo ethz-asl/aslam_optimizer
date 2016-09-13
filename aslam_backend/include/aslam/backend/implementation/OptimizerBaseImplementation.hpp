@@ -31,7 +31,7 @@ template<class Archive>
 inline void OptimizerStatus::serialize(Archive & ar, const unsigned int /*version*/) {
   ar & BOOST_SERIALIZATION_NVP(convergence);
   ar & BOOST_SERIALIZATION_NVP(numIterations);
-  ar & BOOST_SERIALIZATION_NVP(numDerivativeEvaluations);
+  ar & BOOST_SERIALIZATION_NVP(numJacobianEvaluations);
   ar & BOOST_SERIALIZATION_NVP(numErrorEvaluations);
   ar & BOOST_SERIALIZATION_NVP(gradientNorm);
   ar & BOOST_SERIALIZATION_NVP(maxDeltaX);

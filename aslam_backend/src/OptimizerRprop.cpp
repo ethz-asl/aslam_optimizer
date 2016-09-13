@@ -128,7 +128,7 @@ void OptimizerRprop::optimizeImplementation()
       SM_FINER_STREAM_NAMED("optimization", "RPROP: Regularization term gradient: " << jc.asDenseMatrix());
       gradient += jc.asDenseMatrix();
     }
-    _status.numDerivativeEvaluations++;
+    _status.numJacobianEvaluations++;
     timeGrad.stop();
 
     SM_ASSERT_TRUE_DBG(Exception, gradient.allFinite (), "Gradient " << gradient.format(IOFormat(2, DontAlignCols, ", ", ", ", "", "", "[", "]")) << " is not finite");

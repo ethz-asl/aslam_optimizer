@@ -54,7 +54,7 @@ OptimizerBFGS::OptimizerBFGS(const OptimizerOptionsBFGS& options)
 {
   _options.check();
   _linesearch.setEvaluateErrorCallback( [&]() { _status.numErrorEvaluations++; } );
-  _linesearch.setEvaluateGradientCallback( [&]() { _status.numDerivativeEvaluations++; });
+  _linesearch.setEvaluateGradientCallback( [&]() { _status.numJacobianEvaluations++; });
 }
 
 OptimizerBFGS::OptimizerBFGS()

@@ -92,7 +92,7 @@ struct OptimizerStatus
 
   ConvergenceStatus convergence = IN_PROGRESS;
   std::size_t numIterations = 0; /// \brief Number of iterations run
-  std::size_t numDerivativeEvaluations = 0; /// \brief Number of Jacobian/gradient evaluations performed
+  std::size_t numJacobianEvaluations = 0; /// \brief Number of Jacobian/gradient evaluations performed
   std::size_t numErrorEvaluations = 0; /// \brief Number of objective/error evaluations performed
   double gradientNorm = std::numeric_limits<double>::signaling_NaN(); /// \brief Norm of the gradient
   double maxDeltaX = std::numeric_limits<double>::signaling_NaN(); /// \brief Maximum absolute value of change in design variables

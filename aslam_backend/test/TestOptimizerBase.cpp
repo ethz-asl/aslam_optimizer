@@ -37,7 +37,7 @@ class TestOptimizer : public OptimizerProblemManagerBase
     _status.error += _status.deltaError;
     RowVectorType gradient;
     _problemManager.computeGradient(gradient, _options.numThreadsJacobian, true, true, true);
-    _status.numDerivativeEvaluations++;
+    _status.numJacobianEvaluations++;
     _status.gradientNorm = 0.0; // optimizer should stop due to this criterion
     _status.maxDeltaX = 1.0;
     _status.testValue += 1;
@@ -53,7 +53,7 @@ class TestOptimizer : public OptimizerProblemManagerBase
 void expectStatusInitialized(const OptimizerStatus& status)
 {
   EXPECT_EQ(0, status.numIterations);
-  EXPECT_EQ(0, status.numDerivativeEvaluations);
+  EXPECT_EQ(0, status.numJacobianEvaluations);
   EXPECT_EQ(0, status.numErrorEvaluations);
   EXPECT_DOUBLE_EQ(std::numeric_limits<double>::max(), status.error);
   EXPECT_TRUE(std::isnan(status.deltaError));
@@ -114,7 +114,7 @@ TEST(OptimizerTestSuite, testOptimizerStatus)
   expectStatusInitialized(status);
 
   status.numIterations++;
-  status.numDerivativeEvaluations++;
+  status.numJacobianEvaluations++;
   status.numErrorEvaluations++;
   status.convergence = ConvergenceStatus::FAILURE;
 
