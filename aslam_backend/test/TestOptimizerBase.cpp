@@ -71,7 +71,7 @@ TEST(OptimizerTestSuite, testOptimizerOptions)
     EXPECT_NO_THROW(options.check()); // Default options should be valid
 
     // Test some invalid options
-    options.convergenceDeltaObjective = -1.0;
+    options.convergenceDeltaError = -1.0;
     EXPECT_ANY_THROW(options.check());
     options = OptimizerOptionsBase(); // reset to default
 
@@ -92,7 +92,7 @@ TEST(OptimizerTestSuite, testOptimizerOptions)
     sm::BoostPropertyTree pt;
     pt.setDouble("convergenceGradientNorm", -1.0); // invalid
     pt.setDouble("convergenceDeltaX", 1.0);
-    pt.setDouble("convergenceDeltaObjective", 1.0);
+    pt.setDouble("convergenceDeltaError", 1.0);
     pt.setInt("maxIterations", 1);
     pt.setInt("numThreadsGradient", 1);
     pt.setInt("numThreadsError", 4);
@@ -101,7 +101,7 @@ TEST(OptimizerTestSuite, testOptimizerOptions)
     OptimizerOptionsBase options(pt);
     EXPECT_DOUBLE_EQ(pt.getDouble("convergenceGradientNorm"), options.convergenceGradientNorm);
     EXPECT_DOUBLE_EQ(pt.getDouble("convergenceDeltaX"), options.convergenceDeltaX);
-    EXPECT_DOUBLE_EQ(pt.getDouble("convergenceDeltaObjective"), options.convergenceDeltaObjective);
+    EXPECT_DOUBLE_EQ(pt.getDouble("convergenceDeltaError"), options.convergenceDeltaError);
     EXPECT_EQ(pt.getInt("maxIterations"), options.maxIterations);
     EXPECT_EQ(pt.getInt("numThreadsGradient"), options.numThreadsGradient);
     EXPECT_EQ(pt.getInt("numThreadsError"), options.numThreadsError);
@@ -127,7 +127,7 @@ TEST(OptimizerTestSuite, testOptimizerBase)
   try
   {
     TestOptimizerOptions options;
-    options.convergenceDeltaObjective = 0.0;
+    options.convergenceDeltaError = 0.0;
     options.convergenceDeltaX = 0.0;
     options.convergenceGradientNorm = 1e-12;
     options.maxIterations = 1;

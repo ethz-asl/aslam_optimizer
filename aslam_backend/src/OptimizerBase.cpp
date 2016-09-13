@@ -26,7 +26,7 @@ OptimizerOptionsBase::OptimizerOptionsBase(const sm::PropertyTree& config) {
 
   convergenceGradientNorm = config.getDouble("convergenceGradientNorm", convergenceGradientNorm);
   convergenceDeltaX = config.getDouble("convergenceDeltaX", convergenceDeltaX);
-  convergenceDeltaObjective = config.getDouble("convergenceDeltaObjective", convergenceDeltaObjective);
+  convergenceDeltaError = config.getDouble("convergenceDeltaError", convergenceDeltaError);
   maxIterations = config.getInt("maxIterations", maxIterations);
   numThreadsGradient = config.getInt("numThreadsGradient", numThreadsGradient);
   numThreadsError = config.getInt("numThreadsError", numThreadsError);
@@ -38,8 +38,8 @@ void OptimizerOptionsBase::check() const
 {
   SM_ASSERT_GE( Exception, convergenceGradientNorm, 0.0, "");
   SM_ASSERT_GE( Exception, convergenceDeltaX, 0.0, "");
-  SM_ASSERT_GE( Exception, convergenceDeltaObjective, 0.0, "");
-  SM_ASSERT_TRUE( Exception, convergenceDeltaX > 0.0 || convergenceGradientNorm > 0.0 || convergenceDeltaObjective > 0.0, "");
+  SM_ASSERT_GE( Exception, convergenceDeltaError, 0.0, "");
+  SM_ASSERT_TRUE( Exception, convergenceDeltaX > 0.0 || convergenceGradientNorm > 0.0 || convergenceDeltaError > 0.0, "");
   SM_ASSERT_GE( Exception, maxIterations, -1, "");
 }
 
@@ -48,7 +48,7 @@ std::ostream& operator<<(std::ostream& out, const aslam::backend::OptimizerOptio
   out << "OptimizerOptions:" << std::endl;
   out << "\tconvergenceGradientNorm: " << options.convergenceGradientNorm << std::endl;
   out << "\tconvergenceDeltaX: " << options.convergenceDeltaX << std::endl;
-  out << "\tconvergenceDeltaObjective: " << options.convergenceDeltaObjective << std::endl;
+  out << "\tconvergenceDeltaError: " << options.convergenceDeltaError << std::endl;
   out << "\tmaxIterations: " << options.maxIterations << std::endl;
   out << "\tnumThreadsGradient: " << options.numThreadsGradient << std::endl;
   out << "\tnumThreadsError: " << options.numThreadsError;
@@ -142,7 +142,7 @@ void OptimizerBase::updateConvergenceStatus()
     status().convergence = GRADIENT_NORM;
     return;
   }
-  if (fabs(status().deltaError) < getOptions().convergenceDeltaObjective)
+  if (fabs(status().deltaError) < getOptions().convergenceDeltaError)
   {
     status().convergence = DOBJECTIVE;
     return;

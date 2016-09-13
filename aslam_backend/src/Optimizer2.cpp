@@ -48,7 +48,7 @@ namespace aslam {
 
         Optimizer2::Optimizer2(const sm::PropertyTree& config, boost::shared_ptr<LinearSystemSolver> linearSystemSolver, boost::shared_ptr<TrustRegionPolicy> trustRegionPolicy) {
           Options options;
-          options.convergenceDeltaObjective = getDeprecatedPropertyIfItExists(config, "convergenceDeltaJ", "convergenceDeltaObjective", options.convergenceDeltaObjective, static_cast<double(sm::PropertyTree::*)(const std::string&, double) const>(&sm::PropertyTree::getDouble));
+          options.convergenceDeltaError = getDeprecatedPropertyIfItExists(config, "convergenceDeltaJ", "convergenceDeltaError", options.convergenceDeltaError, static_cast<double(sm::PropertyTree::*)(const std::string&, double) const>(&sm::PropertyTree::getDouble));
           options.convergenceDeltaX = config.getDouble("convergenceDeltaX", options.convergenceDeltaX);
           options.maxIterations = config.getInt("maxIterations", options.maxIterations);
           options.doSchurComplement = config.getBool("doSchurComplement", options.doSchurComplement);
@@ -173,7 +173,7 @@ namespace aslam {
             double & deltaX = _status.maxDeltaX;
             deltaX = _options.convergenceDeltaX + 1.0;
             double & deltaJ = _status.deltaError;
-            deltaJ = _options.convergenceDeltaObjective + 1.0;
+            deltaJ = _options.convergenceDeltaError + 1.0;
             bool previousIterationFailed = false;
             bool linearSolverFailure = false;
 
@@ -187,7 +187,7 @@ namespace aslam {
             while (srv.iterations <  _options.maxIterations &&
                    srv.failedIterations < _options.maxIterations &&
                    ((deltaX > _options.convergenceDeltaX &&
-                     fabs(deltaJ) > _options.convergenceDeltaObjective) ||
+                     fabs(deltaJ) > _options.convergenceDeltaError) ||
                     linearSolverFailure)) {
 
                 timeSolve.start();
@@ -249,7 +249,7 @@ namespace aslam {
               _status.convergence = FAILURE;
             } else if (deltaX <= _options.convergenceDeltaX) {
               _status.convergence = DX;
-            } else if (fabs(deltaJ) <= _options.convergenceDeltaObjective) {
+            } else if (fabs(deltaJ) <= _options.convergenceDeltaError) {
               _status.convergence = DOBJECTIVE;
             }
         }

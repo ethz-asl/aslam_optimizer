@@ -249,7 +249,7 @@ void OptimizerRprop::optimizeImplementation()
 
     if (_options.method == OptimizerOptionsRprop::IRPROP_PLUS) {
       _status.deltaError = problemManager().evaluateError(_options.numThreadsError) - _status.error;
-      if (fabs(_status.deltaError) < _options.convergenceDeltaObjective) {
+      if (fabs(_status.deltaError) < _options.convergenceDeltaError) {
         _status.convergence = ConvergenceStatus::DOBJECTIVE;
         SM_DEBUG_STREAM_NAMED("optimization", "RPROP: Change in error " << _status.deltaError <<
                               " is smaller than convergenceDObjective option -> terminating");

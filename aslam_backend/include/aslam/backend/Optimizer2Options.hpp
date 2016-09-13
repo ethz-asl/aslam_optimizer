@@ -17,7 +17,7 @@ namespace aslam {
         verbose(false),
         linearSolverMaximumFails(0)
       {
-        convergenceDeltaObjective = 1e-3;
+        convergenceDeltaError = 1e-3;
         convergenceDeltaX = 1e-3;
         maxIterations = 20;
       }

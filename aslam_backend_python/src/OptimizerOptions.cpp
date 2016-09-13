@@ -27,7 +27,7 @@ void exportOptimizerOptions()
   using namespace boost::python;
   using namespace aslam::backend;
   class_<Optimizer2Options>("Optimizer2Options", init<>())
-    .def_readwrite("convergenceDeltaObjective",&Optimizer2Options::convergenceDeltaObjective)
+    .def_readwrite("convergenceDeltaError",&Optimizer2Options::convergenceDeltaError)
     .def_readwrite("convergenceDeltaX",&Optimizer2Options::convergenceDeltaX)
     .def_readwrite("doSchurComplement",&Optimizer2Options::doSchurComplement)
     .def_readwrite("maxIterations",&Optimizer2Options::maxIterations)
