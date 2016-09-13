@@ -103,7 +103,7 @@ std::ostream& operator<<(std::ostream& out, const OptimizerStatus& ret)
   out << "\tobjective: " << ret.error << std::endl;
   out << "\tdobjective: " << ret.deltaError << std::endl;
   out << "\tmax dx: " << ret.maxDeltaX << std::endl;
-  out << "\tevals objective: " << ret.numObjectiveEvaluations << std::endl;
+  out << "\tevals objective: " << ret.numErrorEvaluations << std::endl;
   out << "\tevals derivative: " << ret.numDerivativeEvaluations;
   return out;
 }

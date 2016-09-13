@@ -147,7 +147,7 @@ void OptimizerRprop::optimizeImplementation()
     bool errorIncreased = false;
     if (_options.method == OptimizerOptionsRprop::IRPROP_PLUS) {
       _status.error = problemManager().evaluateError(_options.numThreadsError);
-      _status.numObjectiveEvaluations++;
+      _status.numErrorEvaluations++;
       errorIncreased = (_status.error - _prev_error) > 0.0;
       _prev_error = _status.error;
     }

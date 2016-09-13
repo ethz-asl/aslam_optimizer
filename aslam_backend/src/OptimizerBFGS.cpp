@@ -53,7 +53,7 @@ OptimizerBFGS::OptimizerBFGS(const OptimizerOptionsBFGS& options)
       _linesearch(getCostFunction<false,true,false,true,true>(problemManager(), false, _options.useDenseJacobianContainer, false, _options.numThreadsJacobian, _options.numThreadsError), _options.linesearch)
 {
   _options.check();
-  _linesearch.setEvaluateErrorCallback( [&]() { _status.numObjectiveEvaluations++; } );
+  _linesearch.setEvaluateErrorCallback( [&]() { _status.numErrorEvaluations++; } );
   _linesearch.setEvaluateGradientCallback( [&]() { _status.numDerivativeEvaluations++; });
 }
 
