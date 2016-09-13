@@ -75,9 +75,12 @@ void ProblemManager::initialize()
     _errorTermsNS.push_back(e);
     _numErrorTerms++;
   }
+  _dimErrorTermsS = 0;
   for (unsigned i = 0; i < _problem->numErrorTerms(); ++i) {
     ErrorTerm* e = _problem->errorTerm(i);
     _errorTermsS.push_back(e);
+    e->setRowBase(_dimErrorTermsS);
+    _dimErrorTermsS += e->dimension();
     _numErrorTerms++;
   }
   initEt.stop();

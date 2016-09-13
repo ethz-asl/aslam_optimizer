@@ -67,7 +67,7 @@ class ProblemManager {
   size_t numDesignVariables() const { return _designVariables.size(); };
 
   /// \brief Get the design variables
-  const std::vector<DesignVariable*>& designVariables() { return _designVariables; };
+  const std::vector<DesignVariable*>& designVariables() const { return _designVariables; };
 
   /// \brief how many scalar parameters (design variables with their minimal dimension)
   ///        are involved in the problem
@@ -75,6 +75,9 @@ class ProblemManager {
 
   /// \brief how many error terms are involved in the problem
   size_t numErrorTerms() const { return _numErrorTerms; }
+
+  /// \brief return the total dimension of all squared error terms together
+  size_t getTotalDimSquaredErrorTerms() const { return _dimErrorTermsS; }
 
   /// \brief Do a bunch of checks to see if the problem is well-defined. This includes checking that every error term is
   ///        hooked up to design variables and running finite differences on error terms where this is possible.
@@ -111,6 +114,9 @@ class ProblemManager {
   void addGradientForErrorTerm(JacobianContainerSparse<1>& jc, RowVectorType& J, ScalarNonSquaredErrorTerm* e, bool useMEstimator);
   void addGradientForErrorTerm(JacobianContainerDense<RowVectorType&, 1>& jc, ScalarNonSquaredErrorTerm* e, bool useMEstimator);
 
+  const std::vector<ErrorTerm*>& getErrorTerms() const {
+    return _errorTermsS;
+  }
  protected:
   /// \brief Set the initialized status
   void setInitialized(bool isInitialized) { _isInitialized = isInitialized; }
@@ -142,6 +148,9 @@ class ProblemManager {
 
   /// \brief the total number of error terms as the sum of squared and non-squared error terms
   std::size_t _numErrorTerms = 0;
+
+  /// \brief the total dimension of squared error terms
+  std::size_t _dimErrorTermsS = 0;
 
   /// \brief Whether the optimizer is correctly initialized
   bool _isInitialized = false;

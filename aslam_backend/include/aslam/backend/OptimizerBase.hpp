@@ -156,7 +156,7 @@ class OptimizerBase
   void reset();
 
   /// \brief Get the design variables
-  virtual const std::vector<DesignVariable*>& getDesignVariables() = 0;
+  virtual const std::vector<DesignVariable*>& getDesignVariables() const = 0;
 
   /// \brief Has the optimizer converged?
   inline bool isConverged() const ;

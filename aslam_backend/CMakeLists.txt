@@ -77,6 +77,7 @@ catkin_add_gtest(${PROJECT_NAME}_test
   test/TestLineSearch.cpp
   test/TestOptimizerBase.cpp
   test/TestOptimizer.cpp
+  test/TestOptimizer2.cpp
   test/TestOptimizerRprop.cpp
   test/TestOptimizerBFGS.cpp
   test/TestSamplerMcmc.cpp

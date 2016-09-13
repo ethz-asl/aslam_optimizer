@@ -11,20 +11,6 @@ namespace aslam {
       _mEstimatorPolicy = boost::make_shared<NoMEstimator>();
     }
 
-    ErrorTerm::~ErrorTerm()
-    {
-    }
-
-    double ErrorTerm::updateRawSquaredError()
-    {
-      return _squaredError = evaluateErrorImplementation();
-    }
-
-    double ErrorTerm::getSquaredError()
-    {
-      return _mEstimatorPolicy->getWeight(_squaredError) * _squaredError;
-    }
-
     /// \brief evaluate the Jacobians.
     void ErrorTerm::evaluateJacobians(JacobianContainer & outJ)
     {
@@ -55,40 +41,6 @@ namespace aslam {
       _mEstimatorPolicy = boost::make_shared<NoMEstimator>();
     }
 
-
-    /// \brief compute the M-estimator weight from a squared error.
-    double ErrorTerm::getMEstimatorWeight(double squaredError) const
-    {
-      return _mEstimatorPolicy->getWeight(squaredError);
-    }
-
-    /// \brief compute the M-estimator weight from a squared error.
-    double ErrorTerm::getCurrentMEstimatorWeight() const
-    {
-      return _mEstimatorPolicy->getWeight(_squaredError);
-    }
-
-  
-
-    /// \brief How many design varibles is this error term connected to?
-    size_t ErrorTerm::numDesignVariables() const
-    {
-      return _designVariables.size();
-    }
-
-    /// \brief Get design variable i.
-    DesignVariable* ErrorTerm::designVariable(size_t i)
-    {
-      SM_ASSERT_LT_DBG(aslam::IndexOutOfBoundsException, i, _designVariables.size(), "index out of bounds");
-      return _designVariables[i];
-    }
-
-    /// \brief Get design variable i.
-    const DesignVariable* ErrorTerm::designVariable(size_t i) const
-    {
-      SM_ASSERT_LT_DBG(aslam::IndexOutOfBoundsException, i, _designVariables.size(), "index out of bounds");
-      return _designVariables[i];
-    }
 
     void ErrorTerm::setDesignVariables(const std::vector<DesignVariable*>& designVariables)
     {
@@ -134,49 +86,19 @@ namespace aslam {
     }
 
 
-    Eigen::VectorXd ErrorTerm::vsError() const
-    {
-      return vsErrorImplementation();
-    }
-
     std::string ErrorTerm::getMEstimatorName()
     {
       return _mEstimatorPolicy->name();
     }
-
-    /// \brief Get the squared error (weighted by the M-estimator policy)
-    double ErrorTerm::getWeightedSquaredError() const
-    {
-      return _mEstimatorPolicy->getWeight(_squaredError) * _squaredError;
-    }
-
-    /// \brief Get the squared error (before weighting by the M-estimator policy)
-    double ErrorTerm::getRawSquaredError() const
-    {
-      return _squaredError;
-    }
-
 
     void ErrorTerm::getDesignVariables(DesignVariable::set_t& dvs)
     {
       dvs.insert(_designVariables.begin(), _designVariables.end());
     }
 
-    size_t ErrorTerm::dimension() const
-    {
-      return getDimensionImplementation();
-    }
-
-
     const std::vector<DesignVariable*>& ErrorTerm::designVariables() const
     {
       return _designVariables;
-    }
-
-    /// \brief Get the column base of this error term in the Jacobian matrix.
-    size_t ErrorTerm::rowBase() const
-    {
-      return _rowBase;
     }
 
     /// \brief Set the column base of this error term in the Jacobian matrix.

@@ -50,7 +50,7 @@ TEST(OptimizerTestSuite, testOptimizerMatrices)
     //   }
     // Now let's optimize.
     OptimizerOptions options;
-    options.verbose = true;
+    options.verbose = false;
     options.linearSolver = "dense";
     options.levenbergMarquardtLambdaInit = 10;
     options.doSchurComplement = false;
@@ -144,7 +144,6 @@ TEST(OptimizerTestSuite, testOptimizerNormalized)
       // set a random scaling:
       point->setScaling(scale);
       scale *= scale;
-      std::cout << "scale [" << p << "] " << point->scaling() << std::endl;
       p2d.push_back(point);
       problem.addDesignVariable(point);
       point->setBlockIndex(p);
@@ -157,13 +156,11 @@ TEST(OptimizerTestSuite, testOptimizerNormalized)
         boost::shared_ptr<LinearErr> err(new LinearErr(p2d[p].get()));
         e1.push_back(err);
         problem.addErrorTerm(err);
-        // SCOPED_TRACE("");
-        // testErrorTerm(err);
       }
     }
     // Now let's optimize.
     OptimizerOptions options;
-    options.verbose = true;
+    options.verbose = false;
     options.linearSolver = "dense";
     options.levenbergMarquardtLambdaInit = 10;
     options.levenbergMarquardtEstimateLambdaScale = 1;
