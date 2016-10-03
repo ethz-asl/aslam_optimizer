@@ -176,6 +176,8 @@ void exportBackendExpressions()
   exportDesignVariableMappedVector<6>();
   exportDesignVariableMappedVector<7>();
   exportDesignVariableMappedVector<8>();
+  exportDesignVariableMappedVector<9>();
+  exportDesignVariableMappedVector<10>();
 
   exportDesignVariableVector<1>();
   exportDesignVariableVector<2>();
@@ -185,6 +187,8 @@ void exportBackendExpressions()
   exportDesignVariableVector<6>();
   exportDesignVariableVector<7>();
   exportDesignVariableVector<8>();
+  exportDesignVariableVector<9>();
+  exportDesignVariableVector<10>();
     
   exportVectorExpression<1>();
   exportVectorExpression<2>();
