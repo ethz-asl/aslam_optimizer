@@ -71,15 +71,10 @@ namespace aslam {
 
     void EuclideanExpressionNodeMatrixMultiply::evaluateJacobiansImplementation(JacobianContainer & outJacobians) const
     {
-      double p1 = _p_rhs(0), p2 = _p_rhs(1), p3 = _p_rhs(2);
       Eigen::Matrix<double, 3,9> J_full;
-      J_full <<
-            p1, 0,  0, p2,  0,  0, p3,  0,  0,
-            0, p1,  0,  0, p2,  0,  0, p3,  0, 
-            0,  0, p1,  0,  0, p2,  0,  0, p3;
-
-        _lhs->evaluateJacobians(outJacobians, J_full); 				 // ## Set in the full 3x9 jacobian matrix
-        _rhs->evaluateJacobians(outJacobians, _A_lhs);
+      J_full << _p_rhs(0) * Eigen::Matrix3d::Identity(), _p_rhs(1) * Eigen::Matrix3d::Identity(), _p_rhs(2) * Eigen::Matrix3d::Identity();
+      _lhs->evaluateJacobians(outJacobians, J_full);
+      _rhs->evaluateJacobians(outJacobians, _A_lhs);
     }
 
     // ----------------------------
