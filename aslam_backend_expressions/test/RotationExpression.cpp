@@ -425,7 +425,7 @@ TEST(RotationExpressionNodeTestSuites, testMinimalDifferenceAndJacobian)
     quat.minimalDifferenceAndJacobian(quatInitial, minDist, M);
 
     // choose small
-    Eigen::Vector3d epsV; epsV.setRandom();epsV = epsV * 0.05;//epsV(0) = 0.001; epsV(1) = 0.001; epsV(2) = 0.001;
+    Eigen::Vector3d epsV; epsV.setRandom();epsV = epsV * 0.001;//epsV(0) = 0.001; epsV(1) = 0.001; epsV(2) = 0.001;
     double eps[3] = {epsV(0), epsV(1), epsV(2)};
     quat.update(eps, 3);
 

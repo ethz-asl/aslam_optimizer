@@ -12,7 +12,7 @@ struct FixedPointNumberTestSuites : public ::testing::Test  {
   constexpr static double eps = std::numeric_limits<TestFixedPointNumber>::epsilon();
 
   TestFixedPointNumber getRand() {
-    return TestFixedPointNumber((sm::random::rand() - 0.5) * 10);
+    return TestFixedPointNumber((sm::random::rand() - 0.5) * 4);
   }
 };
 
@@ -60,5 +60,6 @@ TYPED_TEST(FixedPointNumberTestSuites, testTimes)
 TYPED_TEST(FixedPointNumberTestSuites, testDivision)
 {
   TypeParam a = this->getRand(), b = this->getRand();
+  while(b.getNumerator() == 0) b = this->getRand();
   ASSERT_NEAR((double)(a / b), (double)a / (double)b, this->eps);
 }
