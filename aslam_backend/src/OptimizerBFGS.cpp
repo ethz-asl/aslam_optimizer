@@ -8,6 +8,11 @@
 #include <sm/PropertyTree.hpp>
 #include <sm/logging.hpp>
 
+/*
+ * The following BFGS implementation is based on https://github.com/scipy/scipy/blob/a81bc79ba38825139e97b14c91e158f4aabc0bed/scipy/optimize/optimize.py#L874.
+ * See /LICENSE_SciPy.txt for the SciPy license.
+ */
+
 namespace aslam {
 namespace backend {
 
