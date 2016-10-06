@@ -8,9 +8,6 @@
 #ifndef INCLUDE_ASLAM_BACKEND_CACHEINTERFACE_HPP_
 #define INCLUDE_ASLAM_BACKEND_CACHEINTERFACE_HPP_
 
-// standard includes
-#include <atomic>
-
 namespace aslam {
 namespace backend {
 

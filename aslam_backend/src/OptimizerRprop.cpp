@@ -257,6 +257,7 @@ void OptimizerRprop::optimizeImplementation()
     }
 
     SM_FINE_STREAM_NAMED("optimization", _status << std::endl <<
+                         "\tgradient: " << gradient << std::endl <<
                          "\tdx: " << _dx.transpose() << std::endl <<
                          "\tdelta: " << _delta.transpose());
 
