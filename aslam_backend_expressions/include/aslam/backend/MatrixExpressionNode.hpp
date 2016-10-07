@@ -21,6 +21,7 @@ class MatrixExpressionNode {
 
   /// \brief Evaluate the transformation matrix.
   Eigen::Matrix3d evaluate();
+  Eigen::Matrix3d toMatrix3x3() { return evaluate(); }
 
   /// \brief Evaluate the Jacobians
   void evaluateJacobians(JacobianContainer & outJacobians) const;

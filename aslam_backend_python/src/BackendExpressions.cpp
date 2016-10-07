@@ -12,6 +12,10 @@
 #include <aslam/backend/DesignVariableMappedVector.hpp>
 #include <aslam/backend/DesignVariableVector.hpp>
 
+#include <aslam/backend/MatrixBasic.hpp>
+#include <aslam/backend/MatrixExpression.hpp>
+#include <aslam/backend/MatrixExpressionNode.hpp>
+
 #include <aslam/backend/VectorExpression.hpp>
 #include <aslam/backend/VectorExpressionNode.hpp>
 
@@ -110,6 +114,8 @@ void exportBackendExpressions()
   HomogeneousPoint homogeneousPoint(Eigen::Vector4d::Random());
   HomogeneousExpression homogeneousExpression = homogeneousPoint.toExpression();
   TransformationBasic transformationBasic(rotationExpression, euclideanExpression);
+  MatrixBasic matrixBasic(Eigen::Matrix3d::Random());
+  MatrixExpression matrixExpression = matrixBasic.toExpression();
 
   class_<TransformationExpression,boost::shared_ptr<TransformationExpression> >("TransformationExpression", init<boost::shared_ptr<TransformationExpressionNode> >() )
     .def("toTransformationMatrix", &TransformationExpression::toTransformationMatrix)
@@ -167,6 +173,17 @@ void exportBackendExpressions()
     .def("toTransformationMatrix", &TransformationBasic::toTransformationMatrix)
   .def("getDesignVariables", &getDesignVariables<TransformationBasic>)
      ;
+
+  class_<MatrixExpression,boost::shared_ptr<MatrixExpression> >("MatrixExpression", init<boost::shared_ptr<MatrixExpressionNode> >() )
+    .def("toMatrix3x3", &MatrixExpression::toMatrix3x3)
+    .def(self * euclideanExpression)
+    .def("getDesignVariables", &getDesignVariables<MatrixExpression>)
+    ;
+  class_<MatrixBasic, boost::shared_ptr<MatrixBasic>, bases<DesignVariable> >("MatrixBasicDv", init<const Eigen::Matrix3d, const Eigen::Matrix3i>())
+    .def("toExpression", &MatrixBasic::toExpression)
+    .def("toMatrix3x3", &MatrixBasic::toMatrix3x3)
+    .def("getDesignVariables", &getDesignVariables<MatrixBasic>)
+    ;
 
   exportDesignVariableMappedVector<1>();
   exportDesignVariableMappedVector<2>();

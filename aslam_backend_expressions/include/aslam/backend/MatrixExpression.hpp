@@ -28,6 +28,7 @@ namespace aslam {
 
       /// \brief Evaluate the full transformation matrix.
       Eigen::Matrix3d evaluate() const;
+      Eigen::Matrix3d toMatrix3x3() const { return evaluate(); }
 
       /// \brief Evaluate the Jacobians in the form (1 - (S \delta v)^\times) \bar C
       void evaluateJacobians(JacobianContainer & outJacobians) const;
