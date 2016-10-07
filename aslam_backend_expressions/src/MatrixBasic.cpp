@@ -52,13 +52,6 @@ Eigen::Matrix3d MatrixBasic::evaluateImplementation() const {
   return _A;
 }
 
-///## will not be used
-void MatrixBasic::evaluateJacobiansImplementation(JacobianContainer & outJacobians) const {
-  if (minimalDimensionsImplementation() != 0) {
-    outJacobians.add(const_cast<MatrixBasic *>(this), Eigen::Matrix3d::Identity());
-  }
-}
-
 void MatrixBasic::evaluateJacobiansImplementation(JacobianContainer & outJacobians, const Eigen::MatrixXd & applyChainRule) const {
   if (minimalDimensionsImplementation() != 0) {
     outJacobians.add(const_cast<MatrixBasic*>(this), applyChainRule * _B);

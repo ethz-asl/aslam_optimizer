@@ -28,11 +28,6 @@ Eigen::Matrix3d MatrixExpression::evaluate() const
   return _root->evaluate();
 }
 
-/// \brief Evaluate the Jacobians
-void MatrixExpression::evaluateJacobians(JacobianContainer & outJacobians) const {
-  _root->evaluateJacobians(outJacobians);
-}
-
 EuclideanExpression MatrixExpression::operator*(const EuclideanExpression & p) const {
   boost::shared_ptr<EuclideanExpressionNode> newRoot(new EuclideanExpressionNodeMatrixMultiply(_root, p._root));  // ##
   return EuclideanExpression(newRoot);

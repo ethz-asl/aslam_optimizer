@@ -16,10 +16,6 @@ Eigen::Matrix3d MatrixExpressionNode::evaluate() {
   return evaluateImplementation();
 }
 
-void MatrixExpressionNode::evaluateJacobians(JacobianContainer & outJacobians) const {
-  evaluateJacobiansImplementation(outJacobians);
-}
-
 void MatrixExpressionNode::evaluateJacobians(JacobianContainer & outJacobians, const Eigen::MatrixXd & applyChainRule) const {
   evaluateJacobiansImplementation(outJacobians, applyChainRule);
 }
