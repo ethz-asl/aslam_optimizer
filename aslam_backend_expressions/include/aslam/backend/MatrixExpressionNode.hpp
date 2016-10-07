@@ -14,8 +14,6 @@ namespace backend {
  */
 class MatrixExpressionNode {
  public:
-  EIGEN_MAKE_ALIGNED_OPERATOR_NEW
-
   MatrixExpressionNode();
   virtual ~MatrixExpressionNode();
 
