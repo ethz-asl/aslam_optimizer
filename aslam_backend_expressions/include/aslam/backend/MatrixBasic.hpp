@@ -29,7 +29,7 @@ class MatrixBasic : public MatrixExpressionNode, public DesignVariable {
 
   MatrixExpression toExpression();
  private:
-  virtual Eigen::Matrix3d evaluateImplementation() override;
+  virtual Eigen::Matrix3d evaluateImplementation() const override;
   virtual void evaluateJacobiansImplementation(JacobianContainer & outJacobians) const override;
   virtual void evaluateJacobiansImplementation(JacobianContainer & outJacobians, const Eigen::MatrixXd & applyChainRule) const override;
   virtual void getDesignVariablesImplementation(DesignVariable::set_t & designVariables) const override;

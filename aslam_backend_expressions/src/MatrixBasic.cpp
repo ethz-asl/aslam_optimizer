@@ -48,7 +48,7 @@ int MatrixBasic::minimalDimensionsImplementation() const {
   return _B.cols();  // number of unknowns in the matrix
 }
 
-Eigen::Matrix3d MatrixBasic::evaluateImplementation() {
+Eigen::Matrix3d MatrixBasic::evaluateImplementation() const {
   return _A;
 }
 

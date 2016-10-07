@@ -31,7 +31,7 @@ class MatrixExpressionNode {
   void getDesignVariables(DesignVariable::set_t & designVariables) const;
  protected:
   // These functions must be implemented by child classes.
-  virtual Eigen::Matrix3d evaluateImplementation() = 0;
+  virtual Eigen::Matrix3d evaluateImplementation() const = 0;
   virtual void evaluateJacobiansImplementation(JacobianContainer & outJacobians) const = 0;
   virtual void evaluateJacobiansImplementation(JacobianContainer & outJacobians, const Eigen::MatrixXd & applyChainRule) const = 0;
   virtual void getDesignVariablesImplementation(DesignVariable::set_t & designVariables) const = 0;
