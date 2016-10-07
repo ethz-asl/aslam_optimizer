@@ -39,26 +39,10 @@ namespace aslam {
     }
 
     
-    /// \brief return the expression that inverts the rotation.
-    MatrixExpression MatrixExpression::inverse()
-    {
-      boost::shared_ptr<MatrixExpressionNode> newRoot( new MatrixExpressionNodeInverse(_root) );
-      return MatrixExpression(newRoot);
-    }
-
-    
     /// \brief Evaluate the Jacobians
     void MatrixExpression::evaluateJacobians(JacobianContainer & outJacobians) const
     {
       _root->evaluateJacobians(outJacobians);
-    }
-
-    
-  MatrixExpression MatrixExpression::operator*(const MatrixExpression & /* p */)
-    {
-    	// \todo
-    	        SM_THROW(aslam::NotImplementedException, "Not implemented yet")
-    	      return MatrixExpression();
     }
 
     EuclideanExpression MatrixExpression::operator*(const EuclideanExpression & p)
@@ -66,21 +50,6 @@ namespace aslam {
       boost::shared_ptr<EuclideanExpressionNode> newRoot( new EuclideanExpressionNodeMatrixMultiply(_root, p._root));	// ##
       return EuclideanExpression(newRoot);
       
-    }
-
-  HomogeneousExpression MatrixExpression::operator*(const HomogeneousExpression & /* p */)
-    {
-      // \todo
-        SM_THROW(aslam::NotImplementedException, "Not implemented yet")
-      return HomogeneousExpression();
-    }
-
-    
-    TransformationExpression MatrixExpression::toTransformationExpression()
-    {
-      // \todo
-        SM_THROW(aslam::NotImplementedException, "Not implemented yet")
-      return TransformationExpression();
     }
 
     void MatrixExpression::getDesignVariables(DesignVariable::set_t & designVariables) const
