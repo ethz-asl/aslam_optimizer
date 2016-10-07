@@ -27,12 +27,12 @@ namespace aslam {
       virtual ~MatrixExpression();
 
       /// \brief Evaluate the full transformation matrix.
-      Eigen::Matrix3d toFullMatrix();
+      Eigen::Matrix3d evaluate() const;
 
       /// \brief Evaluate the Jacobians in the form (1 - (S \delta v)^\times) \bar C
       void evaluateJacobians(JacobianContainer & outJacobians) const;
 
-      EuclideanExpression operator*(const EuclideanExpression & p);
+      EuclideanExpression operator*(const EuclideanExpression & p) const;
 
       void getDesignVariables(DesignVariable::set_t & designVariables) const;
 

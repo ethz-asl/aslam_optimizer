@@ -327,7 +327,7 @@ TEST(EuclideanExpressionNodeTestSuites, testMatrixTransformedPoint)
       SCOPED_TRACE("");
       testJacobian(Ap);
 
-      sm::eigen::assertNear(Ap.toEuclidean(), A.toFullMatrix() * p.toEuclidean(), 1e-14, SM_SOURCE_FILE_POS, "Testing the result is unchanged");
+      sm::eigen::assertNear(Ap.toEuclidean(), A.evaluate() * p.toEuclidean(), 1e-14, SM_SOURCE_FILE_POS, "Testing the result is unchanged");
     }
   catch(std::exception const & e)
     {
@@ -361,7 +361,7 @@ TEST(EuclideanExpressionNodeTestSuites, testMatrixdoubleTransformedPoint)
       SCOPED_TRACE("");
       testJacobian(Ap, 3);
 
-      sm::eigen::assertNear(Ap.toEuclidean(), B.toFullMatrix()* (A.toFullMatrix() * p.toEuclidean()), 1e-14, SM_SOURCE_FILE_POS, "Testing the result is unchanged");
+      sm::eigen::assertNear(Ap.toEuclidean(), B.evaluate()* (A.evaluate() * p.toEuclidean()), 1e-14, SM_SOURCE_FILE_POS, "Testing the result is unchanged");
     }
   catch(std::exception const & e)
     {
@@ -394,7 +394,7 @@ TEST(EuclideanExpressionNodeTestSuites, testDiagonalMatrixTransformedPoint)
       SCOPED_TRACE("");
       testJacobian(Ap, 2);
 
-      sm::eigen::assertNear(Ap.toEuclidean(), A.toFullMatrix() * p.toEuclidean(), 1e-14, SM_SOURCE_FILE_POS, "Testing the result is unchanged");
+      sm::eigen::assertNear(Ap.toEuclidean(), A.evaluate() * p.toEuclidean(), 1e-14, SM_SOURCE_FILE_POS, "Testing the result is unchanged");
     }
   catch(std::exception const & e)
     {
@@ -432,7 +432,7 @@ TEST(EuclideanExpressionNodeTestSuites, testLowerTriangleMatrixTransformedPoint)
       SCOPED_TRACE("");
       testJacobian(Ap, 2);
 
-      sm::eigen::assertNear(Ap.toEuclidean(), A.toFullMatrix() * p.toEuclidean(), 1e-14, SM_SOURCE_FILE_POS, "Testing the result is unchanged");
+      sm::eigen::assertNear(Ap.toEuclidean(), A.evaluate() * p.toEuclidean(), 1e-14, SM_SOURCE_FILE_POS, "Testing the result is unchanged");
     }
   catch(std::exception const & e)
     {
@@ -458,7 +458,7 @@ TEST(EuclideanExpressionNodeTestSuites, testLowerMixedMatrixTransformedPoint)
       a.setActive(true);
       a.setBlockIndex(0);
       MatrixExpression A(&a);
-      sm::eigen::assertNear(M, A.toFullMatrix(), 1e-14, SM_SOURCE_FILE_POS, "Testing the initial matrix is good");
+      sm::eigen::assertNear(M, A.evaluate(), 1e-14, SM_SOURCE_FILE_POS, "Testing the initial matrix is good");
 
       Eigen::Matrix3d S = Eigen::Matrix3d::Zero();
       S(0,0)= 10*(float)drand48();
@@ -469,7 +469,7 @@ TEST(EuclideanExpressionNodeTestSuites, testLowerMixedMatrixTransformedPoint)
       b.setBlockIndex(1);
       MatrixExpression B(&b);
 
-      sm::eigen::assertNear(S, B.toFullMatrix(), 1e-14, SM_SOURCE_FILE_POS, "Testing the result is unchanged");
+      sm::eigen::assertNear(S, B.evaluate(), 1e-14, SM_SOURCE_FILE_POS, "Testing the result is unchanged");
 
 
       EuclideanPoint point(Eigen::Vector3d::Random());
@@ -482,7 +482,7 @@ TEST(EuclideanExpressionNodeTestSuites, testLowerMixedMatrixTransformedPoint)
       SCOPED_TRACE("");
       testJacobian(Ap, 3);
 
-      sm::eigen::assertNear(Ap.toEuclidean(), B.toFullMatrix() * A.toFullMatrix() * p.toEuclidean(), 1e-13, SM_SOURCE_FILE_POS, "Testing the result is unchanged");
+      sm::eigen::assertNear(Ap.toEuclidean(), B.evaluate() * A.evaluate() * p.toEuclidean(), 1e-13, SM_SOURCE_FILE_POS, "Testing the result is unchanged");
     }
   catch(std::exception const & e)
     {

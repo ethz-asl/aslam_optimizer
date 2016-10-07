@@ -4,60 +4,43 @@
 #include <sm/boost/null_deleter.hpp>
 
 namespace aslam {
-  namespace backend {
+namespace backend {
 
-    
+/// \brief the base case is to initialize an expression from a design variable.
+MatrixExpression::MatrixExpression(MatrixExpressionNode * rotationDesignVariable) {
+  _root.reset(rotationDesignVariable, sm::null_deleter());
+  SM_ASSERT_TRUE(Exception, _root.get() != NULL, "It is illegal to initialized a rotation expression with a null node");
+}
 
-    /// \brief the base case is to initialize an expression from a design variable.
-    MatrixExpression::MatrixExpression(MatrixExpressionNode * rotationDesignVariable)
-    {
-      _root.reset(rotationDesignVariable,sm::null_deleter());
-      SM_ASSERT_TRUE(Exception, _root.get() != NULL, "It is illegal to initialized a rotation expression with a null node");
-    }
+MatrixExpression::MatrixExpression() {
+}
 
-    MatrixExpression::MatrixExpression()
-    {
-      // 0
-    }
-    
+MatrixExpression::~MatrixExpression() {
+}
 
-    MatrixExpression::~MatrixExpression()
-    {
-      // 0
-    }
+MatrixExpression::MatrixExpression(boost::shared_ptr<MatrixExpressionNode> node)
+    : _root(node) {
+  SM_ASSERT_TRUE(Exception, _root.get() != NULL, "It is illegal to initialized a matrix transformation expression with a null node");
+}
 
-    MatrixExpression::MatrixExpression(boost::shared_ptr<MatrixExpressionNode> node) :
-      _root(node)
-    {
-      SM_ASSERT_TRUE(Exception, _root.get() != NULL, "It is illegal to initialized a matrix transformation expression with a null node");
-    }
+Eigen::Matrix3d MatrixExpression::evaluate() const
+{
+  return _root->evaluate();
+}
 
-    /// \brief Evaluate the full transformation matrix.
-    Eigen::Matrix3d MatrixExpression::toFullMatrix()
-    {
-      return _root->toFullMatrix();
-    }
+/// \brief Evaluate the Jacobians
+void MatrixExpression::evaluateJacobians(JacobianContainer & outJacobians) const {
+  _root->evaluateJacobians(outJacobians);
+}
 
-    
-    /// \brief Evaluate the Jacobians
-    void MatrixExpression::evaluateJacobians(JacobianContainer & outJacobians) const
-    {
-      _root->evaluateJacobians(outJacobians);
-    }
+EuclideanExpression MatrixExpression::operator*(const EuclideanExpression & p) const {
+  boost::shared_ptr<EuclideanExpressionNode> newRoot(new EuclideanExpressionNodeMatrixMultiply(_root, p._root));  // ##
+  return EuclideanExpression(newRoot);
+}
 
-    EuclideanExpression MatrixExpression::operator*(const EuclideanExpression & p)
-    {
-      boost::shared_ptr<EuclideanExpressionNode> newRoot( new EuclideanExpressionNodeMatrixMultiply(_root, p._root));	// ##
-      return EuclideanExpression(newRoot);
-      
-    }
+void MatrixExpression::getDesignVariables(DesignVariable::set_t & designVariables) const {
+  return _root->getDesignVariables(designVariables);
+}
 
-    void MatrixExpression::getDesignVariables(DesignVariable::set_t & designVariables) const
-    {
-      return _root->getDesignVariables(designVariables);
-    }
-    
-    
-
-  } // namespace backend
-} // namespace aslam
+}  // namespace backend
+}  // namespace aslam

@@ -44,7 +44,7 @@ namespace aslam {
     EuclideanExpressionNodeMatrixMultiply::EuclideanExpressionNodeMatrixMultiply(boost::shared_ptr<MatrixExpressionNode> lhs, boost::shared_ptr<EuclideanExpressionNode> rhs) :
          _lhs(lhs), _rhs(rhs)
     {
-      _A_lhs = _lhs->toFullMatrix();
+      _A_lhs = _lhs->evaluate();
       _p_rhs = _rhs->evaluate();
     }
 
@@ -63,7 +63,7 @@ namespace aslam {
     
     Eigen::Vector3d EuclideanExpressionNodeMatrixMultiply::evaluateImplementation() const
     {
-      _A_lhs = _lhs->toFullMatrix();
+      _A_lhs = _lhs->evaluate();
       _p_rhs = _rhs->evaluate();
 
       return _A_lhs * _p_rhs;

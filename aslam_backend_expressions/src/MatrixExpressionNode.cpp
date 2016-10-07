@@ -1,29 +1,32 @@
 #include <aslam/backend/MatrixExpressionNode.hpp>
 
 namespace aslam {
-  namespace backend {
-    
-    ////////////////////////////////////////////
-    // RotationExpressionNode: The Super Class
-    ////////////////////////////////////////////
-    MatrixExpressionNode::MatrixExpressionNode(){}
+namespace backend {
 
-    MatrixExpressionNode::~MatrixExpressionNode(){}
+////////////////////////////////////////////
+// RotationExpressionNode: The Super Class
+////////////////////////////////////////////
+MatrixExpressionNode::MatrixExpressionNode() {
+}
 
-    Eigen::Matrix3d MatrixExpressionNode::toFullMatrix(){ return toFullMatrixImplementation(); }
+MatrixExpressionNode::~MatrixExpressionNode() {
+}
 
-    void MatrixExpressionNode::evaluateJacobians(JacobianContainer & outJacobians) const{
-      evaluateJacobiansImplementation(outJacobians);
-    }      
+Eigen::Matrix3d MatrixExpressionNode::evaluate() {
+  return evaluateImplementation();
+}
 
-    void MatrixExpressionNode::evaluateJacobians(JacobianContainer & outJacobians, const Eigen::MatrixXd & applyChainRule) const{
-      evaluateJacobiansImplementation(outJacobians, applyChainRule);
-    }
-      
-    void MatrixExpressionNode::getDesignVariables(DesignVariable::set_t & designVariables) const
-    {
-      getDesignVariablesImplementation(designVariables);
-    }
+void MatrixExpressionNode::evaluateJacobians(JacobianContainer & outJacobians) const {
+  evaluateJacobiansImplementation(outJacobians);
+}
 
-  } // namespace backend
-} // namespace aslam
+void MatrixExpressionNode::evaluateJacobians(JacobianContainer & outJacobians, const Eigen::MatrixXd & applyChainRule) const {
+  evaluateJacobiansImplementation(outJacobians, applyChainRule);
+}
+
+void MatrixExpressionNode::getDesignVariables(DesignVariable::set_t & designVariables) const {
+  getDesignVariablesImplementation(designVariables);
+}
+
+}  // namespace backend
+}  // namespace aslam
