@@ -3,7 +3,6 @@
 #include <sm/kinematics/rotations.hpp>
 #include <aslam/Exceptions.hpp>
 
-
 namespace aslam {
 namespace backend {
 
