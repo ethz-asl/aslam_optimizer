@@ -43,7 +43,7 @@ namespace aslam {
       EuclideanExpression operator-(const Eigen::Vector3d & p) const;
       EuclideanExpression operator-() const;
       EuclideanExpression operator*(const ScalarExpression& s) const;
-//      EuclideanExpression operator*(double s) const;
+      EuclideanExpression elementwiseMultiply(const EuclideanExpression & p) const;
 
     private:
       friend class RotationExpression;

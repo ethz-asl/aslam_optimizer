@@ -22,6 +22,7 @@ cs_add_library(${PROJECT_NAME}
 
   src/MatrixExpression.cpp 
   src/MatrixExpressionNode.cpp
+  src/MatrixBasic.cpp
   src/MatrixTransformation.cpp
   src/RotationScalarExpressionNode.cpp
 
