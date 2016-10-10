@@ -6,8 +6,6 @@ catkin_simple(ALL_DEPS_REQUIRED)
 
 find_package(Boost REQUIRED COMPONENTS system thread)
 
-include_directories(${Eigen_INCLUDE_DIRS})
-
 add_definitions( -std=c++0x )
 
 # enable timing via cmake option -Daslam_backend_ENABLE_TIMING
