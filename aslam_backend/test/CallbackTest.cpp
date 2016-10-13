@@ -62,7 +62,7 @@ TEST(CallbackTestSuite, testCallback)
         }
       );
     optimizer.callback().add<event::RESIDUALS_UPDATED>(
-        [&](const Event & arg) {
+        [&](const event::RESIDUALS_UPDATED & arg) {
           countResUpdate ++;
           expectedCost = 0;
           for(auto && e : errorTerms){
@@ -72,7 +72,7 @@ TEST(CallbackTestSuite, testCallback)
         }
       );
     optimizer.callback().add<event::COST_UPDATED>(
-        [&](const Event & arg) { // void with argument
+        [&](const event::COST_UPDATED & arg) { // void with argument
           countCostUpdate ++;
           ASSERT_DOUBLE_EQ(expectedCost, arg.currentCost);
           lastUpdatedJ = arg.currentCost;

@@ -90,7 +90,7 @@ public:
   virtual ProceedInstruction operator() (const Event & arg) = 0;
 };
 
-template <typename Funct>
+template <typename Funct, typename Event_>
 class CallbackFunctor : public OptimizerCallbackInterface {
 public:
   CallbackFunctor(Funct f) : f(f) {}
@@ -98,7 +98,7 @@ public:
     return call(arg);
   }
 private:
-  template<typename F = Funct, std::is_same<ProceedInstruction, decltype((*static_cast<F*>(nullptr))(*static_cast<Event*>(nullptr)))>* returnsProceedInstruction = nullptr>
+  template<typename F = Funct, std::is_same<ProceedInstruction, decltype((*static_cast<F*>(nullptr))(*static_cast<Event_*>(nullptr)))>* returnsProceedInstruction = nullptr>
   ProceedInstruction call(const Event & arg) override {
     return withArg(arg, returnsProceedInstruction);
   }
@@ -115,18 +115,18 @@ private:
     return ProceedInstruction::CONTINUE;
   }
   ProceedInstruction withArg(const Event & arg, std::true_type*) {
-    return f(arg);
+    return f(static_cast<const Event_ &>(arg));
   }
   ProceedInstruction withArg(const Event & arg, std::false_type*) {
-    f(arg);
+    f(static_cast<const Event_ &>(arg));
     return ProceedInstruction::CONTINUE;
   }
   Funct f;
 };
 
-template <typename Funct>
+template <typename Event_ = Event, typename Funct>
 OptimizerCallbackInterface::Ptr toOptimizerCallback(Funct f){
-  return boost::make_shared<CallbackFunctor<Funct>>(f);
+  return boost::make_shared<CallbackFunctor<Funct, Event_>>(f);
 }
 
 class OptimizerCallback {
@@ -135,6 +135,9 @@ public:
 
   template <typename Funct>
   OptimizerCallback(Funct funct) : OptimizerCallback(toOptimizerCallback(funct)) {}
+
+  template <typename Event_, typename Funct>
+  OptimizerCallback(Event_*, Funct funct) : OptimizerCallback(toOptimizerCallback<Event_>(funct)) {}
 
   bool operator == (const OptimizerCallback & other) const { return impl_ == other.impl_; };
   ProceedInstruction operator() (const Event & arg){
