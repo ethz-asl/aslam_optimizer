@@ -26,10 +26,11 @@ class Registry {
 
   void add(std::initializer_list<std::type_index> events, const OptimizerCallback & callback);
 
-  template <typename Event_>
-  void add(const OptimizerCallback & callback){
+  template <typename Event_, typename Callback>
+  void add(Callback callback){
     static_assert(std::is_base_of<Event, Event_>::value, "Only children of callback::Event are allowed as callback events!");
-    add({typeid(Event_)}, callback);
+    OptimizerCallback optCallback(static_cast<Event_*>(nullptr), callback);
+    add({typeid(Event_)}, optCallback);
   }
   void remove(std::initializer_list<std::type_index> events, const OptimizerCallback & callback);
   void remove(std::type_index event, const OptimizerCallback & callback){
