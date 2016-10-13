@@ -103,7 +103,27 @@ class TestMetropolisHastings(unittest.TestCase):
         sampler.checkNegativeLogDensitySetup();
         sampler.run(10000);
         
+class TestOptimizerCallback(unittest.TestCase):
+  def test_registry(self):
+    registry = ab.CallbackRegistry()
+    registry.add(ab.EVENT_COST_UPDATED, lambda: None)
+    self.assertEqual(registry.numCallbacks(ab.EVENT_COST_UPDATED), 1)
+
+    registry.add(ab.EVENT_COST_UPDATED, lambda: None)
+    self.assertEqual(registry.numCallbacks(ab.EVENT_COST_UPDATED), 2)
+
+    registry.add([ab.EVENT_ITERATION_START, ab.EVENT_ITERATION_END] , lambda: None)
+    self.assertEqual(registry.numCallbacks(ab.EVENT_ITERATION_START), 1)
+    self.assertEqual(registry.numCallbacks(ab.EVENT_ITERATION_END), 1)
+
+    registry.clear(ab.EVENT_ITERATION_START)
+    self.assertEqual(registry.numCallbacks(ab.EVENT_ITERATION_START), 0)
+
+    registry.clear()
+    self.assertEqual(registry.numCallbacks(ab.EVENT_COST_UPDATED), 0)
+
 if __name__ == '__main__':
     import rostest
     rostest.rosrun('aslam_backend_python', 'Rprop', TestRprop)
     rostest.rosrun('aslam_backend_python', 'MetropolisHastings', TestMetropolisHastings)
+    rostest.rosrun('aslam_backend_python', 'OptimizerCallback', TestOptimizerCallback)

@@ -87,7 +87,7 @@ namespace aslam {
       _threadLocalErrors.resize(nThreads, 0.0);
       setupThreadedJob(boost::bind(&LinearSystemSolver::evaluateErrors, this, _1, _2, _3, _4), nThreads, useMEstimator);
       // Gather the squared error results from the multiple threads.
-      if(callback) callback->issueCallback({callback::Occasion::RESIDUALS_UPDATED, 0, 0});
+      if(callback) callback->issueCallback(callback::event::RESIDUALS_UPDATED{0, 0});
       double error = 0.0;
       for (unsigned i = 0; i < _threadLocalErrors.size(); ++i)
         error += _threadLocalErrors[i];

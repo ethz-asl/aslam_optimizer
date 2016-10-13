@@ -149,8 +149,9 @@ namespace aslam {
       /// \brief Apply a state update.
       double applyStateUpdate();
 
-      /// \brief issue callback for given occasion
-      void issueCallback(callback::Occasion occasion);
+      /// \brief issue callback for given event
+      template<typename Event>
+      void issueCallback();
 
       /// \brief The dense update vector.
       Eigen::VectorXd _dx;

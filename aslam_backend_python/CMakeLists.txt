@@ -11,6 +11,7 @@ add_definitions( -fPIC -msse2 -mssse3 -march=nocona -Wextra -Winit-self -Woverlo
 add_python_export_library(${PROJECT_NAME} python/aslam_backend
   src/module.cpp
   src/Backend.cpp
+  src/OptimizerCallback.cpp
   src/Optimizer.cpp
   src/OptimizerOptions.cpp
   src/OptimizationProblem.cpp

@@ -48,49 +48,49 @@ TEST(CallbackTestSuite, testCallback)
     using namespace callback;
     int countInit = 0, countResUpdate = 0, countCostUpdate = 0, countDesignUpdate = 0;
     double startJ, lastUpdatedJ, expectedCost;
-    optimizer.callback().add(Occasion::OPTIMIZATION_INITIALIZED,
-        [&](const Argument & arg) {
+    optimizer.callback().add<event::OPTIMIZATION_INITIALIZED>(
+        [&](const Event & arg) {
           countInit ++;
           lastUpdatedJ = startJ = arg.currentCost;
-          ASSERT_EQ(Occasion::OPTIMIZATION_INITIALIZED, arg.occasion);
+          ASSERT_EQ(typeid(event::OPTIMIZATION_INITIALIZED), typeid(arg));
         }
       );
-    optimizer.callback().add(Occasion::DESIGN_VARIABLES_UPDATED,
-        [&](const Argument & arg) {
+    optimizer.callback().add<event::DESIGN_VARIABLES_UPDATED>(
+        [&](const Event & arg) {
           countDesignUpdate ++;
-          ASSERT_EQ(Occasion::DESIGN_VARIABLES_UPDATED, arg.occasion);
+          ASSERT_EQ(typeid(event::DESIGN_VARIABLES_UPDATED), typeid(arg));
         }
       );
-    optimizer.callback().add(Occasion::RESIDUALS_UPDATED,
-        [&](const Argument & arg) {
+    optimizer.callback().add<event::RESIDUALS_UPDATED>(
+        [&](const Event & arg) {
           countResUpdate ++;
           expectedCost = 0;
           for(auto && e : errorTerms){
             expectedCost += e->getSquaredError();
           }
-          ASSERT_EQ(Occasion::RESIDUALS_UPDATED, arg.occasion);
+          ASSERT_EQ(typeid(event::RESIDUALS_UPDATED), typeid(arg));
         }
       );
-    optimizer.callback().add(Occasion::COST_UPDATED,
-        [&](const Argument & arg) { // void with argument
+    optimizer.callback().add<event::COST_UPDATED>(
+        [&](const Event & arg) { // void with argument
           countCostUpdate ++;
           ASSERT_DOUBLE_EQ(expectedCost, arg.currentCost);
           lastUpdatedJ = arg.currentCost;
-          ASSERT_EQ(Occasion::COST_UPDATED, arg.occasion);
+          ASSERT_EQ(typeid(event::COST_UPDATED), typeid(arg));
         }
       );
-    optimizer.callback().add({Occasion::COST_UPDATED, Occasion::COST_UPDATED}, // register twice
-        [&](const Argument &) { // void with argument
+    optimizer.callback().add({typeid(event::COST_UPDATED), typeid(event::COST_UPDATED)}, // register twice
+        [&](const Event &) { // void with argument
           countCostUpdate ++;
         }
       );
-    optimizer.callback().add(Occasion::COST_UPDATED,
-        [&](const Argument &) { // ProceedInstruction with argument
+    optimizer.callback().add<event::COST_UPDATED>(
+        [&](const Event &) { // ProceedInstruction with argument
           countCostUpdate ++;
           return ProceedInstruction::CONTINUE;
         }
       );
-    optimizer.callback().add(Occasion::COST_UPDATED,
+    optimizer.callback().add<event::COST_UPDATED>(
         [&]() { // ProceedInstruction without argument
           countCostUpdate ++;
           return ProceedInstruction::CONTINUE;
@@ -100,11 +100,11 @@ TEST(CallbackTestSuite, testCallback)
     auto ret = optimizer.optimize();
 
     ASSERT_EQ(1, countInit);
-    ASSERT_EQ(ret.iterations + 1, countResUpdate);
-    ASSERT_EQ((ret.iterations + 1) * 5, countCostUpdate);
-    ASSERT_EQ(ret.iterations, countDesignUpdate);
-    ASSERT_EQ(ret.JStart, startJ);
-    ASSERT_EQ(ret.JFinal, lastUpdatedJ);
+    EXPECT_EQ(ret.iterations + 1, countResUpdate);
+    EXPECT_EQ((ret.iterations + 1) * 5, countCostUpdate);
+    EXPECT_EQ(ret.iterations, countDesignUpdate);
+    EXPECT_EQ(ret.JStart, startJ);
+    EXPECT_EQ(ret.JFinal, lastUpdatedJ);
   } catch (const std::exception& e) {
     FAIL() << e.what();
   }
