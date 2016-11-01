@@ -21,9 +21,9 @@ template<class Archive>
 inline void OptimizerOptionsBase::serialize(Archive & ar, const unsigned int /*version*/) {
   ar & BOOST_SERIALIZATION_NVP(convergenceGradientNorm);
   ar & BOOST_SERIALIZATION_NVP(convergenceDeltaX);
-  ar & BOOST_SERIALIZATION_NVP(convergenceDeltaObjective);
+  ar & BOOST_SERIALIZATION_NVP(convergenceDeltaError);
   ar & BOOST_SERIALIZATION_NVP(maxIterations);
-  ar & BOOST_SERIALIZATION_NVP(numThreadsGradient);
+  ar & BOOST_SERIALIZATION_NVP(numThreadsJacobian);
   ar & BOOST_SERIALIZATION_NVP(numThreadsError);
 }
 
@@ -31,8 +31,8 @@ template<class Archive>
 inline void OptimizerStatus::serialize(Archive & ar, const unsigned int /*version*/) {
   ar & BOOST_SERIALIZATION_NVP(convergence);
   ar & BOOST_SERIALIZATION_NVP(numIterations);
-  ar & BOOST_SERIALIZATION_NVP(numDerivativeEvaluations);
-  ar & BOOST_SERIALIZATION_NVP(numObjectiveEvaluations);
+  ar & BOOST_SERIALIZATION_NVP(numJacobianEvaluations);
+  ar & BOOST_SERIALIZATION_NVP(numErrorEvaluations);
   ar & BOOST_SERIALIZATION_NVP(gradientNorm);
   ar & BOOST_SERIALIZATION_NVP(maxDeltaX);
   ar & BOOST_SERIALIZATION_NVP(error);

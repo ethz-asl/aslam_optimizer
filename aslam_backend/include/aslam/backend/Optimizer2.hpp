@@ -19,6 +19,7 @@
 #include <aslam/backend/LevenbergMarquardtTrustRegionPolicy.hpp>
 #include <aslam/backend/GaussNewtonTrustRegionPolicy.hpp>
 #include <aslam/backend/DogLegTrustRegionPolicy.hpp>
+#include <aslam/backend/util/OptimizerProblemManagerBase.hpp>
 
 namespace sm {
 
@@ -50,23 +51,22 @@ namespace aslam {
      * IEEE TRANSACTIONS ON MAGNETICS, VOL. 44, NO. 7, JULY 2008
      *
      */
-    class Optimizer2 {
+    class Optimizer2 : public OptimizerProblemManagerBase {
     public:
       typedef aslam::backend::Timer Timer;
       typedef sparse_block_matrix::SparseBlockMatrix<Eigen::MatrixXd> SparseBlockMatrix;
       typedef Optimizer2Options Options;
+      struct Status : public OptimizerStatus {
+        SolutionReturnValue srv;
+       private:
+        void resetImplementation() override;
+      };
 
       SM_DEFINE_EXCEPTION(Exception, aslam::Exception);
 
       Optimizer2(const Options& options = Options());
       Optimizer2(const sm::PropertyTree& config, boost::shared_ptr<LinearSystemSolver> linearSystemSolver, boost::shared_ptr<TrustRegionPolicy> trustRegionPolicy);
       virtual ~Optimizer2();
-
-      /// \brief Set up to work on the optimization problem.
-      void setProblem(boost::shared_ptr<OptimizationProblemBase> problem);
-
-      /// \brief initialize the optimizer to run on an optimization problem.
-      void initialize();
 
       /// \brief initialize the linear solver specified in the optimizer options.
       void initializeLinearSolver();
@@ -76,11 +76,20 @@ namespace aslam {
       /// \brief Run the optimization
       SolutionReturnValue optimize();
 
+      /// \brief Return the status
+      const Status& getStatus() const override { return _status; }
+
+      /// \brief Const getter for the optimizer options.
+      const Options& getOptions() const override { return _options; }
+
       /// \brief Get the optimizer options.
-      Options& options();
+      Options& options() { return _options; }
 
       /// \brief Set the optimizer options.
-      void setOptions(const Options& options);
+      void setOptions(const Options& options) { _options = options; }
+
+      /// \brief Set the optimizer options.
+      void setOptions(const OptimizerOptionsBase& options) override { static_cast<OptimizerOptionsBase&>(_options) = options; }
 
       /// \brief return the reduced system dx
       const Eigen::VectorXd& dx() const;
@@ -153,11 +162,12 @@ namespace aslam {
       template<typename Event>
       void issueCallback();
 
+      void optimizeImplementation() override;
+
+      void initializeImplementation() override;
+
       /// \brief The dense update vector.
       Eigen::VectorXd _dx;
-
-      /// \brief The current value of the cost function.
-      double _J;
 
       /// \brief The previous value of the cost function.
       double _p_J;
@@ -166,23 +176,17 @@ namespace aslam {
 
       boost::shared_ptr<TrustRegionPolicy> _trustRegionPolicy;
 
-      /// \brief The current optimization problem.
-      boost::shared_ptr<OptimizationProblemBase> _problem;
-
-      /// \brief all design variables...first the non-marginalized ones (the dense ones), then the marginalized ones.
-      std::vector<DesignVariable*> _designVariables;
-
-      /// \brief all of the error terms involved in this problem
-      std::vector<ErrorTerm*> _errorTerms;
-
       /// \brief the current set of options
       Options _options;
+
+      /// \brief the current status
+      Status _status;
 
       /// \brief A class that manages the optimizer callbacks
       callback::Manager _callbackManager;
     };
 
-  } // namespace backend
+} // namespace backend
 } // namespace aslam
 
 #endif /* ASLAM_BACKEND_OPTIMIZER_HPP */

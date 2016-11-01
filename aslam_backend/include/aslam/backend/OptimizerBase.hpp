@@ -57,9 +57,9 @@ struct OptimizerOptionsBase
 
   double convergenceGradientNorm = 1e-3; /// \brief Convergence criterion on gradient norm
   double convergenceDeltaX = 0.0; /// \brief Convergence criterion on maximum absolute state update coefficient
-  double convergenceDeltaObjective = 0.0; /// \brief Convergence criterion on change of objective/error
+  double convergenceDeltaError = 0.0; /// \brief Convergence criterion on change of objective/error
   int maxIterations = 100; /// \brief Stop if we reach this number of iterations without hitting any of the above stopping criteria. -1 for unlimited.
-  std::size_t numThreadsGradient = 4; /// \brief The number of threads to use for gradient computation
+  std::size_t numThreadsJacobian = 4; /// \brief The number of threads to use for gradient/Jacobian computation
   std::size_t numThreadsError = 1; /// \brief The number of threads to use for error computation
 
   /// \brief Checks options for sanity. Throws if any options is not valid.
@@ -92,8 +92,8 @@ struct OptimizerStatus
 
   ConvergenceStatus convergence = IN_PROGRESS;
   std::size_t numIterations = 0; /// \brief Number of iterations run
-  std::size_t numDerivativeEvaluations = 0; /// \brief Number of Jacobian/gradient evaluations performed
-  std::size_t numObjectiveEvaluations = 0; /// \brief Number of objective/error evaluations performed
+  std::size_t numJacobianEvaluations = 0; /// \brief Number of Jacobian/gradient evaluations performed
+  std::size_t numErrorEvaluations = 0; /// \brief Number of objective/error evaluations performed
   double gradientNorm = std::numeric_limits<double>::signaling_NaN(); /// \brief Norm of the gradient
   double maxDeltaX = std::numeric_limits<double>::signaling_NaN(); /// \brief Maximum absolute value of change in design variables
   double error = std::numeric_limits<double>::max(); /// \brief Current error/objective value. numeric_limits<double>::max() if error is not evaluated.

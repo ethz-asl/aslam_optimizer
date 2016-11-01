@@ -173,7 +173,7 @@ inline boost::shared_ptr<CostFunctionInterface> getCostFunction(ProblemManager& 
                                                                 const bool& useMEstimator,
                                                                 const bool& useDenseJacobianContainer,
                                                                 const bool& applyDvScaling,
-                                                                const std::size_t& numThreadsGradient,
+                                                                const std::size_t& numThreadsJacobian,
                                                                 const std::size_t& numThreadsError)
 {
 
@@ -184,32 +184,32 @@ inline boost::shared_ptr<CostFunctionInterface> getCostFunction(ProblemManager& 
                    const bool& useMEstimator,
                    const bool& useDenseJacobianContainer,
                    const bool& applyDvScaling,
-                   const std::size_t& numThreadsGradient,
+                   const std::size_t& numThreadsJacobian,
                    const std::size_t& numThreadsError)
         : _pm(pm),
           _useMEstimator(useMEstimator),
           _useDenseJacobianContainer(useDenseJacobianContainer),
           _applyDvScaling(applyDvScaling),
-          _numThreadsGradient(numThreadsGradient),
+          _numThreadsJacobian(numThreadsJacobian),
           _numThreadsError(numThreadsError)
     {
 
     }
     ~CostFunctionPM() { }
     double evaluateError() const override { return _pm.evaluateError(_numThreadsError); }
-    void computeGradient(RowVectorType& gradient) override { _pm.computeGradient(gradient, _numThreadsGradient, _useMEstimator, _applyDvScaling, _useDenseJacobianContainer); }
+    void computeGradient(RowVectorType& gradient) override { _pm.computeGradient(gradient, _numThreadsJacobian, _useMEstimator, _applyDvScaling, _useDenseJacobianContainer); }
     const std::vector<DesignVariable*>& getDesignVariables() override { return _pm.designVariables(); };
    private:
     ProblemManager& _pm;
     typename details::CostFunctionParameterTraits<UseMEstimatorRef>::const_bool_t _useMEstimator;
     typename details::CostFunctionParameterTraits<UseDenseJacobianContainerRef>::const_bool_t _useDenseJacobianContainer;
     typename details::CostFunctionParameterTraits<ApplyDvScalingRef>::const_bool_t _applyDvScaling;
-    typename details::CostFunctionParameterTraits<NumThreadsGradientRef>::const_size_t _numThreadsGradient;
+    typename details::CostFunctionParameterTraits<NumThreadsGradientRef>::const_size_t _numThreadsJacobian;
     typename details::CostFunctionParameterTraits<NumThreadsErrorRef>::const_size_t _numThreadsError;
   };
 
   return boost::shared_ptr<CostFunctionInterface>(new CostFunctionPM(pm, useMEstimator, useDenseJacobianContainer, applyDvScaling,
-                                                                     numThreadsGradient, numThreadsError));
+                                                                     numThreadsJacobian, numThreadsError));
 
 }
 

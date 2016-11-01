@@ -33,11 +33,11 @@ class TestOptimizer : public OptimizerProblemManagerBase
   void optimizeImplementation() override
   {
     _status.deltaError = _problemManager.evaluateError() - _status.error;
-    _status.numObjectiveEvaluations++;
+    _status.numErrorEvaluations++;
     _status.error += _status.deltaError;
     RowVectorType gradient;
-    _problemManager.computeGradient(gradient, _options.numThreadsGradient, true, true, true);
-    _status.numDerivativeEvaluations++;
+    _problemManager.computeGradient(gradient, _options.numThreadsJacobian, true, true, true);
+    _status.numJacobianEvaluations++;
     _status.gradientNorm = 0.0; // optimizer should stop due to this criterion
     _status.maxDeltaX = 1.0;
     _status.testValue += 1;
@@ -53,8 +53,8 @@ class TestOptimizer : public OptimizerProblemManagerBase
 void expectStatusInitialized(const OptimizerStatus& status)
 {
   EXPECT_EQ(0, status.numIterations);
-  EXPECT_EQ(0, status.numDerivativeEvaluations);
-  EXPECT_EQ(0, status.numObjectiveEvaluations);
+  EXPECT_EQ(0, status.numJacobianEvaluations);
+  EXPECT_EQ(0, status.numErrorEvaluations);
   EXPECT_DOUBLE_EQ(std::numeric_limits<double>::max(), status.error);
   EXPECT_TRUE(std::isnan(status.deltaError));
   EXPECT_TRUE(std::isnan(status.maxDeltaX));
@@ -71,7 +71,7 @@ TEST(OptimizerTestSuite, testOptimizerOptions)
     EXPECT_NO_THROW(options.check()); // Default options should be valid
 
     // Test some invalid options
-    options.convergenceDeltaObjective = -1.0;
+    options.convergenceDeltaError = -1.0;
     EXPECT_ANY_THROW(options.check());
     options = OptimizerOptionsBase(); // reset to default
 
@@ -92,18 +92,18 @@ TEST(OptimizerTestSuite, testOptimizerOptions)
     sm::BoostPropertyTree pt;
     pt.setDouble("convergenceGradientNorm", -1.0); // invalid
     pt.setDouble("convergenceDeltaX", 1.0);
-    pt.setDouble("convergenceDeltaObjective", 1.0);
+    pt.setDouble("convergenceDeltaError", 1.0);
     pt.setInt("maxIterations", 1);
-    pt.setInt("numThreadsGradient", 1);
+    pt.setInt("numThreadsJacobian", 1);
     pt.setInt("numThreadsError", 4);
     EXPECT_ANY_THROW(OptimizerOptionsBase options(pt)); // invalid option convergenceGradientNorm
     pt.setDouble("convergenceGradientNorm", 1.0);
     OptimizerOptionsBase options(pt);
     EXPECT_DOUBLE_EQ(pt.getDouble("convergenceGradientNorm"), options.convergenceGradientNorm);
     EXPECT_DOUBLE_EQ(pt.getDouble("convergenceDeltaX"), options.convergenceDeltaX);
-    EXPECT_DOUBLE_EQ(pt.getDouble("convergenceDeltaObjective"), options.convergenceDeltaObjective);
+    EXPECT_DOUBLE_EQ(pt.getDouble("convergenceDeltaError"), options.convergenceDeltaError);
     EXPECT_EQ(pt.getInt("maxIterations"), options.maxIterations);
-    EXPECT_EQ(pt.getInt("numThreadsGradient"), options.numThreadsGradient);
+    EXPECT_EQ(pt.getInt("numThreadsJacobian"), options.numThreadsJacobian);
     EXPECT_EQ(pt.getInt("numThreadsError"), options.numThreadsError);
   }
 }
@@ -114,8 +114,8 @@ TEST(OptimizerTestSuite, testOptimizerStatus)
   expectStatusInitialized(status);
 
   status.numIterations++;
-  status.numDerivativeEvaluations++;
-  status.numObjectiveEvaluations++;
+  status.numJacobianEvaluations++;
+  status.numErrorEvaluations++;
   status.convergence = ConvergenceStatus::FAILURE;
 
   status.reset();
@@ -127,7 +127,7 @@ TEST(OptimizerTestSuite, testOptimizerBase)
   try
   {
     TestOptimizerOptions options;
-    options.convergenceDeltaObjective = 0.0;
+    options.convergenceDeltaError = 0.0;
     options.convergenceDeltaX = 0.0;
     options.convergenceGradientNorm = 1e-12;
     options.maxIterations = 1;

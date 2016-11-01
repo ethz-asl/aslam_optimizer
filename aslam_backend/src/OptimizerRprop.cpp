@@ -119,7 +119,7 @@ void OptimizerRprop::optimizeImplementation()
 
     RowVectorType gradient;
     timeGrad.start();
-    problemManager().computeGradient(gradient, _options.numThreadsGradient, false /*useMEstimator*/, false /*use scaling */, _options.useDenseJacobianContainer /*useDenseJacobianContainer*/);
+    problemManager().computeGradient(gradient, _options.numThreadsJacobian, false /*useMEstimator*/, false /*use scaling */, _options.useDenseJacobianContainer /*useDenseJacobianContainer*/);
 
     // optionally add regularizer
     if (_options.regularizer) {
@@ -128,7 +128,7 @@ void OptimizerRprop::optimizeImplementation()
       SM_FINER_STREAM_NAMED("optimization", "RPROP: Regularization term gradient: " << jc.asDenseMatrix());
       gradient += jc.asDenseMatrix();
     }
-    _status.numDerivativeEvaluations++;
+    _status.numJacobianEvaluations++;
     timeGrad.stop();
 
     SM_ASSERT_TRUE_DBG(Exception, gradient.allFinite (), "Gradient " << gradient.format(IOFormat(2, DontAlignCols, ", ", ", ", "", "", "[", "]")) << " is not finite");
@@ -147,7 +147,7 @@ void OptimizerRprop::optimizeImplementation()
     bool errorIncreased = false;
     if (_options.method == OptimizerOptionsRprop::IRPROP_PLUS) {
       _status.error = problemManager().evaluateError(_options.numThreadsError);
-      _status.numObjectiveEvaluations++;
+      _status.numErrorEvaluations++;
       errorIncreased = (_status.error - _prev_error) > 0.0;
       _prev_error = _status.error;
     }
@@ -249,7 +249,7 @@ void OptimizerRprop::optimizeImplementation()
 
     if (_options.method == OptimizerOptionsRprop::IRPROP_PLUS) {
       _status.deltaError = problemManager().evaluateError(_options.numThreadsError) - _status.error;
-      if (fabs(_status.deltaError) < _options.convergenceDeltaObjective) {
+      if (fabs(_status.deltaError) < _options.convergenceDeltaError) {
         _status.convergence = ConvergenceStatus::DOBJECTIVE;
         SM_DEBUG_STREAM_NAMED("optimization", "RPROP: Change in error " << _status.deltaError <<
                               " is smaller than convergenceDObjective option -> terminating");

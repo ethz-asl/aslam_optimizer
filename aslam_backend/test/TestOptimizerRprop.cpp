@@ -49,7 +49,7 @@ TEST(OptimizerRpropTestSuite, testRpropNonSquaredErrorTerms)
     // Now let's optimize.
     OptimizerRprop::Options options;
     options.maxIterations = 500;
-    options.numThreadsGradient = 8;
+    options.numThreadsJacobian = 8;
     options.convergenceGradientNorm = 0.0;
     options.convergenceDeltaX = 0.0;
     EXPECT_ANY_THROW(options.check());
@@ -122,7 +122,7 @@ TEST(OptimizerRpropTestSuite, testRpropSquaredErrorTerms)
     OptimizerRprop::Options options;
     options.method = OptimizerRprop::Options::RPROP_PLUS;
     options.maxIterations = 500;
-    options.numThreadsGradient = 8;
+    options.numThreadsJacobian = 8;
     OptimizerRprop optimizer(options);
     optimizer.setProblem(problem_ptr);
 

@@ -44,7 +44,7 @@ TEST(OptimizerBFGSTestSuite, testBFGS)
     // Now let's optimize.
     OptimizerBFGS::Options options;
     options.maxIterations = 500;
-    options.numThreadsGradient = 8;
+    options.numThreadsJacobian = 8;
     options.convergenceGradientNorm = 0.0;
     options.convergenceDeltaX = 0.0;
     EXPECT_ANY_THROW(options.check());
@@ -67,8 +67,8 @@ TEST(OptimizerBFGSTestSuite, testBFGS)
 
     EXPECT_GT(ret.convergence, ConvergenceStatus::FAILURE);
     EXPECT_LE(ret.gradientNorm, options.convergenceGradientNorm);
-    EXPECT_GT(ret.numObjectiveEvaluations, 0);
-    EXPECT_GT(ret.numDerivativeEvaluations, 0);
+    EXPECT_GT(ret.numErrorEvaluations, 0);
+    EXPECT_GT(ret.numJacobianEvaluations, 0);
     EXPECT_GE(ret.error, 0.0);
     EXPECT_LT(ret.deltaError, 1e-12);
     EXPECT_LT(ret.maxDeltaX, 1e-3);

@@ -18,9 +18,26 @@
 #include <sm/PropertyTree.hpp>
 
 
+template <typename T>
+T getDeprecatedPropertyIfItExists(const sm::PropertyTree& config, const std::string & name, const std::string & newName, T defaultValue, T (sm::PropertyTree::* getter)(const std::string & key, T defaultValue) const){
+  const T depV = (config.*getter)(name, defaultValue);
+  const T v = (config.*getter)(newName, defaultValue);
+  if(depV != defaultValue){
+    std::cerr << "Property " << name << " is DEPREACTED! Use " << newName << " instead." << std::endl;
+    if(v != defaultValue){
+      SM_THROW(std::runtime_error, "Both properties " + name + " (deprecated) and " + newName + " are used together!");
+    }
+    return depV;
+  }
+  return v;
+}
+
 namespace aslam {
     namespace backend {
 
+        void Optimizer2::Status::resetImplementation() {
+          srv = SolutionReturnValue();
+        }
 
         Optimizer2::Optimizer2(const Options& options) :
             _options(options)
@@ -31,13 +48,14 @@ namespace aslam {
 
         Optimizer2::Optimizer2(const sm::PropertyTree& config, boost::shared_ptr<LinearSystemSolver> linearSystemSolver, boost::shared_ptr<TrustRegionPolicy> trustRegionPolicy) {
           Options options;
-          options.convergenceDeltaJ = config.getDouble("convergenceDeltaJ", options.convergenceDeltaJ);
+          options.convergenceDeltaError = getDeprecatedPropertyIfItExists(config, "convergenceDeltaJ", "convergenceDeltaError", options.convergenceDeltaError, static_cast<double(sm::PropertyTree::*)(const std::string&, double) const>(&sm::PropertyTree::getDouble));
           options.convergenceDeltaX = config.getDouble("convergenceDeltaX", options.convergenceDeltaX);
           options.maxIterations = config.getInt("maxIterations", options.maxIterations);
           options.doSchurComplement = config.getBool("doSchurComplement", options.doSchurComplement);
           options.verbose = config.getBool("verbose", options.verbose);
           options.linearSolverMaximumFails = config.getInt("linearSolverMaximumFails", options.linearSolverMaximumFails);
-          options.nThreads = config.getInt("nThreads", options.nThreads);
+          options.numThreadsJacobian = getDeprecatedPropertyIfItExists(config, "nThreads", "numThreadsJacobian", (int)options.numThreadsJacobian, static_cast<int(sm::PropertyTree::*)(const std::string&, int) const>(&sm::PropertyTree::getInt));
+          options.numThreadsError = config.getInt("numThreadsError", options.numThreadsError);
           options.linearSystemSolver = linearSystemSolver;
           options.trustRegionPolicy = trustRegionPolicy;
           _options = options;
@@ -48,13 +66,6 @@ namespace aslam {
 
         Optimizer2::~Optimizer2()
         {
-        }
-
-
-        /// \brief Set up to work on the optimization problem.
-        void Optimizer2::setProblem(boost::shared_ptr<OptimizationProblemBase> problem)
-        {
-            _problem = problem;
         }
 
         void Optimizer2::initializeTrustRegionPolicy()
@@ -90,64 +101,18 @@ namespace aslam {
           _options.verbose && std::cout << "Using the " << _solver->name() << " linear system solver\n";
         }
 
-        /// \brief initialize the optimizer to run on an optimization problem.
-        ///        This should be called before calling optimize()
-        void Optimizer2::initialize()
+        void Optimizer2::initializeImplementation()
         {
-          initializeLinearSolver();
-          initializeTrustRegionPolicy();
+            OptimizerProblemManagerBase::initializeImplementation();
+            initializeLinearSolver();
+            initializeTrustRegionPolicy();
 
-          SM_ASSERT_FALSE(Exception, _problem.get() == NULL, "No optimization problem has been set");
-            _options.verbose && std::cout << "Initializing\n";
-            Timer init("Optimizer2: Initialize Total");
-            _designVariables.clear();
-            _designVariables.reserve(_problem->numDesignVariables());
-            _errorTerms.clear();
-            _errorTerms.reserve(_problem->numErrorTerms());
-            Timer initDv("Optimizer2: Initialize---Design Variables");
-            // Run through all design variables adding active ones to an active list.
-            // std::cout << "dvloop 1\n";
-            for (size_t i = 0; i < _problem->numDesignVariables(); ++i) {
-                DesignVariable* dv = _problem->designVariable(i);
-                if (dv->isActive())
-                    _designVariables.push_back(dv);
-            }
-            SM_ASSERT_FALSE(Exception, _designVariables.empty(), "It is illegal to run the optimizer with all marginalized design variables.");
-            // Assign block indices to the design variables.
-            // "blocks" will hold the structure of the left-hand-side of Gauss-Newton
-            int columnBase = 0;
-            // std::cout << "dvloop 2\n";
-            for (size_t i = 0; i < _designVariables.size(); ++i) {
-                _designVariables[i]->setBlockIndex(i);
-                _designVariables[i]->setColumnBase(columnBase);
-                columnBase += _designVariables[i]->minimalDimensions();
-            }
-            initDv.stop();
-            Timer initEt("Optimizer2: Initialize---Error Terms");
-            // Get all of the error terms that work on these design variables.
-            int dim = 0;
-            // std::cout << "eloop 1\n";
-            for (unsigned i = 0; i < _problem->numErrorTerms(); ++i) {
-                ErrorTerm* e = _problem->errorTerm(i);
-                _errorTerms.push_back(e);
-                e->setRowBase(dim);
-                dim += e->dimension();
-            }
-            initEt.stop();
-            SM_ASSERT_FALSE(Exception, _errorTerms.empty(), "It is illegal to run the optimizer with no error terms.");
             Timer initMx("Optimizer2: Initialize---Matrices");
             // Set up the block matrix structure.
-            // std::cout << "init structure\n";
-            //      initializeLinearSolver();
-            _solver->initMatrixStructure(_designVariables, _errorTerms, _trustRegionPolicy->requiresAugmentedDiagonal());
+            _solver->initMatrixStructure(getDesignVariables(), problemManager().getErrorTerms(), _trustRegionPolicy->requiresAugmentedDiagonal());
             initMx.stop();
-            _options.verbose && std::cout << "Optimization problem initialized with " << _designVariables.size() << " design variables and " << _errorTerms.size() << " error terms\n";
-            // \todo Say how big the problem is.
-            _options.verbose && std::cout << "The Jacobian matrix is " << dim << " x " << columnBase << std::endl;
-
-
-            // \todo initialize the trust region stuff.
-
+            _options.verbose && std::cout << "Optimization problem initialized with " << problemManager().numDesignVariables() << " design variables and " << problemManager().getErrorTerms().size() << " error terms\n";
+            _options.verbose && std::cout << "The Jacobian matrix is " << problemManager().getTotalDimSquaredErrorTerms() << " x " << problemManager().numOptParameters() << std::endl;
         }
 
 
@@ -163,14 +128,14 @@ namespace aslam {
 
         // the gradient: is simply the right hand side of GN:
         double grad_norm = _rhs.norm();
-        double abs_J = fabs(_J);
+        double abs_J = fabs(_status.error);
 
         // the first condition:
         bool crit1 = grad_norm < sqrt(epsilon) * (1 + abs_J);
 
         bool crit2 = _dx.norm() < sqrt(epsilon) * (1 + x_norm);
 
-        bool crit3 = fabs(_J - _p_J) < epsilon * (1 + abs_J);
+        bool crit3 = fabs(_status.error - _p_J) < epsilon * (1 + abs_J);
 
         bool crit4 = iterations < _options.maxIterations;
 
@@ -178,37 +143,43 @@ namespace aslam {
 
         }*/
 
+      SolutionReturnValue Optimizer2::optimize()
+      {
+        OptimizerProblemManagerBase::optimize();
+        return _status.srv;
+      }
 
-
-        SolutionReturnValue Optimizer2::optimize()
+        void Optimizer2::optimizeImplementation()
         {
             Timer timeErr("Optimizer2: evaluate error", true);
             Timer timeSchur("Optimizer2: Schur complement", true);
             Timer timeBackSub("Optimizer2: Back substitution", true);
             Timer timeSolve("Optimizer2: Build and solve linear system", true);
             // Select the design variables and (eventually) the error terms involved in the optimization.
-            initialize();
-            SolutionReturnValue srv;
+            SolutionReturnValue & srv = _status.srv;
+            _status.numIterations = srv.iterations;
+
             _p_J = -1.0;
 
-            //std::cout << "Evaluate error for the first time\n";
             // This sets _J
             timeErr.start();
             evaluateError(true);
             timeErr.stop();
-            _p_J = _J;
+            _p_J = _status.error;
             srv.JStart = _p_J;
             // *** while not done
-            _options.verbose && std::cout << "[" << srv.iterations << ".0]: J: " << _J << std::endl;
+            _options.verbose && std::cout << "[" << srv.iterations << ".0]: J: " << _status.error << std::endl;
             // Set up the estimation problem.
-            double deltaX = _options.convergenceDeltaX + 1.0;
-            double deltaJ = _options.convergenceDeltaJ + 1.0;
+            double & deltaX = _status.maxDeltaX;
+            deltaX = _options.convergenceDeltaX + 1.0;
+            double & deltaJ = _status.deltaError;
+            deltaJ = _options.convergenceDeltaError + 1.0;
             bool previousIterationFailed = false;
             bool linearSolverFailure = false;
 
             SM_ASSERT_TRUE(Exception, _solver.get() != NULL, "The solver is null");
             _trustRegionPolicy->setSolver(_solver);
-            _trustRegionPolicy->optimizationStarting(_J);
+            _trustRegionPolicy->optimizationStarting(_status.error);
 
             issueCallback<callback::event::OPTIMIZATION_INITIALIZED>();
 
@@ -216,11 +187,12 @@ namespace aslam {
             while (srv.iterations <  _options.maxIterations &&
                    srv.failedIterations < _options.maxIterations &&
                    ((deltaX > _options.convergenceDeltaX &&
-                     fabs(deltaJ) > _options.convergenceDeltaJ) ||
+                     fabs(deltaJ) > _options.convergenceDeltaError) ||
                     linearSolverFailure)) {
 
                 timeSolve.start();
-                bool solutionSuccess = _trustRegionPolicy->solveSystem(_J, previousIterationFailed, _options.nThreads, _dx);
+                bool solutionSuccess = _trustRegionPolicy->solveSystem(_status.error, previousIterationFailed, _options.numThreadsError, _dx);
+                SM_ASSERT_EQ(Exception, problemManager().numOptParameters(), size_t(_dx.size()), "_trustRegionPolicy->solveSystem yielded dx with wrong size!");
                 timeSolve.stop();
                 issueCallback<callback::event::LINEAR_SYSTEM_SOLVED>();
 
@@ -239,7 +211,7 @@ namespace aslam {
                     timeErr.start();
                     evaluateError(true);
                     timeErr.stop();
-                    deltaJ = _p_J - _J;
+                    deltaJ = _p_J - _status.error;
                     // This was a regression.
                     if( _trustRegionPolicy->revertOnFailure() )
                     {
@@ -252,40 +224,48 @@ namespace aslam {
                         }
                         else
                         {
-                            _p_J = _J;
+                            _p_J = _status.error;
                             previousIterationFailed = false;
                         }
                     }
                     else
                     {
-                        _p_J = _J;
+                        _p_J = _status.error;
                     }
                     srv.iterations++;
+                    _status.numIterations = srv.iterations;
 
-                    _options.verbose && std::cout << "[" << srv.iterations << "]: J: " << _J << ", dJ: " << deltaJ << ", deltaX: " << deltaX << ", ";
+                    _options.verbose && std::cout << "[" << srv.iterations << "]: J: " << _status.error << ", dJ: " << deltaJ << ", deltaX: " << deltaX << ", ";
                     _options.verbose && _trustRegionPolicy->printState(std::cout);
                     _options.verbose && std::cout << std::endl;
                 }
             } // if the linear solver failed / else
-            srv.JFinal = _p_J;
+            srv.JFinal = _status.error = _p_J;
             srv.dXFinal = deltaX;
             srv.dJFinal = deltaJ;
             srv.linearSolverFailure = linearSolverFailure;
-            return srv;
+
+            if(linearSolverFailure || srv.failedIterations >= _options.maxIterations){
+              _status.convergence = FAILURE;
+            } else if (deltaX <= _options.convergenceDeltaX) {
+              _status.convergence = DX;
+            } else if (fabs(deltaJ) <= _options.convergenceDeltaError) {
+              _status.convergence = DOBJECTIVE;
+            }
         }
 
 
             DesignVariable* Optimizer2::designVariable(size_t i)
             {
-                SM_ASSERT_LT_DBG(Exception, i, _designVariables.size(), "index out of bounds");
-                return _designVariables[i];
+                SM_ASSERT_LT_DBG(Exception, i, numDesignVariables(), "index out of bounds");
+                return getDesignVariables().at(i);
             }
 
 
 
             size_t Optimizer2::numDesignVariables() const
             {
-                return _designVariables.size();
+                return getDesignVariables().size();
             }
 
 
@@ -293,8 +273,7 @@ namespace aslam {
             {
                 // Apply the update to the dense state.
                 int startIdx = 0;
-                for (size_t i = 0; i < numDesignVariables(); i++) {
-                    DesignVariable* d = _designVariables[i];
+                for (DesignVariable* d : getDesignVariables()) {
                     const int dbd = d->minimalDimensions();
                     Eigen::VectorXd dxS = _dx.segment(startIdx, dbd);
                     dxS *= d->scaling();
@@ -313,27 +292,17 @@ namespace aslam {
 
             void Optimizer2::revertLastStateUpdate()
             {
-                for (size_t i = 0; i < _designVariables.size(); i++) {
-                    _designVariables[i]->revertUpdate();
+                for (DesignVariable * d : getDesignVariables()) {
+                    d->revertUpdate();
                 }
-            }
-
-
-            Optimizer2::Options& Optimizer2::options()
-            {
-                return _options;
-            }
-
-            void Optimizer2::setOptions(const Options& options) {
-              _options = options;
             }
 
             double Optimizer2::evaluateError(bool useMEstimator)
             {
               SM_ASSERT_TRUE(Exception, _solver.get() != NULL, "The solver is null");
-              _J = _solver->evaluateError(_options.nThreads, useMEstimator, &_callbackManager);
-              _callbackManager.issueCallback(callback::event::COST_UPDATED{_J, _p_J});
-              return _J;
+              _status.error = _solver->evaluateError(_options.numThreadsError, useMEstimator, &_callbackManager);
+              _callbackManager.issueCallback(callback::event::COST_UPDATED{_status.error, _p_J});
+              return _status.error;
             }
 
 
@@ -346,7 +315,7 @@ namespace aslam {
             /// The value of the objective function.
             double Optimizer2::J() const
             {
-                return _J;
+                return _status.error;
             }
 
             void Optimizer2::printTiming() const
@@ -372,7 +341,7 @@ namespace aslam {
                 SM_THROW(Exception, "Broken");
 
                 std::vector<std::pair<int, int> > blockIndices;
-                for (size_t i = 0; i < _designVariables.size(); ++i) {
+                for (size_t i = 0; i < getDesignVariables().size(); ++i) {
                     blockIndices.push_back(std::make_pair(i, i));
                 }
                 computeCovarianceBlocks(blockIndices, outP, lambda);
@@ -397,12 +366,12 @@ namespace aslam {
               boost::shared_ptr<BlockCholeskyLinearSystemSolver> solver_sp;
               solver_sp.reset(new BlockCholeskyLinearSystemSolver());
               // True here for creating the diagonal conditioning.
-              solver_sp->initMatrixStructure(_designVariables, _errorTerms, true);
+              solver_sp->initMatrixStructure(getDesignVariables(), problemManager().getErrorTerms(), true);
 
               _options.verbose && std::cout << "Setting the diagonal conditioner to: " << lambda << ".\n";
               evaluateError(false);
               solver_sp->setConstantConditioner(lambda);
-              solver_sp->buildSystem(_options.nThreads, false);
+              solver_sp->buildSystem(_options.numThreadsJacobian, false);
               solver_sp->copyHessian(outH);
             }
 
@@ -419,7 +388,7 @@ namespace aslam {
         template <typename Event>
         void Optimizer2::issueCallback(){
           //TODO (HannesSommer) use ProceedInstruction value in the Optimizer
-          _callbackManager.issueCallback(Event{_J, 0});
+          _callbackManager.issueCallback(Event{_status.error, 0});
         }
 
         } // namespace backend
