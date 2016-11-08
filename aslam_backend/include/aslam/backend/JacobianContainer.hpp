@@ -16,6 +16,8 @@ namespace aslam {
     class JacobianContainerImplHelper;
   }
 
+    class JacobianContainer;
+
     /**
      * \struct JacobianContainerChainRuleApplied
      * \brief Helper return value struct for MatrixStack::PopGuard
