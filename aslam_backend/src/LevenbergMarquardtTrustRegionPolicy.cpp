@@ -23,7 +23,7 @@ namespace aslam {
 
     }
 
-    LevenbergMarquardtTrustRegionPolicy::LevenbergMarquardtTrustRegionPolicy(const sm::PropertyTree & config) {
+    LevenbergMarquardtTrustRegionPolicy::LevenbergMarquardtTrustRegionPolicy(const sm::ConstPropertyTree & config) {
       _lambdaInit = config.getDouble("lambdaInit", 1e-3);
       _gammaInit  = config.getDouble("gammaInit", 3.0);
       _betaInit   = config.getDouble("betaInit", 2.0); 

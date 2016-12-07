@@ -6,7 +6,7 @@
 #include <boost/shared_ptr.hpp>
 
 namespace sm {
-class PropertyTree;
+class ConstPropertyTree;
 } // namespace sm
 
 namespace aslam {
@@ -16,7 +16,7 @@ namespace aslam {
         {
         public:
           LevenbergMarquardtTrustRegionPolicy();
-          LevenbergMarquardtTrustRegionPolicy(const sm::PropertyTree & config);
+          LevenbergMarquardtTrustRegionPolicy(const sm::ConstPropertyTree & config);
           LevenbergMarquardtTrustRegionPolicy(double lambdaInit);
           virtual ~LevenbergMarquardtTrustRegionPolicy();
 
