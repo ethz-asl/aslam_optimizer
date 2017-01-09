@@ -5,9 +5,7 @@
 namespace aslam {
 namespace backend {
 
-LineSearchTrustRegionPolicy::LineSearchTrustRegionPolicy() : _scaleStep(0.5) {}
-
-LineSearchTrustRegionPolicy::LineSearchTrustRegionPolicy(double scale) : _scaleStep(scale) {
+LineSearchTrustRegionPolicy::LineSearchTrustRegionPolicy(double scaleStep, bool resetScaleAfterSuccess) : _scaleStep(scaleStep), _resetScaleAfterSuccess(resetScaleAfterSuccess) {
   SM_ASSERT_GE_LT(std::runtime_error, _scaleStep, 0.0, 1.0, "The scale must be on the interval (0,1).");
 }
 LineSearchTrustRegionPolicy::~LineSearchTrustRegionPolicy() {}
@@ -28,7 +26,11 @@ bool LineSearchTrustRegionPolicy::solveSystemImplementation(double /* J */, bool
     Timer timeSolve("LsGnTrustRegionPolicy: Solve linear system", false);
     success = _solver->solveSystem(outDx);
     timeSolve.stop();
-    _currentScale = 1.0;
+    if(isFirstIteration() || _resetScaleAfterSuccess){
+      _currentScale = 1.0;
+    } else {
+      _currentScale = std::min(1.0, _currentScale / _scaleStep);
+    }
   } else {
     _currentScale *= _scaleStep;
     outDx*= _scaleStep;
@@ -47,9 +49,6 @@ std::ostream & LineSearchTrustRegionPolicy::printState(std::ostream & out) const
 void LineSearchTrustRegionPolicy::setScaleStep(double scale){
   SM_ASSERT_GE_LT(std::runtime_error, scale, 0.0, 1.0, "The scale must be on the interval (0,1).");
   _scaleStep = scale;
-}
-bool LineSearchTrustRegionPolicy::revertOnFailure() {
-  return true;
 }
 
 bool LineSearchTrustRegionPolicy::requiresAugmentedDiagonal() const {
