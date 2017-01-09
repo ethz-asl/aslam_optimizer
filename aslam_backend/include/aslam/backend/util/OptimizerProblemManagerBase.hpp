@@ -29,6 +29,11 @@ class OptimizerProblemManagerBase : public OptimizerBase
   bool isInitialized() override { return _problemManager.isInitialized(); }
   const std::vector<DesignVariable*>& getDesignVariables() const override { return _problemManager.designVariables(); }
 
+  /// \brief return the total dimension of all squared error terms together
+  size_t getTotalDimSquaredErrorTerms() {
+    return problemManager().getTotalDimSquaredErrorTerms();
+  }
+
  protected:
   const ProblemManager& problemManager() const { return _problemManager; }
   ProblemManager& problemManager() { return _problemManager; }

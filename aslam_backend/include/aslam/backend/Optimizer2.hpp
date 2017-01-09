@@ -138,14 +138,13 @@ namespace aslam {
       }
 
       /// \brief expose callback registry
-      inline callback::Registry & callback(){
+      callback::Registry & callback(){
         return _callbackManager;
       }
 
+      const Matrix * getJacobian() const;
 
-        const Matrix * getJacobian() const;
-      
-        const LinearSystemSolver * getBaseSolver() const;
+      const LinearSystemSolver * getBaseSolver() const;
 
     private:
 
