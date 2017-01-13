@@ -13,7 +13,7 @@ namespace backend {
 
     Eigen::Matrix3d RotationScalarExpressionNode::toRotationMatrixImplementation() const
     {
-      const double s = _s->toScalar(), cs = cos(s), ss = sin(s);
+      const double s = _s->toScalar(), cs = std::cos(s), ss = std::sin(s);
       Eigen::Matrix3d ret;
       ret.setZero();
 

@@ -23,7 +23,7 @@
 
 namespace sm {
 
-  class PropertyTree;
+  class ConstPropertyTree;
 
 }
 namespace aslam {
@@ -65,7 +65,7 @@ namespace aslam {
       SM_DEFINE_EXCEPTION(Exception, aslam::Exception);
 
       Optimizer2(const Options& options = Options());
-      Optimizer2(const sm::PropertyTree& config, boost::shared_ptr<LinearSystemSolver> linearSystemSolver, boost::shared_ptr<TrustRegionPolicy> trustRegionPolicy);
+      Optimizer2(const sm::ConstPropertyTree& config, boost::shared_ptr<LinearSystemSolver> linearSystemSolver, boost::shared_ptr<TrustRegionPolicy> trustRegionPolicy);
       virtual ~Optimizer2();
 
       /// \brief initialize the linear solver specified in the optimizer options.
@@ -138,14 +138,13 @@ namespace aslam {
       }
 
       /// \brief expose callback registry
-      inline callback::Registry & callback(){
+      callback::Registry & callback(){
         return _callbackManager;
       }
 
+      const Matrix * getJacobian() const;
 
-        const Matrix * getJacobian() const;
-      
-        const LinearSystemSolver * getBaseSolver() const;
+      const LinearSystemSolver * getBaseSolver() const;
 
     private:
 

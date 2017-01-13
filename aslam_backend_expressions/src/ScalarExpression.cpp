@@ -98,6 +98,37 @@ std::ostream& operator<<(std::ostream& os, const ScalarExpression& e) {
   return os;
 }
 
+class UnaryScalarExpressionNode : public ScalarExpressionNode
+{
+ protected:
+  UnaryScalarExpressionNode(boost::shared_ptr<ScalarExpressionNode> arg) : _arg(arg) {}
+  virtual void getDesignVariablesImplementation(DesignVariable::set_t & designVariables) const override {
+    _arg->getDesignVariables(designVariables);
+  }
+  boost::shared_ptr<ScalarExpressionNode> _arg;
+};
+template <typename Eval, typename EvalDerivative>
+ScalarExpression createUnaryScalarExpressionOp(Eval eval, EvalDerivative evalD, const ScalarExpression& e){
+  class Result : public UnaryScalarExpressionNode {
+   public:
+    Result(Eval eval, EvalDerivative evalD, const ScalarExpression & e) : UnaryScalarExpressionNode(e.root()), eval(eval), evalD(evalD) {}
+   private:
+    double evaluateImplementation() const override {
+      return eval(_arg->evaluate());
+    }
+    void evaluateJacobiansImplementation(JacobianContainer & outJacobians) const override {
+      _arg->evaluateJacobians(outJacobians.apply(evalD(_arg->evaluate())));
+    }
+   private:
+    Eval eval;
+    EvalDerivative evalD;
+  };
+  return ScalarExpression(boost::shared_ptr<ScalarExpressionNode>(new Result(eval, evalD, e)));
+}
+
+ScalarExpression createUnaryScalarExpressionOp(double(* eval)(double), double(* evalD)(double), const ScalarExpression& e){
+  return createUnaryScalarExpressionOp<decltype(eval), decltype(evalD)>(eval, evalD, e);
+}
 
 ScalarExpression sqrt(const ScalarExpression& e) {
   boost::shared_ptr<ScalarExpressionNode> newRoot(new ScalarExpressionNodeSqrt(e.root()));
@@ -132,6 +163,14 @@ ScalarExpression atan2(const ScalarExpression& e0, const ScalarExpression& e1) {
 ScalarExpression acos(const ScalarExpression& e) {
   boost::shared_ptr<ScalarExpressionNode> newRoot(new ScalarExpressionNodeAcos(e.root()));
   return ScalarExpression(newRoot);
+}
+
+ScalarExpression sin(const ScalarExpression& e) {
+  return createUnaryScalarExpressionOp(&std::sin, &std::cos, e);
+}
+
+ScalarExpression cos(const ScalarExpression& e) {
+  return createUnaryScalarExpressionOp(&std::cos, [](double v){return -std::sin(v);}, e);
 }
 
 ScalarExpression acosSquared(const ScalarExpression& e) {

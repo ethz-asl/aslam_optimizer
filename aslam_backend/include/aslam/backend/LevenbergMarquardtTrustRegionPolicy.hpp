@@ -6,7 +6,7 @@
 #include <boost/shared_ptr.hpp>
 
 namespace sm {
-class PropertyTree;
+class ConstPropertyTree;
 } // namespace sm
 
 namespace aslam {
@@ -16,7 +16,7 @@ namespace aslam {
         {
         public:
           LevenbergMarquardtTrustRegionPolicy();
-          LevenbergMarquardtTrustRegionPolicy(const sm::PropertyTree & config);
+          LevenbergMarquardtTrustRegionPolicy(const sm::ConstPropertyTree & config);
           LevenbergMarquardtTrustRegionPolicy(double lambdaInit);
           virtual ~LevenbergMarquardtTrustRegionPolicy();
 
@@ -34,7 +34,7 @@ namespace aslam {
           virtual bool requiresAugmentedDiagonal() const;
           virtual std::string name() const { return "levenberg_marquardt"; }
         private:
-          double getLmRho();
+          double getLmRho(const Eigen::VectorXd & dx);
           double _lambdaInit;
           double _gammaInit;
           double _betaInit;
@@ -46,9 +46,6 @@ namespace aslam {
           double _beta;
           int _p;
           double _mu;
-          
-          Eigen::VectorXd _dx;
-            
         };
         
     } // namespace backend

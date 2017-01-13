@@ -80,6 +80,8 @@ namespace aslam {
     ScalarExpression atan(const ScalarExpression& e);
     ScalarExpression tanh(const ScalarExpression& e);
     ScalarExpression atan2(const ScalarExpression& e0, const ScalarExpression& e1);
+    ScalarExpression sin(const ScalarExpression& e);
+    ScalarExpression cos(const ScalarExpression& e);
     ScalarExpression acos(const ScalarExpression& e);
     ScalarExpression acosSquared(const ScalarExpression& e);
     ScalarExpression inverseSigmoid(const ScalarExpression& e, const double height, const double scale, const double shift);

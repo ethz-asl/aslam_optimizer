@@ -19,7 +19,7 @@
 
 
 template <typename T>
-T getDeprecatedPropertyIfItExists(const sm::PropertyTree& config, const std::string & name, const std::string & newName, T defaultValue, T (sm::PropertyTree::* getter)(const std::string & key, T defaultValue) const){
+T getDeprecatedPropertyIfItExists(const sm::ConstPropertyTree& config, const std::string & name, const std::string & newName, T defaultValue, T (sm::ConstPropertyTree::* getter)(const std::string & key, T defaultValue) const){
   const T depV = (config.*getter)(name, defaultValue);
   const T v = (config.*getter)(newName, defaultValue);
   if(depV != defaultValue){
@@ -46,15 +46,15 @@ namespace aslam {
             initializeTrustRegionPolicy();
         }
 
-        Optimizer2::Optimizer2(const sm::PropertyTree& config, boost::shared_ptr<LinearSystemSolver> linearSystemSolver, boost::shared_ptr<TrustRegionPolicy> trustRegionPolicy) {
+        Optimizer2::Optimizer2(const sm::ConstPropertyTree& config, boost::shared_ptr<LinearSystemSolver> linearSystemSolver, boost::shared_ptr<TrustRegionPolicy> trustRegionPolicy) {
           Options options;
-          options.convergenceDeltaError = getDeprecatedPropertyIfItExists(config, "convergenceDeltaJ", "convergenceDeltaError", options.convergenceDeltaError, static_cast<double(sm::PropertyTree::*)(const std::string&, double) const>(&sm::PropertyTree::getDouble));
+          options.convergenceDeltaError = getDeprecatedPropertyIfItExists(config, "convergenceDeltaJ", "convergenceDeltaError", options.convergenceDeltaError, static_cast<double(sm::ConstPropertyTree::*)(const std::string&, double) const>(&sm::ConstPropertyTree::getDouble));
           options.convergenceDeltaX = config.getDouble("convergenceDeltaX", options.convergenceDeltaX);
           options.maxIterations = config.getInt("maxIterations", options.maxIterations);
           options.doSchurComplement = config.getBool("doSchurComplement", options.doSchurComplement);
           options.verbose = config.getBool("verbose", options.verbose);
           options.linearSolverMaximumFails = config.getInt("linearSolverMaximumFails", options.linearSolverMaximumFails);
-          options.numThreadsJacobian = getDeprecatedPropertyIfItExists(config, "nThreads", "numThreadsJacobian", (int)options.numThreadsJacobian, static_cast<int(sm::PropertyTree::*)(const std::string&, int) const>(&sm::PropertyTree::getInt));
+          options.numThreadsJacobian = getDeprecatedPropertyIfItExists(config, "nThreads", "numThreadsJacobian", (int)options.numThreadsJacobian, static_cast<int(sm::ConstPropertyTree::*)(const std::string&, int) const>(&sm::ConstPropertyTree::getInt));
           options.numThreadsError = config.getInt("numThreadsError", options.numThreadsError);
           options.linearSystemSolver = linearSystemSolver;
           options.trustRegionPolicy = trustRegionPolicy;
