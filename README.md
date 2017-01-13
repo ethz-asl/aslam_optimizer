@@ -9,4 +9,4 @@ Optimizer classes for aslam_cv, kalibr, aslam_incremental_calibration, ..
 3-Clause BSD; see LICENSE
 
 ## Acknowledgments
-This work is supported in part by the European Community's Seventh Framework Programme (FP7/2007-2013) under grant #610603 (EUROPA2).
+This work is supported in part by the European Community's Seventh Framework Programme (FP7/2007-2013) under grants #269916 (V-Charge), and #610603 (EUROPA2).
