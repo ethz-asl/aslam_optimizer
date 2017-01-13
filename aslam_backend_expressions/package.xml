@@ -5,7 +5,7 @@
   <description>aslam_backend_expressions</description>
 
   <maintainer email="Paul.Furgale@mavt.ethz.ch">Paul Furgale</maintainer>
-  <license>BSD</license>
+  <license>3-Clause BSD</license>
   <buildtool_depend>catkin</buildtool_depend>
   <buildtool_depend>catkin_simple</buildtool_depend>
   
