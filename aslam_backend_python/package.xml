@@ -5,7 +5,7 @@
   <version>0.0.1</version>
   <maintainer email="paulfurgale@mavt.ethz.ch">Paul Furgale</maintainer>
   <author>Paul Furgale</author>
-  <license>BSD</license>
+  <license>3-Clause BSD</license>
   <buildtool_depend>catkin</buildtool_depend>
   <buildtool_depend>catkin_simple</buildtool_depend>
 
