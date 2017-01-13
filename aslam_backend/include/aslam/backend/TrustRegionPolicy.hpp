@@ -19,8 +19,8 @@ namespace aslam {
             /// \brief called by the optimizer when an optimization is starting
             virtual void optimizationStarting(double J);
             
-            // Returns true if the solution was successful
-          virtual bool solveSystem(double J, bool previousIterationFailed, int nThreads, Eigen::VectorXd& outDx);
+            /// \brief Returns true if the solution was successful
+            virtual bool solveSystem(double J, bool previousIterationFailed, int nThreads, Eigen::VectorXd& outDx);
 
             /// \brief get the linear system solver
             boost::shared_ptr<LinearSystemSolver> getSolver();
@@ -28,13 +28,13 @@ namespace aslam {
             /// \brief set the linear system solver
             virtual void setSolver(boost::shared_ptr<LinearSystemSolver> solver);
             
-            /// \brief should the optimizer revert on failure? You should probably return true
+            /// \brief should the optimizer revert on failure? You should probably return true (the default implementation does this)
             virtual bool revertOnFailure();
 
-          /// \brief print the current state to a stream (no newlines).
-          virtual std::ostream & printState(std::ostream & out) const = 0;
-          virtual std::string name() const = 0;
-          virtual bool requiresAugmentedDiagonal() const = 0;
+            /// \brief print the current state to a stream (no newlines).
+            virtual std::ostream & printState(std::ostream & out) const = 0;
+            virtual std::string name() const = 0;
+            virtual bool requiresAugmentedDiagonal() const = 0;
         protected:
             double get_dJ();
             bool isFirstIteration(){ return _isFirstIteration; }
@@ -42,8 +42,8 @@ namespace aslam {
             /// \brief called by the optimizer when an optimization is starting
             virtual void optimizationStartingImplementation(double J) = 0;
             
-            // Returns true if the solution was successful
-          virtual bool solveSystemImplementation(double J, bool previousIterationFailed, int nThreads, Eigen::VectorXd& outDx) = 0;
+            /// \brief Returns true if the solution was successful
+            virtual bool solveSystemImplementation(double J, bool previousIterationFailed, int nThreads, Eigen::VectorXd& outDx) = 0;
 
             boost::shared_ptr<LinearSystemSolver> _solver;
             
