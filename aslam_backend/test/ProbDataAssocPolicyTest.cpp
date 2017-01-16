@@ -1,3 +1,4 @@
+#include <limits>
 #include <vector>
 
 #include <boost/make_shared.hpp>
@@ -27,10 +28,9 @@ class DummyError : public ErrorTermFs<1> {
   virtual void evaluateJacobiansImplementation(JacobianContainer &) {}
 };
 
-TEST(ProbDataAssocPolicyTestSuite, callbackTest) {
+ProbDataAssocPolicy::ErrorTermGroups fillErrorGroups() {
   std::vector<ProbDataAssocPolicy::ErrorTermPtr> error_group_1;
   std::vector<ProbDataAssocPolicy::ErrorTermPtr> error_group_2;
-
   for (int i = 0; i < 3; i++) {
     boost::shared_ptr<FixedWeightMEstimator> m_estimator(
         new FixedWeightMEstimator(1));
@@ -53,7 +53,12 @@ TEST(ProbDataAssocPolicyTestSuite, callbackTest) {
   error_groups->push_back(
       boost::make_shared<std::vector<ProbDataAssocPolicy::ErrorTermPtr>>(
           error_group_2));
-  ProbDataAssocPolicy policy(error_groups, 1);
+  return error_groups;
+}
+
+TEST(ProbDataAssocPolicyTestSuite, tCallbackTest) {
+  ProbDataAssocPolicy::ErrorTermGroups error_groups = fillErrorGroups();
+  ProbDataAssocPolicy policy(error_groups, 5, 1);
   for (ProbDataAssocPolicy::ErrorTermGroup group : *error_groups) {
     for (ProbDataAssocPolicy::ErrorTermPtr error_term : *group) {
       // Initially all the weights should be 1
@@ -61,12 +66,38 @@ TEST(ProbDataAssocPolicyTestSuite, callbackTest) {
     }
   }
   policy.callback();
+  std::vector<double> group1_expected_w = {1.0 / 3, 1.0 / 3, 1.0 / 3};
+  std::vector<double> group2_expected_w = {0.7151351, 0.1412613,
+                                           0.0241258, 0.0047656};
+  std::vector<std::vector<double>> expected_weights;
+  expected_weights.push_back(group1_expected_w);
+  expected_weights.push_back(group2_expected_w);
 
-  std::vector<double> group1_expected_w = {-1.09861228866811, -1.09861228866811,
-                                           -1.09861228866811};
+  for (std::size_t i = 0; i < error_groups->size(); i++) {
+    ProbDataAssocPolicy::ErrorTermGroup group = error_groups->at(i);
+    for (std::size_t j = 0; j < group->size(); j++) {
+      ProbDataAssocPolicy::ErrorTermPtr error_term = group->at(j);
+      EXPECT_NEAR(expected_weights[i][j],
+                  error_term->getCurrentMEstimatorWeight(), 1e-6);
+    }
+  }
+}
+
+TEST(ProbDataAssocPolicyTestSuite, gaussianCallbackTest) {
+  ProbDataAssocPolicy::ErrorTermGroups error_groups = fillErrorGroups();
+  ProbDataAssocPolicy policy(
+      error_groups, std::numeric_limits<double>::infinity(), 1);
+  for (ProbDataAssocPolicy::ErrorTermGroup group : *error_groups) {
+    for (ProbDataAssocPolicy::ErrorTermPtr error_term : *group) {
+      // Initially all the weights should be 1
+      EXPECT_EQ(error_term->getCurrentMEstimatorWeight(), 1);
+    }
+  }
+  policy.callback();
+  std::vector<double> group1_expected_w = {1.0 / 3, 1.0 / 3, 1.0 / 3};
   std::vector<double> group2_expected_w = {
-      -0.216722084482954, -1.716722084482954,
-      -4.216722084482954, -7.716722084482954};
+      0.805153702921689,  0.179654074677018,
+      0.0147469044726408, 0.000445317928652638};
   std::vector<std::vector<double>> expected_weights;
   expected_weights.push_back(group1_expected_w);
   expected_weights.push_back(group2_expected_w);

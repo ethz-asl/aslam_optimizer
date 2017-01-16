@@ -1,44 +1,79 @@
 #include <aslam/backend/ProbDataAssocPolicy.hpp>
 
+#include <math.h>
+
+#include <limits>
 #include <vector>
 
 namespace aslam {
 namespace backend {
-ProbDataAssocPolicy::ProbDataAssocPolicy(ErrorTermGroups error_terms,
-                                         double lambda) {
-  error_terms_ = error_terms;
-  scaling_factor_ = -lambda / 2;
+
+constexpr double pi() { return std::atan(1) * 4; }
+
+ProbDataAssocPolicy::ProbDataAssocPolicy(ErrorTermGroups error_terms, double v,
+                                         int dimension)
+    : error_terms_(error_terms), dimension_(dimension) {
+  SM_ASSERT_TRUE(Exception, dimension > 0,
+                 "The dimension of the error terms must be greater than zero");
+  SM_ASSERT_TRUE(Exception, v > 0.0,
+                 "The dof of the t-distribution must be greater than zero");
+  if (v < std::numeric_limits<double>::infinity()) {
+    v_ = v;
+    t_exponent_ = -(v + dimension_) / 2.0;
+    is_normal_ = false;
+    log_norm_constant_ = std::lgamma(v_ / 2) -
+                         std::lgamma((v_ + dimension_) / 2) +
+                         (v_ / 2) * std::log(pi() * v_);
+  } else {
+    is_normal_ = true;
+    log_norm_constant_ = (dimension_ / 2.0) * std::log(2 * pi());
+  }
 }
 
 void ProbDataAssocPolicy::callback() {
   for (ErrorTermGroup vect : *error_terms_) {
-    bool init_max = false;
-    double max_log_weight = 0;
-    std::vector<double> log_weights;
-    log_weights.reserve(vect->size());
+    double max_log_prob = -std::numeric_limits<double>::infinity();
+    std::vector<double> log_probs;
+    std::vector<double> expected_weights;
+    log_probs.reserve(vect->size());
+    expected_weights.reserve(vect->size());
+    double marginal_log_likelihood = 0;
     for (ErrorTermPtr error_term : *vect) {
-      // Update log_weights
-      double log_weight = scaling_factor_ * (error_term->getRawSquaredError());
-      if (!init_max) {
-        max_log_weight = log_weight;
-        init_max = true;
-      } else if (log_weight > max_log_weight) {
-        max_log_weight = log_weight;
+      // Update log_probs
+      const double squared_error = error_term->getRawSquaredError();
+      double log_prob;
+      if (is_normal_) {
+        log_prob = -squared_error / 2 + log_norm_constant_;
+      } else {
+        log_prob =
+            (t_exponent_) * std::log1p(squared_error / v_) - log_norm_constant_;
+        const double expected_weight = (v_ + dimension_) / (v_ + squared_error);
+        expected_weights.push_back(expected_weight);
       }
-      log_weights.push_back(log_weight);
-    }
 
-    double log_norm_constant = 0;
-    for (double log_w : log_weights) {
-      log_norm_constant += exp(log_w - max_log_weight);
+      if (log_prob > max_log_prob) {
+        max_log_prob = log_prob;
+      }
+      log_probs.push_back(log_prob);
     }
-    log_norm_constant = log(log_norm_constant) + max_log_weight;
+    for (double log_p : log_probs) {
+      marginal_log_likelihood += std::exp(log_p - max_log_prob);
+    }
+    marginal_log_likelihood = std::log(marginal_log_likelihood) + max_log_prob;
 
     for (std::size_t i = 0; i < vect->size(); i++) {
       boost::shared_ptr<FixedWeightMEstimator> m_estimator(
           (*vect)[i]->getMEstimatorPolicy<FixedWeightMEstimator>());
-      assert(m_estimator);
-      m_estimator->setWeight(log_weights[i] - log_norm_constant);
+      SM_ASSERT_TRUE(Exception, m_estimator,
+                     "The error term does not have a FixedWeightMEstimator");
+      if (is_normal_) {
+        m_estimator->setWeight(
+            std::exp(log_probs[i] - marginal_log_likelihood));
+      } else {
+        m_estimator->setWeight(
+            std::exp(log_probs[i] - marginal_log_likelihood) *
+            expected_weights[i]);
+      }
     }
   }
 }
