@@ -8,7 +8,10 @@
 namespace aslam {
   namespace backend {
 
-    LinearSystemSolver::LinearSystemSolver() {}
+    LinearSystemSolver::LinearSystemSolver() :
+      _acceptConstantErrorTerms(false)
+    {
+    }
     LinearSystemSolver::~LinearSystemSolver() {}
 
     void LinearSystemSolver::evaluateErrors(size_t threadId, size_t startIdx, size_t endIdx, bool useMEstimator)
@@ -152,6 +155,15 @@ namespace aslam {
       return _JCols;
     }
 
+    void LinearSystemSolver::setAcceptConstantErrorTerms(bool acceptConstantErrorTerms) {
+      if(this->_acceptConstantErrorTerms != acceptConstantErrorTerms){
+        this->_acceptConstantErrorTerms = acceptConstantErrorTerms;
+        handleNewAcceptConstantErrorTerms();
+      }
+    }
+
+    void LinearSystemSolver::handleNewAcceptConstantErrorTerms() {
+    }
 
   } // namespace backend
-} // namespace aslam
+}  // namespace aslam

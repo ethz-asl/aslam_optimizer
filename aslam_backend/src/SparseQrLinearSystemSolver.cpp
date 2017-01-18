@@ -190,7 +190,8 @@ namespace aslam {
         return Jrhs.squaredNorm();
     }
       
-      
-      
+    void SparseQrLinearSystemSolver::handleNewAcceptConstantErrorTerms() {
+      _jacobianBuilder.J_transpose().setAcceptConstantErrorTerms(isAcceptConstantErrorTerms());
+    }
   } // namespace backend
 } // namespace aslam

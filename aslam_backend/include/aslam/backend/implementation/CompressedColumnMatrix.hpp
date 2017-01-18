@@ -249,8 +249,9 @@ namespace aslam {
           elementsPerColumn += dv->minimalDimensions();
         }
       }
-      //std::cout << "Elements per column: " << elementsPerColumn << ", rows: " << Jrows << std::endl;
-      SM_ASSERT_FALSE_DBG(Exception, activeDvs.empty(), "There are no active design variables associated with this error term.");
+      if(!_acceptConstantErrorTerms){
+        SM_ASSERT_FALSE(Exception, activeDvs.empty(), "There are no active design variables associated with this error term. Enable acceptConstantErrorTerms in your LinearSystemSolver if this is required.");
+      }
       // Sort the indices by block index.
       std::sort(activeDvs.begin(), activeDvs.end(), DesignVariable::BlockIndexOrdering());
       size_t startValueIndex = _row_ind.size();

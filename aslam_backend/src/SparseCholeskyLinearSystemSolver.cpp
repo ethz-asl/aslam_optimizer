@@ -110,7 +110,9 @@ namespace aslam {
         return Jrhs.squaredNorm();
     }
       
-      
-
+    void SparseCholeskyLinearSystemSolver::handleNewAcceptConstantErrorTerms() {
+      _jacobianBuilder.J_transpose().setAcceptConstantErrorTerms(isAcceptConstantErrorTerms());
+    }
   } // namespace backend
-} // namespace aslam
+}  // namespace aslam
+
