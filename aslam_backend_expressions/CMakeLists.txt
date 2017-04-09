@@ -50,6 +50,8 @@ cs_add_library(${PROJECT_NAME}
   src/L1Regularizer.cpp
 
   src/MapTransformation.cpp
+
+  src/KinematicChain.cpp
   )
 
 target_link_libraries(${PROJECT_NAME} ${Boost_LIBRARIES})

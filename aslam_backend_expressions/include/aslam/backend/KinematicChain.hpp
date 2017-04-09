@@ -32,17 +32,15 @@ class CoordinateFrame {
   CoordinateFrame (boost::shared_ptr<const CoordinateFrame> parent, RotationExpression R_P_L = RotationExpression(), EuclideanExpression p = EuclideanExpression(), EuclideanExpression omega = EuclideanExpression(), EuclideanExpression v = EuclideanExpression(), EuclideanExpression alpha = EuclideanExpression(), EuclideanExpression a = EuclideanExpression())
     : pp(parent), R_P_L(R_P_L), p(p), v(v), a(a), omega(omega), alpha(alpha)
   {
+    if(!parent){
+      initGlobalsWithoutParent();
+    }
   }
 
   CoordinateFrame (RotationExpression R_P_L, EuclideanExpression p = EuclideanExpression(), EuclideanExpression omega = EuclideanExpression(), EuclideanExpression v = EuclideanExpression(), EuclideanExpression alpha = EuclideanExpression(), EuclideanExpression a = EuclideanExpression())
     : pp(nullptr), R_P_L(R_P_L), p(p), v(v), a(a), omega(omega), alpha(alpha)
   {
-    R_G_L = R_P_L;
-    pG = p;
-    omegaG = omega;
-    vG = v;
-    alphaG = alpha;
-    aG = a;
+    initGlobalsWithoutParent();
   }
 
   const boost::shared_ptr<const CoordinateFrame> getParent() {
@@ -111,6 +109,8 @@ class CoordinateFrame {
     return alpha;
   }
  private:
+  void initGlobalsWithoutParent();
+
   boost::shared_ptr<const CoordinateFrame> pp;
   mutable RotationExpression R_G_L;
   RotationExpression R_P_L; // converting coordinates from to this to global or parent frame
