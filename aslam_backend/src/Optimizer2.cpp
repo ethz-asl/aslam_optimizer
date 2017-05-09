@@ -245,7 +245,10 @@ namespace aslam {
             srv.dJFinal = deltaJ;
             srv.linearSolverFailure = linearSolverFailure;
 
-            if(linearSolverFailure || srv.failedIterations >= _options.maxIterations){
+            //TODO make _status.convergence a set!
+            if(srv.iterations >= _options.maxIterations){
+              _status.convergence = MAX_ITERATIONS;
+            } else if(linearSolverFailure || srv.failedIterations >= _options.maxIterations){
               _status.convergence = FAILURE;
             } else if (deltaX <= _options.convergenceDeltaX) {
               _status.convergence = DX;

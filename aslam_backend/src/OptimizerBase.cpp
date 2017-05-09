@@ -90,6 +90,9 @@ std::ostream& operator<<(std::ostream& out, const ConvergenceStatus& convergence
     case ConvergenceStatus::DOBJECTIVE:
       out << "DOBJECTIVE";
       break;
+    case ConvergenceStatus::MAX_ITERATIONS:
+      out << "MAX_ITERATIONS";
+      break;
   }
   return out;
 }

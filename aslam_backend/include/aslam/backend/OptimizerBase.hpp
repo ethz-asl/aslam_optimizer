@@ -36,7 +36,8 @@ enum ConvergenceStatus
   FAILURE = 1,    //!< FAILURE
   GRADIENT_NORM,  //!< GRADIENT_NORM
   DX,             //!< DX
-  DOBJECTIVE      //!< DOBJECTIVE
+  DOBJECTIVE,     //!< DOBJECTIVE
+  MAX_ITERATIONS, //!< MAX_ITERATIONS
 };
 
 /// \brief Stream operator for ConvergenceStatus
