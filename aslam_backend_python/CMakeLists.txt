@@ -31,6 +31,7 @@ add_python_export_library(${PROJECT_NAME} python/aslam_backend
   src/DesignVariableTimePair.cpp
   src/SampleDvAndError.cpp
   src/Sampler.cpp
+  src/ProblemManager.cpp
 )
 
 find_package(Boost REQUIRED COMPONENTS thread) 
