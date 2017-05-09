@@ -61,6 +61,7 @@ cs_add_library(${PROJECT_NAME}
   src/util/ThreadedRangeProcessor.cpp
   src/util/ProblemManager.cpp
   src/OptimizerCallbackManager.cpp
+  src/LineSearchTrustRegionPolicy.cpp
 )
 
 target_link_libraries(${PROJECT_NAME} ${Boost_LIBRARIES} ${TBB_LIBRARIES})
