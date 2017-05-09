@@ -38,6 +38,7 @@ namespace aslam {
     
     private:
       virtual void initMatrixStructureImplementation(const std::vector<DesignVariable*>& dvs, const std::vector<ErrorTerm*>& errors, bool useDiagonalConditioner);
+      virtual void handleNewAcceptConstantErrorTerms() override;
 
       CompressedColumnJacobianTransposeBuilder<int> _jacobianBuilder;
 

@@ -72,6 +72,11 @@ namespace aslam {
       // helper function for dog leg implementation / steepest descent solution
       virtual double rhsJtJrhs() = 0;
 
+      /// \brief If enabled the system builder must not throw on constant error terms (:= not depending on any active design variable)
+      bool isAcceptConstantErrorTerms() const {
+        return _acceptConstantErrorTerms;
+      }
+      void setAcceptConstantErrorTerms(bool acceptConstantErrorTerms);
     protected:
       /// \brief initialized the matrix structure for the problem with these error terms and errors.
       virtual void initMatrixStructureImplementation(const std::vector<DesignVariable*>& dvs, const std::vector<ErrorTerm*>& errors, bool useDiagonalConditioner) = 0;
@@ -85,6 +90,9 @@ namespace aslam {
 
       /// \brief a function to split a multi-threaded job across all error term indices.
       void setupThreadedJob(boost::function<void(size_t, size_t, size_t, bool)> job, size_t nThreads, bool useMEstimator);
+
+      /// \brief Event hook to handle new value for the acceptConstantErrorTerms property
+      virtual void handleNewAcceptConstantErrorTerms();
 
       /// \brief the vector of error terms.
       std::vector<ErrorTerm*> _errorTerms;
@@ -101,6 +109,9 @@ namespace aslam {
       /// \brief Should we use a diagonal conditioner
       bool _useDiagonalConditioner;
 
+      /// \brief If enabled the system builder must not complain about constant error terms (:= not depending on any active design variable)
+      bool _acceptConstantErrorTerms;
+
       /// \brief The diagonal conditioner
       Eigen::VectorXd _diagonalConditioner;
 
@@ -109,7 +120,6 @@ namespace aslam {
 
       /// \brief The number of columns in the Jacobian matrix
       size_t _JCols;
-
     };
 
   } // namespace backend

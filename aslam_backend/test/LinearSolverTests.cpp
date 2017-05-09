@@ -137,3 +137,30 @@ TEST(LinearSolverTestSuite, testSparseQR)
             }*/
   }
 }
+
+class ConstZeroError : public ErrorTermFs<1> {
+ protected:
+  virtual double evaluateErrorImplementation() { return 0; }
+
+  virtual void evaluateJacobiansImplementation(JacobianContainer &) {}
+};
+
+TEST(LinearSolverTestSuite, testSparseQRAcceptConstantErrorTerms)
+{
+  using namespace aslam::backend;
+  std::vector<DesignVariable*> dvs;
+  std::vector<ErrorTerm*> errs;
+
+  buildSystem(1, 1, dvs, errs);
+  errs.push_back(new ConstZeroError);
+
+  SparseQrLinearSystemSolver solver;
+  EXPECT_FALSE(solver.isAcceptConstantErrorTerms());
+  solver.setAcceptConstantErrorTerms(true);
+  EXPECT_NO_THROW(solver.initMatrixStructure(dvs, errs, false));
+  EXPECT_NO_THROW(solver.buildSystem(1, false));
+
+  solver.setAcceptConstantErrorTerms(false);
+  EXPECT_ANY_THROW(solver.initMatrixStructure(dvs, errs, false));
+  deleteSystem(dvs, errs);
+}

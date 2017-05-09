@@ -146,6 +146,13 @@ namespace aslam {
       /// Initializes the matrix from a cholmod_sparse matrix
       void fromCholmodSparse(const cholmod_sparse* cs);
 
+      bool isAcceptConstantErrorTerms() const {
+        return _acceptConstantErrorTerms;
+      }
+
+      void setAcceptConstantErrorTerms(bool acceptConstantErrorTerms) {
+        _acceptConstantErrorTerms = acceptConstantErrorTerms;
+      }
     private:
       void checkMatrixDbg();
 
@@ -156,6 +163,10 @@ namespace aslam {
       std::vector<index_t> _col_ptr;
 
       bool _hasDiagonalAppended;
+
+      /// \brief If enabled the system builder must not complain about constant error terms (:= not depending on any active design variable)
+      bool _acceptConstantErrorTerms = false;
+
       // Keep one of these guys around to make cs views.
       cholmod_sparse _cholmodSparse;
 
