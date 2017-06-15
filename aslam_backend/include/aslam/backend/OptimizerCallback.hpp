@@ -99,11 +99,11 @@ public:
   }
 private:
   template<typename F = Funct, std::is_same<ProceedInstruction, decltype((*static_cast<F*>(nullptr))(*static_cast<Event_*>(nullptr)))>* returnsProceedInstruction = nullptr>
-  ProceedInstruction call(const Event & arg) override {
+  ProceedInstruction call(const Event & arg) {
     return withArg(arg, returnsProceedInstruction);
   }
   template<typename F = Funct, std::is_same<ProceedInstruction, decltype((*static_cast<F*>(nullptr))())>* returnsProceedInstruction = nullptr>
-  ProceedInstruction call(const Event &) override {
+  ProceedInstruction call(const Event &) {
     return withoutArg(returnsProceedInstruction);
   }
 
