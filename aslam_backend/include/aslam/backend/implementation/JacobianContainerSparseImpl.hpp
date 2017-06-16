@@ -313,7 +313,7 @@ namespace aslam {
       }
       // Now the lhs list is done...add the remaining elements of the rhs list.
       for (; rt != rt_end; rt++) {
-        map_t::iterator it = _jacobianMap.insert(lt, std::make_pair(rt->first, applyChainRule == nullptr ? rt->second : (*applyChainRule)*rt->second));
+        _jacobianMap.insert(lt, std::make_pair(rt->first, applyChainRule == nullptr ? rt->second : (*applyChainRule)*rt->second));
       }
     }
 

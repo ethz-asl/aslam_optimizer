@@ -109,10 +109,10 @@ class BinaryOperationResultNode : public TResult::node_t {
   typedef internal::NodeTraits<lhs_node_t> lhs_node_traits_t;
   typedef internal::NodeTraits<rhs_node_t> rhs_node_traits_t;
 
-  inline apply_diff_return_t applyLhsDiff(const typename lhs_node_traits_t::tangent_vector_t & tangent_vector) const {
+  inline apply_diff_return_t applyLhsDiff(const typename lhs_node_traits_t::tangent_vector_t & /*tangent_vector*/) const {
     throw std::runtime_error("This method must be shadowed or not used!");
   }
-  inline apply_diff_return_t applyRhsDiff(const typename rhs_node_traits_t::tangent_vector_t & tangent_vector) const {
+  inline apply_diff_return_t applyRhsDiff(const typename rhs_node_traits_t::tangent_vector_t & /*tangent_vector*/) const {
     throw std::runtime_error("This method must be shadowed or not used!");
   }
 

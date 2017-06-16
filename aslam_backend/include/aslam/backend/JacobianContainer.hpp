@@ -22,7 +22,8 @@ namespace aslam {
      * \struct JacobianContainerChainRuleApplied
      * \brief Helper return value struct for MatrixStack::PopGuard
      */
-    struct JacobianContainerChainRuleApplied {
+    class JacobianContainerChainRuleApplied {
+     public:
       JacobianContainerChainRuleApplied(MatrixStack::PopGuard&& pg)
           : _guard(std::move(pg))
       {
