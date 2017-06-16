@@ -7,6 +7,7 @@
 
 #ifndef BASISMATRIXFUNCTOR_HPP_
 #define BASISMATRIXFUNCTOR_HPP_
+#include <stdexcept>
 #include "Eigen/Core"
 
 namespace aslam {
@@ -21,6 +22,9 @@ struct BasisMatrixNullaryFunctor {
       : _cwiseIndex(cwiseIndex),
         _i(i),
         _j(j) {
+  }
+  inline result_type operator()() const {
+    throw std::runtime_error("This should never be called. It is only there to satisfy the compiler for recent some Eigen versions (e.g. 3.2.10)");
   }
   inline result_type operator()(Eigen::DenseIndex& index) const {
     return (_cwiseIndex == index) ? 1 : 0;
