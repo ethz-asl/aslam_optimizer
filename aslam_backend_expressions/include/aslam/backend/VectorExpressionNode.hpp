@@ -52,12 +52,12 @@ namespace aslam {
       }
       ConstantVectorExpressionNode(const vector_t & value) : value(value) {}
 
-      virtual ~ConstantVectorExpressionNode() = default;
-      virtual int getSize() const override { return value.rows(); }
+      ~ConstantVectorExpressionNode() override = default;
+      int getSize() const override { return value.rows(); }
      private:
-      virtual vector_t evaluateImplementation() const override { return value; }
-      virtual void evaluateJacobiansImplementation(JacobianContainer &) const override {}
-      virtual void getDesignVariablesImplementation(DesignVariable::set_t &) const override {}
+      vector_t evaluateImplementation() const override { return value; }
+      void evaluateJacobiansImplementation(JacobianContainer &) const override {}
+      void getDesignVariablesImplementation(DesignVariable::set_t &) const override {}
      private:
       vector_t value;
     };

@@ -13,7 +13,7 @@ std::string to_string(const bool useMEstimator, const bool applyDvScaling, const
 {
   std::ostringstream os;
   os << "Failure with options useMEstimator: "  << useMEstimator <<
-      ", applyDvScaling: " + applyDvScaling << ", useDenseJacobianContainer: " << useDenseJacobianContainer;
+      ", applyDvScaling: " << applyDvScaling << ", useDenseJacobianContainer: " << useDenseJacobianContainer;
   return os.str();
 }
 

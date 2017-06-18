@@ -16,28 +16,28 @@ class MatrixBasic : public MatrixExpressionNode, public DesignVariable {
   MatrixBasic(const Eigen::Matrix3d & A, bool add_dv);
   MatrixBasic(const Eigen::Matrix3d & A, const Eigen::Matrix3i & UpdatePattern);
 
-  virtual ~MatrixBasic();
+  ~MatrixBasic() override;
 
   /// \brief Revert the last state update.
-  virtual void revertUpdateImplementation() override;
+  void revertUpdateImplementation() override;
 
   /// \brief Update the design variable.
-  virtual void updateImplementation(const double * dp, int size) override;
+  void updateImplementation(const double * dp, int size) override;
 
   /// \brief the size of an update step
-  virtual int minimalDimensionsImplementation() const override;
+  int minimalDimensionsImplementation() const override;
 
   MatrixExpression toExpression();
  private:
-  virtual Eigen::Matrix3d evaluateImplementation() const override;
-  virtual void evaluateJacobiansImplementation(JacobianContainer & outJacobians, const Eigen::MatrixXd & applyChainRule) const override;
-  virtual void getDesignVariablesImplementation(DesignVariable::set_t & designVariables) const override;
+  Eigen::Matrix3d evaluateImplementation() const override;
+  void evaluateJacobiansImplementation(JacobianContainer & outJacobians, const Eigen::MatrixXd & applyChainRule) const override;
+  void getDesignVariablesImplementation(DesignVariable::set_t & designVariables) const override;
 
   /// Returns the content of the design variable
-  virtual void getParametersImplementation(Eigen::MatrixXd& value) const override;
+  void getParametersImplementation(Eigen::MatrixXd& value) const override;
 
   /// Sets the content of the design variable
-  virtual void setParametersImplementation(const Eigen::MatrixXd& value) override;
+  void setParametersImplementation(const Eigen::MatrixXd& value) override;
 
   Eigen::Matrix3d _A;
   Eigen::Matrix3d _p_A;

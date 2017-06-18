@@ -44,12 +44,12 @@ namespace aslam {
       /// \brief initialize and set the potential number of nonzeros.
       CompressedColumnMatrix(size_t rows, size_t cols, size_t nnz, size_t num_cols);
 
-      virtual ~CompressedColumnMatrix();
+      ~CompressedColumnMatrix() override;
 
       /// \brief Return this matrix as a Cholmod sparse matrix
       void getView(cholmod_sparse* cs);
 
-      virtual void toDenseInto(Eigen::MatrixXd& outM) const;
+      void toDenseInto(Eigen::MatrixXd& outM) const override;
 
       /// \brief Clear all values in this matrix
       void clear();
@@ -58,13 +58,13 @@ namespace aslam {
       void init(size_t rows, size_t cols, size_t nnz, size_t num_cols);
 
       /// \brief return the number of rows in this matrix
-      virtual size_t rows() const;
+      size_t rows() const override;
 
       /// \brief return the number of columns in this matrix
-      virtual size_t cols() const;
+      size_t cols() const override;
 
       /// \brief get the element at row r and column c
-      virtual double operator()(size_t r, size_t c) const;
+      double operator()(size_t r, size_t c) const override;
 
       /// \brief get the element at row r and column c. r and c are checked for validity
       double value(size_t r, size_t c) const;
@@ -123,22 +123,22 @@ namespace aslam {
       void updateConstantDiagonalBlock(double diagonal);
 
       /// \brief right multiply the vector y = A x
-      void rightMultiply(const Eigen::VectorXd& x, Eigen::VectorXd& outY) const;
+      void rightMultiply(const Eigen::VectorXd& x, Eigen::VectorXd& outY) const override;
 
       /// \brief left multiply the vector y = A^T x
-      void leftMultiply(const Eigen::VectorXd& x, Eigen::VectorXd& outY) const;
+      void leftMultiply(const Eigen::VectorXd& x, Eigen::VectorXd& outY) const override;
 
 
       /// \brief Initialize the matrix from a dense matrix
-      virtual void fromDense(const Eigen::MatrixXd& M);
+      void fromDense(const Eigen::MatrixXd& M) override;
 
       /// \brief Initialize the matrix from a dense matrix.
       ///        Entries with absolute value less than tolerance
       ///        should be considered zeros.
-      virtual void fromDenseTolerance(const Eigen::MatrixXd& M, double tolerance);
+      void fromDenseTolerance(const Eigen::MatrixXd& M, double tolerance) override;
 
       /// Writes to standard output
-      virtual void write(std::ostream& stream) const;
+      void write(std::ostream& stream) const override;
 
       /// Writes to standard stream in MATLAB format
       void writeMATLAB(std::ostream& stream) const;

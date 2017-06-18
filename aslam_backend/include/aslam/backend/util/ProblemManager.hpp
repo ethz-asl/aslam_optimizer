@@ -195,7 +195,7 @@ inline boost::shared_ptr<CostFunctionInterface> getCostFunction(ProblemManager& 
     {
 
     }
-    ~CostFunctionPM() { }
+    ~CostFunctionPM() override { }
     double evaluateError() const override { return _pm.evaluateError(_numThreadsError); }
     void computeGradient(RowVectorType& gradient) override { _pm.computeGradient(gradient, _numThreadsJacobian, _useMEstimator, _applyDvScaling, _useDenseJacobianContainer); }
     const std::vector<DesignVariable*>& getDesignVariables() override { return _pm.designVariables(); };

@@ -14,17 +14,17 @@ namespace aslam {
     public:
       typedef Eigen::Matrix<double, 6, 6> Matrix6d;
       TransformationBasic(RotationExpression C_0_1, EuclideanExpression t_0_1_0);
-      virtual ~TransformationBasic();
+      ~TransformationBasic() override;
 
       TransformationExpression toExpression();
 
     private:
-      virtual Eigen::Matrix4d toTransformationMatrixImplementation();
-      virtual void evaluateJacobiansImplementation(JacobianContainer & outJacobians) const;
-      virtual void getDesignVariablesImplementation(DesignVariable::set_t & designVariables) const;
+      Eigen::Matrix4d toTransformationMatrixImplementation() override;
+      void evaluateJacobiansImplementation(JacobianContainer & outJacobians) const override;
+      void getDesignVariablesImplementation(DesignVariable::set_t & designVariables) const override;
 
-      virtual RotationExpression toRotationExpression(const boost::shared_ptr<TransformationExpressionNode> & thisShared) const;
-      virtual EuclideanExpression toEuclideanExpression(const boost::shared_ptr<TransformationExpressionNode> & thisShared) const;
+      RotationExpression toRotationExpression(const boost::shared_ptr<TransformationExpressionNode> & thisShared) const override;
+      EuclideanExpression toEuclideanExpression(const boost::shared_ptr<TransformationExpressionNode> & thisShared) const override;
     private:
       boost::shared_ptr<RotationExpressionNode> _rotation;
       boost::shared_ptr<EuclideanExpressionNode>  _translation;

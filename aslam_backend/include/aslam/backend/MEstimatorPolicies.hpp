@@ -17,17 +17,17 @@ namespace aslam {
 
     class NoMEstimator : public MEstimator {
     public:
-      virtual ~NoMEstimator();
-      virtual double getWeight(double squaredError) const;
-      virtual std::string name() const;
+      ~NoMEstimator() override;
+      double getWeight(double squaredError) const override;
+      std::string name() const override;
     };
 
     class  GemanMcClureMEstimator : public MEstimator {
     public:
       GemanMcClureMEstimator(double sigma2);
-      virtual ~GemanMcClureMEstimator();
-      virtual double getWeight(double error) const;
-      virtual std::string name() const;
+      ~GemanMcClureMEstimator() override;
+      double getWeight(double error) const override;
+      std::string name() const override;
 
       double _sigma2;
     };
@@ -35,9 +35,9 @@ namespace aslam {
     class  CauchyMEstimator : public MEstimator {
     public:
       CauchyMEstimator(double sigma2);
-      virtual ~CauchyMEstimator();
-      virtual double getWeight(double error) const;
-      virtual std::string name() const;
+      ~CauchyMEstimator() override;
+      double getWeight(double error) const override;
+      std::string name() const override;
 
       double _sigma2;
     };
@@ -48,10 +48,10 @@ namespace aslam {
     class FixedWeightMEstimator : public MEstimator {
     public:
       FixedWeightMEstimator(double weight);
-      virtual ~FixedWeightMEstimator();
-      virtual double getWeight(double error) const;
+      ~FixedWeightMEstimator() override;
+      double getWeight(double error) const override;
       virtual void setWeight(double weight);
-      virtual std::string name() const;
+      std::string name() const override;
 
       double _weight;
     };
@@ -60,9 +60,9 @@ namespace aslam {
     class HuberMEstimator : public MEstimator {
     public:
       HuberMEstimator(double k);
-      virtual ~HuberMEstimator();
-      virtual double getWeight(double error) const;
-      virtual std::string name() const;
+      ~HuberMEstimator() override;
+      double getWeight(double error) const override;
+      std::string name() const override;
 
       double _k;
       double _k2;
@@ -100,7 +100,7 @@ namespace aslam {
       BlakeZissermanMEstimator& operator =
           (const BlakeZissermanMEstimator& other);
       /// Destructor
-      virtual ~BlakeZissermanMEstimator();
+      ~BlakeZissermanMEstimator() override;
       /** @}
         */
 
@@ -108,9 +108,9 @@ namespace aslam {
         @{
         */
       /// Evaluate the weight function for a given squared Mahalanobis distance
-      virtual double getWeight(double mahalanobis2) const;
+      double getWeight(double mahalanobis2) const override;
       /// Returns the ASCII name of the M-Estimator
-      virtual std::string name() const;
+      std::string name() const override;
       /// Returns the inverse chi-squared cdf for p and df
       double chi2InvCDF(double p, size_t df) const;
       /// Compute optimal epsilon

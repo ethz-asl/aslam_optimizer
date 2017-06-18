@@ -45,14 +45,14 @@ class SamplerMetropolisHastings : public SamplerBase {
   /// \brief Constructor
   SamplerMetropolisHastings(const Options& options);
   /// \brief Destructor
-  ~SamplerMetropolisHastings() { }
+  ~SamplerMetropolisHastings() override { }
 
   /// \brief Mutable getter for options
   Options& options() { return _options; }
 
  private:
-  virtual void step(bool& accepted, double& acceptanceProbability) override;
-  virtual void resetImplementation() override;
+  void step(bool& accepted, double& acceptanceProbability) override;
+  void resetImplementation() override;
 
  private:
    SamplerMetropolisHastingsOptions _options; /// \brief Configuration options

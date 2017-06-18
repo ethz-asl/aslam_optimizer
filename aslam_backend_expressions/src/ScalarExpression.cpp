@@ -102,7 +102,7 @@ class UnaryScalarExpressionNode : public ScalarExpressionNode
 {
  protected:
   UnaryScalarExpressionNode(boost::shared_ptr<ScalarExpressionNode> arg) : _arg(arg) {}
-  virtual void getDesignVariablesImplementation(DesignVariable::set_t & designVariables) const override {
+  void getDesignVariablesImplementation(DesignVariable::set_t & designVariables) const override {
     _arg->getDesignVariables(designVariables);
   }
   boost::shared_ptr<ScalarExpressionNode> _arg;

@@ -32,16 +32,16 @@ namespace aslam {
       ErrorTermEuclidean(const aslam::backend::EuclideanExpression& t, const Eigen::Vector3d& prior, const Eigen::Matrix<double,3,3>& N, int debug=0);
       ErrorTermEuclidean(const aslam::backend::EuclideanExpression& t, const Eigen::Vector3d& prior, double weight, int debug=0);
 
-      virtual ~ErrorTermEuclidean();
+      ~ErrorTermEuclidean() override;
 
     protected:
       /// This is the interface required by ErrorTermFs<>
 
       /// \brief evaluate the error term and return the weighted squared error e^T invR e
-      virtual double evaluateErrorImplementation();
+      double evaluateErrorImplementation() override;
 
       /// \brief evaluate the jacobian
-      virtual void evaluateJacobiansImplementation(JacobianContainer & J);
+      void evaluateJacobiansImplementation(JacobianContainer & J) override;
 
     private:
       aslam::backend::EuclideanExpression _t;

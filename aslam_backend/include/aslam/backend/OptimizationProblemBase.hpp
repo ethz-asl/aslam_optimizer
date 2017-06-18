@@ -38,7 +38,7 @@ namespace aslam {
       SM_DEFINE_EXCEPTION(Exception, aslam::Exception);
 
       OptimizationProblemBase();
-      virtual ~OptimizationProblemBase();
+      ~OptimizationProblemBase() override;
 
       /// \brief The number of design variables stored in this optimization problem
       size_t numDesignVariables() const;
@@ -78,7 +78,7 @@ namespace aslam {
 
       /// \brief This is ugly but it is just enough abstract interface
       ///        to allow error term factories to work
-      virtual void addErrorTerm(const boost::shared_ptr<ErrorTerm> & /* et */) override {
+      void addErrorTerm(const boost::shared_ptr<ErrorTerm> & /* et */) override {
         SM_THROW(std::runtime_error, "Not Implemented");
       }
     protected:

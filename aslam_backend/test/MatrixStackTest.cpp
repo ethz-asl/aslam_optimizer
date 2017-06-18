@@ -96,7 +96,7 @@ TEST(MatrixStackTestSuites, testMatrixStack)
       }
 
       while(!stack.empty()) {
-        sm::eigen::assertEqual(storage.back(), stack.top(), SM_SOURCE_FILE_POS, "Testing push() and top() after pop() was called");
+        sm::eigen::assertNear(storage.back(), stack.top(), 1e-9, SM_SOURCE_FILE_POS, "Testing push() and top() after pop() was called");
         stack.pop();
         storage.pop_back();
       }

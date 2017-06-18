@@ -40,9 +40,7 @@ namespace aslam {
                 if( rho > 0.75 ) // step succeeded
                 {
                     double dx_norm3 = 3 * _dx.norm();
-                    if ( _delta > dx_norm3 )
-                        _delta = _delta;
-                    else
+                    if ( _delta <= dx_norm3 )
                         _delta = dx_norm3;
                 }
                 else if (rho > 0 && rho < 0.25) // step almost failed

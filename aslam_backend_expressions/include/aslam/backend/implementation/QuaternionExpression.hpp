@@ -7,6 +7,9 @@
 
 #include <sm/kinematics/quaternion_algebra.hpp>
 
+#define _PSEUDO_UNUSED_FOR_CLANG __attribute__((unused)) // Without this it sometimes warns about actually used local typedefs
+
+
 namespace aslam {
 namespace backend {
 namespace quaternion {
@@ -176,7 +179,7 @@ inline typename _CLASS::self_with_default_node_t _CLASS::operator * (const Quate
 
   class ResultNode : public result_t::template BinaryOperationResult<ResultNode, self_t, other_t> {
   public:
-    typedef typename result_t::template BinaryOperationResult<ResultNode, self_t, other_t> base_t;
+    typedef typename result_t::template BinaryOperationResult<ResultNode, self_t, other_t> base_t _PSEUDO_UNUSED_FOR_CLANG;
 
     virtual ~ResultNode() {}
     inline typename base_t::apply_diff_return_t applyLhsDiff(const typename base_t::lhs_t::tangent_vector_t & tangent_vector) const {
@@ -201,7 +204,7 @@ inline typename _CLASS::self_with_default_node_t _CLASS::inverse() const {
 
   class ResultNode : public result_t::template UnaryOperationResult<ResultNode, self_t> {
   public:
-    typedef typename result_t::template UnaryOperationResult<ResultNode, self_t> base_t;
+    typedef typename result_t::template UnaryOperationResult<ResultNode, self_t> base_t _PSEUDO_UNUSED_FOR_CLANG;
 
     virtual ~ResultNode() {}
     inline typename base_t::apply_diff_return_t applyDiff(const typename base_t::operand_t::tangent_vector_t & tangentVector) const {
@@ -227,7 +230,7 @@ typename _CLASS::self_with_default_node_t _CLASS::conjugate() const {
   typedef _CLASS::self_with_default_node_t result_t;
   class ResultNode : public result_t::template UnaryOperationResult<ResultNode, self_t> {
   public:
-    typedef typename result_t::template UnaryOperationResult<ResultNode, self_t> base_t;
+    typedef typename result_t::template UnaryOperationResult<ResultNode, self_t> base_t _PSEUDO_UNUSED_FOR_CLANG;
 
     virtual ~ResultNode() {}
     inline typename base_t::apply_diff_return_t applyDiff(const typename base_t::operand_t::tangent_vector_t & tangentVector) const {
@@ -250,7 +253,7 @@ inline GenericMatrixExpression<3, 1, TScalar> _CLASS::imaginaryPart() const {
 
   class ResultNode : public result_t::template UnaryOperationResult<ResultNode, self_t> {
   public:
-    typedef typename result_t::template UnaryOperationResult<ResultNode, self_t> base_t;
+    typedef typename result_t::template UnaryOperationResult<ResultNode, self_t> base_t _PSEUDO_UNUSED_FOR_CLANG;
 
     virtual ~ResultNode() {}
     inline typename base_t::apply_diff_return_t applyDiff(const typename base_t::operand_t::tangent_vector_t & tangentVector) const {
@@ -278,7 +281,7 @@ GenericMatrixExpression<3, 1,TScalar> _CLASS::rotate3Vector(const GenericMatrixE
 
   class ResultNode : public result_t::template BinaryOperationResult<ResultNode, self_t, other_t> {
   public:
-    typedef typename result_t::template BinaryOperationResult<ResultNode, self_t, other_t> base_t;
+    typedef typename result_t::template BinaryOperationResult<ResultNode, self_t, other_t> base_t _PSEUDO_UNUSED_FOR_CLANG;
 
     virtual ~ResultNode() {}
 
@@ -374,6 +377,7 @@ typename _CLASS::self_with_default_node_t _CLASS::geoExp(const GenericMatrixExpr
 
 #undef _TEMPLATE
 #undef _CLASS
+#undef _PSEUDO_UNUSED_FOR_CLANG
 
 }  // namespace quaternion
 }  // namespace backend

@@ -12,19 +12,19 @@ class LineSearchTrustRegionPolicy : public TrustRegionPolicy {
   /// @param scaleStep: How much to multiply the current scale with when an iteration fails or divide by if it succeeds unless resetScaleAfterSuccess.
   /// @param resetScaleAfterSuccess: @see scaleStep
   LineSearchTrustRegionPolicy(double scaleStep = 0.5, bool resetScaleAfterSuccess = false);
-  virtual ~LineSearchTrustRegionPolicy();
+  ~LineSearchTrustRegionPolicy() override;
 
   /// \brief called by the optimizer when an optimization is starting
-  virtual void optimizationStartingImplementation(double J) override;
+  void optimizationStartingImplementation(double J) override;
 
   /// \brief Returns true if the solution was successful
-  virtual bool solveSystemImplementation(double J, bool previousIterationFailed, int nThreads, Eigen::VectorXd& outDx) override;
+  bool solveSystemImplementation(double J, bool previousIterationFailed, int nThreads, Eigen::VectorXd& outDx) override;
 
   /// \brief print the current state to a stream (no newlines).
-  virtual std::ostream & printState(std::ostream & out) const override;
+  std::ostream & printState(std::ostream & out) const override;
 
-  virtual std::string name() const override { return "line_search"; }
-  virtual bool requiresAugmentedDiagonal() const override;
+  std::string name() const override { return "line_search"; }
+  bool requiresAugmentedDiagonal() const override;
 
   double getScaleStep() { return _scaleStep; }
   void setScaleStep(double scale);

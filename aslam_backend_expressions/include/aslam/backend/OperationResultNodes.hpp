@@ -25,7 +25,7 @@ namespace internal {
 }
 
 template<typename TDerived, typename TOperand, typename TResult, typename TApplyDiffReturn, typename TScalar>
-class UnaryOperationResultNode : public TResult::node_t {
+class UnaryOperationResultNodeBase : public TResult::node_t {
  public:
   typedef TOperand operand_t;
   typedef TResult self_t;
@@ -35,8 +35,7 @@ class UnaryOperationResultNode : public TResult::node_t {
   typedef TApplyDiffReturn apply_diff_return_t;
   typedef internal::NodeTraits<operand_node_t> operand_node_traits_t;
 
-  virtual ~UnaryOperationResultNode() {
-  }
+  virtual ~UnaryOperationResultNodeBase() {}
 
   inline apply_diff_return_t applyDiff(const typename operand_node_traits_t::tangent_vector_t & /* tangent_vector */) const {
     throw std::runtime_error("This method must be shadowed or not used!");
@@ -55,15 +54,15 @@ class UnaryOperationResultNode : public TResult::node_t {
   }
 
  protected:
-  inline UnaryOperationResultNode() {
-  }
+  inline UnaryOperationResultNodeBase() {}
+
   const operand_node_t& getOperandNode() const {
     return *_operand;
   }
-  virtual void getDesignVariablesImplementation(DesignVariable::set_t & designVariables) const {
+  virtual void getDesignVariablesImplementation(DesignVariable::set_t & designVariables) const override {
     _operand->getDesignVariables(designVariables);
   }
-  virtual void evaluateJacobiansImplementation(JacobianContainer & outJacobians, const typename node_traits_t::differential_t & chainRuleDifferentail) const {
+  void evaluateJacobiansWithApplyDiff(JacobianContainer & outJacobians, const typename node_traits_t::differential_t & chainRuleDifferentail) const {
     this->getOperandNode().evaluateJacobians(outJacobians, Diff(*static_cast<const TDerived *>(this), chainRuleDifferentail));
   }
  private:
@@ -88,6 +87,29 @@ class UnaryOperationResultNode : public TResult::node_t {
   };
 };
 
+template<typename TDerived, typename TOperand, typename TResult, typename TApplyDiffReturn, typename TScalar>
+class UnaryOperationResultNodeNoDiff : public UnaryOperationResultNodeBase<TDerived, TOperand, TResult, TApplyDiffReturn, TScalar> {
+  typedef typename TResult::node_t node_t;
+  typedef internal::NodeTraits<node_t> node_traits_t;
+ protected:
+  void evaluateJacobiansImplementation(JacobianContainer & outJacobians) const override {
+    this->evaluateJacobiansWithApplyDiff(outJacobians, IdentityDifferential<Eigen::Matrix<double, 1,1>, double>());
+  };
+};
+
+
+
+template<typename TDerived, typename TOperand, typename TResult, typename TApplyDiffReturn, typename TScalar>
+class UnaryOperationResultNode : public UnaryOperationResultNodeBase<TDerived, TOperand, TResult, TApplyDiffReturn, TScalar> {
+  typedef typename TResult::node_t node_t;
+  typedef internal::NodeTraits<node_t> node_traits_t;
+ protected:
+  void evaluateJacobiansImplementation(JacobianContainer & outJacobians, const typename node_traits_t::differential_t & chainRuleDifferentail) const override {
+    this->evaluateJacobiansWithApplyDiff(outJacobians, chainRuleDifferentail);
+  }
+};
+
+
 
 
 template<typename TDerived, typename TLhs, typename TRhs, typename TResult, typename TApplyDiffReturn, typename TScalar>
@@ -109,10 +131,10 @@ class BinaryOperationResultNode : public TResult::node_t {
   typedef internal::NodeTraits<lhs_node_t> lhs_node_traits_t;
   typedef internal::NodeTraits<rhs_node_t> rhs_node_traits_t;
 
-  inline apply_diff_return_t applyLhsDiff(const typename lhs_node_traits_t::tangent_vector_t & tangent_vector) const {
+  inline apply_diff_return_t applyLhsDiff(const typename lhs_node_traits_t::tangent_vector_t & /*tangent_vector*/) const {
     throw std::runtime_error("This method must be shadowed or not used!");
   }
-  inline apply_diff_return_t applyRhsDiff(const typename rhs_node_traits_t::tangent_vector_t & tangent_vector) const {
+  inline apply_diff_return_t applyRhsDiff(const typename rhs_node_traits_t::tangent_vector_t & /*tangent_vector*/) const {
     throw std::runtime_error("This method must be shadowed or not used!");
   }
 

@@ -39,17 +39,17 @@ namespace sparse_block_matrix {
 
       }
 
-      virtual ~LinearSolverDense()
+      ~LinearSolverDense() override
       {
       }
 
-      virtual bool init()
+      bool init() override
       {
 
         return true;
       }
 
-      bool solve(const SparseBlockMatrix<MatrixType>& A, double* x, double* b)
+      bool solve(const SparseBlockMatrix<MatrixType>& A, double* x, double* b) override
       {
 
         int n = A.cols();

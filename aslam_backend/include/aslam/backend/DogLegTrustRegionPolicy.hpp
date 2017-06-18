@@ -12,21 +12,21 @@ namespace aslam {
         {
         public:
             DogLegTrustRegionPolicy();
-            virtual ~DogLegTrustRegionPolicy();
+            ~DogLegTrustRegionPolicy() override;
             
             /// \brief called by the optimizer when an optimization is starting
-            virtual void optimizationStartingImplementation(double J);
+            void optimizationStartingImplementation(double J) override;
             
             // Returns true if the solution was successful
-          virtual bool solveSystemImplementation(double J, bool previousIterationFailed, int nThreads, Eigen::VectorXd& outDx);
+          bool solveSystemImplementation(double J, bool previousIterationFailed, int nThreads, Eigen::VectorXd& outDx) override;
             
             /// \brief should the optimizer revert on failure? You should probably return true
-            bool revertOnFailure();
+            bool revertOnFailure() override;
             
             /// \brief print the current state to a stream (no newlines).
-            virtual std::ostream & printState(std::ostream & out) const;
-          virtual bool requiresAugmentedDiagonal() const;
-          virtual std::string name() const { return "dog_leg"; }
+            std::ostream & printState(std::ostream & out) const override;
+          bool requiresAugmentedDiagonal() const override;
+          std::string name() const override { return "dog_leg"; }
         private:
             
             Eigen::VectorXd _dx;

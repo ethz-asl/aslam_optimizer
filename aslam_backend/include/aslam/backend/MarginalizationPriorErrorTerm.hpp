@@ -33,7 +33,7 @@ public:
                                 const Eigen::VectorXd& d,
                                 const Eigen::MatrixXd& R);
 
-  virtual ~MarginalizationPriorErrorTerm();
+  ~MarginalizationPriorErrorTerm() override;
 
   int numDesignVariables() { return _designVariables.size(); }
   aslam::backend::DesignVariable* getDesignVariable(int i);
@@ -41,8 +41,8 @@ public:
 private:
   MarginalizationPriorErrorTerm();
 
-  virtual double evaluateErrorImplementation();
-  virtual void evaluateJacobiansImplementation(JacobianContainer & outJ);
+  double evaluateErrorImplementation() override;
+  void evaluateJacobiansImplementation(JacobianContainer & outJ) override;
 
   // computes the minimal difference of all design variables between the linearization point at marginalization and the current guess (i.e. log(x_bar - x))
   Eigen::VectorXd getDifferenceSinceMarginalization();

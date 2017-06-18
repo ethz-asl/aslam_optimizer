@@ -59,12 +59,12 @@ namespace aslam {
 
       HomogeneousExpressionNodeMultiply(boost::shared_ptr<TransformationExpressionNode> lhs, 
 				     boost::shared_ptr<HomogeneousExpressionNode> rhs);
-      virtual ~HomogeneousExpressionNodeMultiply();
+      ~HomogeneousExpressionNodeMultiply() override;
 
     private:
-      virtual Eigen::Vector4d toHomogeneousImplementation() const;
-      virtual void evaluateJacobiansImplementation(JacobianContainer & outJacobians) const;
-      virtual void getDesignVariablesImplementation(DesignVariable::set_t & designVariables) const;
+      Eigen::Vector4d toHomogeneousImplementation() const override;
+      void evaluateJacobiansImplementation(JacobianContainer & outJacobians) const override;
+      void getDesignVariablesImplementation(DesignVariable::set_t & designVariables) const override;
 
       boost::shared_ptr<TransformationExpressionNode> _lhs;
       mutable Eigen::Matrix4d _T_lhs;
@@ -79,13 +79,13 @@ namespace aslam {
       EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
       HomogeneousExpressionNodeConstant(const Eigen::Vector4d & p);
-      virtual ~HomogeneousExpressionNodeConstant();
+      ~HomogeneousExpressionNodeConstant() override;
 
         void set(const Eigen::Vector4d & p){ _p = p; }
     private:
-      virtual Eigen::Vector4d toHomogeneousImplementation() const;
-      virtual void evaluateJacobiansImplementation(JacobianContainer & outJacobians) const;
-      virtual void getDesignVariablesImplementation(DesignVariable::set_t & designVariables) const;
+      Eigen::Vector4d toHomogeneousImplementation() const override;
+      void evaluateJacobiansImplementation(JacobianContainer & outJacobians) const override;
+      void getDesignVariablesImplementation(DesignVariable::set_t & designVariables) const override;
 
       Eigen::Vector4d _p;
     };
@@ -96,12 +96,12 @@ namespace aslam {
       EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
       HomogeneousExpressionNodeEuclidean( boost::shared_ptr<EuclideanExpressionNode> p);
-      virtual ~HomogeneousExpressionNodeEuclidean();
+      ~HomogeneousExpressionNodeEuclidean() override;
 
     private:
-      virtual Eigen::Vector4d toHomogeneousImplementation() const;
-      virtual void evaluateJacobiansImplementation(JacobianContainer & outJacobians) const;
-      virtual void getDesignVariablesImplementation(DesignVariable::set_t & designVariables) const;
+      Eigen::Vector4d toHomogeneousImplementation() const override;
+      void evaluateJacobiansImplementation(JacobianContainer & outJacobians) const override;
+      void getDesignVariablesImplementation(DesignVariable::set_t & designVariables) const override;
 
       boost::shared_ptr<EuclideanExpressionNode> _p;
     };

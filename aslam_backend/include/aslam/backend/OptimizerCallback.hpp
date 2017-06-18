@@ -94,7 +94,7 @@ template <typename Funct, typename Event_>
 class CallbackFunctor : public OptimizerCallbackInterface {
 public:
   CallbackFunctor(Funct f) : f(f) {}
-  virtual ProceedInstruction operator() (const Event & arg) override {
+  ProceedInstruction operator() (const Event & arg) override {
     return call(arg);
   }
 private:

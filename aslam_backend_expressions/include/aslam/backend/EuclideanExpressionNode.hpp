@@ -34,12 +34,12 @@ namespace aslam {
 
       EuclideanExpressionNodeMultiply(boost::shared_ptr<RotationExpressionNode> lhs, 
 				     boost::shared_ptr<EuclideanExpressionNode> rhs);
-      virtual ~EuclideanExpressionNodeMultiply();
+      ~EuclideanExpressionNodeMultiply() override;
 
     private:
-      virtual Eigen::Vector3d evaluateImplementation() const;
-      virtual void evaluateJacobiansImplementation(JacobianContainer & outJacobians) const;
-      virtual void getDesignVariablesImplementation(DesignVariable::set_t & designVariables) const;
+      Eigen::Vector3d evaluateImplementation() const override;
+      void evaluateJacobiansImplementation(JacobianContainer & outJacobians) const override;
+      void getDesignVariablesImplementation(DesignVariable::set_t & designVariables) const override;
 
       boost::shared_ptr<RotationExpressionNode> _lhs;
       mutable Eigen::Matrix3d _C_lhs;
@@ -62,12 +62,12 @@ namespace aslam {
        EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
        EuclideanExpressionNodeMatrixMultiply(boost::shared_ptr<MatrixExpressionNode> lhs, boost::shared_ptr<EuclideanExpressionNode> rhs);
-       virtual ~EuclideanExpressionNodeMatrixMultiply();
+       ~EuclideanExpressionNodeMatrixMultiply() override;
 
      private:
-       virtual Eigen::Vector3d evaluateImplementation() const;
-       virtual void evaluateJacobiansImplementation(JacobianContainer & outJacobians) const;
-       virtual void getDesignVariablesImplementation(DesignVariable::set_t & designVariables) const;
+       Eigen::Vector3d evaluateImplementation() const override;
+       void evaluateJacobiansImplementation(JacobianContainer & outJacobians) const override;
+       void getDesignVariablesImplementation(DesignVariable::set_t & designVariables) const override;
 
        boost::shared_ptr<MatrixExpressionNode> _lhs;
        mutable Eigen::Matrix3d _A_lhs;
@@ -91,12 +91,12 @@ namespace aslam {
 
        EuclideanExpressionNodeCrossEuclidean(boost::shared_ptr<EuclideanExpressionNode> lhs,
            boost::shared_ptr<EuclideanExpressionNode> rhs);
-       virtual ~EuclideanExpressionNodeCrossEuclidean();
+       ~EuclideanExpressionNodeCrossEuclidean() override;
 
      private:
-       virtual Eigen::Vector3d evaluateImplementation() const;
-       virtual void evaluateJacobiansImplementation(JacobianContainer & outJacobians) const;
-       virtual void getDesignVariablesImplementation(DesignVariable::set_t & designVariables) const;
+       Eigen::Vector3d evaluateImplementation() const override;
+       void evaluateJacobiansImplementation(JacobianContainer & outJacobians) const override;
+       void getDesignVariablesImplementation(DesignVariable::set_t & designVariables) const override;
 
        boost::shared_ptr<EuclideanExpressionNode> _lhs;
        boost::shared_ptr<EuclideanExpressionNode> _rhs;
@@ -116,12 +116,12 @@ namespace aslam {
 
         EuclideanExpressionNodeAddEuclidean(boost::shared_ptr<EuclideanExpressionNode> lhs,
             boost::shared_ptr<EuclideanExpressionNode> rhs);
-        virtual ~EuclideanExpressionNodeAddEuclidean();
+        ~EuclideanExpressionNodeAddEuclidean() override;
 
       private:
-        virtual Eigen::Vector3d evaluateImplementation() const;
-        virtual void evaluateJacobiansImplementation(JacobianContainer & outJacobians) const;
-        virtual void getDesignVariablesImplementation(DesignVariable::set_t & designVariables) const;
+        Eigen::Vector3d evaluateImplementation() const override;
+        void evaluateJacobiansImplementation(JacobianContainer & outJacobians) const override;
+        void getDesignVariablesImplementation(DesignVariable::set_t & designVariables) const override;
 
         boost::shared_ptr<EuclideanExpressionNode> _lhs;
         boost::shared_ptr<EuclideanExpressionNode> _rhs;
@@ -141,12 +141,12 @@ namespace aslam {
 
        EuclideanExpressionNodeSubtractEuclidean(boost::shared_ptr<EuclideanExpressionNode> lhs,
            boost::shared_ptr<EuclideanExpressionNode> rhs);
-       virtual ~EuclideanExpressionNodeSubtractEuclidean();
+       ~EuclideanExpressionNodeSubtractEuclidean() override;
 
      private:
-       virtual Eigen::Vector3d evaluateImplementation() const;
-       virtual void evaluateJacobiansImplementation(JacobianContainer & outJacobians) const;
-       virtual void getDesignVariablesImplementation(DesignVariable::set_t & designVariables) const;
+       Eigen::Vector3d evaluateImplementation() const override;
+       void evaluateJacobiansImplementation(JacobianContainer & outJacobians) const override;
+       void getDesignVariablesImplementation(DesignVariable::set_t & designVariables) const override;
 
        boost::shared_ptr<EuclideanExpressionNode> _lhs;
        boost::shared_ptr<EuclideanExpressionNode> _rhs;
@@ -164,13 +164,13 @@ namespace aslam {
        EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
        EuclideanExpressionNodeConstant(const Eigen::Vector3d & p);
-       virtual ~EuclideanExpressionNodeConstant();
+       ~EuclideanExpressionNodeConstant() override;
 
          void set(const Eigen::Vector3d & p){ _p = p; }
      private:
-         virtual Eigen::Vector3d evaluateImplementation() const;
-         virtual void evaluateJacobiansImplementation(JacobianContainer & outJacobians) const;
-         virtual void getDesignVariablesImplementation(DesignVariable::set_t & designVariables) const;
+         Eigen::Vector3d evaluateImplementation() const override;
+         void evaluateJacobiansImplementation(JacobianContainer & outJacobians) const override;
+         void getDesignVariablesImplementation(DesignVariable::set_t & designVariables) const override;
 
          Eigen::Vector3d _p;
      };
@@ -188,12 +188,12 @@ namespace aslam {
 
        EuclideanExpressionNodeSubtractVector(boost::shared_ptr<EuclideanExpressionNode> lhs,
               const Eigen::Vector3d & rhs);
-       virtual ~EuclideanExpressionNodeSubtractVector();
+       ~EuclideanExpressionNodeSubtractVector() override;
 
      private:
-       virtual Eigen::Vector3d evaluateImplementation() const;
-       virtual void evaluateJacobiansImplementation(JacobianContainer & outJacobians) const;
-       virtual void getDesignVariablesImplementation(DesignVariable::set_t & designVariables) const;
+       Eigen::Vector3d evaluateImplementation() const override;
+       void evaluateJacobiansImplementation(JacobianContainer & outJacobians) const override;
+       void getDesignVariablesImplementation(DesignVariable::set_t & designVariables) const override;
 
        boost::shared_ptr<EuclideanExpressionNode> _lhs;
        Eigen::Vector3d _rhs;
@@ -212,12 +212,12 @@ namespace aslam {
         EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
         EuclideanExpressionNodeNegated(boost::shared_ptr<EuclideanExpressionNode> operand);
-        virtual ~EuclideanExpressionNodeNegated();
+        ~EuclideanExpressionNodeNegated() override;
 
       private:
-        virtual Eigen::Vector3d evaluateImplementation() const;
-        virtual void evaluateJacobiansImplementation(JacobianContainer & outJacobians) const;
-        virtual void getDesignVariablesImplementation(DesignVariable::set_t & designVariables) const;
+        Eigen::Vector3d evaluateImplementation() const override;
+        void evaluateJacobiansImplementation(JacobianContainer & outJacobians) const override;
+        void getDesignVariablesImplementation(DesignVariable::set_t & designVariables) const override;
 
         boost::shared_ptr<EuclideanExpressionNode> _operand;
       };
@@ -234,12 +234,12 @@ namespace aslam {
         EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
         EuclideanExpressionNodeScalarMultiply(boost::shared_ptr<EuclideanExpressionNode> p, boost::shared_ptr<ScalarExpressionNode> s);
-        virtual ~EuclideanExpressionNodeScalarMultiply();
+        ~EuclideanExpressionNodeScalarMultiply() override;
 
       private:
-        virtual Eigen::Vector3d evaluateImplementation() const;
-        virtual void evaluateJacobiansImplementation(JacobianContainer & outJacobians) const;
-        virtual void getDesignVariablesImplementation(DesignVariable::set_t & designVariables) const;
+        Eigen::Vector3d evaluateImplementation() const override;
+        void evaluateJacobiansImplementation(JacobianContainer & outJacobians) const override;
+        void getDesignVariablesImplementation(DesignVariable::set_t & designVariables) const override;
 
         boost::shared_ptr<EuclideanExpressionNode> _p;
         boost::shared_ptr<ScalarExpressionNode> _s;
@@ -251,12 +251,12 @@ namespace aslam {
         EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
         EuclideanExpressionNodeTranslation(boost::shared_ptr<TransformationExpressionNode> operand);
-        virtual ~EuclideanExpressionNodeTranslation();
+        ~EuclideanExpressionNodeTranslation() override;
 
       private:
-        virtual Eigen::Vector3d evaluateImplementation() const;
-        virtual void evaluateJacobiansImplementation(JacobianContainer & outJacobians) const;
-        virtual void getDesignVariablesImplementation(DesignVariable::set_t & designVariables) const;
+        Eigen::Vector3d evaluateImplementation() const override;
+        void evaluateJacobiansImplementation(JacobianContainer & outJacobians) const override;
+        void getDesignVariablesImplementation(DesignVariable::set_t & designVariables) const override;
 
         boost::shared_ptr<TransformationExpressionNode> _operand;
       };
@@ -268,12 +268,12 @@ namespace aslam {
         EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
         EuclideanExpressionNodeRotationParameters(boost::shared_ptr<RotationExpressionNode> operand, sm::kinematics::RotationalKinematics::Ptr rk);
-        virtual ~EuclideanExpressionNodeRotationParameters();
+        ~EuclideanExpressionNodeRotationParameters() override;
 
       private:
-        virtual Eigen::Vector3d evaluateImplementation() const;
-        virtual void evaluateJacobiansImplementation(JacobianContainer & outJacobians) const;
-        virtual void getDesignVariablesImplementation(DesignVariable::set_t & designVariables) const;
+        Eigen::Vector3d evaluateImplementation() const override;
+        void evaluateJacobiansImplementation(JacobianContainer & outJacobians) const override;
+        void getDesignVariablesImplementation(DesignVariable::set_t & designVariables) const override;
 
         boost::shared_ptr<RotationExpressionNode> _operand;
         sm::kinematics::RotationalKinematics::Ptr _rk;
@@ -286,12 +286,12 @@ namespace aslam {
         EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
         EuclideanExpressionNodeFromHomogeneous(boost::shared_ptr<HomogeneousExpressionNode> root);
-        virtual ~EuclideanExpressionNodeFromHomogeneous();
+        ~EuclideanExpressionNodeFromHomogeneous() override;
 
       private:
-        virtual Eigen::Vector3d evaluateImplementation() const;
-        virtual void evaluateJacobiansImplementation(JacobianContainer & outJacobians) const;
-        virtual void getDesignVariablesImplementation(DesignVariable::set_t & designVariables) const;
+        Eigen::Vector3d evaluateImplementation() const override;
+        void evaluateJacobiansImplementation(JacobianContainer & outJacobians) const override;
+        void getDesignVariablesImplementation(DesignVariable::set_t & designVariables) const override;
 
         boost::shared_ptr<HomogeneousExpressionNode> _root;
       };
@@ -309,12 +309,12 @@ namespace aslam {
 
        EuclideanExpressionNodeElementwiseMultiplyEuclidean(boost::shared_ptr<EuclideanExpressionNode> lhs,
            boost::shared_ptr<EuclideanExpressionNode> rhs);
-       virtual ~EuclideanExpressionNodeElementwiseMultiplyEuclidean();
+       ~EuclideanExpressionNodeElementwiseMultiplyEuclidean() override;
 
      private:
-       virtual Eigen::Vector3d evaluateImplementation() const override;
-       virtual void evaluateJacobiansImplementation(JacobianContainer & outJacobians) const override;
-       virtual void getDesignVariablesImplementation(DesignVariable::set_t & designVariables) const override;
+       Eigen::Vector3d evaluateImplementation() const override;
+       void evaluateJacobiansImplementation(JacobianContainer & outJacobians) const override;
+       void getDesignVariablesImplementation(DesignVariable::set_t & designVariables) const override;
 
        boost::shared_ptr<EuclideanExpressionNode> _lhs;
        boost::shared_ptr<EuclideanExpressionNode> _rhs;

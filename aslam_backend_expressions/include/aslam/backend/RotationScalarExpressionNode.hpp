@@ -20,12 +20,12 @@ namespace aslam {
       RotationScalarExpressionNode(int axis, const ScalarExpression & s) : _axis(axis), _s(s.root()){
         SM_ASSERT_GE_LT(std::runtime_error, axis, 0, 3, "The axis index must be in {0, 1, 2}");
       }
-      virtual ~RotationScalarExpressionNode(){}
+      ~RotationScalarExpressionNode() override{}
 
     private:
-      virtual Eigen::Matrix3d toRotationMatrixImplementation() const;
-      virtual void evaluateJacobiansImplementation(JacobianContainer & outJacobians) const;
-      virtual void getDesignVariablesImplementation(DesignVariable::set_t & designVariables) const;
+      Eigen::Matrix3d toRotationMatrixImplementation() const override;
+      void evaluateJacobiansImplementation(JacobianContainer & outJacobians) const override;
+      void getDesignVariablesImplementation(DesignVariable::set_t & designVariables) const override;
 
       int _axis;
       boost::shared_ptr<ScalarExpressionNode> _s;

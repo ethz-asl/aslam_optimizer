@@ -18,19 +18,19 @@ namespace aslam {
     public:
       DenseQrLinearSystemSolver(const DenseQRLinearSolverOptions& options = DenseQRLinearSolverOptions());
       DenseQrLinearSystemSolver(const sm::PropertyTree& config);
-      virtual ~DenseQrLinearSystemSolver();
+      ~DenseQrLinearSystemSolver() override;
 
       /// \brief build the system of equations.
-      virtual void buildSystem(size_t nThreads, bool useMEstimator);
+      void buildSystem(size_t nThreads, bool useMEstimator) override;
 
       /// \brief solve the system storing the solution in outDx and returning true on success.
-      virtual bool solveSystem(Eigen::VectorXd& outDx);
+      bool solveSystem(Eigen::VectorXd& outDx) override;
 
       /// \brief return the Jacobian matrix if available. Null if not available.
-      virtual const Matrix* Jacobian() const;
+      const Matrix* Jacobian() const override;
       const Eigen::MatrixXd& getJacobian() const;
 
-      virtual std::string name() const { return "dense_qr";};
+      std::string name() const override { return "dense_qr";};
       
       /// Returns the options
       const DenseQRLinearSolverOptions& getOptions() const;
@@ -42,14 +42,14 @@ namespace aslam {
 
 
       /// Helper Function for DogLeg implementation; returns parts required for the steepest descent solution
-      double rhsJtJrhs();
+      double rhsJtJrhs() override;
     
     private:
       /// \brief a method for a thread to evaluate Jacobians
       void evaluateJacobians(size_t threadId, size_t startIdx, size_t endIdx, bool useMEstimator);
 
       /// \brief initialized the matrix structure for the problem with these error terms and errors.
-      virtual void initMatrixStructureImplementation(const std::vector<DesignVariable*>& dvs, const std::vector<ErrorTerm*>& errors, bool useDiagonalConditioner);
+      void initMatrixStructureImplementation(const std::vector<DesignVariable*>& dvs, const std::vector<ErrorTerm*>& errors, bool useDiagonalConditioner) override;
 
       /// \brief the dense Jacobian matrix
       DenseMatrix _J;

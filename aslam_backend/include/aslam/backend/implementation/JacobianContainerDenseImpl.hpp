@@ -51,7 +51,7 @@ EIGEN_ALWAYS_INLINE void JACOBIAN_CONTAINER_DENSE_CLASS_TEMPLATE::addJacobian(De
 
 JACOBIAN_CONTAINER_DENSE_TEMPLATE
 template<typename DERIVED>
-void JACOBIAN_CONTAINER_DENSE_CLASS_TEMPLATE::add(const JacobianContainerDense& rhs, const Eigen::MatrixBase<DERIVED>* applyChainRule /*= nullptr*/)
+void JACOBIAN_CONTAINER_DENSE_CLASS_TEMPLATE::add(const JacobianContainerDense& /*rhs*/, const Eigen::MatrixBase<DERIVED>* /*applyChainRule*/ /*= nullptr*/)
 {
   SM_THROW(NotImplementedException, __PRETTY_FUNCTION__ << " not implemented");
 }

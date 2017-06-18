@@ -16,32 +16,32 @@ public:
   Vector1d _p_v;
 
   Scalar(const Vector1d& v) : _v(v), _p_v(v) {}
-  virtual ~Scalar() {}
+  ~Scalar() override {}
 
 protected:
   /// \brief Revert the last state update.
-  virtual void revertUpdateImplementation() {
+  void revertUpdateImplementation() override {
     _v = _p_v;
   }
 
   /// \brief Update the design variable.
-  virtual void updateImplementation(const double* dp, int /* size */) {
+  void updateImplementation(const double* dp, int /* size */) override {
     _p_v = _v;
     _v[0] += dp[0];
   }
 
   /// \brief what is the number of dimensions of the perturbation variable.
-  virtual int minimalDimensionsImplementation() const {
+  int minimalDimensionsImplementation() const override {
     return 1;
   }
 
   /// Returns the content of the design variable
-  virtual void getParametersImplementation(Eigen::MatrixXd& value) const {
+  void getParametersImplementation(Eigen::MatrixXd& value) const override {
     value = _v;
   }
 
   /// Sets the content of the design variable
-  virtual void setParametersImplementation(const Eigen::MatrixXd& value) {
+  void setParametersImplementation(const Eigen::MatrixXd& value) override {
     _p_v = _v;
     _v[0] = value(0);
   }
@@ -56,33 +56,33 @@ public:
   Eigen::Vector2d _p_v;
 
   Point2d(const Eigen::Vector2d& v) : _v(v), _p_v(v) {}
-  virtual ~Point2d() {}
+  ~Point2d() override {}
 
 protected:
   /// \brief Revert the last state update.
-  virtual void revertUpdateImplementation() {
+  void revertUpdateImplementation() override {
     _v = _p_v;
   }
 
   /// \brief Update the design variable.
-  virtual void updateImplementation(const double* dp, int /* size */) {
+  void updateImplementation(const double* dp, int /* size */) override {
     _p_v = _v;
     _v[0] += dp[0];
     _v[1] += dp[1];
   }
 
   /// \brief what is the number of dimensions of the perturbation variable.
-  virtual int minimalDimensionsImplementation() const {
+  int minimalDimensionsImplementation() const override {
     return 2;
   }
 
   /// Returns the content of the design variable
-  virtual void getParametersImplementation(Eigen::MatrixXd& value) const {
+  void getParametersImplementation(Eigen::MatrixXd& value) const override {
     value = _v;
   }
 
   /// Sets the content of the design variable
-  virtual void setParametersImplementation(const Eigen::MatrixXd& value) {
+  void setParametersImplementation(const Eigen::MatrixXd& value) override {
     _p_v = _v;
     _v = value;
   }
@@ -108,16 +108,16 @@ public:
     _p[0] += sm::random::randn() * 0.1;
     _p[1] += sm::random::randn() * 0.1;
   }
-  virtual ~LinearErr() {}
+  ~LinearErr() override {}
 
   /// \brief evaluate the error term
-  virtual double evaluateErrorImplementation() {
+  double evaluateErrorImplementation() override {
     setError(_p - _J * _p2d->_v);
     return evaluateChiSquaredError();
   }
 
   /// \brief evaluate the jacobian
-  virtual void evaluateJacobiansImplementation(aslam::backend::JacobianContainer & outJ) {
+  void evaluateJacobiansImplementation(aslam::backend::JacobianContainer & outJ) override {
     outJ.add(_p2d, -_J);
   }
 
@@ -147,16 +147,16 @@ public:
     _p[0] += sm::random::randn() * 0.1;
     _p[1] += sm::random::randn() * 0.1;
   }
-  virtual ~LinearErr2() {}
+  ~LinearErr2() override {}
 
   /// \brief evaluate the error term
-  virtual double evaluateErrorImplementation() {
+  double evaluateErrorImplementation() override {
     setError(_p - _J1 * _p2d1->_v - _J2 * _p2d2->_v);
     return evaluateChiSquaredError();
   }
 
   /// \brief evaluate the jacobian
-  virtual void evaluateJacobiansImplementation(aslam::backend::JacobianContainer & J) {
+  void evaluateJacobiansImplementation(aslam::backend::JacobianContainer & J) override {
     J.add(_p2d1, -_J1);
     J.add(_p2d2, -_J2);
   }
@@ -193,16 +193,16 @@ public:
     _p[2] += sm::random::randn() * 0.1;
     _p[3] += sm::random::randn() * 0.1;
   }
-  virtual ~LinearErr3() {}
+  ~LinearErr3() override {}
 
   /// \brief evaluate the error term
-  virtual double evaluateErrorImplementation() {
+  double evaluateErrorImplementation() override {
     setError(_p - _J1 * _p2d1->_v - _J2 * _p2d2->_v - _J3 * _p3->_v);
     return evaluateChiSquaredError();
   }
 
   /// \brief evaluate the jacobian
-  virtual void evaluateJacobiansImplementation(aslam::backend::JacobianContainer & J) {
+  void evaluateJacobiansImplementation(aslam::backend::JacobianContainer & J) override {
     J.add(_p2d1, -_J1);
     J.add(_p2d2, -_J2);
     J.add(_p3, -_J3);
@@ -230,16 +230,16 @@ public:
     parent_t::setDesignVariables(_p2d);
     setWeight(1.0);
   }
-  virtual ~TestNonSquaredError() {}
+  ~TestNonSquaredError() override {}
 
   /// \brief evaluate the error term
-  virtual double evaluateErrorImplementation() {
+  double evaluateErrorImplementation() override {
     double v = _p - _grad * _p2d->_v;
     return v*v;
   }
 
   /// \brief evaluate the jacobian
-  virtual void evaluateJacobiansImplementation(aslam::backend::JacobianContainer & outJ) {
+  void evaluateJacobiansImplementation(aslam::backend::JacobianContainer & outJ) override {
     outJ.add(_p2d, -2.*_grad*(_p - _grad*_p2d->_v));
   }
 

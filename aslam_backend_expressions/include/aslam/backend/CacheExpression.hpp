@@ -49,7 +49,7 @@ class CacheExpressionNode : public CacheInterface, public ExpressionNode
 
  protected:
 
-  typename ExpressionNode::value_t evaluateImplementation() const
+  typename ExpressionNode::value_t evaluateImplementation() const override
   {
     if (!_isCacheValidV)
     {
@@ -119,7 +119,7 @@ class CacheExpressionNode< GenericMatrixExpressionNode<IRows, ICols, TScalar>, D
 
  protected:
 
-  void evaluateImplementation() const
+  void evaluateImplementation() const override
   {
     if (!_isCacheValidV)
     {

@@ -59,12 +59,12 @@ namespace aslam {
 
       TransformationExpressionNodeMultiply(boost::shared_ptr<TransformationExpressionNode> lhs, 
 				     boost::shared_ptr<TransformationExpressionNode> rhs);
-      virtual ~TransformationExpressionNodeMultiply();
+      ~TransformationExpressionNodeMultiply() override;
 
     private:
-      virtual Eigen::Matrix4d toTransformationMatrixImplementation();
-      virtual void evaluateJacobiansImplementation(JacobianContainer & outJacobians) const;
-      virtual void getDesignVariablesImplementation(DesignVariable::set_t & designVariables) const;
+      Eigen::Matrix4d toTransformationMatrixImplementation() override;
+      void evaluateJacobiansImplementation(JacobianContainer & outJacobians) const override;
+      void getDesignVariablesImplementation(DesignVariable::set_t & designVariables) const override;
 
       boost::shared_ptr<TransformationExpressionNode> _lhs;
       Eigen::Matrix4d _T_lhs;
@@ -87,12 +87,12 @@ namespace aslam {
 
       TransformationExpressionNodeInverse(boost::shared_ptr<TransformationExpressionNode> dvTransformation);
 
-      virtual ~TransformationExpressionNodeInverse();
+      ~TransformationExpressionNodeInverse() override;
 
     private:
-      virtual Eigen::Matrix4d toTransformationMatrixImplementation();
-      virtual void evaluateJacobiansImplementation(JacobianContainer & outJacobians) const;
-      virtual void getDesignVariablesImplementation(DesignVariable::set_t & designVariables) const;
+      Eigen::Matrix4d toTransformationMatrixImplementation() override;
+      void evaluateJacobiansImplementation(JacobianContainer & outJacobians) const override;
+      void getDesignVariablesImplementation(DesignVariable::set_t & designVariables) const override;
 
       boost::shared_ptr<TransformationExpressionNode> _dvTransformation;
       Eigen::Matrix4d _T;
@@ -111,12 +111,12 @@ namespace aslam {
       EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
         TransformationExpressionNodeConstant(const Eigen::Matrix4d & T);
-        virtual ~TransformationExpressionNodeConstant();
+        ~TransformationExpressionNodeConstant() override;
 
     private:
-      virtual Eigen::Matrix4d toTransformationMatrixImplementation();
-      virtual void evaluateJacobiansImplementation(JacobianContainer & outJacobians) const;
-      virtual void getDesignVariablesImplementation(DesignVariable::set_t & designVariables) const;
+      Eigen::Matrix4d toTransformationMatrixImplementation() override;
+      void evaluateJacobiansImplementation(JacobianContainer & outJacobians) const override;
+      void getDesignVariablesImplementation(DesignVariable::set_t & designVariables) const override;
 
 
       Eigen::Matrix4d _T;

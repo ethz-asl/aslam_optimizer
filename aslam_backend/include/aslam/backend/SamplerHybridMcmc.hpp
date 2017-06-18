@@ -59,10 +59,10 @@ class SamplerHybridMcmc : public SamplerBase {
   /// \brief Constructor
   SamplerHybridMcmc(const SamplerHybridMcmcOptions& options);
   /// \brief Destructor
-  ~SamplerHybridMcmc() { }
+  ~SamplerHybridMcmc() override { }
 
   /// \brief Initialization method
-  virtual void initialize() override;
+  void initialize() override;
 
   /// \brief Const getter for options
   const SamplerHybridMcmcOptions& getOptions() const { return _options; }
@@ -72,7 +72,7 @@ class SamplerHybridMcmc : public SamplerBase {
  private:
 
   /// \brief Implementation of the step method
-  virtual void step(bool& accepted, double& acceptanceProbability);
+  void step(bool& accepted, double& acceptanceProbability) override;
 
   /// \brief Save the current state of the design variables
   void saveDesignVariables();
