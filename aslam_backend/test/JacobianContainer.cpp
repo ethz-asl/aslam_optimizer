@@ -183,24 +183,24 @@ TYPED_TEST(JacobianContainerTests, testAddJacobian)
     const auto M = Eigen::Matrix<double, dimensionError, dimensionError>::Random().eval();
     static_cast<JacobianContainer&>(jc.apply(M)).add(&dvs[1], J1);
     expected += M*J1;
-    sm::eigen::assertEqual(expected, jc.Jacobian(&dvs[1]), SM_SOURCE_FILE_POS, "Recover the Jacobian");
+    sm::eigen::assertNear(expected, jc.Jacobian(&dvs[1]), 1e-9, SM_SOURCE_FILE_POS, "Recover the Jacobian");
 
     // Test application of multiple chain rule matrices
     static_cast<JacobianContainer&>(static_cast<JacobianContainer&>(jc.apply(M)).apply(M)).add(&dvs[1], J1);
     expected += M*M*J1;
-    sm::eigen::assertEqual(expected, jc.Jacobian(&dvs[1]), SM_SOURCE_FILE_POS, "Recover the Jacobian");
+    sm::eigen::assertNear(expected, jc.Jacobian(&dvs[1]), 1e-9, SM_SOURCE_FILE_POS, "Recover the Jacobian");
 
     // Test that chain rule matrix is indeed popped from the stack and does not influence further add() calls
     jc.add(&dvs[1], J1);
     expected += J1;
-    sm::eigen::assertEqual(expected, jc.Jacobian(&dvs[1]), SM_SOURCE_FILE_POS, "Recover the Jacobian");
+    sm::eigen::assertNear(expected, jc.Jacobian(&dvs[1]), 1e-9, SM_SOURCE_FILE_POS, "Recover the Jacobian");
 
     // Test apply() method with identity.
     // We apply N as chain rule, this should add N to the existing content J1 + J1 + M*J1
     const auto N = Eigen::Matrix<double, dimensionError, dimensionDv>::Random().eval();
     static_cast<JacobianContainer&>(jc.apply(N)).add(&dvs[1]);
     expected += N;
-    sm::eigen::assertEqual(expected, jc.Jacobian(&dvs[1]), SM_SOURCE_FILE_POS, "Recover the Jacobian");
+    sm::eigen::assertNear(expected, jc.Jacobian(&dvs[1]), 1e-9, SM_SOURCE_FILE_POS, "Recover the Jacobian");
   }
   catch (const std::exception& e)
   {
@@ -316,6 +316,7 @@ TEST(JacobianContainerTests, testChainRule)
     jc1.add(&dv1, J1);
     jc1.add(&dv2, J2);
     Eigen::Matrix<double, 2, 2> C;
+    C << 1, 3, 0.5, -8;
     jc2.add(jc1, &C); // add with chain rule
     jc1.applyChainRule(C);
     sm::eigen::assertEqual(jc1.asDenseMatrix(), jc2.asDenseMatrix(), SM_SOURCE_FILE_POS, "Checking for correct application of the chain rule");
