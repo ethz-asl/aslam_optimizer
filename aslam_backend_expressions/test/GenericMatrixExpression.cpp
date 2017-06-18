@@ -364,7 +364,7 @@ TEST(GenericMatrixExpressionNodeTestSuites, testEntryAsScalarExpression) {
 
     {
       SCOPED_TRACE("");
-      testExpression(gMat.template toScalarExpression(), 1);
+      testExpression(gMat.toScalarExpression(), 1);
     }
     {
       SCOPED_TRACE("");
@@ -376,11 +376,11 @@ TEST(GenericMatrixExpressionNodeTestSuites, testEntryAsScalarExpression) {
     }
     {
       SCOPED_TRACE("");
-      testExpression(gMat.template toScalarExpression(0, 1), 1);
+      testExpression(gMat.toScalarExpression(0, 1), 1);
     }
     {
       SCOPED_TRACE("");
-      testExpression(gMat.template toScalarExpression(1, 0), 1);
+      testExpression(gMat.toScalarExpression(1, 0), 1);
     }
   }
   catch(std::exception const & e)

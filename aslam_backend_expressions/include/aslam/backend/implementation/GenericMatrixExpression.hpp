@@ -3,6 +3,8 @@
 #include <Eigen/Geometry>
 #include "../OperationResultNodes.hpp"
 
+#define _PSEUDO_UNUSED_FOR_CLANG __attribute__((unused)) // Without this it sometimes warns about actually used local typedefs
+
 namespace aslam {
 namespace backend {
 
@@ -38,7 +40,7 @@ _CLASS::GenericMatrixExpression(ScalarExpression v, dummy) : _root()
 {
   class ResultNode : public UnaryOperationResultNode<ResultNode, ScalarExpression, self_t, Eigen::Matrix<double, 1, 1>, double> {
   public:
-    typedef UnaryOperationResultNode<ResultNode, ScalarExpression, self_t, Eigen::Matrix<double, 1, 1>, double> base_t;
+    typedef UnaryOperationResultNode<ResultNode, ScalarExpression, self_t, Eigen::Matrix<double, 1, 1>, double> base_t _PSEUDO_UNUSED_FOR_CLANG;
 
     virtual ~ResultNode() {}
 
@@ -88,9 +90,9 @@ _TEMPLATE
 template<int RowIndex, int ColIndex>
 ScalarExpression _CLASS::toScalarExpression() const {
 
-  class ResultNode : public UnaryOperationResultNode<ResultNode, self_t, ScalarExpression, Eigen::Matrix<double, 1, 1>, double> {
+  class ResultNode : public UnaryOperationResultNodeNoDiff<ResultNode, self_t, ScalarExpression, Eigen::Matrix<double, 1, 1>, double> {
   public:
-    typedef UnaryOperationResultNode<ResultNode, self_t, ScalarExpression, Eigen::Matrix<double, 1, 1>, double> base_t;
+    typedef UnaryOperationResultNodeNoDiff<ResultNode, self_t, ScalarExpression, Eigen::Matrix<double, 1, 1>, double> base_t _PSEUDO_UNUSED_FOR_CLANG;
 
     virtual ~ResultNode() {}
 
@@ -101,11 +103,6 @@ ScalarExpression _CLASS::toScalarExpression() const {
     inline typename base_t::apply_diff_return_t applyDiff(const typename base_t::operand_t::tangent_vector_t & tangent_vector) const {
       return tangent_vector.template block<1,1>(RowIndex, ColIndex);
     }
-    void evaluateJacobiansImplementation(JacobianContainer & outJacobians) const { base_t::evaluateJacobiansImplementation(outJacobians, IdentityDifferential<Eigen::Matrix<double, 1,1>, double>()); };
-    void evaluateJacobiansImplementation(JacobianContainer & outJacobians, const Eigen::MatrixXd & applyChainRule) const {
-      assert(applyChainRule.cols() == 1);
-      evaluateJacobians(outJacobians.apply(applyChainRule));
-    };
   };
 
   return ResultNode::create(*this);
@@ -114,9 +111,9 @@ ScalarExpression _CLASS::toScalarExpression() const {
 _TEMPLATE
 ScalarExpression _CLASS::toScalarExpression(int rowIndex, int colIndex) const {
 
-  class ResultNode : public UnaryOperationResultNode<ResultNode, self_t, ScalarExpression, Eigen::Matrix<double, 1, 1>, double> {
+  class ResultNode : public UnaryOperationResultNodeNoDiff<ResultNode, self_t, ScalarExpression, Eigen::Matrix<double, 1, 1>, double> {
   public:
-    typedef UnaryOperationResultNode<ResultNode, self_t, ScalarExpression, Eigen::Matrix<double, 1, 1>, double> base_t;
+    typedef UnaryOperationResultNodeNoDiff<ResultNode, self_t, ScalarExpression, Eigen::Matrix<double, 1, 1>, double> base_t _PSEUDO_UNUSED_FOR_CLANG;
 
     ResultNode(std::pair<int, int> coordinates) : rowIndex(coordinates.first), colIndex(coordinates.second) { }
 
@@ -129,11 +126,6 @@ ScalarExpression _CLASS::toScalarExpression(int rowIndex, int colIndex) const {
     inline typename base_t::apply_diff_return_t applyDiff(const typename base_t::operand_t::tangent_vector_t & tangent_vector) const {
       return tangent_vector.template block<1,1>(rowIndex, colIndex);
     }
-    void evaluateJacobiansImplementation(JacobianContainer & outJacobians) const { base_t::evaluateJacobiansImplementation(outJacobians, IdentityDifferential<Eigen::Matrix<double, 1,1>, double>()); };
-    void evaluateJacobiansImplementation(JacobianContainer & outJacobians, const Eigen::MatrixXd & applyChainRule) const {
-      assert(applyChainRule.cols() == 1);
-      evaluateJacobians(outJacobians.apply(applyChainRule));
-    };
   private:
     int rowIndex;
     int colIndex;
@@ -153,7 +145,7 @@ inline _CLASS::operator GenericMatrixExpression<IRows, ICols,TScalar>()const{typ
 
 class ResultNode : public result_t::template UnaryOperationResult<ResultNode, self_t> {
 public:
-  typedef typename result_t::template UnaryOperationResult<ResultNode, self_t> base_t;
+  typedef typename result_t::template UnaryOperationResult<ResultNode, self_t> base_t _PSEUDO_UNUSED_FOR_CLANG;
 
   virtual ~ResultNode() {}
 
@@ -173,11 +165,11 @@ _TEMPLATE GenericMatrixExpression<ICols, IRows, TScalar> _CLASS::transpose() con
 
   class ResultNode : public result_t::template UnaryOperationResult<ResultNode, self_t> {
   public:
-    typedef typename result_t::template UnaryOperationResult<ResultNode, self_t> base_t;
+    typedef typename result_t::template UnaryOperationResult<ResultNode, self_t> base_t _PSEUDO_UNUSED_FOR_CLANG;
 
     virtual ~ResultNode() {}
 
-    virtual void evaluateImplementation() const {
+    virtual void evaluateImplementation() const override {
       this->_currentValue = this->getOperandNode().evaluate().transpose();
     }
 
@@ -195,9 +187,9 @@ _TEMPLATE ScalarExpression _CLASS::squaredNorm() const
   static_assert(ICols == 1, "squaredNorm() method only supported for column vector expression. "
       "Rethink this assertion if dynamic size expressions are possible");
 
-  class ResultNode : public UnaryOperationResultNode<ResultNode, self_t, ScalarExpression, Eigen::Matrix<double, 1, 1>, double> {
+  class ResultNode : public UnaryOperationResultNodeNoDiff<ResultNode, self_t, ScalarExpression, Eigen::Matrix<double, 1, 1>, double> {
   public:
-    typedef UnaryOperationResultNode<ResultNode, self_t, ScalarExpression, Eigen::Matrix<double, 1, 1>, double> base_t;
+    typedef UnaryOperationResultNodeNoDiff<ResultNode, self_t, ScalarExpression, Eigen::Matrix<double, 1, 1>, double> base_t _PSEUDO_UNUSED_FOR_CLANG;
 
     ResultNode() { }
 
@@ -227,7 +219,7 @@ _TEMPLATE GenericMatrixExpression<ICols, IRows, TScalar> _CLASS::inverse() const
 
   class ResultNode : public result_t::template UnaryOperationResult<ResultNode, self_t> {
   public:
-    typedef typename result_t::template UnaryOperationResult<ResultNode, self_t> base_t;
+    typedef typename result_t::template UnaryOperationResult<ResultNode, self_t> base_t _PSEUDO_UNUSED_FOR_CLANG;
 
     virtual ~ResultNode() {}
 
@@ -251,7 +243,7 @@ GenericMatrixExpression<IRows, IColsOther, TScalar> _CLASS::operator*(const Gene
 
   class ResultNode : public result_t::template BinaryOperationResult<ResultNode, self_t, other_t> {
   public:
-    typedef typename result_t::template BinaryOperationResult<ResultNode, self_t, other_t> base_t;
+    typedef typename result_t::template BinaryOperationResult<ResultNode, self_t, other_t> base_t _PSEUDO_UNUSED_FOR_CLANG;
 
     virtual ~ResultNode() {}
 
@@ -277,7 +269,7 @@ typename _CLASS::default_self_t _CLASS::operator+(const GenericMatrixExpression<
 
   class ResultNode : public result_t::template BinaryOperationResult<ResultNode, self_t, other_t> {
   public:
-    typedef typename result_t::template BinaryOperationResult<ResultNode, self_t, other_t> base_t;
+    typedef typename result_t::template BinaryOperationResult<ResultNode, self_t, other_t> base_t _PSEUDO_UNUSED_FOR_CLANG;
 
     virtual ~ResultNode() {}
 
@@ -304,7 +296,7 @@ typename _CLASS::default_self_t _CLASS::operator-(const GenericMatrixExpression<
 
   class ResultNode : public result_t::template BinaryOperationResult<ResultNode, self_t, other_t> {
   public:
-    typedef typename result_t::template BinaryOperationResult<ResultNode, self_t, other_t> base_t;
+    typedef typename result_t::template BinaryOperationResult<ResultNode, self_t, other_t> base_t _PSEUDO_UNUSED_FOR_CLANG;
 
     virtual ~ResultNode() {}
 
@@ -329,7 +321,7 @@ typename _CLASS::default_self_t _CLASS::operator-() const {
 
   class ResultNode : public result_t::template UnaryOperationResult<ResultNode, self_t> {
   public:
-    typedef typename result_t::template UnaryOperationResult<ResultNode, self_t> base_t;
+    typedef typename result_t::template UnaryOperationResult<ResultNode, self_t> base_t _PSEUDO_UNUSED_FOR_CLANG;
 
     virtual ~ResultNode() {}
 
@@ -353,7 +345,7 @@ typename _CLASS::default_self_t _CLASS::operator*(const ScalarExpression & scala
 
   class ResultNode : public BinaryOperationResultNode<ResultNode, self_t, other_t, result_t, typename result_t::tangent_vector_t, typename result_t::scalar_t> {
   public:
-    typedef BinaryOperationResultNode<ResultNode, self_t, other_t, result_t, typename result_t::tangent_vector_t, typename result_t::scalar_t> base_t;
+    typedef BinaryOperationResultNode<ResultNode, self_t, other_t, result_t, typename result_t::tangent_vector_t, typename result_t::scalar_t> base_t _PSEUDO_UNUSED_FOR_CLANG;
     virtual ~ResultNode() {}
 
     virtual void evaluateImplementation() const {
@@ -377,7 +369,7 @@ typename _CLASS::default_self_t _CLASS::operator*(TScalar scalar) const {
 
   class ResultNode : public result_t::template UnaryOperationResult<ResultNode, self_t> {
   public:
-    typedef typename result_t::template UnaryOperationResult<ResultNode, self_t> base_t;
+    typedef typename result_t::template UnaryOperationResult<ResultNode, self_t> base_t _PSEUDO_UNUSED_FOR_CLANG;
 
     ResultNode(TScalar scalar) : _scalar(scalar) {}
     virtual ~ResultNode() {}
@@ -447,7 +439,7 @@ GenericMatrixExpression<3, (ICols == 1 ? IColsOther : ICols), TScalar> _CLASS::c
 
   class ResultNode : public result_t::template BinaryOperationResult<ResultNode, self_t, other_t> {
   public:
-    typedef typename result_t::template BinaryOperationResult<ResultNode, self_t, other_t> base_t;
+    typedef typename result_t::template BinaryOperationResult<ResultNode, self_t, other_t> base_t _PSEUDO_UNUSED_FOR_CLANG;
 
     virtual ~ResultNode() {}
 
@@ -473,6 +465,6 @@ GenericMatrixExpression<3, (ICols == 1 ? IColsOther : ICols), TScalar> _CLASS::c
 }
 #undef _TEMPLATE
 #undef _CLASS
-
+#undef _PSEUDO_UNUSED_FOR_CLANG
 }  // namespace backend
 }  // namespace aslam

@@ -26,7 +26,7 @@ OptimizerOptionsBFGS::OptimizerOptionsBFGS()
 OptimizerOptionsBFGS::OptimizerOptionsBFGS(const sm::PropertyTree& config)
     : OptimizerOptionsBase(config), linesearch(sm::PropertyTree(config, "linesearch"))
 {
-  useDenseJacobianContainer = config.getDouble("useDenseJacobianContainer", useDenseJacobianContainer);
+  useDenseJacobianContainer = config.getBool("useDenseJacobianContainer", useDenseJacobianContainer);
   // base options checked by OptimizerOptionsBase
   linesearch.check();
 }

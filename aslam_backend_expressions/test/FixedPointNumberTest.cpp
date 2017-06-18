@@ -16,6 +16,9 @@ struct FixedPointNumberTestSuites : public ::testing::Test  {
   }
 };
 
+template <typename FixedPointNumber_>
+constexpr const double FixedPointNumberTestSuites<FixedPointNumber_>::eps;
+
 
 typedef ::testing::Types<
     FixedPointNumber<char, 10>,
