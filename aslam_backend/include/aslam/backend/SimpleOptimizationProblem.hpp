@@ -21,7 +21,7 @@ namespace aslam {
     class SimpleOptimizationProblem : public OptimizationProblemBase {
     public:
       SimpleOptimizationProblem();
-      virtual ~SimpleOptimizationProblem();
+      ~SimpleOptimizationProblem() override;
 
       /// \brief Add a design variable to the problem. If the second
       /// argument is true, the design variable will be deleted
@@ -38,7 +38,7 @@ namespace aslam {
       void addErrorTerm(ScalarNonSquaredErrorTerm* dv, bool problemOwnsVariable);
 
       /// \brief Add an error term to the problem
-      virtual void addErrorTerm(const boost::shared_ptr<ErrorTerm> & et);
+      void addErrorTerm(const boost::shared_ptr<ErrorTerm> & et) override;
       virtual void addErrorTerm(const boost::shared_ptr<ScalarNonSquaredErrorTerm> & et);
 
       /// \brief clear the design variables and error terms.
@@ -47,19 +47,19 @@ namespace aslam {
       /// \brief used for debugging...is the design variable in the problem.
       bool isDesignVariableInProblem(const DesignVariable* dv);
     protected:
-      virtual size_t numDesignVariablesImplementation() const;
-      virtual DesignVariable* designVariableImplementation(size_t i);
-      virtual const DesignVariable* designVariableImplementation(size_t i) const;
+      size_t numDesignVariablesImplementation() const override;
+      DesignVariable* designVariableImplementation(size_t i) override;
+      const DesignVariable* designVariableImplementation(size_t i) const override;
 
-      virtual size_t numErrorTermsImplementation() const;
-      virtual size_t numNonSquaredErrorTermsImplementation() const;
-      virtual ErrorTerm* errorTermImplementation(size_t i);
-      virtual ScalarNonSquaredErrorTerm* nonSquaredErrorTermImplementation(size_t i);
-      virtual const ErrorTerm* errorTermImplementation(size_t i) const;
-      virtual const ScalarNonSquaredErrorTerm* nonSquaredErrorTermImplementation(size_t i) const;
+      size_t numErrorTermsImplementation() const override;
+      size_t numNonSquaredErrorTermsImplementation() const override;
+      ErrorTerm* errorTermImplementation(size_t i) override;
+      ScalarNonSquaredErrorTerm* nonSquaredErrorTermImplementation(size_t i) override;
+      const ErrorTerm* errorTermImplementation(size_t i) const override;
+      const ScalarNonSquaredErrorTerm* nonSquaredErrorTermImplementation(size_t i) const override;
 
-      virtual void getErrorsImplementation(const DesignVariable* dv, std::set<ErrorTerm*>& outErrorSet);
-      virtual void getNonSquaredErrorsImplementation(const DesignVariable* dv, std::set<ScalarNonSquaredErrorTerm*>& outErrorSet);
+      void getErrorsImplementation(const DesignVariable* dv, std::set<ErrorTerm*>& outErrorSet) override;
+      void getNonSquaredErrorsImplementation(const DesignVariable* dv, std::set<ScalarNonSquaredErrorTerm*>& outErrorSet) override;
 
       // \todo Replace these std::vectors by something better. The underlying algorithms that this object
       //       supports suck with these containers. Blerg. See "removeDesignVariable()" for an example of

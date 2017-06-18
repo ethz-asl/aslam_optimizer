@@ -10,37 +10,37 @@ namespace aslam {
     class SparseBlockMatrixWrapper : public Matrix {
     public:
       SparseBlockMatrixWrapper();
-      virtual ~SparseBlockMatrixWrapper();
+      ~SparseBlockMatrixWrapper() override;
 
       /// \brief Get a value from the matrix at row r and column c
-      virtual double operator()(size_t r, size_t c) const;
+      double operator()(size_t r, size_t c) const override;
 
       /// \brief The number of rows in the matrix.
-      virtual size_t rows() const;
+      size_t rows() const override;
 
       /// \brief The number of columns in the matrix.
-      virtual size_t cols() const;
+      size_t cols() const override;
 
       /// \brief Fill and return a dense matrix.
       Eigen::MatrixXd toDense() const;
 
       /// \brief Fill the input dense matrix. The default version just
       ///        Goes through the matrix calling operator(). Please override.
-      virtual void toDenseInto(Eigen::MatrixXd& outM) const;
+      void toDenseInto(Eigen::MatrixXd& outM) const override;
 
       /// \brief Initialize the matrix from a dense matrix
-      virtual void fromDense(const Eigen::MatrixXd& M);
+      void fromDense(const Eigen::MatrixXd& M) override;
 
       /// \brief Initialize the matrix from a dense matrix.
       ///        Entries with absolute value less than tolerance
       ///        should be considered zeros.
-      virtual void fromDenseTolerance(const Eigen::MatrixXd& M, double tolerance);
+      void fromDenseTolerance(const Eigen::MatrixXd& M, double tolerance) override;
 
       /// \brief right multiply the vector y = A x
-      virtual void rightMultiply(const Eigen::VectorXd& x, Eigen::VectorXd& outY) const;
+      void rightMultiply(const Eigen::VectorXd& x, Eigen::VectorXd& outY) const override;
 
       /// \brief left multiply the vector y = A^T x
-      virtual void leftMultiply(const Eigen::VectorXd& x, Eigen::VectorXd& outY) const;
+      void leftMultiply(const Eigen::VectorXd& x, Eigen::VectorXd& outY) const override;
 
       sparse_block_matrix::SparseBlockMatrix<Eigen::MatrixXd> _M;
     };

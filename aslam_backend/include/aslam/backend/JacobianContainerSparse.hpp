@@ -29,7 +29,7 @@ namespace aslam {
       {
         SM_ASSERT_TRUE(Exception, Rows == Eigen::Dynamic || rows == Rows, "");
       }
-      virtual ~JacobianContainerSparse();
+      ~JacobianContainerSparse() override;
 
       /**
        * \brief Evaluate the Hessian and the RHS of Gauss-Newton given the error and inverse covariance.
@@ -57,9 +57,9 @@ namespace aslam {
       void addLargeLhs(const JacobianContainerSparse& rhs, const Eigen::MatrixBase<DERIVED>* applyChainRule = nullptr);
 
       /// \brief Add a jacobian to the list. If the design variable is not active, discard the value.
-      virtual void add(DesignVariable* designVariable, const Eigen::Ref<const Eigen::MatrixXd>& Jacobian) override;
+      void add(DesignVariable* designVariable, const Eigen::Ref<const Eigen::MatrixXd>& Jacobian) override;
       /// \brief Add a jacobian to the list with identity chain rule. If the design variable is not active, discard the value.
-      virtual void add(DesignVariable* designVariable) override;
+      void add(DesignVariable* designVariable) override;
 
       /// \brief how many design variables does this jacobian container represent.
       size_t numDesignVariables() const;
@@ -78,7 +78,7 @@ namespace aslam {
 
 
       /// Check whether the entries corresponding to design variable \p dv are finite
-      virtual bool isFinite(const DesignVariable& dv) const override;
+      bool isFinite(const DesignVariable& dv) const override;
 
       /// Get the Jacobian associated with a particular design variable \p dv
       const Eigen::MatrixXd& Jacobian(const DesignVariable* dv) const;
@@ -106,7 +106,7 @@ namespace aslam {
       SparseBlockMatrix asSparseMatrix(const std::vector<int>& colBlockIndices) const;
 
       /// \brief Gets a dense matrix with the Jacobians. The Jacobian ordering matches the sort order.
-      virtual Eigen::MatrixXd asDenseMatrix() const override;
+      Eigen::MatrixXd asDenseMatrix() const override;
 
       /// \brief Gets a dense matrix with the Jacobians. This uses the column block indices
       ///        to build the sparse, full width jacobian matrix

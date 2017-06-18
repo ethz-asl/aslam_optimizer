@@ -18,11 +18,11 @@ namespace aslam {
     public:
       SparseCholeskyLinearSystemSolver(const SparseCholeskyLinearSolverOptions& options = SparseCholeskyLinearSolverOptions());
       SparseCholeskyLinearSystemSolver(const sm::PropertyTree& config);
-      virtual ~SparseCholeskyLinearSystemSolver();
+      ~SparseCholeskyLinearSystemSolver() override;
 
 
-      virtual void buildSystem(size_t nThreads, bool useMEstimator);
-      virtual bool solveSystem(Eigen::VectorXd& outDx);
+      void buildSystem(size_t nThreads, bool useMEstimator) override;
+      bool solveSystem(Eigen::VectorXd& outDx) override;
 
       /// Returns the options
       const SparseCholeskyLinearSolverOptions& getOptions() const;
@@ -31,14 +31,14 @@ namespace aslam {
       /// Sets the options
       void setOptions(const SparseCholeskyLinearSolverOptions& options);
 
-      virtual std::string name() const {  return "sparse_cholesky"; };        
+      std::string name() const override {  return "sparse_cholesky"; };        
       /// Helper Function for DogLeg implementation; returns parts required for the steepest descent solution
-      double rhsJtJrhs();
+      double rhsJtJrhs() override;
    
     
     private:
-      virtual void initMatrixStructureImplementation(const std::vector<DesignVariable*>& dvs, const std::vector<ErrorTerm*>& errors, bool useDiagonalConditioner);
-      virtual void handleNewAcceptConstantErrorTerms() override;
+      void initMatrixStructureImplementation(const std::vector<DesignVariable*>& dvs, const std::vector<ErrorTerm*>& errors, bool useDiagonalConditioner) override;
+      void handleNewAcceptConstantErrorTerms() override;
 
       CompressedColumnJacobianTransposeBuilder<int> _jacobianBuilder;
 

@@ -224,7 +224,7 @@ namespace aslam {
       typedef Eigen::Matrix<double, Dimension, Dimension> inverse_covariance_t;
 
       ErrorTermFs();
-      virtual ~ErrorTermFs();
+      ~ErrorTermFs() override;
 
 
       /// \brief retrieve the error vector
@@ -238,12 +238,12 @@ namespace aslam {
       /// \brief the inverse covariance matrix.
       inverse_covariance_t invR() const;
 
-      virtual void getInvR(Eigen::MatrixXd& invR) const;
-      virtual Eigen::MatrixXd vsInvR() const;
-      virtual void vsSetInvR(const Eigen::MatrixXd& invR);
+      void getInvR(Eigen::MatrixXd& invR) const override;
+      Eigen::MatrixXd vsInvR() const override;
+      void vsSetInvR(const Eigen::MatrixXd& invR) override;
 
-      virtual void getWeightedJacobians(JacobianContainer& outJc, bool useMEstimator);
-      virtual void getWeightedError(Eigen::VectorXd& e, bool useMEstimator) const;
+      void getWeightedJacobians(JacobianContainer& outJc, bool useMEstimator) override;
+      void getWeightedError(Eigen::VectorXd& e, bool useMEstimator) const override;
 
       /// Check if Jacobians are finite
       void checkJacobiansFinite() const;
@@ -253,12 +253,12 @@ namespace aslam {
     protected:
 
       /// \brief build the hessian.
-      virtual void buildHessianImplementation(SparseBlockMatrix& outHessian, Eigen::VectorXd& outRhs, bool useMEstimator);
+      void buildHessianImplementation(SparseBlockMatrix& outHessian, Eigen::VectorXd& outRhs, bool useMEstimator) override;
 
       /// \brief get the current value of the error.
-      virtual Eigen::VectorXd vsErrorImplementation() const;
+      Eigen::VectorXd vsErrorImplementation() const override;
 
-      virtual size_t getDimensionImplementation() const {
+      size_t getDimensionImplementation() const override {
         return Dimension;
       }
 

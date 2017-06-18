@@ -22,12 +22,12 @@ class Vector2RotationQuaternionExpressionAdapter : public RotationExpressionNode
     return RotationExpression(boost::shared_ptr<Vector2RotationQuaternionExpressionAdapter>(new Vector2RotationQuaternionExpressionAdapter(vectorExpression)));
   }
 
-  virtual ~Vector2RotationQuaternionExpressionAdapter();
+  ~Vector2RotationQuaternionExpressionAdapter() override;
  protected:
   Vector2RotationQuaternionExpressionAdapter(const VectorExpression<4> & vectorExpression);
-  virtual Eigen::Matrix3d toRotationMatrixImplementation() const;
-  virtual void evaluateJacobiansImplementation(JacobianContainer & outJacobians) const;
-  virtual void getDesignVariablesImplementation(DesignVariable::set_t & designVariables) const;
+  Eigen::Matrix3d toRotationMatrixImplementation() const override;
+  void evaluateJacobiansImplementation(JacobianContainer & outJacobians) const override;
+  void getDesignVariablesImplementation(DesignVariable::set_t & designVariables) const override;
  private:
   Eigen::MatrixXd getMatrixToLieAlgebra() const;
   boost::shared_ptr<VectorExpressionNode<4> > _root;

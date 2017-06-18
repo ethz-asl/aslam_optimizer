@@ -46,7 +46,7 @@ class LinearSolverCholmod : public LinearSolver<MatrixType>
       _cholmodCommon.supernodal = CHOLMOD_AUTO; //CHOLMOD_SUPERNODAL; //CHOLMOD_SIMPLICIAL;
     }
 
-    virtual ~LinearSolverCholmod()
+    ~LinearSolverCholmod() override
     {
       delete _cholmodSparse;
       if (_cholmodFactor) {
@@ -56,7 +56,7 @@ class LinearSolverCholmod : public LinearSolver<MatrixType>
       cholmod_finish(&_cholmodCommon);
     }
 
-    virtual bool init()
+    bool init() override
     {
         //std::cout << "this init!" << std::endl;
          
@@ -67,7 +67,7 @@ class LinearSolverCholmod : public LinearSolver<MatrixType>
       return true;
     }
 
-    bool solve(const SparseBlockMatrix<MatrixType>& A, double* x, double* b)
+    bool solve(const SparseBlockMatrix<MatrixType>& A, double* x, double* b) override
     {
              
       //cerr << __PRETTY_FUNCTION__ << " using cholmod" << endl;
@@ -111,7 +111,7 @@ class LinearSolverCholmod : public LinearSolver<MatrixType>
       return true;
     }
 
-    bool solveBlocks(double**& blocks, const SparseBlockMatrix<MatrixType>& A)
+    bool solveBlocks(double**& blocks, const SparseBlockMatrix<MatrixType>& A) override
     {
       //cerr << __PRETTY_FUNCTION__ << " using cholmod" << endl;
       fillCholmodExt(A, _cholmodFactor); // _cholmodFactor used as bool, if not existing will copy the whole structure, otherwise only the values
@@ -161,7 +161,7 @@ class LinearSolverCholmod : public LinearSolver<MatrixType>
       return true;
     }
 
-    virtual bool solvePattern(SparseBlockMatrix<MatrixXd>& spinv, const std::vector<std::pair<int, int> >& blockIndices, const SparseBlockMatrix<MatrixType>& A)
+    bool solvePattern(SparseBlockMatrix<MatrixXd>& spinv, const std::vector<std::pair<int, int> >& blockIndices, const SparseBlockMatrix<MatrixType>& A) override
     {
       //cerr << __PRETTY_FUNCTION__ << " using cholmod" << endl;
       fillCholmodExt(A, _cholmodFactor); // _cholmodFactor used as bool, if not existing will copy the whole structure, otherwise only the values

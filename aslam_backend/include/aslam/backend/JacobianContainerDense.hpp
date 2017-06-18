@@ -29,7 +29,7 @@ namespace aslam {
       JacobianContainerDense(int rows, int cols, dummy = typename std::enable_if<!std::is_reference<Container>::value, int>::type(0));
 
       /// \brief Destructor
-      virtual ~JacobianContainerDense() { }
+      ~JacobianContainerDense() override { }
 
       /// \brief Add the rhs container to this one.
       template<typename DERIVED = Eigen::MatrixXd>
@@ -37,11 +37,11 @@ namespace aslam {
 
       /// \brief Add a jacobian to the list. If the design variable is not active,
       /// discard the value.
-      virtual void add(DesignVariable* designVariable, const Eigen::Ref<const Eigen::MatrixXd>& Jacobian) override;
-      virtual void add(DesignVariable* designVariable) override;
+      void add(DesignVariable* designVariable, const Eigen::Ref<const Eigen::MatrixXd>& Jacobian) override;
+      void add(DesignVariable* designVariable) override;
 
       /// Check whether the entries corresponding to design variable \p dv are finite
-      virtual bool isFinite(const DesignVariable& dv) const override;
+      bool isFinite(const DesignVariable& dv) const override;
 
       /// Get the Jacobian associated with a particular design variable \p dv
       Eigen::MatrixXd Jacobian(const DesignVariable* dv) const;
@@ -50,7 +50,7 @@ namespace aslam {
       void clear();
 
       /// \brief Gets a dense matrix with the Jacobians. The Jacobian ordering matches the sort order.
-      virtual Eigen::MatrixXd asDenseMatrix() const override { return _jacobian; }
+      Eigen::MatrixXd asDenseMatrix() const override { return _jacobian; }
 
     private:
 

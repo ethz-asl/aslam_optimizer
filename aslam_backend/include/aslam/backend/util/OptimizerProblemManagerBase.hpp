@@ -23,7 +23,7 @@ namespace backend
 class OptimizerProblemManagerBase : public OptimizerBase
 {
  public:
-  virtual ~OptimizerProblemManagerBase() { }
+  ~OptimizerProblemManagerBase() override { }
   void setProblem(boost::shared_ptr<OptimizationProblemBase> problem) override { _problemManager.setProblem(problem); }
   void checkProblemSetup() override { _problemManager.checkProblemSetup(); }
   bool isInitialized() override { return _problemManager.isInitialized(); }
@@ -37,7 +37,7 @@ class OptimizerProblemManagerBase : public OptimizerBase
  protected:
   const ProblemManager& problemManager() const { return _problemManager; }
   ProblemManager& problemManager() { return _problemManager; }
-  virtual void initializeImplementation() override { _problemManager.initialize(); }
+  void initializeImplementation() override { _problemManager.initialize(); }
 
  private:
   ProblemManager _problemManager; /// \brief Problem manager

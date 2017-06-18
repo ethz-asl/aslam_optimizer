@@ -20,15 +20,15 @@ namespace aslam {
 
       SparseQrLinearSystemSolver(const SparseQRLinearSolverOptions& options = SparseQRLinearSolverOptions());
       SparseQrLinearSystemSolver(const sm::PropertyTree& config);
-      virtual ~SparseQrLinearSystemSolver();
+      ~SparseQrLinearSystemSolver() override;
 
       // virtual void evaluateError(size_t nThreads, bool useMEstimator);
-      virtual void buildSystem(size_t nThreads, bool useMEstimator);
-      virtual bool solveSystem(Eigen::VectorXd& outDx);
+      void buildSystem(size_t nThreads, bool useMEstimator) override;
+      bool solveSystem(Eigen::VectorXd& outDx) override;
       // virtual void solveConstantAugmentedSystem(double diagonalConditioner, Eigen::VectorXd & outDx);
       // virtual void solveAugmentedSystem(const Eigen::VectorXd & diagonalConditioner, Eigen::VectorXd & outDx);
 
-      virtual std::string name() const { return "sparse_qr"; }
+      std::string name() const override { return "sparse_qr"; }
 
       /// Returns the current Jacobian transpose
       const CompressedColumnMatrix<index_t>& getJacobianTranspose() const;
@@ -55,11 +55,11 @@ namespace aslam {
       void setOptions(const SparseQRLinearSolverOptions& options);
         
       /// Helper Function for DogLeg implementation; returns parts required for the steepest descent solution
-      double rhsJtJrhs();
+      double rhsJtJrhs() override;
 
     private:
-      virtual void initMatrixStructureImplementation(const std::vector<DesignVariable*>& dvs, const std::vector<ErrorTerm*>& errors, bool useDiagonalConditioner);
-      virtual void handleNewAcceptConstantErrorTerms() override;
+      void initMatrixStructureImplementation(const std::vector<DesignVariable*>& dvs, const std::vector<ErrorTerm*>& errors, bool useDiagonalConditioner) override;
+      void handleNewAcceptConstantErrorTerms() override;
 
       CompressedColumnJacobianTransposeBuilder<index_t> _jacobianBuilder;
 

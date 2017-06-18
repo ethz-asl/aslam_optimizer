@@ -66,7 +66,7 @@ namespace aslam {
       /// \brief Constructor from property tree
       OptimizerRprop(const sm::PropertyTree& config);
       /// \brief Destructor
-      ~OptimizerRprop();
+      ~OptimizerRprop() override;
 
       /// \brief Return the status
       const Status& getStatus() const override { return _status; }

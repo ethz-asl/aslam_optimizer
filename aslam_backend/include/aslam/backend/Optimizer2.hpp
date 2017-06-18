@@ -66,7 +66,7 @@ namespace aslam {
 
       Optimizer2(const Options& options = Options());
       Optimizer2(const sm::ConstPropertyTree& config, boost::shared_ptr<LinearSystemSolver> linearSystemSolver, boost::shared_ptr<TrustRegionPolicy> trustRegionPolicy);
-      virtual ~Optimizer2();
+      ~Optimizer2() override;
 
       /// \brief initialize the linear solver specified in the optimizer options.
       void initializeLinearSolver();
@@ -122,7 +122,7 @@ namespace aslam {
 
       /// \brief Do a bunch of checks to see if the problem is well-defined. This includes checking that every error term is
       ///        hooked up to design variables and running finite differences on error terms where this is possible.
-      void checkProblemSetup();
+      void checkProblemSetup() override;
 
       /// \brief Build the Gauss-Newton matrices.
       void buildGnMatrices(bool useMEstimator);

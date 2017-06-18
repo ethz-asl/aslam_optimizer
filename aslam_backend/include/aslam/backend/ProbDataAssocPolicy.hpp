@@ -25,7 +25,7 @@ class ProbDataAssocPolicy : public PerIterationCallback {
 
   ProbDataAssocPolicy(ErrorTermGroups error_terms, double lambda);
   // The optimizer will call this function before each iteration.
-  void callback();
+  void callback() override;
 
  private:
   ErrorTermGroups error_terms_;

@@ -23,21 +23,21 @@ namespace aslam {
 
       BlockCholeskyLinearSystemSolver(const std::string & solver = "cholesky", const BlockCholeskyLinearSolverOptions& options= BlockCholeskyLinearSolverOptions());
       BlockCholeskyLinearSystemSolver(const sm::PropertyTree& config);
-      virtual ~BlockCholeskyLinearSystemSolver();
+      ~BlockCholeskyLinearSystemSolver() override;
 
 
       /// \brief build the system of equations.
-      virtual void buildSystem(size_t nThreads, bool useMEstimator);
+      void buildSystem(size_t nThreads, bool useMEstimator) override;
 
       /// \brief solve the system storing the solution in outDx and returning true on success.
-      virtual bool solveSystem(Eigen::VectorXd& outDx);
+      bool solveSystem(Eigen::VectorXd& outDx) override;
 
       /// \brief return the Hessian matrix if avaliable. Null if not available.
-      virtual const Matrix* Hessian() const {
+      const Matrix* Hessian() const override {
         return &_H;
       }
 
-      virtual std::string name() const { return "block_" + _solverType; }
+      std::string name() const override { return "block_" + _solverType; }
 
       /// \brief compute only the covariance blocks associated with the block indices passed as an argument
       void computeCovarianceBlocks(const std::vector<std::pair<int, int> >& blockIndices, SparseBlockMatrix& outP);
@@ -52,14 +52,14 @@ namespace aslam {
       void setOptions(const BlockCholeskyLinearSolverOptions& options);
 
       /// Helper Function for DogLeg implementation; returns parts required for the steepest descent solution
-      double rhsJtJrhs();
+      double rhsJtJrhs() override;
         
     private:
 
       void initSolver();
       
       /// \brief initialized the matrix structure for the problem with these error terms and errors.
-      virtual void initMatrixStructureImplementation(const std::vector<DesignVariable*>& dvs, const std::vector<ErrorTerm*>& errors, bool useDiagonalConditioner);
+      void initMatrixStructureImplementation(const std::vector<DesignVariable*>& dvs, const std::vector<ErrorTerm*>& errors, bool useDiagonalConditioner) override;
 
 
       /// \brief The full Hessian matrix.

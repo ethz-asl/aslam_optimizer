@@ -18,16 +18,16 @@ class JacobianContainerFunctor : public JacobianContainer {
  public:
 
   JacobianContainerFunctor(JacobianContainer& jc, int rows, Functor functor) : JacobianContainer(rows), _jc(jc), _functor(functor) { }
-  virtual ~JacobianContainerFunctor() { }
+  ~JacobianContainerFunctor() override { }
 
-  virtual void add(DesignVariable* designVariable, const Eigen::Ref<const Eigen::MatrixXd>& Jacobian) override {
+  void add(DesignVariable* designVariable, const Eigen::Ref<const Eigen::MatrixXd>& Jacobian) override {
     if (this->chainRuleEmpty())
       _jc.add(designVariable, _functor(Jacobian));
     else
       _jc.add(designVariable, _functor(this->chainRuleMatrix()*Jacobian));
   }
 
-  virtual void add(DesignVariable* designVariable) override {
+  void add(DesignVariable* designVariable) override {
     if (this->chainRuleEmpty()) {
       _jc.add(designVariable, _functor(Eigen::MatrixXd::Identity(this->rows(), designVariable->minimalDimensions())));
     } else {
@@ -36,11 +36,11 @@ class JacobianContainerFunctor : public JacobianContainer {
     }
   }
 
-  virtual Eigen::MatrixXd asDenseMatrix() const override {
+  Eigen::MatrixXd asDenseMatrix() const override {
     return _jc.asDenseMatrix();
   }
 
-  virtual bool isFinite(const DesignVariable& dv) const override {
+  bool isFinite(const DesignVariable& dv) const override {
     return _jc.isFinite(dv);
   }
 

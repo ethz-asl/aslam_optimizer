@@ -22,7 +22,7 @@ namespace aslam {
       /// \brief initialize from an existing map.
       DesignVariableMappedVector(Eigen::Map< vector_t > v);
 
-      virtual ~DesignVariableMappedVector();
+      ~DesignVariableMappedVector() override;
 
       vector_t value() const;
 
@@ -33,27 +33,27 @@ namespace aslam {
       double * data() { return &_v[0]; }
     protected:
       /// \brief Revert the last state update.
-      virtual void revertUpdateImplementation() override;
+      void revertUpdateImplementation() override;
       /// \brief Update the design variable.
-      virtual void updateImplementation(const double * dp, int size) override;
+      void updateImplementation(const double * dp, int size) override;
       /// \brief what is the number of dimensions of the perturbation variable.
-      virtual int minimalDimensionsImplementation() const override;
+      int minimalDimensionsImplementation() const override;
 
-      virtual vector_t evaluateImplementation() const override;
-      virtual void evaluateJacobiansImplementation(JacobianContainer & outJacobians) const override;
-      virtual void getDesignVariablesImplementation(DesignVariable::set_t & designVariables) const override;
+      vector_t evaluateImplementation() const override;
+      void evaluateJacobiansImplementation(JacobianContainer & outJacobians) const override;
+      void getDesignVariablesImplementation(DesignVariable::set_t & designVariables) const override;
 
       /// Returns the content of the design variable
-      virtual void getParametersImplementation(Eigen::MatrixXd& value) const override;
+      void getParametersImplementation(Eigen::MatrixXd& value) const override;
 
       /// Sets the content of the design variable
-      virtual void setParametersImplementation(const Eigen::MatrixXd& value) override;
+      void setParametersImplementation(const Eigen::MatrixXd& value) override;
 
       /// Computes the minimal distance in tangent space between the current value of the DV and xHat
-      virtual void minimalDifferenceImplementation(const Eigen::MatrixXd& xHat, Eigen::VectorXd& outDifference) const override;
+      void minimalDifferenceImplementation(const Eigen::MatrixXd& xHat, Eigen::VectorXd& outDifference) const override;
 
       /// Computes the minimal distance in tangent space between the current value of the DV and xHat and the jacobian
-      virtual void minimalDifferenceAndJacobianImplementation(const Eigen::MatrixXd& xHat, Eigen::VectorXd& outDifference, Eigen::MatrixXd& outJacobian) const override;
+      void minimalDifferenceAndJacobianImplementation(const Eigen::MatrixXd& xHat, Eigen::VectorXd& outDifference, Eigen::MatrixXd& outJacobian) const override;
 
     private:
       Eigen::Map< vector_t > _v;

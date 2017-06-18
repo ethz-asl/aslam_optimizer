@@ -55,7 +55,7 @@ namespace aslam {
       /// \brief Constructor from property tree
       OptimizerBFGS(const sm::PropertyTree& config);
       /// \brief Destructor
-      ~OptimizerBFGS();
+      ~OptimizerBFGS() override;
 
       /// \brief Return the status
       const Status& getStatus() const override { return _status; }

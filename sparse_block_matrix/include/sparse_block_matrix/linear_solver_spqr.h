@@ -49,7 +49,7 @@ class LinearSolverQr : public LinearSolver<MatrixType>
         _cholmodCommon.SPQR_grain = 12;		// +/-2* number of cores
     }
 
-    virtual ~LinearSolverQr()
+    ~LinearSolverQr() override
     {
       delete _cholmodSparse;
       if ( _cholmodFactor)
@@ -57,7 +57,7 @@ class LinearSolverQr : public LinearSolver<MatrixType>
       cholmod_finish(&_cholmodCommon);
     }
 
-    virtual bool init()
+    bool init() override
     {
     	if (_cholmodFactor) {
     		SuiteSparseQR_free(&_cholmodFactor, &_cholmodCommon);
@@ -66,7 +66,7 @@ class LinearSolverQr : public LinearSolver<MatrixType>
     	return true;
     }
 
-    bool solve(const SparseBlockMatrix<MatrixType>& A, double* x, double* b)
+    bool solve(const SparseBlockMatrix<MatrixType>& A, double* x, double* b) override
     {
 		fillCholmodExt(A, _cholmodFactor);
 

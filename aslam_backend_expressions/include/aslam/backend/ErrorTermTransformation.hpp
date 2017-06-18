@@ -33,16 +33,16 @@ namespace aslam {
       ErrorTermTransformation(aslam::backend::TransformationExpression T, sm::kinematics::Transformation prior, Eigen::Matrix<double,6,6> N, int debug=0);
         ErrorTermTransformation(aslam::backend::TransformationExpression T, sm::kinematics::Transformation prior, double weightRotation, double weightTranslation);
       
-      virtual ~ErrorTermTransformation();
+      ~ErrorTermTransformation() override;
 
     protected:
       /// This is the interface required by ErrorTermFs<>
 
       /// \brief evaluate the error term and return the weighted squared error e^T invR e
-      virtual double evaluateErrorImplementation();
+      double evaluateErrorImplementation() override;
 
       /// \brief evaluate the jacobian
-      virtual void evaluateJacobiansImplementation(JacobianContainer & J);
+      void evaluateJacobiansImplementation(JacobianContainer & J) override;
 
     private:
       aslam::backend::TransformationExpression _T;
