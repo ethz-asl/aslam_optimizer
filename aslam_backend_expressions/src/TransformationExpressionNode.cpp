@@ -16,8 +16,6 @@ namespace aslam {
 
     TransformationExpressionNode::~TransformationExpressionNode(){}
 
-    Eigen::Matrix4d TransformationExpressionNode::toTransformationMatrix(){ return toTransformationMatrixImplementation(); }
-
     void TransformationExpressionNode::evaluateJacobians(JacobianContainer & outJacobians) const
     {
       evaluateJacobiansImplementation(outJacobians);
@@ -66,7 +64,6 @@ namespace aslam {
     
     TransformationExpressionNodeInverse::TransformationExpressionNodeInverse(boost::shared_ptr<TransformationExpressionNode> dvTransformation) : _dvTransformation(dvTransformation)
     {
-      _T = _dvTransformation->toTransformationMatrix().inverse();
     }
     
     TransformationExpressionNodeInverse::~TransformationExpressionNodeInverse(){}
