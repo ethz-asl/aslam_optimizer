@@ -10,8 +10,8 @@ namespace aslam {
   namespace backend {
     class EuclideanExpression;
     class RotationExpression;
-    
     class TransformationExpressionNode
+
     {
     public:
       EIGEN_MAKE_ALIGNED_OPERATOR_NEW
@@ -21,9 +21,9 @@ namespace aslam {
       TransformationExpressionNode();
       virtual ~TransformationExpressionNode();
 
-      /// \brief Evaluate the rotation matrix.
-      Eigen::Matrix4d toTransformationMatrix();
-      
+      /// \brief Evaluate the transformation matrix.
+      Eigen::Matrix4d toTransformationMatrix() { return toTransformationMatrixImplementation(); }
+
       /// \brief Evaluate the Jacobians
       void evaluateJacobians(JacobianContainer & outJacobians) const;   
       template <typename DERIVED>
@@ -39,11 +39,9 @@ namespace aslam {
 
       virtual RotationExpression toRotationExpression(const boost::shared_ptr<TransformationExpressionNode> & thisShared) const;
       virtual EuclideanExpression toEuclideanExpression(const boost::shared_ptr<TransformationExpressionNode> & thisShared) const;
-      
+
       friend class TransformationExpression;
     };
-
-    
 
     /**
      * \class TransformationExpressionNodeMultiply
@@ -58,7 +56,8 @@ namespace aslam {
       typedef Eigen::Matrix<double,6,6> Matrix6d;
 
       TransformationExpressionNodeMultiply(boost::shared_ptr<TransformationExpressionNode> lhs, 
-				     boost::shared_ptr<TransformationExpressionNode> rhs);
+                                           boost::shared_ptr<TransformationExpressionNode> rhs);
+
       ~TransformationExpressionNodeMultiply() override;
 
     private:
