@@ -4,7 +4,22 @@ project(aslam_backend_tutorial)
 find_package(catkin_simple REQUIRED)
 catkin_simple()
 
-add_definitions(-std=c++0x)
+find_package(Boost REQUIRED COMPONENTS system) 
+include_directories(${Boost_INCLUDE_DIRS})
+
+# enable warnings
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra")
+if("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
+  # deprecated-register warnings are cause by old Eigen versions
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-deprecated-register")
+endif()
+
+# enable C++11 support
+if(CMAKE_VERSION VERSION_LESS "3.1")
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
+else()
+  set(CMAKE_CXX_STANDARD 11)
+endif()
 
 cs_add_library(${PROJECT_NAME}
   src/ScalarDesignVariable.cpp
@@ -17,7 +32,6 @@ cs_add_library(${PROJECT_NAME}
 add_python_export_library(${PROJECT_NAME}_python python/${PROJECT_NAME}
   src/python_module.cpp
 )
-
 # Tell CMake to link against the project.
 target_link_libraries(${PROJECT_NAME}_python ${PROJECT_NAME})
 
@@ -26,16 +40,8 @@ target_link_libraries(${PROJECT_NAME}_python ${PROJECT_NAME})
 cs_add_executable( example
   src/example.cpp
 )
-
-find_package(Boost REQUIRED COMPONENTS system) 
-
-
 # Tell CMake to link against the project.
 target_link_libraries(example ${PROJECT_NAME} ${Boost_LIBRARIES})
-
-
-# Avoid clash with tr1::tuple: https://code.google.com/p/googletest/source/browse/trunk/README?r=589#257
-add_definitions(-DGTEST_USE_OWN_TR1_TUPLE=0)
 
 catkin_add_gtest(${PROJECT_NAME}_test
   test/test_main.cpp

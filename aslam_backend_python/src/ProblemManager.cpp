@@ -13,7 +13,10 @@
 using namespace boost::python;
 using namespace aslam::backend;
 
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wunused-local-typedefs"
 BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(evaluateError_overloads, evaluateError, 0, 1);
+#pragma GCC diagnostic pop
 
 void exportProblemManager()
 {

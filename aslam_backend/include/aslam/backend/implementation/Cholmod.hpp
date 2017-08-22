@@ -213,7 +213,7 @@ namespace aslam {
       _cholmod.supernodal = CHOLMOD_AUTO;
       cholmod_factor* factor = NULL;
       factor = CholmodIndexTraits<index_t>::analyze(J, &_cholmod);
-      SM_ASSERT_EQ(Exception, _cholmod.status, CHOLMOD_OK, "The symbolic cholesky factorization failed.");
+      SM_ASSERT_EQ(Exception, _cholmod.status, CHOLMOD_OK, "The symbolic Cholesky factorization failed.");
       SM_ASSERT_FALSE(Exception, factor == NULL, "cholmod_analyze returned a null factor");
       return factor;
     }

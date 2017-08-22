@@ -68,10 +68,14 @@ double evaluateError(boost::shared_ptr<OptimizationProblemBase> problem, std::si
   return pm.evaluateError(nThreads);
 }
 
+
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wunused-local-typedefs"
 BOOST_PYTHON_FUNCTION_OVERLOADS(computeGradientForErrorTerm_overloads, computeGradientForErrorTerm, 2, 4);
 BOOST_PYTHON_FUNCTION_OVERLOADS(computeGradientForScalarNonSquaredErrorTerm_overloads, computeGradientForScalarNonSquaredErrorTerm, 2, 3);
 BOOST_PYTHON_FUNCTION_OVERLOADS(computeGradient_overloads, computeGradient, 1, 5);
 BOOST_PYTHON_FUNCTION_OVERLOADS(evaluateError_overloads, evaluateError, 1, 2);
+#pragma GCC diagnostic pop
 
 void exportOptimizationProblem()
 {

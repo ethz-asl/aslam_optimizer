@@ -1,12 +1,15 @@
 #ifndef ASLAM_BACKEND_COMPRESSED_COLUMN_MATRIX_HPP
 #define ASLAM_BACKEND_COMPRESSED_COLUMN_MATRIX_HPP
 
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wunknown-pragmas"
+#pragma clang diagnostic ignored "-Wreturn-type-c-linkage"
 #include <cs.h>
+#pragma GCC diagnostic pop
+
 #include "Cholmod.hpp"
 #include <vector>
 #include <Eigen/Core>
-//#define EIGEN_YES_I_KNOW_SPARSE_MODULE_IS_NOT_STABLE_YET
-//#include <Eigen/Sparse>
 #include <sm/assert_macros.hpp>
 #include <sm/string_routines.hpp>
 #include <boost/cstdint.hpp>
