@@ -38,11 +38,12 @@ TEST(MatrixStackTestSuites, testMatrixStack)
       EXPECT_ANY_THROW(stack.push(M));
     }
 
-    // Test push scalar and pop guard
+    // Test push scalar, alignment and pop guard
     {
       SCOPED_TRACE("Testing push() with scalar");
       const double scalar = 0.1;
       const auto pg = stack.pushWithGuard(scalar);
+      EXPECT_EQ(0, reinterpret_cast<size_t>(stack.top().data()) % MatrixStack::DataAlignment);
       sm::eigen::assertEqual(scalar*Eigen::MatrixXd::Identity(numRows, numRows), stack.top(), SM_SOURCE_FILE_POS, "Testing push() with scalar");
     }
 
