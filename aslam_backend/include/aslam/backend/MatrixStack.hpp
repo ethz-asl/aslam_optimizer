@@ -33,6 +33,8 @@ namespace backend {
   class MatrixStack
   {
    public:
+    static constexpr size_t DataAlignment = 16;
+
     typedef double Scalar;
     template <int Rows, int Cols>
     using Map = Eigen::Map<Eigen::Matrix<Scalar, Rows, Cols>, Eigen::Aligned>;
@@ -237,8 +239,40 @@ namespace backend {
     }
 
    private:
-    typedef Eigen::aligned_allocator< std::vector<Scalar> > AlignedAllocator;
-    std::vector<Scalar, AlignedAllocator> _data; /// \brief The data of the matrices
+    struct alignas(DataAlignment) aligned_scalar {
+      Scalar s;
+    };
+    class aligned_double_allocator : public std::allocator<Scalar>
+    {
+     public:
+      typedef Scalar value_type;
+      typedef std::size_t size_type;
+      typedef std::ptrdiff_t difference_type;
+      typedef value_type* pointer;
+      typedef const value_type* const_pointer;
+      typedef value_type& reference;
+      typedef const value_type& const_reference;
+      //
+      //       template<class U>
+      //       struct rebind
+      //       {
+      //         typedef aligned_allocator<U> other;
+      //       };
+      //
+      using std::allocator<double>::allocator;
+
+      pointer allocate(size_type num, const void* /*hint*/ = 0)
+      {
+        return reinterpret_cast<pointer>( new aligned_scalar[num]);
+      }
+
+      void deallocate(pointer p, size_type /*num*/)
+      {
+        delete[] reinterpret_cast<aligned_scalar*>(p);
+      }
+    };
+
+    std::vector<Scalar, aligned_double_allocator> _data; /// \brief The data of the matrices
     std::vector<Header> _headers; /// \brief Metadata for the matrix entries
 
     uint16_t _numRows; /// \brief Number of rows
