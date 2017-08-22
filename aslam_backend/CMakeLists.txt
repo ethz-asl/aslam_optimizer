@@ -5,11 +5,23 @@ find_package(catkin_simple REQUIRED)
 catkin_simple(ALL_DEPS_REQUIRED)
 
 find_package(Boost REQUIRED COMPONENTS system thread)
+include_directories(${Boost_INCLUDE_DIRS})
 
-add_definitions( -std=c++0x )
+# enable warnings
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra -Wno-unknown-pragmas")
+if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
+  # deprecated-register warnings are cause by old Eigen versions
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-deprecated-register")
+endif()
+
+# enable C++11 support
+if(CMAKE_VERSION VERSION_LESS "3.1")
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
+else()
+  set(CMAKE_CXX_STANDARD 11)
+endif()
 
 # enable timing via cmake option -Daslam_backend_ENABLE_TIMING
-
 SET(aslam_backend_ENABLE_TIMING OFF CACHE BOOL "Enable sm::timing based profiling in aslam_backend")
 # cmake -Daslam_backend_ENABLE_TIMING=1 or catkin build -Daslam_backend_ENABLE_TIMING
 if (${PROJECT_NAME}_ENABLE_TIMING)
@@ -63,11 +75,8 @@ cs_add_library(${PROJECT_NAME}
   src/OptimizerCallbackManager.cpp
   src/LineSearchTrustRegionPolicy.cpp
 )
-
 target_link_libraries(${PROJECT_NAME} ${Boost_LIBRARIES} ${TBB_LIBRARIES})
 
-# Avoid clash with tr1::tuple: https://code.google.com/p/googletest/source/browse/trunk/README?r=589#257
-add_definitions(-DGTEST_USE_OWN_TR1_TUPLE=0)
 catkin_add_gtest(${PROJECT_NAME}_test
   test/test_main.cpp
   test/JacobianContainer.cpp

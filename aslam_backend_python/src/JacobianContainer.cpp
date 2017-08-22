@@ -32,7 +32,10 @@ void addContainerWrapper(JacobianContainerSparse<Eigen::Dynamic>& jc, const Jaco
     jc.add(rhs, &applyChainRule);
 }
 
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wunused-local-typedefs"
 BOOST_PYTHON_FUNCTION_OVERLOADS(JacobianContainerSparse_add_overloads, addContainerWrapper, 2, 3);
+#pragma GCC diagnostic pop
 
 void exportJacobianContainer()
 {

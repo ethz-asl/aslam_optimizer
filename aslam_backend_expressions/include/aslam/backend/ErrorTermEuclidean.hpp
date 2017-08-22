@@ -29,8 +29,8 @@ namespace aslam {
       // http://eigen.tuxfamily.org/dox-devel/TopicStructHavingEigenMembers.html
       EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
-      ErrorTermEuclidean(const aslam::backend::EuclideanExpression& t, const Eigen::Vector3d& prior, const Eigen::Matrix<double,3,3>& N, int debug=0);
-      ErrorTermEuclidean(const aslam::backend::EuclideanExpression& t, const Eigen::Vector3d& prior, double weight, int debug=0);
+      ErrorTermEuclidean(const aslam::backend::EuclideanExpression& t, const Eigen::Vector3d& prior, const Eigen::Matrix<double,3,3>& N);
+      ErrorTermEuclidean(const aslam::backend::EuclideanExpression& t, const Eigen::Vector3d& prior, double weight);
 
       ~ErrorTermEuclidean() override;
 
@@ -44,9 +44,8 @@ namespace aslam {
       void evaluateJacobiansImplementation(JacobianContainer & J) override;
 
     private:
-      aslam::backend::EuclideanExpression _t;
       Eigen::Vector3d _prior;
-      int _debug;
+      aslam::backend::EuclideanExpression _t;
     };
 
   } // namespace backend

@@ -45,6 +45,7 @@ namespace aslam {
       typedef typename VectorExpressionNode<D>::differential_t differential_t;
 
       ConstantVectorExpressionNode(int rows = D, int cols = 1) {
+        static_cast<void>(rows); static_cast<void>(cols); // necessary to prevent warnings for release build;
         if (D != Eigen::Dynamic){
           SM_ASSERT_EQ_DBG(std::runtime_error, rows, D, "dynamic size has to equal static size");
         }

@@ -1,17 +1,25 @@
 cmake_minimum_required(VERSION 2.8.3)
 project(aslam_backend_expressions)
 
-include_directories(include ${catkin_INCLUDE_DIRS})
-
-SET(CMAKE_CXX_FLAGS "-std=c++0x")
-
 find_package(catkin_simple REQUIRED)
-
 catkin_simple(ALL_DEPS_REQUIRED)
 
-include_directories(${EIGEN_INCLUDE_DIRS})
-
 find_package(Boost REQUIRED COMPONENTS system program_options)
+include_directories(${Boost_INCLUDE_DIRS})
+
+# enable warnings
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra")
+if("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
+  # deprecated-register warnings are cause by old Eigen versions
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-deprecated-register")
+endif()
+
+# enable C++11 support
+if(CMAKE_VERSION VERSION_LESS "3.1")
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
+else()
+  set(CMAKE_CXX_STANDARD 11)
+endif()
 
 cs_add_library(${PROJECT_NAME}
   src/RotationExpression.cpp 
@@ -52,8 +60,7 @@ cs_add_library(${PROJECT_NAME}
   src/MapTransformation.cpp
 
   src/KinematicChain.cpp
-  )
-
+)
 target_link_libraries(${PROJECT_NAME} ${Boost_LIBRARIES})
 
 cs_add_executable(${PROJECT_NAME}-profiling
@@ -83,10 +90,8 @@ catkin_add_gtest(${PROJECT_NAME}_test
   test/VectorExpressionTest.cpp 
   test/KinematicChain.cpp 
   )
-
 target_link_libraries(${PROJECT_NAME}_test ${PROJECT_NAME})
 
 cs_install()
-
 cs_export()
 

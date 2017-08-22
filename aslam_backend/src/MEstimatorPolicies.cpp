@@ -1,4 +1,6 @@
 #include <aslam/backend/MEstimatorPolicies.hpp>
+
+#define BOOST_MATH_DISABLE_FLOAT128
 #include <boost/math/distributions/chi_squared.hpp>
 
 #include <iomanip>
