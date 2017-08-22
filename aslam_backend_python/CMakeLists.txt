@@ -5,7 +5,7 @@ find_package(catkin_simple REQUIRED)
 catkin_simple()
 
 # enable warnings
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra -Wno-unused-local-typedef")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra -Wno-unknown-pragmas")
 
 # enable C++11 support
 if(CMAKE_VERSION VERSION_LESS "3.1")
