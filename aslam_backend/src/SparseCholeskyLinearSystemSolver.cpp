@@ -9,7 +9,11 @@ namespace aslam {
       // NO OPTIONS CURRENTLY IMPLEMENTED
       // USING C++11 would allow to do constructor delegation and more elegant code
     }
-    SparseCholeskyLinearSystemSolver::~SparseCholeskyLinearSystemSolver() {}
+    SparseCholeskyLinearSystemSolver::~SparseCholeskyLinearSystemSolver() {
+      if (_factor) {
+        _cholmod.free(_factor);
+      }
+    }
 
     void SparseCholeskyLinearSystemSolver::initMatrixStructureImplementation(const std::vector<DesignVariable*>& dvs, const std::vector<ErrorTerm*>& errors, bool useDiagonalConditioner)
     {
