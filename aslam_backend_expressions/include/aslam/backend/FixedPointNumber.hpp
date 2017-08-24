@@ -54,54 +54,57 @@ class FixedPointNumber{
   typedef Integer_ Integer;
   typedef typename internal::NextBiggerNumberTypeBySize<sizeof(Integer)>::type NextBiggerType;
 
-  inline constexpr static std::uintmax_t getDivider(){ return Divider; }
+  constexpr static std::uintmax_t getDivider(){ return Divider; }
 
+  struct Numerator {
+    Integer i;
+    constexpr Numerator(Integer i) : i(i) {}
+  };
 
-  inline FixedPointNumber() = default;
-  inline FixedPointNumber(const FixedPointNumber & other) = default;
-
-  inline FixedPointNumber(Integer p) : _p(p){}
-  inline FixedPointNumber(double const & other) : _p(other * getDivider()) {}
-
-  template <typename OtherInteger_, std::uintmax_t OtherDivider_>
-  inline explicit FixedPointNumber(FixedPointNumber<OtherInteger_, OtherDivider_> const & other) { _p = other._p * getDivider() / other.getDivider(); }
-
-  ~FixedPointNumber(){
+  FixedPointNumber() {
     static_assert(std::numeric_limits<Integer_>::is_integer, "only integral types are allowed as Integer_");
     static_assert(Divider != 0, "the Divider must be zero");
     static_assert((1.0/(double)Divider) * Divider == 1, "the Divider must be loss less convertible to double");
     static_assert((std::uintmax_t)((Integer)Divider) == Divider, "the Divider must be loss less convertible to the Integer_ type");
   }
 
-  inline operator double() const { return (long double) _p / getDivider(); }
-//  inline operator Integer() = delete; TODO find out : why does this disable conversions to double?
-//  inline operator Integer() const { return getNumerator(); }
-  inline Integer getNumerator() const { return _p; }
-  inline operator Integer() const { return getNumerator(); }
-  inline Integer getDenominator() const { return Integer(getDivider()); }
+  FixedPointNumber(const FixedPointNumber & other) = default;
+
+  FixedPointNumber(Integer p) = delete;
+  constexpr FixedPointNumber(Numerator p) : _num(p.i){}
+  constexpr FixedPointNumber(double const & other) : _num(other * getDivider()) {}
+
+  template <typename OtherInteger_, std::uintmax_t OtherDivider_>
+  explicit FixedPointNumber(FixedPointNumber<OtherInteger_, OtherDivider_> const & other) { _num = other._num * getDivider() / other.getDivider(); }
+
+  operator double() const { return (long double) _num / getDivider(); }
+//  operator Integer() = delete; TODO find out : why does this disable conversions to double?
+  Integer getNumerator() const { return _num; }
+  operator Integer() const { return getNumerator(); }
+  Integer getDenominator() const { return Integer(getDivider()); }
 
   FixedPointNumber operator - () const {
-    return FixedPointNumber((Integer)(-_p));
+    return FixedPointNumber(Numerator(-_num));
   }
 
   FixedPointNumber operator + (const FixedPointNumber & other) const {
-    return FixedPointNumber((Integer)(_p + other._p));
+    return FixedPointNumber(Numerator(_num + other._num));
   }
   FixedPointNumber & operator += (const FixedPointNumber & other) {
-    _p += other._p;
+    _num += other._num;
     return *this;
   }
 
   FixedPointNumber operator - (const FixedPointNumber & other) const {
-    return FixedPointNumber((Integer)(_p - other._p));
+    return FixedPointNumber(Numerator(_num - other._num));
   }
   FixedPointNumber & operator -= (const FixedPointNumber & other) {
-    _p -= other._p;
+    _num -= other._num;
     return *this;
   }
 
   FixedPointNumber operator * (const FixedPointNumber & other) const {
-    return FixedPointNumber((Integer)(((NextBiggerType)_p * (NextBiggerType)other._p) / (NextBiggerType)other.getDivider()));
+    return FixedPointNumber(Numerator(((NextBiggerType)_num * (NextBiggerType)other._num) / (NextBiggerType)other.getDivider()));
   }
   FixedPointNumber & operator *= (const FixedPointNumber & other) {
     *this = *this * other;
@@ -109,38 +112,40 @@ class FixedPointNumber{
   }
 
   FixedPointNumber operator / (const FixedPointNumber & other) const {
-    return FixedPointNumber((Integer)(((NextBiggerType)_p * (NextBiggerType)other.getDivider()) / (NextBiggerType)other._p));
+    return FixedPointNumber(Numerator(((NextBiggerType)_num * (NextBiggerType)other.getDivider()) / (NextBiggerType)other._num));
   }
   FixedPointNumber & operator /= (const FixedPointNumber & other) {
     *this = *this / other;
     return *this;
   }
 
-  inline bool operator == (const FixedPointNumber & other) const {
-    return _p == other._p;
+  bool operator == (const FixedPointNumber & other) const {
+    return _num == other._num;
   }
-  inline bool operator != (const FixedPointNumber & other) const {
-    return _p != other._p;
+  bool operator != (const FixedPointNumber & other) const {
+    return _num != other._num;
   }
-  inline bool operator < (const FixedPointNumber & other) const {
-    return _p < other._p;
+  bool operator < (const FixedPointNumber & other) const {
+    return _num < other._num;
   }
-  inline bool operator > (const FixedPointNumber & other) const {
-    return _p > other._p;
+  bool operator > (const FixedPointNumber & other) const {
+    return _num > other._num;
   }
-  inline bool operator <= (const FixedPointNumber & other) const {
-    return _p <= other._p;
+  bool operator <= (const FixedPointNumber & other) const {
+    return _num <= other._num;
   }
-  inline bool operator >= (const FixedPointNumber & other) const {
-    return _p >= other._p;
+  bool operator >= (const FixedPointNumber & other) const {
+    return _num >= other._num;
   }
 
   friend std::ostream & operator << (std::ostream & o, const FixedPointNumber & v){
     o << typename std::enable_if<(sizeof(v) > 0), char>::type('[') << v.getNumerator() << " / " << v.getDenominator() << ']';
     return o;
   }
+
+  constexpr static FixedPointNumber Zero() { return Numerator(0); }
  private:
-  Integer _p;
+  Integer _num;
   template<typename OtherInteger_, std::uintmax_t OtherDivider>
   friend class FixedPointNumber;
 };
