@@ -76,10 +76,11 @@ class FixedPointNumber{
 
   FixedPointNumber(const FixedPointNumber & other) = default;
 
-  AB_DEPRECATED("Use FixedPointNumber(Numerator num) instead of FixedPointNumber(Integer num). E.g. let FixedPointNumber<...>::Numerator(num) be automatically converted to FixedPointNumber<...>.")
+  AB_DEPRECATED("Use FixedPointNumber(Numerator num) instead of FixedPointNumber(Integer num). E.g. let FixedPointNumber<...>::Numerator(num) be automatically converted to FixedPointNumber<...> or use FixedPointNumber<...>::fromNumerator(num).")
   constexpr FixedPointNumber(Integer num) : _num(num){}
 
   constexpr FixedPointNumber(Numerator num) : _num(num.i){}
+  constexpr static FixedPointNumber fromNumerator(Integer num) { return FixedPointNumber(Numerator(num)); }
   constexpr FixedPointNumber(double const & other) : _num(other * getDivider()) {}
 
   template <typename OtherInteger_, std::uintmax_t OtherDivider_>
