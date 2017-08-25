@@ -6,6 +6,12 @@
 #include <type_traits>
 #include <iosfwd>
 
+#if __cplusplus >= 201402L
+#define AB_DEPRECATED(msg) [[deprecated(msg)]]
+#else
+#define AB_DEPRECATED(msg)
+#endif
+
 namespace aslam {
 namespace backend {
 
@@ -70,8 +76,10 @@ class FixedPointNumber{
 
   FixedPointNumber(const FixedPointNumber & other) = default;
 
-  FixedPointNumber(Integer p) = delete;
-  constexpr FixedPointNumber(Numerator p) : _num(p.i){}
+  AB_DEPRECATED("Use FixedPointNumber(Numerator num) instead of FixedPointNumber(Integer num). E.g. let FixedPointNumber<...>::Numerator(num) be automatically converted to FixedPointNumber<...>.")
+  constexpr FixedPointNumber(Integer num) : _num(num){}
+
+  constexpr FixedPointNumber(Numerator num) : _num(num.i){}
   constexpr FixedPointNumber(double const & other) : _num(other * getDivider()) {}
 
   template <typename OtherInteger_, std::uintmax_t OtherDivider_>
