@@ -169,28 +169,6 @@ namespace aslam {
       _rhs->evaluateJacobians(outJacobians.apply(-1.0));
     }
 
-    EuclideanExpressionNodeConstant::EuclideanExpressionNodeConstant(const Eigen::Vector3d & p) :
-      _p(p)
-    {
-    }
-
-    EuclideanExpressionNodeConstant::~EuclideanExpressionNodeConstant()
-    {
-    }
-
-    void EuclideanExpressionNodeConstant::getDesignVariablesImplementation(DesignVariable::set_t & /* designVariables */) const
-    {
-    }
-
-    Eigen::Vector3d EuclideanExpressionNodeConstant::evaluateImplementation() const
-    {
-      return _p;
-    }
-
-    void EuclideanExpressionNodeConstant::evaluateJacobiansImplementation(JacobianContainer & /* outJacobians */) const
-    {
-    }
-
     EuclideanExpressionNodeSubtractVector::EuclideanExpressionNodeSubtractVector(boost::shared_ptr<EuclideanExpressionNode> lhs, const Eigen::Vector3d & rhs) :
       _lhs(lhs), _rhs(rhs)
     {
