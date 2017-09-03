@@ -14,10 +14,6 @@ namespace aslam {
 
     {
     public:
-      EIGEN_MAKE_ALIGNED_OPERATOR_NEW
-      typedef Eigen::Matrix<double,6,6> Matrix6d;
-      typedef Eigen::Matrix<double,4,6> Matrix4x6d;
-
       TransformationExpressionNode();
       virtual ~TransformationExpressionNode();
 
@@ -25,7 +21,7 @@ namespace aslam {
       Eigen::Matrix4d toTransformationMatrix() { return toTransformationMatrixImplementation(); }
 
       /// \brief Evaluate the Jacobians
-      void evaluateJacobians(JacobianContainer & outJacobians) const;   
+      void evaluateJacobians(JacobianContainer & outJacobians) const;
       template <typename DERIVED>
       EIGEN_ALWAYS_INLINE void evaluateJacobians(JacobianContainer & outJacobians, const Eigen::MatrixBase<DERIVED> & applyChainRule) const {
         evaluateJacobians(outJacobians.apply(applyChainRule));
@@ -53,7 +49,6 @@ namespace aslam {
     {
     public:
       EIGEN_MAKE_ALIGNED_OPERATOR_NEW
-      typedef Eigen::Matrix<double,6,6> Matrix6d;
 
       TransformationExpressionNodeMultiply(boost::shared_ptr<TransformationExpressionNode> lhs, 
                                            boost::shared_ptr<TransformationExpressionNode> rhs);
@@ -82,7 +77,6 @@ namespace aslam {
     {
     public:
       EIGEN_MAKE_ALIGNED_OPERATOR_NEW
-      typedef Eigen::Matrix<double,6,6> Matrix6d;
 
       TransformationExpressionNodeInverse(boost::shared_ptr<TransformationExpressionNode> dvTransformation);
 
@@ -120,8 +114,6 @@ namespace aslam {
 
       Eigen::Matrix4d _T;
     };
-
-
 
   } // namespace backend
 } // namespace aslam

@@ -12,7 +12,6 @@ namespace aslam {
     class TransformationBasic : public TransformationExpressionNode
     {
     public:
-      typedef Eigen::Matrix<double, 6, 6> Matrix6d;
       TransformationBasic(RotationExpression C_0_1, EuclideanExpression t_0_1_0);
       ~TransformationBasic() override;
 
