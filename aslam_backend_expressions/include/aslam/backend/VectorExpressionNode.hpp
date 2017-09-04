@@ -2,6 +2,7 @@
 #define ASLAM_BACKEND_VECTOR_EXPRESSION_NODE_HPP
 #include <aslam/backend/JacobianContainer.hpp>
 #include <aslam/backend/Differential.hpp>
+#include <aslam/backend/ExpressionNodeVisitor.hpp>
 
 namespace aslam {
   namespace backend {
@@ -30,6 +31,8 @@ namespace aslam {
       void getDesignVariables(DesignVariable::set_t & designVariables) const;
 
       virtual int getSize() const { assert(D != Eigen::Dynamic); return D; }
+
+      virtual void accept(ExpressionNodeVisitor& visitor) { visitor.visit("V", this); }; //TODO make pure and complete nodes
     private:
       virtual vector_t evaluateImplementation() const = 0;
       virtual void evaluateJacobiansImplementation(JacobianContainer & outJacobians) const = 0;
@@ -55,6 +58,8 @@ namespace aslam {
 
       ~ConstantVectorExpressionNode() override = default;
       int getSize() const override { return value.rows(); }
+
+      void accept(ExpressionNodeVisitor& visitor) override;
      private:
       vector_t evaluateImplementation() const override { return value; }
       void evaluateJacobiansImplementation(JacobianContainer &) const override {}
@@ -64,7 +69,6 @@ namespace aslam {
     };
   } // namespace backend
 } // namespace aslam
-
 
 #include "implementation/VectorExpressionNode.hpp"
 

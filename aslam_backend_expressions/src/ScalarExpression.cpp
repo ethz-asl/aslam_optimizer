@@ -1,15 +1,33 @@
 #include <aslam/backend/ScalarExpression.hpp>
-#include <aslam/backend/ScalarExpressionNode.hpp>
+
 #include <sm/boost/null_deleter.hpp>
+
+#include <aslam/backend/ExpressionNodeVisitor.hpp>
+#include <aslam/backend/ScalarExpressionNode.hpp>
 
 namespace aslam {
 namespace backend {
 ScalarExpression::ScalarExpression() {
-
 }
 
 ScalarExpression::ScalarExpression(double value)
     : _root(new ScalarExpressionNodeConstant(value)) {
+}
+
+class ScalarExpressionNodeNamedConstant : public ScalarExpressionNodeConstant
+{
+ public:
+  ScalarExpressionNodeNamedConstant(const char *name, double s) : ScalarExpressionNodeConstant(s), _name(name){}
+  void accept(ExpressionNodeVisitor& visitor) override {
+    visitor.visit(_name.c_str(), this);
+  }
+ protected:
+  std::string _name;
+};
+
+ScalarExpression::ScalarExpression(const char * name, double value) :
+    _root(new ScalarExpressionNodeNamedConstant(name, value))
+{
 }
 
 ScalarExpression::ScalarExpression(ScalarExpressionNode * designVariable)
@@ -191,6 +209,10 @@ ScalarExpression powerExpression(const ScalarExpression& e, const int k) {
 ScalarExpression piecewiseExpression(const ScalarExpression& e1, const ScalarExpression& e2, std::function<bool()> useFirst) {
   boost::shared_ptr<ScalarExpressionNode> newRoot(new ScalarExpressionPiecewiseExpression(e1.root(), e2.root(), useFirst));
   return ScalarExpression(newRoot);
+}
+
+void ScalarExpression::accept(ExpressionNodeVisitor& visitor) const {
+  visitor.beAcceptedBy(_root);
 }
 
 

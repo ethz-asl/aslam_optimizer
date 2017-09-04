@@ -76,19 +76,9 @@ class CoordinateFrame {
     return pG;
   }
 
-  const EuclideanExpression & getVG() const {
-    if(pp && vG.isEmpty()){
-      vG = pp->getVG() + pp->getR_G_L() * v + pp->getOmegaG().cross(pp->getR_G_L() * p); //TODO have a caching variable for (pp->getR_G_L() * p)!
-    }
-    return vG;
-  }
+  const EuclideanExpression & getVG() const;
 
-  const EuclideanExpression & getAG() const {
-    if(pp && aG.isEmpty()){
-      aG = pp->getAG() + pp->getR_G_L() * a + pp->getOmegaG().cross(pp->getR_G_L() * v) + pp->getAlphaG().cross(pp->getR_G_L() * p) + pp->getOmegaG().cross(pp->getOmegaG().cross(pp->getR_G_L() * p));
-    }
-    return aG;
-  }
+  const EuclideanExpression& getAG() const;
 
   const RotationExpression & getR_P_L() const {
     return R_P_L;
@@ -117,6 +107,7 @@ class CoordinateFrame {
   EuclideanExpression p, v, a, omega, alpha;
   mutable EuclideanExpression pG, vG, aG, omegaG, alphaG;
 };
+
 
 } // namespace backend
 } // namespace aslam

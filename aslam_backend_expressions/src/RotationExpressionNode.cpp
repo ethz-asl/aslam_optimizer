@@ -1,3 +1,4 @@
+#include <aslam/backend/ExpressionNodeVisitor.hpp>
 #include <aslam/backend/RotationExpressionNode.hpp>
 
 namespace aslam {
@@ -13,6 +14,10 @@ namespace aslam {
     void RotationExpressionNode::getDesignVariables(DesignVariable::set_t & designVariables) const
     {
       getDesignVariablesImplementation(designVariables);
+    }
+
+    void RotationExpressionNode::accept(ExpressionNodeVisitor& visitor) {
+      visitor.visit("C", this);
     }
 
     /////////////////////////////////////////////////
@@ -126,4 +131,5 @@ namespace aslam {
 
   
   } // namespace backend
-} // namespace aslam
+}  // namespace aslam
+

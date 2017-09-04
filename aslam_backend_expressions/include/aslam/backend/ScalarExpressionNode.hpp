@@ -8,7 +8,7 @@
 
 namespace aslam {
   namespace backend {
-
+    class ExpressionNodeVisitor;
 
     /**
      * \class ScalarExpressionNode
@@ -17,7 +17,6 @@ namespace aslam {
     class ScalarExpressionNode
     {
     public:
-      EIGEN_MAKE_ALIGNED_OPERATOR_NEW
       typedef double value_t;
 
       ScalarExpressionNode();
@@ -42,6 +41,8 @@ namespace aslam {
       }
 
       void getDesignVariables(DesignVariable::set_t & designVariables) const;
+
+      virtual void accept(ExpressionNodeVisitor& visitor);  //TODO make pure and complete nodes
     protected:
       // These functions must be implemented by child classes.
       virtual double evaluateImplementation() const = 0;
@@ -53,11 +54,11 @@ namespace aslam {
       class ScalarExpressionNodeMultiply : public ScalarExpressionNode
       {
       public:
-          EIGEN_MAKE_ALIGNED_OPERATOR_NEW
-
           ScalarExpressionNodeMultiply(boost::shared_ptr<ScalarExpressionNode> lhs,
                                        boost::shared_ptr<ScalarExpressionNode> rhs);
           ~ScalarExpressionNodeMultiply() override;
+
+          void accept(ExpressionNodeVisitor& visitor) override;
       protected:
           // These functions must be implemented by child classes.
           inline double evaluateImplementation() const override;
@@ -66,17 +67,15 @@ namespace aslam {
 
           boost::shared_ptr<ScalarExpressionNode> _lhs;
           boost::shared_ptr<ScalarExpressionNode> _rhs;
-
     };
 
       class ScalarExpressionNodeDivide : public ScalarExpressionNode
       {
       public:
-          EIGEN_MAKE_ALIGNED_OPERATOR_NEW
-
           ScalarExpressionNodeDivide(boost::shared_ptr<ScalarExpressionNode> lhs,
                                        boost::shared_ptr<ScalarExpressionNode> rhs);
           ~ScalarExpressionNodeDivide() override;
+          void accept(ExpressionNodeVisitor& visitor) override;
       protected:
           // These functions must be implemented by child classes.
           inline double evaluateImplementation() const override;
@@ -91,11 +90,9 @@ namespace aslam {
     class ScalarExpressionNodeNegated : public ScalarExpressionNode
       {
       public:
-          EIGEN_MAKE_ALIGNED_OPERATOR_NEW
-
           ScalarExpressionNodeNegated(boost::shared_ptr<ScalarExpressionNode> rhs);
           ~ScalarExpressionNodeNegated() override;
-
+          void accept(ExpressionNodeVisitor& visitor) override;
        protected:
           // These functions must be implemented by child classes.
           inline double evaluateImplementation() const override;
@@ -108,13 +105,11 @@ namespace aslam {
       class ScalarExpressionNodeAdd : public ScalarExpressionNode
       {
       public:
-          EIGEN_MAKE_ALIGNED_OPERATOR_NEW
-
           ScalarExpressionNodeAdd(boost::shared_ptr<ScalarExpressionNode> lhs,
                                   boost::shared_ptr<ScalarExpressionNode> rhs,
                                   double multiplyRhs = 1.0);
           ~ScalarExpressionNodeAdd() override;
-
+          void accept(ExpressionNodeVisitor& visitor) override;
        protected:
           // These functions must be implemented by child classes.
           inline double evaluateImplementation() const override;
@@ -130,11 +125,9 @@ namespace aslam {
       class ScalarExpressionNodeConstant  : public ScalarExpressionNode
       {
       public:
-          EIGEN_MAKE_ALIGNED_OPERATOR_NEW
-
           ScalarExpressionNodeConstant(double s);
           ~ScalarExpressionNodeConstant() override;
-
+          void accept(ExpressionNodeVisitor& visitor) override;
       protected:
           // These functions must be implemented by child classes.
           double evaluateImplementation() const override{return _s;}
@@ -147,8 +140,6 @@ namespace aslam {
       class ScalarExpressionNodeSqrt : public ScalarExpressionNode
       {
        public:
-          EIGEN_MAKE_ALIGNED_OPERATOR_NEW
-
           ScalarExpressionNodeSqrt(boost::shared_ptr<ScalarExpressionNode> lhs);
           ~ScalarExpressionNodeSqrt() override;
 
@@ -164,8 +155,6 @@ namespace aslam {
       class ScalarExpressionNodeLog : public ScalarExpressionNode
       {
        public:
-          EIGEN_MAKE_ALIGNED_OPERATOR_NEW
-
           ScalarExpressionNodeLog(boost::shared_ptr<ScalarExpressionNode> lhs);
           ~ScalarExpressionNodeLog() override;
 
@@ -181,8 +170,6 @@ namespace aslam {
       class ScalarExpressionNodeExp : public ScalarExpressionNode
       {
        public:
-          EIGEN_MAKE_ALIGNED_OPERATOR_NEW
-
           ScalarExpressionNodeExp(boost::shared_ptr<ScalarExpressionNode> lhs);
           ~ScalarExpressionNodeExp() override;
 
@@ -198,8 +185,6 @@ namespace aslam {
       class ScalarExpressionNodeAtan : public ScalarExpressionNode
       {
        public:
-          EIGEN_MAKE_ALIGNED_OPERATOR_NEW
-
           ScalarExpressionNodeAtan(boost::shared_ptr<ScalarExpressionNode> lhs);
           ~ScalarExpressionNodeAtan() override;
 
@@ -215,8 +200,6 @@ namespace aslam {
       class ScalarExpressionNodeTanh : public ScalarExpressionNode
       {
        public:
-          EIGEN_MAKE_ALIGNED_OPERATOR_NEW
-
           ScalarExpressionNodeTanh(boost::shared_ptr<ScalarExpressionNode> lhs);
           ~ScalarExpressionNodeTanh() override;
 
@@ -232,8 +215,6 @@ namespace aslam {
       class ScalarExpressionNodeAtan2 : public ScalarExpressionNode
       {
        public:
-          EIGEN_MAKE_ALIGNED_OPERATOR_NEW
-
           ScalarExpressionNodeAtan2(boost::shared_ptr<ScalarExpressionNode> lhs, boost::shared_ptr<ScalarExpressionNode> rhs);
           ~ScalarExpressionNodeAtan2() override;
 
@@ -250,8 +231,6 @@ namespace aslam {
       class ScalarExpressionNodeAcos : public ScalarExpressionNode
       {
        public:
-          EIGEN_MAKE_ALIGNED_OPERATOR_NEW
-
           ScalarExpressionNodeAcos(boost::shared_ptr<ScalarExpressionNode> lhs);
           ~ScalarExpressionNodeAcos() override;
 
@@ -267,8 +246,6 @@ namespace aslam {
       class ScalarExpressionNodeAcosSquared : public ScalarExpressionNode
       {
        public:
-          EIGEN_MAKE_ALIGNED_OPERATOR_NEW
-
           ScalarExpressionNodeAcosSquared(boost::shared_ptr<ScalarExpressionNode> lhs);
           ~ScalarExpressionNodeAcosSquared() override;
 
@@ -284,8 +261,6 @@ namespace aslam {
       class ScalarExpressionNodeInverseSigmoid : public ScalarExpressionNode
       {
        public:
-          EIGEN_MAKE_ALIGNED_OPERATOR_NEW
-
           ScalarExpressionNodeInverseSigmoid(boost::shared_ptr<ScalarExpressionNode> lhs, const double height, const double scale, const double shift);
           ScalarExpressionNodeInverseSigmoid(boost::shared_ptr<ScalarExpressionNode> lhs);
           ~ScalarExpressionNodeInverseSigmoid() override;
@@ -324,8 +299,6 @@ namespace aslam {
       class ScalarExpressionPiecewiseExpression : public ScalarExpressionNode
       {
        public:
-          EIGEN_MAKE_ALIGNED_OPERATOR_NEW
-
           ScalarExpressionPiecewiseExpression(boost::shared_ptr<ScalarExpressionNode> e1, boost::shared_ptr<ScalarExpressionNode> e2, std::function<bool()> useFirst);
           ~ScalarExpressionPiecewiseExpression() override;
 
@@ -344,8 +317,6 @@ namespace aslam {
       class ScalarExpressionNodeFromVectorExpression : public ScalarExpressionNode
       {
       public:
-          EIGEN_MAKE_ALIGNED_OPERATOR_NEW
-
           ScalarExpressionNodeFromVectorExpression(boost::shared_ptr<VectorExpressionNode<VectorSize> > lhs) : _lhs(lhs){
             static_assert (ComponentIndex < VectorSize, "component index must be smaller than the vectors size");
           }

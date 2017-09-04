@@ -51,7 +51,7 @@ std::ostream& operator<<(std::ostream& out, const aslam::backend::OptimizerOptio
   out << "\tconvergenceDeltaError: " << options.convergenceDeltaError << std::endl;
   out << "\tmaxIterations: " << options.maxIterations << std::endl;
   out << "\tnumThreadsJacobian: " << options.numThreadsJacobian << std::endl;
-  out << "\tnumThreadsError: " << options.numThreadsError;
+  out << "\tnumThreadsError: " << options.numThreadsError << std::endl;
   return out;
 }
 

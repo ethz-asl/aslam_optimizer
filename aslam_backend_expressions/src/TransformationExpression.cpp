@@ -109,6 +109,9 @@ namespace aslam {
       return toTransformationMatrix();
     }
 
+    void TransformationExpression::accept(ExpressionNodeVisitor& visitor) const {
+      visitor.beAcceptedBy(_root);
+    }
   } // namespace backend
 }  // namespace aslam
 

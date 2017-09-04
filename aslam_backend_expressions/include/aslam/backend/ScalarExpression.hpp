@@ -14,6 +14,7 @@ namespace aslam {
     using std::log;
     using std::exp;
 
+    class ExpressionNodeVisitor;
     class ScalarExpressionNode;
     
     class ScalarExpression
@@ -24,7 +25,8 @@ namespace aslam {
       typedef double value_t;
       typedef ScalarExpressionNode node_t;
 
-      explicit ScalarExpression( double value );
+      explicit ScalarExpression(double value);
+      ScalarExpression(const char * name, double value);
       ScalarExpression(ScalarExpressionNode * designVariable);
       ScalarExpression(boost::shared_ptr<ScalarExpressionNode> designVariable);
       ~ScalarExpression();
@@ -62,6 +64,7 @@ namespace aslam {
       bool operator == (const double s) const { return this->toValue() == s; }
       bool operator != (const double s) const { return this->toValue() != s; }
 
+      void accept(ExpressionNodeVisitor& visitor) const;
     private:
       /// \todo make the default constructor private.
       ScalarExpression();

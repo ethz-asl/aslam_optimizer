@@ -45,6 +45,8 @@ namespace aslam {
       int getSize() const;
 
       bool isEmpty() const { return !_root; }
+
+      void accept(ExpressionNodeVisitor& visitor) const { visitor.beAcceptedBy(_root); }
     protected:
       boost::shared_ptr< VectorExpressionNode<D> > _root;
     };

@@ -10,27 +10,26 @@ namespace aslam {
   namespace backend {
     class EuclideanExpression;
     class RotationExpression;
-    class TransformationExpressionNode
+    class ExpressionNodeVisitor;
 
-    {
+    class TransformationExpressionNode {
     public:
-      EIGEN_MAKE_ALIGNED_OPERATOR_NEW
-      typedef Eigen::Matrix<double,6,6> Matrix6d;
-      typedef Eigen::Matrix<double,4,6> Matrix4x6d;
-
       TransformationExpressionNode();
       virtual ~TransformationExpressionNode();
 
       /// \brief Evaluate the transformation matrix.
+      Eigen::Matrix4d evaluate() { return toTransformationMatrixImplementation(); }
       Eigen::Matrix4d toTransformationMatrix() { return toTransformationMatrixImplementation(); }
 
       /// \brief Evaluate the Jacobians
-      void evaluateJacobians(JacobianContainer & outJacobians) const;   
+      void evaluateJacobians(JacobianContainer & outJacobians) const;
       template <typename DERIVED>
       EIGEN_ALWAYS_INLINE void evaluateJacobians(JacobianContainer & outJacobians, const Eigen::MatrixBase<DERIVED> & applyChainRule) const {
         evaluateJacobians(outJacobians.apply(applyChainRule));
       }
       void getDesignVariables(DesignVariable::set_t & designVariables) const;
+
+      virtual void accept(ExpressionNodeVisitor& visitor); //TODO make pure and complete nodes
     protected:
       // These functions must be implemented by child classes.
       virtual Eigen::Matrix4d toTransformationMatrixImplementation() = 0;
@@ -53,13 +52,13 @@ namespace aslam {
     {
     public:
       EIGEN_MAKE_ALIGNED_OPERATOR_NEW
-      typedef Eigen::Matrix<double,6,6> Matrix6d;
 
       TransformationExpressionNodeMultiply(boost::shared_ptr<TransformationExpressionNode> lhs, 
                                            boost::shared_ptr<TransformationExpressionNode> rhs);
 
       ~TransformationExpressionNodeMultiply() override;
 
+      void accept(ExpressionNodeVisitor& visitor) override;
     private:
       Eigen::Matrix4d toTransformationMatrixImplementation() override;
       void evaluateJacobiansImplementation(JacobianContainer & outJacobians) const override;
@@ -82,12 +81,12 @@ namespace aslam {
     {
     public:
       EIGEN_MAKE_ALIGNED_OPERATOR_NEW
-      typedef Eigen::Matrix<double,6,6> Matrix6d;
 
       TransformationExpressionNodeInverse(boost::shared_ptr<TransformationExpressionNode> dvTransformation);
 
       ~TransformationExpressionNodeInverse() override;
 
+      void accept(ExpressionNodeVisitor& visitor) override;
     private:
       Eigen::Matrix4d toTransformationMatrixImplementation() override;
       void evaluateJacobiansImplementation(JacobianContainer & outJacobians) const override;
@@ -109,9 +108,10 @@ namespace aslam {
     public:
       EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
-        TransformationExpressionNodeConstant(const Eigen::Matrix4d & T);
-        ~TransformationExpressionNodeConstant() override;
+      TransformationExpressionNodeConstant(const Eigen::Matrix4d & T);
+      ~TransformationExpressionNodeConstant() override;
 
+      void accept(ExpressionNodeVisitor& visitor) override;
     private:
       Eigen::Matrix4d toTransformationMatrixImplementation() override;
       void evaluateJacobiansImplementation(JacobianContainer & outJacobians) const override;
@@ -120,8 +120,6 @@ namespace aslam {
 
       Eigen::Matrix4d _T;
     };
-
-
 
   } // namespace backend
 } // namespace aslam
