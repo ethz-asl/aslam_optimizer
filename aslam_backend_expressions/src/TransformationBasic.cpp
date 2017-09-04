@@ -76,5 +76,10 @@ namespace aslam {
       }
     }
 
+    void TransformationBasic::accept(ExpressionNodeVisitor& visitor) {
+      visitor.visit("TB", this, _rotation, _translation);
+    }
+
   } // namespace backend
-} // namespace aslam
+}  // namespace aslam
+

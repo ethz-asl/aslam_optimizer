@@ -17,6 +17,7 @@ namespace aslam {
 
       TransformationExpression toExpression();
 
+      void accept(ExpressionNodeVisitor& visitor) override;
     private:
       Eigen::Matrix4d toTransformationMatrixImplementation() override;
       void evaluateJacobiansImplementation(JacobianContainer & outJacobians) const override;

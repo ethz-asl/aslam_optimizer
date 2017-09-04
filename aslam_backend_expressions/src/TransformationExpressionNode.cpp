@@ -2,6 +2,7 @@
 #include <sm/kinematics/transformations.hpp>
 #include <aslam/backend/EuclideanExpression.hpp>
 #include <aslam/backend/EuclideanExpressionNode.hpp>
+#include <aslam/backend/ExpressionNodeVisitor.hpp>
 #include <aslam/backend/RotationExpression.hpp>
 #include <aslam/backend/RotationExpressionNode.hpp>
 #include <Eigen/Dense>
@@ -44,6 +45,9 @@ namespace aslam {
       _rhs->getDesignVariables(designVariables);
     }
 
+    void TransformationExpressionNode::accept(ExpressionNodeVisitor& visitor) {
+      visitor.visit("T", this);
+    }
 
     Eigen::Matrix4d TransformationExpressionNodeMultiply::toTransformationMatrixImplementation()
     {
@@ -102,5 +106,17 @@ namespace aslam {
     return boost::shared_ptr< EuclideanExpressionNode >( new EuclideanExpressionNodeTranslation( thisShared ) );
   }
 
+  void TransformationExpressionNodeMultiply::accept(ExpressionNodeVisitor& visitor) {
+    visitor.visit("*", this, _lhs, _rhs);
+  }
+
+  void TransformationExpressionNodeInverse::accept(ExpressionNodeVisitor& visitor) {
+    visitor.visit("^-1", this, _dvTransformation);
+  }
+
+  void TransformationExpressionNodeConstant::accept(ExpressionNodeVisitor& visitor) {
+    visitor.visit("#", this);
+  }
+
   } // namespace backend
-} // namespace aslam
+}  // namespace aslam

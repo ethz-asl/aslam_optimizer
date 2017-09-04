@@ -33,9 +33,10 @@ namespace aslam {
       EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
       EuclideanExpressionNodeMultiply(boost::shared_ptr<RotationExpressionNode> lhs, 
-				     boost::shared_ptr<EuclideanExpressionNode> rhs);
+                                      boost::shared_ptr<EuclideanExpressionNode> rhs);
       ~EuclideanExpressionNodeMultiply() override;
 
+      void accept(ExpressionNodeVisitor& visitor) override;
     private:
       Eigen::Vector3d evaluateImplementation() const override;
       void evaluateJacobiansImplementation(JacobianContainer & outJacobians) const override;
@@ -45,8 +46,6 @@ namespace aslam {
       mutable Eigen::Matrix3d _C_lhs;
       boost::shared_ptr<EuclideanExpressionNode> _rhs;
       mutable Eigen::Vector3d _p_rhs;
-
-
     };
 
     // ## New Class for Multiplication with a MatrixExpression
@@ -87,12 +86,11 @@ namespace aslam {
      class EuclideanExpressionNodeCrossEuclidean : public EuclideanExpressionNode
      {
      public:
-       EIGEN_MAKE_ALIGNED_OPERATOR_NEW
-
        EuclideanExpressionNodeCrossEuclidean(boost::shared_ptr<EuclideanExpressionNode> lhs,
            boost::shared_ptr<EuclideanExpressionNode> rhs);
        ~EuclideanExpressionNodeCrossEuclidean() override;
 
+       void accept(ExpressionNodeVisitor& visitor) override;
      private:
        Eigen::Vector3d evaluateImplementation() const override;
        void evaluateJacobiansImplementation(JacobianContainer & outJacobians) const override;
@@ -112,12 +110,11 @@ namespace aslam {
       class EuclideanExpressionNodeAddEuclidean : public EuclideanExpressionNode
       {
       public:
-        EIGEN_MAKE_ALIGNED_OPERATOR_NEW
-
         EuclideanExpressionNodeAddEuclidean(boost::shared_ptr<EuclideanExpressionNode> lhs,
             boost::shared_ptr<EuclideanExpressionNode> rhs);
         ~EuclideanExpressionNodeAddEuclidean() override;
 
+        void accept(ExpressionNodeVisitor& visitor) override;
       private:
         Eigen::Vector3d evaluateImplementation() const override;
         void evaluateJacobiansImplementation(JacobianContainer & outJacobians) const override;
@@ -137,8 +134,6 @@ namespace aslam {
      class EuclideanExpressionNodeSubtractEuclidean : public EuclideanExpressionNode
      {
      public:
-       EIGEN_MAKE_ALIGNED_OPERATOR_NEW
-
        EuclideanExpressionNodeSubtractEuclidean(boost::shared_ptr<EuclideanExpressionNode> lhs,
            boost::shared_ptr<EuclideanExpressionNode> rhs);
        ~EuclideanExpressionNodeSubtractEuclidean() override;

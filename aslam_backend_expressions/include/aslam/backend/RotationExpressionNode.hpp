@@ -10,7 +10,8 @@
 
 namespace aslam {
   namespace backend {
-    
+    class ExpressionNodeVisitor;
+
     /**
      * \class RotationExpressionNode
      * \brief The superclass of all classes representing rotations.
@@ -24,6 +25,7 @@ namespace aslam {
       virtual ~RotationExpressionNode();
 
       /// \brief Evaluate the rotation matrix.
+      EIGEN_ALWAYS_INLINE Eigen::Matrix3d evaluate() const { return toRotationMatrixImplementation(); }
       EIGEN_ALWAYS_INLINE Eigen::Matrix3d toRotationMatrix() const { return toRotationMatrixImplementation(); }
       
       /// \brief Evaluate the Jacobians
@@ -50,6 +52,8 @@ namespace aslam {
       }
 
       void getDesignVariables(DesignVariable::set_t & designVariables) const;
+
+      virtual void accept(ExpressionNodeVisitor& visitor);  //TODO make pure and complete nodes
     protected:        
       // These functions must be implemented by child classes.
       virtual Eigen::Matrix3d toRotationMatrixImplementation() const = 0;

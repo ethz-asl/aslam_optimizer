@@ -16,9 +16,9 @@ namespace aslam {
     class RotationExpression;
     class HomogeneousExpression;
     class EuclideanExpression;
+    class ExpressionNodeVisitor;
 
-    class TransformationExpression
-    {
+    class TransformationExpression {
     public:
       TransformationExpression();
       TransformationExpression(const RotationExpression & rotation, const EuclideanExpression & translation);
@@ -34,7 +34,7 @@ namespace aslam {
       sm::kinematics::Transformation toTransformation() const;
 
       RotationExpression toRotationExpression() const;
-      HomogeneousExpression toHomogeneousExpression() const;
+      HomogeneousExpression toHomogeneousExpression() const; //XXX Remove this missing function
       EuclideanExpression toEuclideanExpression() const;
 
       void evaluateJacobians(JacobianContainer & outJacobians) const;
@@ -52,6 +52,8 @@ namespace aslam {
       void getDesignVariables(DesignVariable::set_t & designVariables) const;
 
       boost::shared_ptr<TransformationExpressionNode> root(){ return _root; }
+
+      virtual void accept(ExpressionNodeVisitor& visitor) const;
     private:
       boost::shared_ptr<TransformationExpressionNode> _root;
     };

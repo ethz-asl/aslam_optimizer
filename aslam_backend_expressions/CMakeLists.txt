@@ -60,6 +60,9 @@ cs_add_library(${PROJECT_NAME}
   src/MapTransformation.cpp
 
   src/KinematicChain.cpp
+  
+  src/ExpressionNodeVisitor.cpp
+  src/ToTextNodeVisitor.cpp
 )
 target_link_libraries(${PROJECT_NAME} ${Boost_LIBRARIES})
 
@@ -89,7 +92,8 @@ catkin_add_gtest(${PROJECT_NAME}_test
   test/ErrorTest_L1Regularizer.cpp
   test/VectorExpressionTest.cpp 
   test/KinematicChain.cpp 
-  )
+  test/ExpressionNodeVisitorTest.cpp
+)
 target_link_libraries(${PROJECT_NAME}_test ${PROJECT_NAME})
 
 cs_install()

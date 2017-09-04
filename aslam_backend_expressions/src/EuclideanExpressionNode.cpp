@@ -352,5 +352,17 @@ namespace aslam {
       _rhs->evaluateJacobians(outJacobians, Eigen::Matrix3d(_lhs->evaluate().asDiagonal()));
     }
 
+    void EuclideanExpressionNodeMultiply::accept(ExpressionNodeVisitor& visitor) {
+      visitor.visit("*", this, _lhs, _rhs);
+    }
+
+    void EuclideanExpressionNodeCrossEuclidean::accept(ExpressionNodeVisitor& visitor) {
+      visitor.visit("x", this, _lhs, _rhs);
+    }
+
+    void EuclideanExpressionNodeAddEuclidean::accept(ExpressionNodeVisitor& visitor) {
+      visitor.visit("+", this, _lhs, _rhs);
+    }
   } // namespace backend
-} // namespace aslam
+}  // namespace aslam
+

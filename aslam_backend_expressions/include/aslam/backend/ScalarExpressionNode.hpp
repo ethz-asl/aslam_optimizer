@@ -8,7 +8,7 @@
 
 namespace aslam {
   namespace backend {
-
+    class ExpressionNodeVisitor;
 
     /**
      * \class ScalarExpressionNode
@@ -41,6 +41,8 @@ namespace aslam {
       }
 
       void getDesignVariables(DesignVariable::set_t & designVariables) const;
+
+      virtual void accept(ExpressionNodeVisitor& visitor);  //TODO make pure and complete nodes
     protected:
       // These functions must be implemented by child classes.
       virtual double evaluateImplementation() const = 0;
@@ -55,6 +57,8 @@ namespace aslam {
           ScalarExpressionNodeMultiply(boost::shared_ptr<ScalarExpressionNode> lhs,
                                        boost::shared_ptr<ScalarExpressionNode> rhs);
           ~ScalarExpressionNodeMultiply() override;
+
+          void accept(ExpressionNodeVisitor& visitor) override;
       protected:
           // These functions must be implemented by child classes.
           inline double evaluateImplementation() const override;
@@ -63,7 +67,6 @@ namespace aslam {
 
           boost::shared_ptr<ScalarExpressionNode> _lhs;
           boost::shared_ptr<ScalarExpressionNode> _rhs;
-
     };
 
       class ScalarExpressionNodeDivide : public ScalarExpressionNode
@@ -72,6 +75,7 @@ namespace aslam {
           ScalarExpressionNodeDivide(boost::shared_ptr<ScalarExpressionNode> lhs,
                                        boost::shared_ptr<ScalarExpressionNode> rhs);
           ~ScalarExpressionNodeDivide() override;
+          void accept(ExpressionNodeVisitor& visitor) override;
       protected:
           // These functions must be implemented by child classes.
           inline double evaluateImplementation() const override;
@@ -88,7 +92,7 @@ namespace aslam {
       public:
           ScalarExpressionNodeNegated(boost::shared_ptr<ScalarExpressionNode> rhs);
           ~ScalarExpressionNodeNegated() override;
-
+          void accept(ExpressionNodeVisitor& visitor) override;
        protected:
           // These functions must be implemented by child classes.
           inline double evaluateImplementation() const override;
@@ -105,7 +109,7 @@ namespace aslam {
                                   boost::shared_ptr<ScalarExpressionNode> rhs,
                                   double multiplyRhs = 1.0);
           ~ScalarExpressionNodeAdd() override;
-
+          void accept(ExpressionNodeVisitor& visitor) override;
        protected:
           // These functions must be implemented by child classes.
           inline double evaluateImplementation() const override;
@@ -123,7 +127,7 @@ namespace aslam {
       public:
           ScalarExpressionNodeConstant(double s);
           ~ScalarExpressionNodeConstant() override;
-
+          void accept(ExpressionNodeVisitor& visitor) override;
       protected:
           // These functions must be implemented by child classes.
           double evaluateImplementation() const override{return _s;}

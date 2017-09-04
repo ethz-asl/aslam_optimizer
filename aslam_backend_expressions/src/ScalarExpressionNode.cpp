@@ -1,3 +1,4 @@
+#include <aslam/backend/ExpressionNodeVisitor.hpp>
 #include <aslam/backend/ScalarExpressionNode.hpp>
 #include <sm/kinematics/rotations.hpp>
 
@@ -19,7 +20,9 @@ namespace aslam {
             getDesignVariablesImplementation(designVariables);
         }
 
-
+        void ScalarExpressionNode::accept(ExpressionNodeVisitor& visitor) {
+            visitor.visitAny(this);
+        }
           
         ScalarExpressionNodeMultiply::ScalarExpressionNodeMultiply(boost::shared_ptr<ScalarExpressionNode> lhs,
                                                                    boost::shared_ptr<ScalarExpressionNode> rhs) :
@@ -289,5 +292,27 @@ namespace aslam {
         {
             _rhs->getDesignVariables(designVariables);
         }
+
+
+        void ScalarExpressionNodeMultiply::accept(ExpressionNodeVisitor& visitor) {
+          visitor.visit("*", this, _lhs, _rhs);
+        }
+
+        void ScalarExpressionNodeDivide::accept(ExpressionNodeVisitor& visitor) {
+          visitor.visit("/", this, _lhs, _rhs);
+        }
+
+        void ScalarExpressionNodeNegated::accept(ExpressionNodeVisitor& visitor) {
+          visitor.visit("-", this, _rhs);
+        }
+
+        void ScalarExpressionNodeAdd::accept(ExpressionNodeVisitor& visitor) {
+          visitor.visit("+", this, _lhs, _rhs);
+        }
+
+        void ScalarExpressionNodeConstant::accept(ExpressionNodeVisitor& visitor) {
+          visitor.visit("#", this);
+        }
     } // namespace backend
-} // namespace aslam
+}  // namespace aslam
+

@@ -22,5 +22,11 @@ void VectorExpressionNode<D>::getDesignVariables(DesignVariable::set_t & designV
   getDesignVariablesImplementation(designVariables);
 }
 
+template<int D>
+void ConstantVectorExpressionNode<D>::accept(ExpressionNodeVisitor& visitor) {
+  visitor.visit("#", this);
+}
+
+
 }  // namespace backend
 }  // namespace aslam
