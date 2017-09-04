@@ -1,8 +1,3 @@
-/** KinematicChain.cpp
- *  Created on: Oct 7, 2014
- *      Author: hannes
- */
-
 #include <Eigen/Geometry>
 #include <sm/eigen/gtest.hpp>
 #include <sm/eigen/NumericalDiff.hpp>
@@ -125,4 +120,26 @@ TEST(KinematicChainTestSuites, testTheoreticallyTwoFrames) {
 //  CoordinateFrame
 //    C, B(C), A(B);
 
+}
+
+TEST(KinematicChainTestSuites, testTheoreticallyThreeFrames) {
+  {
+    CoordinateFrame A(Identity, Zero, Z, Zero, Zero, Zero);
+    CoordinateFrame B(A, Identity, X, (-Z).eval(), Zero, Zero, Zero);
+    CoordinateFrame C(B, Identity, (-Y).eval(), Zero, Zero, Zero, Zero);
+    std::string msg = "Testing global acceleration with two complementary rotations";
+
+    sm::eigen::assertEqual(B.getAG().toValue(),(-X).eval(), SM_SOURCE_FILE_POS, msg);
+    sm::eigen::assertEqual(C.getAG().toValue(), (-X).eval(), SM_SOURCE_FILE_POS, msg);
+  }
+
+  {
+    CoordinateFrame A(Identity, Zero, Z, Zero, Zero, Zero);
+    CoordinateFrame B(A, Identity, X, Zero, Zero, Zero, Zero);
+    CoordinateFrame C(B, Identity, X, Zero, Zero, Zero, Zero);
+    std::string msg = "Testing global acceleration with fixed second";
+
+    sm::eigen::assertEqual(B.getAG().toValue(),(-X).eval(), SM_SOURCE_FILE_POS, msg);
+    sm::eigen::assertEqual(C.getAG().toValue(), (X * -2).eval(), SM_SOURCE_FILE_POS, msg);
+  }
 }
