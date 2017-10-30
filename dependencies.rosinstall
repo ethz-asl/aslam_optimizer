@@ -5,8 +5,8 @@
     local-name: eigen_catkin
     uri: https://github.com/ethz-asl/eigen_catkin.git
 - git:
-    local-name: Schweizer-Messer
-    uri: https://github.com/ethz-asl/Schweizer-Messer.git
+    local-name: schweizer_messer
+    uri: https://github.com/ethz-asl/schweizer_messer.git
 - git:
     local-name: asl_cmake_modules
     uri: https://github.com/ethz-asl/asl_cmake_modules.git
