@@ -36,8 +36,10 @@ namespace backend {
     static constexpr size_t DataAlignment =
 #ifdef EIGEN_DEFAULT_ALIGN_BYTES
         EIGEN_DEFAULT_ALIGN_BYTES;
-#else
+#elif defined EIGEN_MAX_ALIGN_BYTES
         EIGEN_MAX_ALIGN_BYTES; // for older Eigen versions
+#else
+        16; // for even older Eigen versions
 #endif
 
     typedef double Scalar;
