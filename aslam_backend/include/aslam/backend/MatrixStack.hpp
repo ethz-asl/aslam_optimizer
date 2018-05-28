@@ -33,7 +33,14 @@ namespace backend {
   class MatrixStack
   {
    public:
-    static constexpr size_t DataAlignment = 16;
+    static constexpr size_t DataAlignment =
+#ifdef EIGEN_DEFAULT_ALIGN_BYTES
+        EIGEN_DEFAULT_ALIGN_BYTES;
+#elif defined EIGEN_MAX_ALIGN_BYTES
+        EIGEN_MAX_ALIGN_BYTES; // for older Eigen versions
+#else
+        16; // for even older Eigen versions
+#endif
 
     typedef double Scalar;
     template <int Rows, int Cols>
@@ -196,7 +203,7 @@ namespace backend {
     /// \brief Allocates memory and metadata for an element of size \p _numRows x \p cols.
     void allocate(const int cols)
     {
-      static constexpr int align = 16/sizeof(Scalar);
+      static constexpr int align = DataAlignment/sizeof(Scalar);
       std::size_t start = this->numElements();
       if (start % align != 0) // manual memory alignment
         start += align - start % align;
@@ -212,7 +219,7 @@ namespace backend {
       _dataSize = newSize;
       _headers.emplace_back(cols, start);
 
-      SM_ASSERT_TRUE_DBG(Exception, (uintptr_t)(&(_data[_headers.back().dataIndex])) % 16 == 0, "Memory is not properly aligned");
+      SM_ASSERT_TRUE_DBG(Exception, (uintptr_t)(&(_data[_headers.back().dataIndex])) % DataAlignment == 0, "Memory is not properly aligned");
     }
 
     /// \brief Const getter for the \p i-th matrix in the stack
@@ -239,40 +246,7 @@ namespace backend {
     }
 
    private:
-    struct alignas(DataAlignment) aligned_scalar {
-      Scalar s;
-    };
-    class aligned_double_allocator : public std::allocator<Scalar>
-    {
-     public:
-      typedef Scalar value_type;
-      typedef std::size_t size_type;
-      typedef std::ptrdiff_t difference_type;
-      typedef value_type* pointer;
-      typedef const value_type* const_pointer;
-      typedef value_type& reference;
-      typedef const value_type& const_reference;
-      //
-      //       template<class U>
-      //       struct rebind
-      //       {
-      //         typedef aligned_allocator<U> other;
-      //       };
-      //
-      using std::allocator<double>::allocator;
-
-      pointer allocate(size_type num, const void* /*hint*/ = 0)
-      {
-        return reinterpret_cast<pointer>( new aligned_scalar[num]);
-      }
-
-      void deallocate(pointer p, size_type /*num*/)
-      {
-        delete[] reinterpret_cast<aligned_scalar*>(p);
-      }
-    };
-
-    std::vector<Scalar, aligned_double_allocator> _data; /// \brief The data of the matrices
+    std::vector<Scalar, Eigen::aligned_allocator<Scalar>> _data; /// \brief The data of the matrices
     std::vector<Header> _headers; /// \brief Metadata for the matrix entries
 
     uint16_t _numRows; /// \brief Number of rows
