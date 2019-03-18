@@ -77,6 +77,7 @@ cs_add_library(${PROJECT_NAME}
 )
 target_link_libraries(${PROJECT_NAME} ${Boost_LIBRARIES} ${TBB_LIBRARIES})
 
+if(CATKIN_ENABLE_TESTING)
 catkin_add_gtest(${PROJECT_NAME}_test
   test/test_main.cpp
   test/JacobianContainer.cpp
@@ -101,6 +102,7 @@ catkin_add_gtest(${PROJECT_NAME}_test
   test/MatrixStackTest.cpp
 )
 target_link_libraries(${PROJECT_NAME}_test ${PROJECT_NAME})
+endif()
 
 cs_install()
 cs_export()

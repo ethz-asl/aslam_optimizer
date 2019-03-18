@@ -71,9 +71,7 @@ cs_add_executable(${PROJECT_NAME}-profiling
 )
 target_link_libraries(${PROJECT_NAME}-profiling ${PROJECT_NAME} ${Boost_LIBRARIES})
 
-# Avoid clash with tr1::tuple: https://code.google.com/p/googletest/source/browse/trunk/README?r=589#257
-add_definitions(-DGTEST_USE_OWN_TR1_TUPLE=0)
-
+if(CATKIN_ENABLE_TESTING)
 catkin_add_gtest(${PROJECT_NAME}_test
   test/test_main.cpp
   test/RotationExpression.cpp
@@ -95,6 +93,7 @@ catkin_add_gtest(${PROJECT_NAME}_test
   test/ExpressionNodeVisitorTest.cpp
 )
 target_link_libraries(${PROJECT_NAME}_test ${PROJECT_NAME})
+endif()
 
 cs_install()
 cs_export()
