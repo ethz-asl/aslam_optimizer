@@ -153,6 +153,7 @@ void exportBackendExpressions()
     .def("toExpression", &RotationQuaternion::toExpression)
     .def("toRotationMatrix", &RotationQuaternion::toRotationMatrix)
     .def("getDesignVariables", &getDesignVariables<RotationQuaternion>)
+    .def("set", &RotationQuaternion::set)
     ;
 
   class_<EuclideanPoint, boost::shared_ptr<EuclideanPoint>, bases<DesignVariable> >("EuclideanPointDv", init<const Eigen::Vector3d>())
