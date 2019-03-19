@@ -160,6 +160,7 @@ void exportBackendExpressions()
       .def("toHomogeneousExpression", &EuclideanPoint::toHomogeneousExpression)
       .def("toEuclidean", &EuclideanPoint::toEuclidean, return_value_policy<copy_const_reference>())
       .def("getDesignVariables", &getDesignVariables<EuclideanPoint>)
+      .def("set", &EuclideanPoint::set)
      ;
 
   class_<HomogeneousPoint, boost::shared_ptr<HomogeneousPoint>, bases<DesignVariable> >("HomogeneousPointDv", init<const Eigen::Vector4d>())
