@@ -78,32 +78,33 @@ cs_add_library(${PROJECT_NAME}
 target_link_libraries(${PROJECT_NAME} ${Boost_LIBRARIES} ${TBB_LIBRARIES})
 
 if(CATKIN_ENABLE_TESTING)
-catkin_add_gtest(${PROJECT_NAME}_test
-  test/test_main.cpp
-  test/JacobianContainer.cpp
-  test/test_sparse_matrix_functions.cpp
-  test/TestProblemManager.cpp
-  test/TestLineSearch.cpp
-  test/TestOptimizerBase.cpp
-  test/TestOptimizer.cpp
-  test/TestOptimizer2.cpp
-  test/TestOptimizerRprop.cpp
-  test/TestOptimizerBFGS.cpp
-  test/TestSamplerMcmc.cpp
-  test/CallbackTest.cpp
-  test/TestOptimizationProblem.cpp
-  test/CompressedColumnMatrixTest.cpp
-  test/MatrixTestHarness.cpp
-  test/DenseMatrixTest.cpp
-  test/SparseMatrixTest.cpp
-  test/LinearSolverTests.cpp
-  test/ErrorTermTests.cpp
-  test/ProbDataAssocPolicyTest.cpp
-  test/MatrixStackTest.cpp
-)
-target_link_libraries(${PROJECT_NAME}_test ${PROJECT_NAME})
+  catkin_add_gtest(${PROJECT_NAME}_test
+    test/test_main.cpp
+    test/JacobianContainer.cpp
+    test/test_sparse_matrix_functions.cpp
+    test/TestProblemManager.cpp
+    test/TestLineSearch.cpp
+    test/TestOptimizerBase.cpp
+    test/TestOptimizer.cpp
+    test/TestOptimizer2.cpp
+    test/TestOptimizerRprop.cpp
+    test/TestOptimizerBFGS.cpp
+    test/TestSamplerMcmc.cpp
+    test/CallbackTest.cpp
+    test/TestOptimizationProblem.cpp
+    test/CompressedColumnMatrixTest.cpp
+    test/MatrixTestHarness.cpp
+    test/DenseMatrixTest.cpp
+    test/SparseMatrixTest.cpp
+    test/LinearSolverTests.cpp
+    test/ErrorTermTests.cpp
+    test/ProbDataAssocPolicyTest.cpp
+    test/MatrixStackTest.cpp
+  )
+  if(TARGET ${PROJECT_NAME}_test)
+    target_link_libraries(${PROJECT_NAME}_test ${PROJECT_NAME})
+  endif()
 endif()
 
 cs_install()
 cs_export()
-

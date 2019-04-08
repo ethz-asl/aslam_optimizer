@@ -72,27 +72,29 @@ cs_add_executable(${PROJECT_NAME}-profiling
 target_link_libraries(${PROJECT_NAME}-profiling ${PROJECT_NAME} ${Boost_LIBRARIES})
 
 if(CATKIN_ENABLE_TESTING)
-catkin_add_gtest(${PROJECT_NAME}_test
-  test/test_main.cpp
-  test/RotationExpression.cpp
-  test/HomogeneousExpression.cpp
-  test/MatrixAndEuclideanExpression.cpp
-  test/ExpressionErrorTermTest.cpp
-  test/FixedPointNumberTest.cpp
-  test/GenericScalarExpressionTest.cpp
-  test/GenericMatrixExpression.cpp
-  test/QuaternionExpression.cpp
-  test/CacheExpression.cpp
-  test/ScalarExpression.cpp
-  test/ExpressionUtils.cpp
-  test/ErrorTest_Transformation.cpp
-  test/ErrorTest_Euclidean.cpp
-  test/ErrorTest_L1Regularizer.cpp
-  test/VectorExpressionTest.cpp 
-  test/KinematicChain.cpp 
-  test/ExpressionNodeVisitorTest.cpp
-)
-target_link_libraries(${PROJECT_NAME}_test ${PROJECT_NAME})
+  catkin_add_gtest(${PROJECT_NAME}_test
+    test/test_main.cpp
+    test/RotationExpression.cpp
+    test/HomogeneousExpression.cpp
+    test/MatrixAndEuclideanExpression.cpp
+    test/ExpressionErrorTermTest.cpp
+    test/FixedPointNumberTest.cpp
+    test/GenericScalarExpressionTest.cpp
+    test/GenericMatrixExpression.cpp
+    test/QuaternionExpression.cpp
+    test/CacheExpression.cpp
+    test/ScalarExpression.cpp
+    test/ExpressionUtils.cpp
+    test/ErrorTest_Transformation.cpp
+    test/ErrorTest_Euclidean.cpp
+    test/ErrorTest_L1Regularizer.cpp
+    test/VectorExpressionTest.cpp
+    test/KinematicChain.cpp
+    test/ExpressionNodeVisitorTest.cpp
+  )
+  if(TARGET ${PROJECT_NAME}_test)
+    target_link_libraries(${PROJECT_NAME}_test ${PROJECT_NAME})
+  endif()
 endif()
 
 cs_install()
