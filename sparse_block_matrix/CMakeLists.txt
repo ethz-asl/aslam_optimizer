@@ -21,12 +21,14 @@ cs_add_library(${PROJECT_NAME}
 )
 
 if(CATKIN_ENABLE_TESTING)
-catkin_add_gtest( ${PROJECT_NAME}_tests 
-  test/test_main.cpp
-  test/solver_tests.cpp
-  test/sparse_block_matrix_tests.cpp
-)
-target_link_libraries(${PROJECT_NAME}_tests ${PROJECT_NAME} ${TBB_LIBRARIES})
+  catkin_add_gtest( ${PROJECT_NAME}_tests
+    test/test_main.cpp
+    test/solver_tests.cpp
+    test/sparse_block_matrix_tests.cpp
+  )
+  if(TARGET ${PROJECT_NAME}_tests)
+    target_link_libraries(${PROJECT_NAME}_tests ${PROJECT_NAME} ${TBB_LIBRARIES})
+  endif()
 endif()
 
 cs_install()

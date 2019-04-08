@@ -43,9 +43,14 @@ cs_add_executable( example
 # Tell CMake to link against the project.
 target_link_libraries(example ${PROJECT_NAME} ${Boost_LIBRARIES})
 
-catkin_add_gtest(${PROJECT_NAME}_test
-  test/test_main.cpp
-  test/ErrorTests.cpp
-)
-# Tell CMake to link against the project.
-target_link_libraries(${PROJECT_NAME}_test ${PROJECT_NAME})
+
+if(CATKIN_ENABLE_TESTING)
+  catkin_add_gtest(${PROJECT_NAME}_test
+    test/test_main.cpp
+    test/ErrorTests.cpp
+  )
+  if(TARGET ${PROJECT_NAME}_test)
+    # Tell CMake to link against the project.
+    target_link_libraries(${PROJECT_NAME}_test ${PROJECT_NAME})
+  endif()
+endif()
