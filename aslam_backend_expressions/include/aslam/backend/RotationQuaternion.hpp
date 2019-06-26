@@ -9,7 +9,7 @@
 
 namespace aslam {
   namespace backend {
-    
+
     class RotationQuaternion : public RotationExpressionNode, public DesignVariable
     {
     public:
@@ -38,7 +38,10 @@ namespace aslam {
 
       const Eigen::Vector4d & getQuaternion(){ return _q; }
 
-      void set( const Eigen::Vector4d & q){ _q = q; _p_q = q; }
+      void set(const Eigen::Vector4d & q) {
+        _q = q; _p_q = q;
+        _C = sm::kinematics::quat2r(q);
+      }
     private:
       Eigen::Matrix3d toRotationMatrixImplementation() const override;
       void evaluateJacobiansImplementation(JacobianContainer & outJacobians) const override;
@@ -53,7 +56,7 @@ namespace aslam {
       Eigen::Vector4d _q;
       Eigen::Vector4d _p_q;
       Eigen::Matrix3d _C;
-      
+
     };
 
   } // namespace backend
