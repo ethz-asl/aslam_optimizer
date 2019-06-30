@@ -192,6 +192,7 @@ namespace aslam {
 
                 timeSolve.start();
                 bool solutionSuccess = _trustRegionPolicy->solveSystem(_status.error, previousIterationFailed, _options.numThreadsError, _dx);
+                _status.numJacobianEvaluations++;
                 SM_ASSERT_EQ(Exception, problemManager().numOptParameters(), size_t(_dx.size()), "_trustRegionPolicy->solveSystem yielded dx with wrong size!");
                 timeSolve.stop();
                 issueCallback<callback::event::LINEAR_SYSTEM_SOLVED>();
@@ -304,6 +305,7 @@ namespace aslam {
             {
               SM_ASSERT_TRUE(Exception, _solver.get() != NULL, "The solver is null");
               _status.error = _solver->evaluateError(_options.numThreadsError, useMEstimator, &_callbackManager);
+              _status.numErrorEvaluations++;
               _callbackManager.issueCallback(callback::event::COST_UPDATED{_status.error, _p_J});
               return _status.error;
             }
@@ -375,6 +377,7 @@ namespace aslam {
               evaluateError(false);
               solver_sp->setConstantConditioner(lambda);
               solver_sp->buildSystem(_options.numThreadsJacobian, false);
+              _status.numJacobianEvaluations ++;
               solver_sp->copyHessian(outH);
             }
 
