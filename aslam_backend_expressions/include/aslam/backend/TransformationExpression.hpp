@@ -34,7 +34,6 @@ namespace aslam {
       sm::kinematics::Transformation toTransformation() const;
 
       RotationExpression toRotationExpression() const;
-      HomogeneousExpression toHomogeneousExpression() const; //XXX Remove this missing function
       EuclideanExpression toEuclideanExpression() const;
 
       void evaluateJacobians(JacobianContainer & outJacobians) const;
