@@ -1,8 +1,6 @@
 #ifndef ASLAM_BACKEND_DIFFERENTIAL_HPP
 #define ASLAM_BACKEND_DIFFERENTIAL_HPP
 
-#include "BasisMatrixFunctor.hpp"
-
 namespace aslam {
 namespace backend {
 
@@ -17,10 +15,7 @@ class Differential {
   typedef TDomain domain_t;
   typedef TScalar scalar_t;
 
-  inline domain_t getDomainBasisVectorByIndex(Eigen::DenseIndex index) const {
-    static_assert(domain_t::RowsAtCompileTime != Eigen::Dynamic && domain_t::ColsAtCompileTime != Eigen::Dynamic, "dynamic dimension is not supported yet");
-    return domain_t::NullaryExpr(domain_t::RowsAtCompileTime, domain_t::ColsAtCompileTime, internal::BasisMatrixNullaryFunctor(index, index % domain_t::RowsAtCompileTime, index / domain_t::RowsAtCompileTime));
-  }
+  domain_t getDomainBasisVectorByIndex(Eigen::DenseIndex index) const;
 
   typedef Differential<TDomain, TScalar> self_t;
 
@@ -43,6 +38,20 @@ class Differential {
   virtual void convertIntoMatrix(const_map_t* chainRule, map_t result) const = 0;
 
 };
+
+template <typename TDomain, typename TScalar>
+inline typename aslam::backend::Differential<TDomain, TScalar>::domain_t
+Differential<TDomain, TScalar>::getDomainBasisVectorByIndex(
+    Eigen::DenseIndex index) const {
+  static_assert(
+      domain_t::RowsAtCompileTime != Eigen::Dynamic &&
+          domain_t::ColsAtCompileTime != Eigen::Dynamic,
+      "dynamic dimension is not supported yet");
+  domain_t ret = domain_t::Zero();
+  ret(index % domain_t::RowsAtCompileTime,
+      index / domain_t::RowsAtCompileTime) = 1;
+  return ret;
+}
 
 template<typename DIFFERENTIAL>
 JacobianContainerChainRuleApplied applyDifferentialToJacobianContainer(JacobianContainer& jc, const DIFFERENTIAL& diff, int domainDimension)
@@ -253,12 +262,12 @@ class ComposedDifferential : public Differential<TDomain, TScalar> {
   }
 
   virtual void convertIntoMatrix(typename base_t::const_map_t* chainRule, typename base_t::map_t result) const {
-    if (chainRule != nullptr) 
+    if (chainRule != nullptr)
     {
       SM_ASSERT_EQ_DBG(Exception, chainRule->rows(), result.rows(), "");
       result = (*chainRule) * internal::DifferentialCalculator<DERIVED>::calcJacobianByApplication(chainRule->cols(), result.cols(), getDerived());
-    } 
-    else 
+    }
+    else
     {
       result = internal::DifferentialCalculator<DERIVED>::calcJacobianByApplication(result.rows(), result.cols(), getDerived());
     }
