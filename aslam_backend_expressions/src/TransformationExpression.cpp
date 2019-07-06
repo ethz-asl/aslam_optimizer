@@ -63,7 +63,7 @@ namespace aslam {
       return RotationExpression();
     }
   }
-  // HomogeneousExpression toHomogeneousExpression() const;
+  
   EuclideanExpression TransformationExpression::toEuclideanExpression() const {
     if(_root){
       return _root->toEuclideanExpression(_root);
