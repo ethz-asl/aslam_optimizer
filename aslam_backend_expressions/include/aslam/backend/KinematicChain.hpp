@@ -43,7 +43,7 @@ class CoordinateFrame {
     initGlobalsWithoutParent();
   }
 
-  const boost::shared_ptr<const CoordinateFrame> getParent() {
+  const boost::shared_ptr<const CoordinateFrame> getParent() const {
     return pp;
   }
 

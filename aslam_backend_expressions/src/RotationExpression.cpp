@@ -9,7 +9,7 @@ namespace aslam {
 
 
     /// \brief the base case is to initialize an expression from a design variable.
-    RotationExpression::RotationExpression(RotationExpressionNode * rotationDesignVariable) 
+    RotationExpression::RotationExpression(RotationExpressionNode * rotationDesignVariable)
     {
       _root.reset(rotationDesignVariable,sm::null_deleter());
       SM_ASSERT_TRUE(Exception, _root.get() != NULL, "It is illegal to initialize a rotation expression with a null pointer");
@@ -66,10 +66,10 @@ namespace aslam {
       if(p.isEmpty())
         return EuclideanExpression();
       if(this->isEmpty())
-        return EuclideanExpression();
+        return p;
       boost::shared_ptr<EuclideanExpressionNode> newRoot( new EuclideanExpressionNodeMultiply(_root, p._root));
       return EuclideanExpression(newRoot);
-      
+
     }
 
     HomogeneousExpression RotationExpression::operator*(const HomogeneousExpression & /* p */) const
@@ -91,7 +91,7 @@ namespace aslam {
       if(!isEmpty())
         _root->getDesignVariables(designVariables);
     }
-    
+
     EuclideanExpression RotationExpression::toParameters(sm::kinematics::RotationalKinematics::Ptr rk) const {
       assert(!isEmpty());
       boost::shared_ptr<EuclideanExpressionNode> een( new EuclideanExpressionNodeRotationParameters(_root, rk));
