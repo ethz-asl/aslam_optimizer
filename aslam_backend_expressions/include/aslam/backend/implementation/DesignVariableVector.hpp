@@ -3,21 +3,21 @@ namespace aslam {
   namespace backend {
 
     template<int D>
-    DesignVariableVector<D>::DesignVariableVector(vector_t v) : _v(v), _p_v(v)
+    DesignVariableVector<D>::DesignVariableVector(const size_t dim)
     {
+      SM_ASSERT_GE(aslam::InvalidArgumentException, dim, 0, "For dynamically sized DesignVariableVector you must provide a initial dimension on construction");
+      _v.setZero(dim);
+      _p_v.setZero(dim);
+    }
 
+    template<int D>
+    DesignVariableVector<D>::DesignVariableVector(const vector_t& v) : _v(v), _p_v(v)
+    {
     }
 
     template<int D>
     DesignVariableVector<D>::~DesignVariableVector()
     {
-
-    }
-
-    template<int D>
-    const typename DesignVariableVector<D>::vector_t & DesignVariableVector<D>::value() const
-    {
-      return _v;
     }
 
     template<int D>
@@ -39,8 +39,8 @@ namespace aslam {
     void DesignVariableVector<D>::updateImplementation(const double * dp, int size)
     {
       static_cast<void>(size); // unused in non debug build
-      SM_ASSERT_EQ_DBG(aslam::InvalidArgumentException, size, D, "Update dimension doesn't match the state dimension");
-      Eigen::Map< const vector_t > dv(dp);
+      SM_ASSERT_EQ_DBG(aslam::InvalidArgumentException, size, getSize(), "Update dimension doesn't match the state dimension");
+      Eigen::Map< const vector_t > dv(dp, getSize());
       _p_v = _v;
       _v += dv;
     }
@@ -49,7 +49,7 @@ namespace aslam {
     template<int D>
     int DesignVariableVector<D>::minimalDimensionsImplementation() const
     {
-      return D;
+      return getSize();
     }
 
 
@@ -80,6 +80,7 @@ namespace aslam {
     template<int D>
     void DesignVariableVector<D>::setParametersImplementation(
         const Eigen::MatrixXd& value) {
+      SM_ASSERT_EQ(aslam::InvalidArgumentException, value.size(), getSize(), "Set dimension doesn't match the state dimension");
       _p_v = _v;
       _v = value;
     }
@@ -87,7 +88,7 @@ namespace aslam {
     template<int D>
     void DesignVariableVector<D>::minimalDifferenceImplementation(const Eigen::MatrixXd& xHat, Eigen::VectorXd& outDifference) const
     {
-    	SM_ASSERT_TRUE(aslam::Exception, (xHat.rows() == D)&&(xHat.cols() == 1), "Incompatible dimension of xHat.");
+    	SM_ASSERT_TRUE(aslam::Exception, (xHat.rows() == getSize())&&(xHat.cols() == 1), "Incompatible dimension of xHat.");
     	outDifference = _v - xHat;
     }
 
@@ -95,9 +96,8 @@ namespace aslam {
     void DesignVariableVector<D>::minimalDifferenceAndJacobianImplementation(const Eigen::MatrixXd& xHat, Eigen::VectorXd& outDifference,	Eigen::MatrixXd& outJacobian) const
     {
     	minimalDifferenceImplementation(xHat, outDifference);
-    	outJacobian.setIdentity(D,D);
+    	outJacobian.setIdentity(getSize(),getSize());
     }
-
 
   } // namespace backend
 } // namespace aslam

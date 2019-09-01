@@ -146,7 +146,7 @@ class ExpressionTester {
 
   void test(){
     if(_expectedNumberOfDesignVariables > 0)
-      ASSERT_EQ(_expectedNumberOfDesignVariables, _dvs.size());
+      ASSERT_EQ(static_cast<size_t>(_expectedNumberOfDesignVariables), _dvs.size());
     ExpressionJacobianTestTraits<TExpression>::testJacobian(*this);
   }
 
@@ -199,7 +199,7 @@ class ExpressionJacobianTestTraits {
     Eigen::MatrixXd Jest = ExpressionNumDiffTraits<TExpression>::numericallyCalcJacobian(expression, jacobianCols, expressionTester.getDesignVariables(), expressionTester.getEps());
 
     auto JccrM = expressionTester.getJacobian(Jccr);
-    
+
     sm::eigen::assertNear(Jest, JcM, expressionTester.getTolerance(), SM_SOURCE_FILE_POS, "Testing the Jacobian with finite differences");
     sm::eigen::assertEqual(JcM, JccrM, SM_SOURCE_FILE_POS, "Testing whether chaining identity changes nothing.");
 
