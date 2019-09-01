@@ -57,7 +57,7 @@ namespace aslam {
 
       /// \brief evaluate the Jacobians using finite differences.
       void evaluateJacobiansFiniteDifference(JacobianContainer & outJacobians);
-      
+
       virtual void getWeightedJacobians(JacobianContainer& outJc, bool useMEstimator) = 0;
 
       virtual void getWeightedError(Eigen::VectorXd& e, bool useMEstimator) const = 0;
@@ -223,7 +223,7 @@ namespace aslam {
       typedef Eigen::Matrix<double, Dimension, 1> error_t;
       typedef Eigen::Matrix<double, Dimension, Dimension> inverse_covariance_t;
 
-      ErrorTermFs();
+      ErrorTermFs(size_t dim = Dimension);
       ~ErrorTermFs() override;
 
 
