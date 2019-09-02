@@ -26,11 +26,11 @@ namespace aslam {
 
 
     template<int C>
-    ErrorTermFs<C>::ErrorTermFs() : 
+    ErrorTermFs<C>::ErrorTermFs(size_t dim) :
       _evalJacobianTimer("ErrorTerm: Evaluate Jacobian", true),
       _buildHessianTimer("ErrorTerm: Build Hessian", true)
     {
-      _sqrtInvR = inverse_covariance_t::Identity();
+      _sqrtInvR = inverse_covariance_t::Identity(dim, dim);
     }
 
     template<int C>
@@ -174,7 +174,7 @@ namespace aslam {
     }
 
     template<int C>
-    void ErrorTermFs<C>::getWeightedJacobians(JacobianContainer& outJc, bool useMEstimator) 
+    void ErrorTermFs<C>::getWeightedJacobians(JacobianContainer& outJc, bool useMEstimator)
     {
       evaluateWeightedJacobian(outJc, useMEstimator, _sqrtInvR);
     }
@@ -204,8 +204,8 @@ namespace aslam {
 
       JacobianContainerSparse<Dimension> J(C);
       evaluateJacobians(J);
-      
-      
+
+
       detail::ErrorTermFsFunctor<C> functor(*this);
       sm::eigen::NumericalDiff<detail::ErrorTermFsFunctor<C> >
         numdiff(functor, tolerance);

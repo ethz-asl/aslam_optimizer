@@ -17,9 +17,11 @@ namespace aslam {
 
         SM_DEFINE_EXCEPTION(Exception, std::runtime_error);
 
-      DesignVariableVector(vector_t v = vector_t::Zero());
+      DesignVariableVector(size_t dim = D);
+      DesignVariableVector(const vector_t& v);
       ~DesignVariableVector() override;
-      const vector_t & value() const;
+      const vector_t & value() const { return _v; }
+      int getSize() const override { return D != Eigen::Dynamic ? D : _v.size(); };
       VectorExpression<D> toExpression();
     protected:
       /// \brief Revert the last state update.
@@ -48,7 +50,7 @@ namespace aslam {
     private:
       vector_t _v;
       vector_t _p_v;
-      
+
     };
 
 

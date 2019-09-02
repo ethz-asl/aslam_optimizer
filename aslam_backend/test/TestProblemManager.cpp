@@ -55,9 +55,9 @@ TEST(OptimizationProblemTestSuite, testProblemManager)
     pm.initialize();
 
     ASSERT_TRUE(pm.isInitialized());
-    ASSERT_EQ(1, pm.numDesignVariables()); // only one active
-    ASSERT_EQ(2, pm.numOptParameters()); // one active two-dimensional
-    ASSERT_EQ(3, pm.numErrorTerms());
+    ASSERT_EQ(1u, pm.numDesignVariables()); // only one active
+    ASSERT_EQ(2u, pm.numOptParameters()); // one active two-dimensional
+    ASSERT_EQ(3u, pm.numErrorTerms());
 
     JacobianContainerSparse<> jc1(err1.dimension());
     err1.evaluateWeightedJacobians(jc1);
@@ -88,9 +88,9 @@ TEST(OptimizationProblemTestSuite, testProblemManager)
     // Now activate design variable 0
     dv0.setActive(true);
     pm.initialize();
-    ASSERT_EQ(2, pm.numDesignVariables());
-    ASSERT_EQ(4, pm.numOptParameters());
-    ASSERT_EQ(3, pm.numErrorTerms());
+    ASSERT_EQ(2u, pm.numDesignVariables());
+    ASSERT_EQ(4u, pm.numOptParameters());
+    ASSERT_EQ(3u, pm.numErrorTerms());
     grad = RowVectorType::Zero(pm.numOptParameters());
 
     // Compute expected gradient for squared error
