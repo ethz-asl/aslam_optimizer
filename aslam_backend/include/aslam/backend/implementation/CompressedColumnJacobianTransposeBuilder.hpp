@@ -1,4 +1,7 @@
 #include <aslam/backend/CompressedColumnJacobianTransposeBuilder.hpp>
+
+#include <future>
+
 #include <boost/thread.hpp>
 
 namespace aslam {
@@ -69,12 +72,19 @@ namespace aslam {
           indices[i + 1] = indices[i] + nJPerThread;
         // deal with the remainder.
         indices.back() = _jacobianPointers.size();
-        // Build a thread pool and evaluate the jacobians.
-        boost::thread_group threads;
+
+        //replace by std::async for performance
+        std::vector<std::future<void>> jobs;
+        jobs.reserve(nThreads);
         for (unsigned i = 0; i < nThreads; ++i) {
-          threads.create_thread(boost::bind(ptr, this, i, indices[i], indices[i + 1], useMEstimator));
+          jobs.push_back(std::async(
+              std::launch::async, [this, ptr, i, &indices, useMEstimator]() {
+                (this->*ptr)(i, indices[i], indices[i + 1], useMEstimator);
+              }));
         }
-        threads.join_all();
+        for (auto& j : jobs) {
+          j.get();
+        }
       }
     }
 

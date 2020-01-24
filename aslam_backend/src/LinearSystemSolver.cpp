@@ -1,4 +1,7 @@
 #include <aslam/backend/LinearSystemSolver.hpp>
+
+#include <future>
+
 #include <boost/thread.hpp>
 #include <boost/ref.hpp>
 
@@ -65,19 +68,19 @@ namespace aslam {
           indices[i + 1] = indices[i] + nJPerThread;
         // deal with the remainder.
         indices.back() = _errorTerms.size();
-        // Build a thread pool and evaluate the jacobians.
-        boost::thread_group threads;
-        std::vector<SafeJob> jobs(nThreads);
-        for (size_t i = 0; i < nThreads; ++i) {
-          jobs[i] = SafeJob(boost::bind(job, i, indices[i], indices[i + 1], useMEstimator));
-          threads.create_thread(boost::ref(jobs[i]));
+
+        //replace by std::async for performance
+        std::vector<std::future<void>> jobs;
+        jobs.reserve(nThreads);
+        for (unsigned i = 0; i < nThreads; ++i) {
+          jobs.push_back(std::async(
+              std::launch::async,
+              [job, i, &indices, useMEstimator]() {
+                job(i, indices[i], indices[i + 1], useMEstimator);
+              }));
         }
-        threads.join_all();
-        // Now go through and look for exceptions.
-        for (size_t i = 0; i < nThreads; ++i) {
-          if (jobs[i]._rval) {
-            throw jobs[i]._rval->_e;
-          }
+        for (auto& j : jobs) {
+          j.get();
         }
       }
     }
