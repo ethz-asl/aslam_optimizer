@@ -2,9 +2,6 @@
 
 #include <future>
 
-#include <boost/thread.hpp>
-#include <boost/ref.hpp>
-
 #include <aslam/backend/ErrorTerm.hpp>
 #include <aslam/backend/OptimizerCallbackManager.hpp>
 
