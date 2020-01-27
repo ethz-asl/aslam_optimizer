@@ -2,8 +2,6 @@
 
 #include <future>
 
-#include <boost/thread.hpp>
-
 namespace aslam {
   namespace backend {
 
