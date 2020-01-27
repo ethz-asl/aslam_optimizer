@@ -30,31 +30,6 @@ namespace aslam {
       }
     }
 
-    struct SafeJobReturnValue {
-      SafeJobReturnValue(const std::exception& e) : _e(e) {}
-
-      std::exception _e;
-    };
-
-    struct SafeJob {
-      boost::function<void()> _fn;
-      SafeJobReturnValue* _rval;
-      SafeJob() : _rval(NULL) {}
-      SafeJob(boost::function<void()> fn) : _fn(fn), _rval(NULL) {}
-      ~SafeJob() {
-        if (_rval) delete _rval;
-      }
-
-      void operator()() {
-        try {
-          _fn();
-        } catch (const std::exception& e) {
-          _rval = new SafeJobReturnValue(e);
-          std::cout << "Exception in thread block: " << e.what() << std::endl;
-        }
-      }
-    };
-
     void LinearSystemSolver::setupThreadedJob(boost::function<void(size_t, size_t, size_t, bool)> job, size_t nThreads, bool useMEstimator)
     {
       if (nThreads <= 1) {
@@ -69,7 +44,6 @@ namespace aslam {
         // deal with the remainder.
         indices.back() = _errorTerms.size();
 
-        //replace by std::async for performance
         std::vector<std::future<void>> jobs;
         jobs.reserve(nThreads);
         for (unsigned i = 0; i < nThreads; ++i) {

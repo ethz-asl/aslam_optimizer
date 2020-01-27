@@ -12,32 +12,6 @@ namespace aslam {
 namespace backend {
 namespace util {
 
-/// \brief The return value for a safe job
-struct SafeJobReturnValue {
-  SafeJobReturnValue(const std::exception& e) : _e(e) {}
-  std::exception _e;
-};
-
-/// \brief Functor running a job catching all exceptions
-struct SafeJob {
-  boost::function<void()> _fn;
-  SafeJobReturnValue* _rval;
-  SafeJob() : _rval(NULL) {}
-  SafeJob(boost::function<void()> fn) : _fn(fn), _rval(NULL) {}
-  ~SafeJob() {
-    if (_rval) delete _rval;
-  }
-
-  void operator()() {
-    try {
-      _fn();
-    } catch (const std::exception& e) {
-      _rval = new SafeJobReturnValue(e);
-      SM_FATAL_STREAM("Exception in thread block: " << e.what());
-    }
-  }
-};
-
 void runThreadedJob(boost::function<void(size_t, size_t, size_t)> job, size_t rangeLength, size_t nThreads)
 {
   SM_ASSERT_GT(std::runtime_error, nThreads, 0, "");
@@ -57,7 +31,6 @@ void runThreadedJob(boost::function<void(size_t, size_t, size_t)> job, size_t ra
     // deal with the remainder.
     indices.back() = rangeLength;
 
-    // replace by std::async for performance
     std::vector<std::future<void>> jobs;
     jobs.reserve(nThreads);
     for (unsigned i = 0; i < nThreads; ++i) {

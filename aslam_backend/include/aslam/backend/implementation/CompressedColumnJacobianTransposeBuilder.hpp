@@ -73,7 +73,6 @@ namespace aslam {
         // deal with the remainder.
         indices.back() = _jacobianPointers.size();
 
-        //replace by std::async for performance
         std::vector<std::future<void>> jobs;
         jobs.reserve(nThreads);
         for (unsigned i = 0; i < nThreads; ++i) {
