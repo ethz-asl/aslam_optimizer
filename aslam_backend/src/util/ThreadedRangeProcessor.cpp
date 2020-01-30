@@ -1,6 +1,7 @@
 #include <aslam/backend/util/ThreadedRangeProcessor.hpp>
 
 #include <exception>
+#include <future>
 
 #include <boost/thread.hpp>
 
@@ -10,32 +11,6 @@
 namespace aslam {
 namespace backend {
 namespace util {
-
-/// \brief The return value for a safe job
-struct SafeJobReturnValue {
-  SafeJobReturnValue(const std::exception& e) : _e(e) {}
-  std::exception _e;
-};
-
-/// \brief Functor running a job catching all exceptions
-struct SafeJob {
-  boost::function<void()> _fn;
-  SafeJobReturnValue* _rval;
-  SafeJob() : _rval(NULL) {}
-  SafeJob(boost::function<void()> fn) : _fn(fn), _rval(NULL) {}
-  ~SafeJob() {
-    if (_rval) delete _rval;
-  }
-
-  void operator()() {
-    try {
-      _fn();
-    } catch (const std::exception& e) {
-      _rval = new SafeJobReturnValue(e);
-      SM_FATAL_STREAM("Exception in thread block: " << e.what());
-    }
-  }
-};
 
 void runThreadedJob(boost::function<void(size_t, size_t, size_t)> job, size_t rangeLength, size_t nThreads)
 {
@@ -56,18 +31,16 @@ void runThreadedJob(boost::function<void(size_t, size_t, size_t)> job, size_t ra
     // deal with the remainder.
     indices.back() = rangeLength;
 
-    // Build a thread pool and execute the jobs.
-    boost::thread_group threads;
-    std::vector<SafeJob> jobs(nThreads);
-    for (size_t i = 0; i < nThreads; ++i) {
-      jobs[i] = SafeJob(boost::bind(job, i, indices[i], indices[i + 1]));
-      threads.create_thread(boost::ref(jobs[i]));
+    std::vector<std::future<void>> jobs;
+    jobs.reserve(nThreads);
+    for (unsigned i = 0; i < nThreads; ++i) {
+      jobs.push_back(
+          std::async(std::launch::async, [job, i, &indices]() {
+            job(i, indices[i], indices[i + 1]);
+          }));
     }
-    threads.join_all();
-    // Now go through and look for exceptions.
-    for (size_t i = 0; i < nThreads; ++i) {
-      if (jobs[i]._rval != nullptr)
-        throw jobs[i]._rval->_e;
+    for (auto& j : jobs) {
+      j.get();
     }
   }
 }

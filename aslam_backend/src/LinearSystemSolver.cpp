@@ -1,6 +1,6 @@
 #include <aslam/backend/LinearSystemSolver.hpp>
-#include <boost/thread.hpp>
-#include <boost/ref.hpp>
+
+#include <future>
 
 #include <aslam/backend/ErrorTerm.hpp>
 #include <aslam/backend/OptimizerCallbackManager.hpp>
@@ -27,31 +27,6 @@ namespace aslam {
       }
     }
 
-    struct SafeJobReturnValue {
-      SafeJobReturnValue(const std::exception& e) : _e(e) {}
-
-      std::exception _e;
-    };
-
-    struct SafeJob {
-      boost::function<void()> _fn;
-      SafeJobReturnValue* _rval;
-      SafeJob() : _rval(NULL) {}
-      SafeJob(boost::function<void()> fn) : _fn(fn), _rval(NULL) {}
-      ~SafeJob() {
-        if (_rval) delete _rval;
-      }
-
-      void operator()() {
-        try {
-          _fn();
-        } catch (const std::exception& e) {
-          _rval = new SafeJobReturnValue(e);
-          std::cout << "Exception in thread block: " << e.what() << std::endl;
-        }
-      }
-    };
-
     void LinearSystemSolver::setupThreadedJob(boost::function<void(size_t, size_t, size_t, bool)> job, size_t nThreads, bool useMEstimator)
     {
       if (nThreads <= 1) {
@@ -65,19 +40,18 @@ namespace aslam {
           indices[i + 1] = indices[i] + nJPerThread;
         // deal with the remainder.
         indices.back() = _errorTerms.size();
-        // Build a thread pool and evaluate the jacobians.
-        boost::thread_group threads;
-        std::vector<SafeJob> jobs(nThreads);
-        for (size_t i = 0; i < nThreads; ++i) {
-          jobs[i] = SafeJob(boost::bind(job, i, indices[i], indices[i + 1], useMEstimator));
-          threads.create_thread(boost::ref(jobs[i]));
+
+        std::vector<std::future<void>> jobs;
+        jobs.reserve(nThreads);
+        for (unsigned i = 0; i < nThreads; ++i) {
+          jobs.push_back(std::async(
+              std::launch::async,
+              [job, i, &indices, useMEstimator]() {
+                job(i, indices[i], indices[i + 1], useMEstimator);
+              }));
         }
-        threads.join_all();
-        // Now go through and look for exceptions.
-        for (size_t i = 0; i < nThreads; ++i) {
-          if (jobs[i]._rval) {
-            throw jobs[i]._rval->_e;
-          }
+        for (auto& j : jobs) {
+          j.get();
         }
       }
     }
