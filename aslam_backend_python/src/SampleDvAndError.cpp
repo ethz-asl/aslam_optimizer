@@ -1,7 +1,5 @@
 #include <numpy_eigen/boost_python_headers.hpp>
 
-#include <aslam/backend/../../../test/SampleDvAndError.hpp>
-
 #include <boost/shared_ptr.hpp>
 
 
