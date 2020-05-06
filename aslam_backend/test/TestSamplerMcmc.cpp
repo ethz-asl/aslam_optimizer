@@ -5,7 +5,7 @@
 #include <aslam/backend/SamplerHybridMcmc.hpp>
 #include <aslam/backend/SamplerMetropolisHastings.hpp>
 #include <aslam/backend/test/ErrorTermTester.hpp>
-#include "SampleDvAndError.hpp"
+#include <aslam/backend/test/SampleDvAndError.hpp>
 
 using namespace std;
 using namespace boost;

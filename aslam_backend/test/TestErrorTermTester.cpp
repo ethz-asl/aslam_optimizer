@@ -1,7 +1,7 @@
 #include <sm/eigen/gtest.hpp>
 
 #include <aslam/backend/test/ErrorTermTester.hpp>
-#include "SampleDvAndError.hpp"
+#include <aslam/backend/test/SampleDvAndError.hpp>
 
 class BadErr : public LinearErr {
 public:

@@ -2,7 +2,7 @@
 
 #include <numeric>
 
-#include "SampleDvAndError.hpp"
+#include <aslam/backend/test/SampleDvAndError.hpp>
 
 #include <aslam/backend/DenseQrLinearSystemSolver.hpp>
 #include <aslam/backend/SparseCholeskyLinearSystemSolver.hpp>

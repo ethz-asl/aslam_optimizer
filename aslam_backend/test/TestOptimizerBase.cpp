@@ -3,7 +3,7 @@
 #include <aslam/backend/OptimizerBase.hpp>
 #include <aslam/backend/OptimizationProblem.hpp>
 #include <aslam/backend/util/OptimizerProblemManagerBase.hpp>
-#include "SampleDvAndError.hpp"
+#include <aslam/backend/test/SampleDvAndError.hpp>
 
 #include <sm/BoostPropertyTree.hpp>
 

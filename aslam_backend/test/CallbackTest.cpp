@@ -4,7 +4,7 @@
 #include <aslam/backend/ErrorTerm.hpp>
 #include <boost/ptr_container/ptr_vector.hpp>
 #include <aslam/backend/test/ErrorTermTestHarness.hpp>
-#include "SampleDvAndError.hpp"
+#include <aslam/backend/test/SampleDvAndError.hpp>
 
 
 TEST(CallbackTestSuite, testCallback)

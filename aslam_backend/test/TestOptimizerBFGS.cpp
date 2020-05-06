@@ -5,7 +5,7 @@
 #include <boost/ptr_container/ptr_vector.hpp>
 #include <sm/random.hpp>
 #include <aslam/backend/test/ErrorTermTester.hpp>
-#include "SampleDvAndError.hpp"
+#include <aslam/backend/test/SampleDvAndError.hpp>
 
 TEST(OptimizerBFGSTestSuite, testBFGS)
 {

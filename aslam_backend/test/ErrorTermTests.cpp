@@ -1,7 +1,7 @@
 #include <boost/make_shared.hpp>
 
 #include <sm/eigen/gtest.hpp>
-#include "SampleDvAndError.hpp"
+#include <aslam/backend/test/SampleDvAndError.hpp>
 
 TEST(ErrorTermTestSuite, testMEstimatorGetter) {
   using aslam::backend::FixedWeightMEstimator;
