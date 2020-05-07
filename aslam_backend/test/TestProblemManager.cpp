@@ -4,7 +4,7 @@
 #include <aslam/backend/util/ProblemManager.hpp>
 #include <aslam/backend/JacobianContainerDense.hpp>
 #include <aslam/backend/JacobianContainerSparse.hpp>
-#include "SampleDvAndError.hpp"
+#include <aslam/backend/test/SampleDvAndError.hpp>
 
 using namespace std;
 using namespace aslam::backend;

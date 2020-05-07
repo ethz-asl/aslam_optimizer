@@ -4,7 +4,7 @@
 #include <numeric>
 #include "DummyDesignVariable.hpp"
 #include <aslam/backend/CompressedColumnJacobianTransposeBuilder.hpp>
-#include "SampleDvAndError.hpp"
+#include <aslam/backend/test/SampleDvAndError.hpp>
 #include "MatrixTestHarness.hpp"
 
 TEST(CompressColumnMatrixTestSuite, testMatInterface)

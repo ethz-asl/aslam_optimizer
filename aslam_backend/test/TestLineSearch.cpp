@@ -5,7 +5,7 @@
 #include <aslam/backend/ErrorTerm.hpp>
 #include <aslam/backend/ScalarNonSquaredErrorTerm.hpp>
 #include <aslam/backend/test/ErrorTermTester.hpp>
-#include "SampleDvAndError.hpp"
+#include <aslam/backend/test/SampleDvAndError.hpp>
 
 #include <sm/random.hpp>
 #include <sm/logging.hpp>
