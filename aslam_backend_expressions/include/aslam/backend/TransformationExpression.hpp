@@ -31,8 +31,7 @@ namespace aslam {
       virtual ~TransformationExpression();
 
       Eigen::Matrix4d toTransformationMatrix() const;
-      //TODO(huberya) talk about this
-      Eigen::Matrix<double, 6, 1> toValue() const;
+      sm::kinematics::Transformation evaluate() const;
       sm::kinematics::Transformation toTransformation() const;
 
       RotationExpression toRotationExpression() const;

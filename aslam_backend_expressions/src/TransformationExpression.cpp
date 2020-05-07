@@ -109,10 +109,8 @@ namespace aslam {
       return toTransformationMatrix();
     }
 
-    Eigen::Matrix<double, 6, 1> TransformationExpression::toValue() const {
-      Eigen::Matrix<double, 6, 1> res;
-      res << toTransformation().t(), sm::kinematics::quat2AxisAngle(toTransformation().q());
-      return res;
+    sm::kinematics::Transformation TransformationExpression::evaluate() const {
+      return toTransformation();
     }
 
     void TransformationExpression::accept(ExpressionNodeVisitor& visitor) const {
