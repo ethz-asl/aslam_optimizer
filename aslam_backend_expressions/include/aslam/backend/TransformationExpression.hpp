@@ -31,6 +31,7 @@ namespace aslam {
       virtual ~TransformationExpression();
 
       Eigen::Matrix4d toTransformationMatrix() const;
+      sm::kinematics::Transformation evaluate() const;
       sm::kinematics::Transformation toTransformation() const;
 
       RotationExpression toRotationExpression() const;

@@ -109,6 +109,10 @@ namespace aslam {
       return toTransformationMatrix();
     }
 
+    sm::kinematics::Transformation TransformationExpression::evaluate() const {
+      return toTransformation();
+    }
+
     void TransformationExpression::accept(ExpressionNodeVisitor& visitor) const {
       visitor.beAcceptedBy(_root);
     }
