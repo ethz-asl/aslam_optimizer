@@ -27,12 +27,12 @@ target_link_libraries(${PROJECT_NAME}
 /usr/lib/x86_64-linux-gnu/libcholmod.so
 /usr/lib/x86_64-linux-gnu/libcolamd.so
 /usr/lib/x86_64-linux-gnu/libcxsparse.so
-/usr/lib/x86_64-linux-gnu/libgraphblas.so
+#/usr/lib/x86_64-linux-gnu/libgraphblas.so
 /usr/lib/x86_64-linux-gnu/libklu.so
 /usr/lib/x86_64-linux-gnu/libldl.so
-/usr/lib/x86_64-linux-gnu/librbio.so
+#/usr/lib/x86_64-linux-gnu/librbio.so
 /usr/lib/x86_64-linux-gnu/libspqr.so
-/usr/lib/x86_64-linux-gnu/libsuitesparseconfig.so
+#/usr/lib/x86_64-linux-gnu/libsuitesparseconfig.so
 /usr/lib/x86_64-linux-gnu/libumfpack.so
 )
 include_directories(/usr/include/suitesparse)
