@@ -19,7 +19,6 @@
   <build_depend>sm_python</build_depend>
   <build_depend>sm_kinematics</build_depend>
   <build_depend>sm_timing</build_depend>
-  <build_depend>suitesparse</build_depend>
 
 
 </package>
