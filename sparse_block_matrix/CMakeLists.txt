@@ -33,4 +33,4 @@ if(CATKIN_ENABLE_TESTING)
 endif()
 
 cs_install()
-cs_export()
+cs_export(INCLUDE_DIRS ${SUITESPARSE_INCLUDE_DIRS})
