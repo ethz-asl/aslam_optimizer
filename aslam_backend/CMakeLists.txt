@@ -7,9 +7,6 @@ catkin_simple(ALL_DEPS_REQUIRED)
 find_package(Boost REQUIRED COMPONENTS system thread)
 include_directories(${Boost_INCLUDE_DIRS})
 
-find_package(SUITESPARSE REQUIRED)
-include_directories(${SUITESPARSE_INCLUDE_DIRS})
-
 # enable warnings
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra -Wno-unknown-pragmas")
 if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
@@ -78,7 +75,7 @@ cs_add_library(${PROJECT_NAME}
   src/OptimizerCallbackManager.cpp
   src/LineSearchTrustRegionPolicy.cpp
 )
-target_link_libraries(${PROJECT_NAME} ${Boost_LIBRARIES} ${TBB_LIBRARIES} ${SUITESPARSE_LIBRARY_DIRS})
+target_link_libraries(${PROJECT_NAME} ${Boost_LIBRARIES} ${TBB_LIBRARIES})
 
 if(CATKIN_ENABLE_TESTING)
   catkin_add_gtest(${PROJECT_NAME}_test

@@ -7,8 +7,6 @@ catkin_simple(ALL_DEPS_REQUIRED)
 # enable warnings
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra -Wno-deprecated-register") # deprecated-register warnings are cause by old Eigen versions
 
-find_package(SUITESPARSE REQUIRED)
-include_directories(${SUITESPARSE_INCLUDE_DIRS})
 
 # enable C++11 support
 if(CMAKE_VERSION VERSION_LESS "3.1")
@@ -30,7 +28,7 @@ if(CATKIN_ENABLE_TESTING)
     test/sparse_block_matrix_tests.cpp
   )
   if(TARGET ${PROJECT_NAME}_tests)
-    target_link_libraries(${PROJECT_NAME}_tests ${PROJECT_NAME} ${TBB_LIBRARIES} ${SUITESPARSE_LIBRARY_DIRS})
+    target_link_libraries(${PROJECT_NAME}_tests ${PROJECT_NAME} ${TBB_LIBRARIES})
   endif()
 endif()
 
