@@ -94,6 +94,13 @@ namespace aslam {
       /// Returns the content of the design variable
       void getParameters(Eigen::MatrixXd& value) const;
 
+      /// Returns the content of the design variable
+      Eigen::MatrixXd getParameters() const {
+        Eigen::MatrixXd m;
+        getParameters(m);
+        return m;
+      }
+
       /// Sets the content of the design variable
       void setParameters(const Eigen::MatrixXd& value);
 
