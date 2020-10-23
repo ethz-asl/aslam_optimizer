@@ -39,6 +39,9 @@ namespace aslam {
 
       /// \brief Evaluate the rotation matrix.
       Eigen::Matrix3d toRotationMatrix() const;
+      Eigen::Matrix3d evaluate() const {
+        return toRotationMatrix();
+      }
 
       EuclideanExpression toParameters(sm::kinematics::RotationalKinematics::Ptr rk) const;
       
