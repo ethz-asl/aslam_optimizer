@@ -13,3 +13,6 @@
 - git:
     local-name: suitesparse
     uri: https://github.com/ethz-asl/suitesparse.git
+- git:
+    local-name: catkin_boost_python_buildtool
+    uri: https://github.com/ethz-asl/catkin_boost_python_buildtool.git
