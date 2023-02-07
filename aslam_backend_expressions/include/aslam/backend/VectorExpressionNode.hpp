@@ -1,8 +1,12 @@
 #ifndef ASLAM_BACKEND_VECTOR_EXPRESSION_NODE_HPP
 #define ASLAM_BACKEND_VECTOR_EXPRESSION_NODE_HPP
+
+#include <type_traits>
+
 #include <aslam/backend/JacobianContainer.hpp>
 #include <aslam/backend/Differential.hpp>
 #include <aslam/backend/ExpressionNodeVisitor.hpp>
+#include <aslam/backend/ScalarExpression.hpp>
 
 namespace aslam {
   namespace backend {
@@ -66,6 +70,38 @@ namespace aslam {
       void getDesignVariablesImplementation(DesignVariable::set_t &) const override {}
      private:
       vector_t value;
+    };
+
+    template <int D>
+    class StackedScalarVectorExpressionNode : public VectorExpressionNode<D> {
+      // TODO Here or Node?
+     public:
+      EIGEN_MAKE_ALIGNED_OPERATOR_NEW
+      typedef typename VectorExpressionNode<D>::vector_t vector_t;
+      typedef typename VectorExpressionNode<D>::differential_t differential_t;
+
+      template <typename... Args>
+      StackedScalarVectorExpressionNode(Args&&... args) : components{args...} {
+        static_assert(sizeof...(args) == D);
+        static_assert(std::is_convertible_v<std::common_type_t<Args...> , boost::shared_ptr<ScalarExpressionNode>>);
+      }
+
+      ~StackedScalarVectorExpressionNode() override = default;
+      int getSize() const override {
+        return components.size();
+      }
+
+      void accept(ExpressionNodeVisitor& visitor) override;
+
+     private:
+      vector_t evaluateImplementation() const override;
+      void evaluateJacobiansImplementation(JacobianContainer&) const override;
+
+      void getDesignVariablesImplementation(
+          DesignVariable::set_t&) const override;
+
+     private:
+      std::array<boost::shared_ptr<ScalarExpressionNode>, D> components;
     };
   } // namespace backend
 } // namespace aslam

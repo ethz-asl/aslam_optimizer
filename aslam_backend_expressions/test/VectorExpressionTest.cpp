@@ -1,4 +1,5 @@
 #include <sm/eigen/gtest.hpp>
+#include <sm/random.hpp>
 #include <Eigen/Geometry>
 #include <aslam/backend/Scalar.hpp>
 #include <aslam/backend/VectorExpression.hpp>
@@ -38,6 +39,28 @@ TEST(VectorExpressionNodeTestSuites, testVectorBasicOperations) {
     testExpression(vecExp, 1);
     testExpression(vecExp2, 0);
     testExpression(vecExp3, 1);
+  }
+  catch(std::exception const & e)
+  {
+    FAIL() << e.what();
+  }
+}
+
+
+
+TEST(VectorExpressionNodeTestSuites, testVectorStackingFromScalars) {
+  try {
+    Scalar scalar1(sm::random::rand());
+    Scalar scalar2(sm::random::rand());
+    Scalar scalar3(sm::random::rand());
+
+    VectorExpression<1> singleStacked(scalar1.toExpression());
+    VectorExpression<2> twoStacked(scalar1.toExpression(), scalar2.toExpression());
+    VectorExpression<3> threeStacked(scalar1.toExpression(), scalar2.toExpression(), scalar3.toExpression());
+
+    testExpression(singleStacked, 1);
+    testExpression(twoStacked, 2);
+    testExpression(threeStacked, 3);
   }
   catch(std::exception const & e)
   {

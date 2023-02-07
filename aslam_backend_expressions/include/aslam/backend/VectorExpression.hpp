@@ -24,6 +24,8 @@ namespace aslam {
       VectorExpression(boost::shared_ptr< VectorExpressionNode<D> > root);
       VectorExpression(VectorExpressionNode<D> * root);
       VectorExpression(const vector_t & v);
+      template <typename... Args>
+      VectorExpression(ScalarExpression expr, Args&&... remainingExprs);
       
       vector_t evaluate() const;
       vector_t toValue() const { return evaluate(); }

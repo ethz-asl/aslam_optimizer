@@ -27,6 +27,40 @@ void ConstantVectorExpressionNode<D>::accept(ExpressionNodeVisitor& visitor) {
   visitor.visit("#", this);
 }
 
+template <int D>
+void StackedScalarVectorExpressionNode<D>::accept(ExpressionNodeVisitor& visitor) {
+  //New line or what do we want here? (for sure would want to expand)
+  visitor.visit("#", this, components.at(0));
+}
+
+template <int D>
+typename StackedScalarVectorExpressionNode<D>::vector_t
+StackedScalarVectorExpressionNode<D>::evaluateImplementation() const {
+  // TODO nicer solution to this
+  std::vector<double> values;
+  values.reserve(D);
+  for (const auto& component : components) {
+    values.push_back(component->evaluate());
+  }
+  return vector_t(values.data());
+}
+
+template <int D>
+void StackedScalarVectorExpressionNode<D>::evaluateJacobiansImplementation(
+    JacobianContainer& outJacobians) const {
+  for (int i = 0; i < components.size(); ++i) {
+    components.at(i)->evaluateJacobians(
+        outJacobians, Eigen::Matrix<double, D, 1>::Unit(i));
+  }
+}
+
+template <int D>
+void StackedScalarVectorExpressionNode<D>::getDesignVariablesImplementation(
+    DesignVariable::set_t& designVariables) const {
+  for (const auto& component : components) {
+    component->getDesignVariables(designVariables);
+  }
+}
 
 }  // namespace backend
 }  // namespace aslam

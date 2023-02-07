@@ -72,6 +72,8 @@ namespace aslam {
       boost::shared_ptr<ScalarExpressionNode> _root;
 
       friend class EuclideanExpression;
+      template <int D>
+      friend class VectorExpression;
 
     };
     
