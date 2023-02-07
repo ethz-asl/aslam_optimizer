@@ -62,5 +62,30 @@ void StackedScalarVectorExpressionNode<D>::getDesignVariablesImplementation(
   }
 }
 
+template <int D>
+void VectorExpressionNodeAddVector<D>::accept(ExpressionNodeVisitor& visitor) {
+  visitor.visit("+", this, _lhs, _rhs);
+}
+
+template <int D>
+typename VectorExpressionNodeAddVector<D>::vector_t
+VectorExpressionNodeAddVector<D>::evaluateImplementation() const {
+  return _lhs->evaluate() + _rhs->evaluate();
+}
+
+template <int D>
+void VectorExpressionNodeAddVector<D>::evaluateJacobiansImplementation(
+    JacobianContainer& outJacobians) const {
+  _lhs->evaluateJacobians(outJacobians);
+  _rhs->evaluateJacobians(outJacobians);
+}
+
+template <int D>
+void VectorExpressionNodeAddVector<D>::getDesignVariablesImplementation(
+    DesignVariable::set_t& designVariables) const {
+  _lhs->getDesignVariables(designVariables);
+  _rhs->getDesignVariables(designVariables);
+}
+
 }  // namespace backend
 }  // namespace aslam

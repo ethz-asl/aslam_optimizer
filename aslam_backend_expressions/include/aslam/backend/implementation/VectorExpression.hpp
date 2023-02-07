@@ -70,5 +70,16 @@ namespace aslam {
       return toScalarExpression<0>();
     }
 
+    template<int D>
+    VectorExpression<D> VectorExpression<D>::operator+(const VectorExpression<D> & p) const
+    {
+      if(p.isEmpty())
+        return *this;
+      if(this->isEmpty())
+        return p;
+      boost::shared_ptr<VectorExpressionNode<D>> newRoot( new VectorExpressionNodeAddVector<D>(_root, p._root));
+      return VectorExpression<D>(newRoot);
+    }
+
   } // namespace backend
 } // namespace aslam

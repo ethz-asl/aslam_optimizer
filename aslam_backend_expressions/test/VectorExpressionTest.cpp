@@ -67,3 +67,23 @@ TEST(VectorExpressionNodeTestSuites, testVectorStackingFromScalars) {
     FAIL() << e.what();
   }
 }
+
+
+TEST(VectorExpressionNodeTestSuites, testVectorAdd) {
+  try {
+    typedef VectorExpression<4> VEC;
+    DesignVariableVector<4> vecExp1(VEC::value_t::Random());
+    DesignVariableVector<4> vecExp2(VEC::value_t::Random());
+    const auto vec1 = vecExp1.toExpression();
+    const auto vec2 = vecExp2.toExpression();
+    const auto sum = vec1 + vec2;
+
+    testExpression(vec1, 1);
+    testExpression(vec2, 1);
+    testExpression(sum, 2);
+  }
+  catch(std::exception const & e)
+  {
+    FAIL() << e.what();
+  }
+}
