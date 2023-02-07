@@ -25,7 +25,7 @@ namespace aslam {
       VectorExpression(VectorExpressionNode<D> * root);
       VectorExpression(const vector_t & v);
       template <typename... Args>
-      VectorExpression(ScalarExpression expr, Args&&... remainingExprs);
+      VectorExpression(const ScalarExpression& expr, Args&&... remainingExprs);
       
       vector_t evaluate() const;
       vector_t toValue() const { return evaluate(); }

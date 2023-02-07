@@ -21,8 +21,8 @@ namespace aslam {
 
     template <int D>
     template <typename... Args>
-    VectorExpression<D>::VectorExpression(ScalarExpression expr, Args&&... remainingExprs)
-        : _root(new StackedScalarVectorExpressionNode<D>(expr._root, remainingExprs._root...)) {} //TODO do transformation to node here?
+    VectorExpression<D>::VectorExpression(const ScalarExpression& expr, Args&&... remainingExprs)
+        : _root(new StackedScalarVectorExpressionNode<D>(expr._root, remainingExprs._root...)) {}
 
     template<int D>
     int VectorExpression<D>::getSize() const {

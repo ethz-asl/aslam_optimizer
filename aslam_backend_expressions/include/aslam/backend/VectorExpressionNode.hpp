@@ -74,7 +74,6 @@ namespace aslam {
 
     template <int D>
     class StackedScalarVectorExpressionNode : public VectorExpressionNode<D> {
-      // TODO Here or Node?
      public:
       EIGEN_MAKE_ALIGNED_OPERATOR_NEW
       typedef typename VectorExpressionNode<D>::vector_t vector_t;
