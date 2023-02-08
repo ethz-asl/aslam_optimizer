@@ -129,6 +129,30 @@ namespace aslam {
       boost::shared_ptr<VectorExpressionNode<D>> _rhs;
     };
 
+    template <int D>
+    class VectorExpressionNodeScalarMultiply
+        : public VectorExpressionNode<D> {
+     public:
+      EIGEN_MAKE_ALIGNED_OPERATOR_NEW
+      typedef typename VectorExpressionNode<D>::vector_t vector_t;
+      typedef typename VectorExpressionNode<D>::differential_t differential_t;
+
+      VectorExpressionNodeScalarMultiply(
+          boost::shared_ptr<VectorExpressionNode<D>> p,
+          boost::shared_ptr<ScalarExpressionNode> s): _p(p), _s(s) {}
+      ~VectorExpressionNodeScalarMultiply() override = default;
+
+     private:
+      vector_t evaluateImplementation() const override;
+      void evaluateJacobiansImplementation(
+          JacobianContainer& outJacobians) const override;
+      void getDesignVariablesImplementation(
+          DesignVariable::set_t& designVariables) const override;
+
+      boost::shared_ptr<VectorExpressionNode<D>> _p;
+      boost::shared_ptr<ScalarExpressionNode> _s;
+    };
+
   } // namespace backend
 } // namespace aslam
 

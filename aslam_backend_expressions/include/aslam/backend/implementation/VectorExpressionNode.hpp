@@ -87,5 +87,25 @@ void VectorExpressionNodeAddVector<D>::getDesignVariablesImplementation(
   _rhs->getDesignVariables(designVariables);
 }
 
+template <int D>
+void VectorExpressionNodeScalarMultiply<D>::getDesignVariablesImplementation(
+    DesignVariable::set_t& designVariables) const {
+  _p->getDesignVariables(designVariables);
+  _s->getDesignVariables(designVariables);
+}
+
+template <int D>
+typename VectorExpressionNodeScalarMultiply<D>::vector_t VectorExpressionNodeScalarMultiply<D>::evaluateImplementation()
+    const {
+  return _p->evaluate() * _s->evaluate();
+}
+
+template <int D>
+void VectorExpressionNodeScalarMultiply<D>::evaluateJacobiansImplementation(
+    JacobianContainer& outJacobians) const {
+  _p->evaluateJacobians(outJacobians.apply(_s->evaluate()));
+  _s->evaluateJacobians(outJacobians.apply(_p->evaluate()));
+}
+
 }  // namespace backend
 }  // namespace aslam

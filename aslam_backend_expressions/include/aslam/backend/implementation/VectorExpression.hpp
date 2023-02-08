@@ -70,14 +70,25 @@ namespace aslam {
       return toScalarExpression<0>();
     }
 
-    template<int D>
-    VectorExpression<D> VectorExpression<D>::operator+(const VectorExpression<D> & p) const
-    {
-      if(p.isEmpty())
+    template <int D>
+    VectorExpression<D> VectorExpression<D>::operator+(
+        const VectorExpression<D>& p) const {
+      if (p.isEmpty())
         return *this;
-      if(this->isEmpty())
+      if (this->isEmpty())
         return p;
-      boost::shared_ptr<VectorExpressionNode<D>> newRoot( new VectorExpressionNodeAddVector<D>(_root, p._root));
+      boost::shared_ptr<VectorExpressionNode<D>> newRoot(
+          new VectorExpressionNodeAddVector<D>(_root, p._root));
+      return VectorExpression<D>(newRoot);
+    }
+
+    template <int D>
+    VectorExpression<D> VectorExpression<D>::operator*(
+        const ScalarExpression& s) const {
+      if (this->isEmpty() || s.isEmpty())
+        return VectorExpression<D>();
+      boost::shared_ptr<VectorExpressionNode<D>> newRoot(
+          new VectorExpressionNodeScalarMultiply(_root, s._root));
       return VectorExpression<D>(newRoot);
     }
 

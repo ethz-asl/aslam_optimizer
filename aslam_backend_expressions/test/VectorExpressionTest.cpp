@@ -72,18 +72,35 @@ TEST(VectorExpressionNodeTestSuites, testVectorStackingFromScalars) {
 TEST(VectorExpressionNodeTestSuites, testVectorAdd) {
   try {
     typedef VectorExpression<4> VEC;
-    DesignVariableVector<4> vecExp1(VEC::value_t::Random());
-    DesignVariableVector<4> vecExp2(VEC::value_t::Random());
-    const auto vec1 = vecExp1.toExpression();
-    const auto vec2 = vecExp2.toExpression();
-    const auto sum = vec1 + vec2;
+    DesignVariableVector<4> vec1(VEC::value_t::Random());
+    DesignVariableVector<4> vec2(VEC::value_t::Random());
+    const auto vecExp1 = vec1.toExpression();
+    const auto vecExp2 = vec2.toExpression();
+    const auto sum = vecExp1 + vecExp2;
 
-    testExpression(vec1, 1);
-    testExpression(vec2, 1);
+    testExpression(vecExp1, 1);
+    testExpression(vecExp2, 1);
     testExpression(sum, 2);
   }
   catch(std::exception const & e)
   {
+    FAIL() << e.what();
+  }
+}
+
+TEST(VectorExpressionNodeTestSuites, testVectorMultiply) {
+  try {
+    typedef VectorExpression<4> VEC;
+    DesignVariableVector<4> vec(VEC::value_t::Random());
+    const auto vecExp = vec.toExpression();
+    Scalar point(sm::random::rand());
+    const auto pExp = point.toExpression();
+    const auto prod = p1 * vecExp;
+
+    testExpression(vecExp, 1);
+    testExpression(pExp, 1);
+    testExpression(prod, 2);
+  } catch (std::exception const& e) {
     FAIL() << e.what();
   }
 }

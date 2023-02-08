@@ -42,6 +42,7 @@ namespace aslam {
       template <int ColumnIndex>
       ScalarExpression toScalarExpression() const;
       VectorExpression operator+(const VectorExpression & p) const;
+      VectorExpression operator*(const ScalarExpression& s) const;
 
       boost::shared_ptr< VectorExpressionNode<D> > root() const { return _root; }
 
