@@ -1,3 +1,4 @@
+#include <aslam/backend/ScalarExpressionNode.hpp>
 
 namespace aslam {
 namespace backend {
@@ -36,13 +37,12 @@ void StackedScalarVectorExpressionNode<D>::accept(ExpressionNodeVisitor& visitor
 template <int D>
 typename StackedScalarVectorExpressionNode<D>::vector_t
 StackedScalarVectorExpressionNode<D>::evaluateImplementation() const {
-  // TODO nicer solution to this
-  std::vector<double> values;
-  values.reserve(D);
+  vector_t res;
+  int idx = 0;
   for (const auto& component : components) {
-    values.push_back(component->evaluate());
+    res[idx++] = component->evaluate();
   }
-  return vector_t(values.data());
+  return res;
 }
 
 template <int D>

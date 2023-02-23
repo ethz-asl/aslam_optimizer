@@ -1,3 +1,4 @@
+#include <aslam/backend/VectorExpressionNode.hpp>
 
 namespace aslam {
   namespace backend {
@@ -85,10 +86,11 @@ namespace aslam {
     template <int D>
     VectorExpression<D> VectorExpression<D>::operator*(
         const ScalarExpression& s) const {
-      if (this->isEmpty() || s.isEmpty())
+      if (this->isEmpty() || s.isEmpty()) {
         return VectorExpression<D>();
+      }
       boost::shared_ptr<VectorExpressionNode<D>> newRoot(
-          new VectorExpressionNodeScalarMultiply(_root, s._root));
+          new VectorExpressionNodeScalarMultiply<D>(_root, s._root));
       return VectorExpression<D>(newRoot);
     }
 

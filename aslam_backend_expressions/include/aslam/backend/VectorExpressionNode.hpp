@@ -82,7 +82,7 @@ namespace aslam {
       template <typename... Args>
       StackedScalarVectorExpressionNode(Args&&... args) : components{args...} {
         static_assert(sizeof...(args) == D);
-        static_assert(std::is_convertible_v<std::common_type_t<Args...> , boost::shared_ptr<ScalarExpressionNode>>);
+        static_assert(std::is_convertible<typename std::common_type<Args...>::type, boost::shared_ptr<ScalarExpressionNode>>::value);
       }
 
       ~StackedScalarVectorExpressionNode() override = default;
