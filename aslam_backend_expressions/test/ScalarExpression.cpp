@@ -10,6 +10,7 @@
 
 #include <aslam/backend/test/ExpressionTests.hpp>
 #include <aslam/backend/test/GenericScalarExpressionTests.hpp>
+#include <aslam/backend/VectorExpressionNode.hpp>
 
 using namespace aslam::backend;
 using namespace sm::kinematics;

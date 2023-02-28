@@ -4,11 +4,13 @@
 #include <aslam/backend/JacobianContainer.hpp>
 #include <boost/shared_ptr.hpp>
 #include <Eigen/Core>
-#include <aslam/backend/VectorExpressionNode.hpp>
+#include <aslam/backend/Differential.hpp>
 
 namespace aslam {
   namespace backend {
     class ExpressionNodeVisitor;
+    template <int D>
+    class VectorExpressionNode;
 
     /**
      * \class ScalarExpressionNode
