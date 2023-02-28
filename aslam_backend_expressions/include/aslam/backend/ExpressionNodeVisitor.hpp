@@ -42,6 +42,9 @@ class ExpressionNodeVisitor {
   void visit(const char *, const ExpNode & node, Args ... args);
 
   template <typename ExpNode, typename ... Args>
+  void visit(const char *, const ExpNode & node, const std::tuple<Args ...>& args);
+
+  template <typename ExpNode, typename ... Args>
   void visit(const ExpNode & node, Args ... args) {
     visit(typeid(node).name(), node, args...);
   }
@@ -83,7 +86,7 @@ template <typename ExpNode, typename ... Args>
 class NodeImpl : public NodeI {
  public:
   NodeImpl(const char * name, const ExpNode & n, Args ... args) : name_(name), n(n), args_(args...) {}
-
+  NodeImpl(const char * name, const ExpNode & n, const std::tuple<Args...>& args) : name_(name), n(n), args_(args) {}
   virtual ~NodeImpl() = default;
   virtual const char * getName() const override {
     return name_;
@@ -133,6 +136,12 @@ class NodeImpl : public NodeI {
 template <typename ExpNode, typename ... Args>
 void ExpressionNodeVisitor::visit(const char * name, const ExpNode & node, Args ... args) {
   NodeImpl<ExpNode, Args...> nodeImpl(name, node, args...);
+  visitV(nodeImpl);
+}
+
+template <typename ExpNode, typename ... Args>
+void ExpressionNodeVisitor::visit(const char * name, const ExpNode & node, const std::tuple<Args ...>& args) {
+  NodeImpl<ExpNode, Args...> nodeImpl(name, node, args);
   visitV(nodeImpl);
 }
 

@@ -1,3 +1,6 @@
+#include <tuple>
+#include <utility>
+
 #include <aslam/backend/ScalarExpressionNode.hpp>
 
 namespace aslam {
@@ -30,8 +33,7 @@ void ConstantVectorExpressionNode<D>::accept(ExpressionNodeVisitor& visitor) {
 
 template <int D>
 void StackedScalarVectorExpressionNode<D>::accept(ExpressionNodeVisitor& visitor) {
-  //New line or what do we want here? (for sure would want to expand)
-  visitor.visit("#", this, components.at(0));
+  visitor.visit("#", this, std::tuple_cat(components));
 }
 
 template <int D>

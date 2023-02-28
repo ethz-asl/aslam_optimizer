@@ -2,9 +2,11 @@
 #include <sm/random.hpp>
 #include <Eigen/Geometry>
 #include <aslam/backend/Scalar.hpp>
+#include <aslam/backend/ScalarExpression.hpp>
 #include <aslam/backend/VectorExpression.hpp>
 #include <aslam/backend/DesignVariableVector.hpp>
 #include <aslam/backend/test/ExpressionTests.hpp>
+#include <aslam/backend/test/GenericScalarExpressionTests.hpp>
 
 using namespace aslam::backend;
 using namespace std;
@@ -93,12 +95,13 @@ TEST(VectorExpressionNodeTestSuites, testVectorMultiply) {
     typedef VectorExpression<4> VEC;
     DesignVariableVector<4> vec(VEC::value_t::Random());
     const auto vecExp = vec.toExpression();
-    Scalar point(sm::random::rand());
-    const auto pExp = point.toExpression();
-    const auto prod = p1 * vecExp;
+    Scalar scalar(sm::random::rand());
+    ScalarExpression sExp = scalar.toExpression();
+    const auto prod = vecExp * sExp;
 
     testExpression(vecExp, 1);
-    testExpression(pExp, 1);
+    //Why is this not compiling
+    testExpression(sExp, 1);
     testExpression(prod, 2);
   } catch (std::exception const& e) {
     FAIL() << e.what();
