@@ -1,9 +1,12 @@
 #include <sm/eigen/gtest.hpp>
+#include <sm/random.hpp>
 #include <Eigen/Geometry>
 #include <aslam/backend/Scalar.hpp>
+#include <aslam/backend/ScalarExpression.hpp>
 #include <aslam/backend/VectorExpression.hpp>
 #include <aslam/backend/DesignVariableVector.hpp>
 #include <aslam/backend/test/ExpressionTests.hpp>
+#include <aslam/backend/test/GenericScalarExpressionTests.hpp>
 
 using namespace aslam::backend;
 using namespace std;
@@ -41,6 +44,66 @@ TEST(VectorExpressionNodeTestSuites, testVectorBasicOperations) {
   }
   catch(std::exception const & e)
   {
+    FAIL() << e.what();
+  }
+}
+
+
+
+TEST(VectorExpressionNodeTestSuites, testVectorStackingFromScalars) {
+  try {
+    Scalar scalar1(sm::random::rand());
+    Scalar scalar2(sm::random::rand());
+    Scalar scalar3(sm::random::rand());
+
+    VectorExpression<1> singleStacked(scalar1.toExpression());
+    VectorExpression<2> twoStacked(scalar1.toExpression(), scalar2.toExpression());
+    VectorExpression<3> threeStacked(scalar1.toExpression(), scalar2.toExpression(), scalar3.toExpression());
+
+    testExpression(singleStacked, 1);
+    testExpression(twoStacked, 2);
+    testExpression(threeStacked, 3);
+  }
+  catch(std::exception const & e)
+  {
+    FAIL() << e.what();
+  }
+}
+
+
+TEST(VectorExpressionNodeTestSuites, testVectorAdd) {
+  try {
+    typedef VectorExpression<4> VEC;
+    DesignVariableVector<4> vec1(VEC::value_t::Random());
+    DesignVariableVector<4> vec2(VEC::value_t::Random());
+    const auto vecExp1 = vec1.toExpression();
+    const auto vecExp2 = vec2.toExpression();
+    const auto sum = vecExp1 + vecExp2;
+
+    testExpression(vecExp1, 1);
+    testExpression(vecExp2, 1);
+    testExpression(sum, 2);
+  }
+  catch(std::exception const & e)
+  {
+    FAIL() << e.what();
+  }
+}
+
+TEST(VectorExpressionNodeTestSuites, testVectorMultiply) {
+  try {
+    typedef VectorExpression<4> VEC;
+    DesignVariableVector<4> vec(VEC::value_t::Random());
+    const auto vecExp = vec.toExpression();
+    Scalar scalar(sm::random::rand());
+    ScalarExpression sExp = scalar.toExpression();
+    const auto prod = vecExp * sExp;
+
+    testExpression(vecExp, 1);
+    //Why is this not compiling
+    testExpression(sExp, 1);
+    testExpression(prod, 2);
+  } catch (std::exception const& e) {
     FAIL() << e.what();
   }
 }

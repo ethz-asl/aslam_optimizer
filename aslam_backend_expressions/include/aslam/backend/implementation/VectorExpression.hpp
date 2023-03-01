@@ -1,3 +1,4 @@
+#include <aslam/backend/VectorExpressionNode.hpp>
 
 namespace aslam {
   namespace backend {
@@ -18,7 +19,12 @@ namespace aslam {
       _root(new ConstantVectorExpressionNode<D>(v))
     {
     }
-      
+
+    template <int D>
+    template <typename... Args>
+    VectorExpression<D>::VectorExpression(const ScalarExpression& expr, Args&&... remainingExprs)
+        : _root(new StackedScalarVectorExpressionNode<D>(expr._root, remainingExprs._root...)) {}
+
     template<int D>
     int VectorExpression<D>::getSize() const {
       if(D != Eigen::Dynamic){
@@ -63,6 +69,29 @@ namespace aslam {
     template<int D>
     ScalarExpression VectorExpression<D>::toScalarExpression() const{
       return toScalarExpression<0>();
+    }
+
+    template <int D>
+    VectorExpression<D> VectorExpression<D>::operator+(
+        const VectorExpression<D>& p) const {
+      if (p.isEmpty())
+        return *this;
+      if (this->isEmpty())
+        return p;
+      boost::shared_ptr<VectorExpressionNode<D>> newRoot(
+          new VectorExpressionNodeAddVector<D>(_root, p._root));
+      return VectorExpression<D>(newRoot);
+    }
+
+    template <int D>
+    VectorExpression<D> VectorExpression<D>::operator*(
+        const ScalarExpression& s) const {
+      if (this->isEmpty() || s.isEmpty()) {
+        return VectorExpression<D>();
+      }
+      boost::shared_ptr<VectorExpressionNode<D>> newRoot(
+          new VectorExpressionNodeScalarMultiply<D>(_root, s._root));
+      return VectorExpression<D>(newRoot);
     }
 
   } // namespace backend
